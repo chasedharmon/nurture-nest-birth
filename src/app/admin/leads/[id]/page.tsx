@@ -20,7 +20,7 @@ import { DocumentsList } from '@/components/admin/documents-list'
 import { PaymentsList } from '@/components/admin/payments-list'
 import { formatDistanceToNow } from 'date-fns'
 
-const sourceLabels = {
+const sourceLabels: Record<string, string> = {
   contact_form: 'Contact Form',
   newsletter: 'Newsletter',
   manual: 'Manual Entry',

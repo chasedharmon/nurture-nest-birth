@@ -42,7 +42,8 @@ export default async function ClientMeetingsPage() {
     return null
   }
 
-  const allMeetings = await getClientMeetings(session.clientId)
+  const allMeetingsResult = await getClientMeetings(session.clientId)
+  const allMeetings = Array.isArray(allMeetingsResult) ? allMeetingsResult : []
 
   const now = new Date()
   const upcomingMeetings = allMeetings
@@ -92,11 +93,15 @@ export default async function ClientMeetingsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-3xl">
-                        {meetingTypeIcons[meeting.meeting_type]}
+                        {meetingTypeIcons[
+                          meeting.meeting_type as keyof typeof meetingTypeIcons
+                        ] || meetingTypeIcons.other}
                       </span>
                       <div>
                         <CardTitle>
-                          {meetingTypeLabels[meeting.meeting_type]}
+                          {meetingTypeLabels[
+                            meeting.meeting_type as keyof typeof meetingTypeLabels
+                          ] || meetingTypeLabels.other}
                         </CardTitle>
                         <CardDescription className="mt-1">
                           {format(
@@ -107,7 +112,7 @@ export default async function ClientMeetingsPage() {
                       </div>
                     </div>
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${meetingStatusColors[meeting.status]}`}
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${meetingStatusColors[meeting.status as keyof typeof meetingStatusColors] || meetingStatusColors.no_show}`}
                     >
                       {meeting.status.replace('_', ' ').toUpperCase()}
                     </span>
@@ -172,11 +177,15 @@ export default async function ClientMeetingsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl opacity-70">
-                        {meetingTypeIcons[meeting.meeting_type]}
+                        {meetingTypeIcons[
+                          meeting.meeting_type as keyof typeof meetingTypeIcons
+                        ] || meetingTypeIcons.other}
                       </span>
                       <div>
                         <CardTitle className="text-lg">
-                          {meetingTypeLabels[meeting.meeting_type]}
+                          {meetingTypeLabels[
+                            meeting.meeting_type as keyof typeof meetingTypeLabels
+                          ] || meetingTypeLabels.other}
                         </CardTitle>
                         <CardDescription className="mt-1">
                           {format(
@@ -187,7 +196,7 @@ export default async function ClientMeetingsPage() {
                       </div>
                     </div>
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${meetingStatusColors[meeting.status]}`}
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${meetingStatusColors[meeting.status as keyof typeof meetingStatusColors] || meetingStatusColors.no_show}`}
                     >
                       {meeting.status.replace('_', ' ').toUpperCase()}
                     </span>

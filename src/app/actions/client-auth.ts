@@ -207,8 +207,6 @@ export async function signOutClient() {
 
   cookieStore.delete(CLIENT_COOKIE_NAME)
   cookieStore.delete('client_id')
-
-  return { success: true }
 }
 
 /**

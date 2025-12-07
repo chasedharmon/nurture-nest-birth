@@ -41,7 +41,8 @@ export default async function ClientServicesPage() {
     return null
   }
 
-  const services = await getClientServices(session.clientId)
+  const servicesResult = await getClientServices(session.clientId)
+  const services = Array.isArray(servicesResult) ? servicesResult : []
 
   return (
     <div className="space-y-6">
@@ -69,7 +70,9 @@ export default async function ClientServicesPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle>
-                      {serviceTypeLabels[service.service_type]}
+                      {serviceTypeLabels[
+                        service.service_type as keyof typeof serviceTypeLabels
+                      ] || serviceTypeLabels.other}
                     </CardTitle>
                     {service.package_name && (
                       <CardDescription className="mt-1">
@@ -79,12 +82,12 @@ export default async function ClientServicesPage() {
                   </div>
                   <div className="flex flex-col gap-2">
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${serviceStatusColors[service.status]}`}
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${serviceStatusColors[service.status as keyof typeof serviceStatusColors] || serviceStatusColors.pending}`}
                     >
                       {service.status.replace('_', ' ').toUpperCase()}
                     </span>
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${paymentStatusColors[service.payment_status]}`}
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${paymentStatusColors[service.payment_status as keyof typeof paymentStatusColors] || paymentStatusColors.unpaid}`}
                     >
                       {service.payment_status.replace('_', ' ').toUpperCase()}
                     </span>

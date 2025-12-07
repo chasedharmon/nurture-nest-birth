@@ -31,10 +31,21 @@ export default async function ClientPaymentsPage() {
     return null
   }
 
-  const [payments, paymentSummary] = await Promise.all([
+  const [paymentsResult, paymentSummaryResult] = await Promise.all([
     getClientPayments(session.clientId),
     getClientPaymentSummary(session.clientId),
   ])
+
+  const payments = Array.isArray(paymentsResult) ? paymentsResult : []
+  const paymentSummary =
+    paymentSummaryResult && 'summary' in paymentSummaryResult
+      ? paymentSummaryResult.summary
+      : {
+          total: 0,
+          paid: 0,
+          pending: 0,
+          outstanding: 0,
+        }
 
   // Sort payments by date (newest first)
   const sortedPayments = [...payments].sort((a, b) => {
@@ -145,7 +156,7 @@ export default async function ClientPaymentsPage() {
                             ${payment.amount.toLocaleString()}
                           </p>
                           <span
-                            className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${paymentStatusColors[payment.status]}`}
+                            className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${paymentStatusColors[payment.status as keyof typeof paymentStatusColors] || paymentStatusColors.pending}`}
                           >
                             {payment.status.toUpperCase()}
                           </span>
@@ -176,7 +187,7 @@ export default async function ClientPaymentsPage() {
                             For:{' '}
                             {payment.service.service_type
                               .replace('_', ' ')
-                              .replace(/\b\w/g, l => l.toUpperCase())}
+                              .replace(/\b\w/g, (l: string) => l.toUpperCase())}
                             {payment.service.package_name &&
                               ` - ${payment.service.package_name}`}
                           </p>

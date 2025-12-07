@@ -27,15 +27,10 @@ export default async function ClientDashboardPage() {
     documentsResult,
     paymentSummaryResult,
   ] = await Promise.all([
-    getClientServices(session.clientId).catch(() => []),
-    getClientMeetings(session.clientId).catch(() => []),
-    getClientVisibleDocuments(session.clientId).catch(() => []),
-    getClientPaymentSummary(session.clientId).catch(() => ({
-      total: 0,
-      paid: 0,
-      pending: 0,
-      outstanding: 0,
-    })),
+    getClientServices(session.clientId).catch(() => null),
+    getClientMeetings(session.clientId).catch(() => null),
+    getClientVisibleDocuments(session.clientId).catch(() => null),
+    getClientPaymentSummary(session.clientId).catch(() => null),
   ])
 
   // Ensure we have arrays (handle null/undefined/errors)
@@ -44,12 +39,15 @@ export default async function ClientDashboardPage() {
   const documents = Array.isArray(documentsResult) ? documentsResult : []
 
   // Ensure paymentSummary has all required properties with defaults
-  const paymentSummary = {
-    total: paymentSummaryResult?.total ?? 0,
-    paid: paymentSummaryResult?.paid ?? 0,
-    pending: paymentSummaryResult?.pending ?? 0,
-    outstanding: paymentSummaryResult?.outstanding ?? 0,
-  }
+  const paymentSummary =
+    paymentSummaryResult && 'summary' in paymentSummaryResult
+      ? paymentSummaryResult.summary
+      : {
+          total: 0,
+          paid: 0,
+          pending: 0,
+          outstanding: 0,
+        }
 
   // Filter upcoming meetings
   const upcomingMeetings = meetings
@@ -196,7 +194,7 @@ export default async function ClientDashboardPage() {
                       <p className="font-medium text-foreground">
                         {meeting.meeting_type
                           .replace('_', ' ')
-                          .replace(/\b\w/g, l => l.toUpperCase())}
+                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {format(
@@ -241,7 +239,7 @@ export default async function ClientDashboardPage() {
                     <p className="font-medium text-foreground">
                       {service.service_type
                         .replace('_', ' ')
-                        .replace(/\b\w/g, l => l.toUpperCase())}
+                        .replace(/\b\w/g, (l: string) => l.toUpperCase())}
                     </p>
                     {service.package_name && (
                       <p className="text-sm text-muted-foreground">
@@ -294,7 +292,7 @@ export default async function ClientDashboardPage() {
                       <p className="text-sm text-muted-foreground">
                         {doc.document_type
                           .replace('_', ' ')
-                          .replace(/\b\w/g, l => l.toUpperCase())}
+                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
                       </p>
                     </div>
                     <Link

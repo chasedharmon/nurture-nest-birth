@@ -49,7 +49,7 @@ export function DocumentsList({ documents }: DocumentsListProps) {
       if (!acc[doc.document_type]) {
         acc[doc.document_type] = []
       }
-      acc[doc.document_type].push(doc)
+      acc[doc.document_type]!.push(doc)
       return acc
     },
     {} as Record<string, ClientDocument[]>
@@ -81,7 +81,7 @@ export function DocumentsList({ documents }: DocumentsListProps) {
                       <h4 className="font-semibold text-foreground">
                         {document.title}
                       </h4>
-                      {document.is_client_visible && (
+                      {document.is_visible_to_client && (
                         <span className="inline-flex rounded-full bg-green-100 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-800 dark:text-green-300">
                           👁 Visible to Client
                         </span>
@@ -99,12 +99,14 @@ export function DocumentsList({ documents }: DocumentsListProps) {
                         Uploaded{' '}
                         {format(new Date(document.uploaded_at), 'MMM d, yyyy')}
                       </span>
-                      {document.file_size && (
-                        <span>{(document.file_size / 1024).toFixed(1)} KB</span>
+                      {document.file_size_bytes && (
+                        <span>
+                          {(document.file_size_bytes / 1024).toFixed(1)} KB
+                        </span>
                       )}
-                      {document.mime_type && (
+                      {document.file_mime_type && (
                         <span className="uppercase">
-                          {document.mime_type.split('/')[1]}
+                          {document.file_mime_type.split('/')[1]}
                         </span>
                       )}
                     </div>

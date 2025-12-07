@@ -265,7 +265,7 @@ export default async function ClientProfilePage() {
               <p className="text-foreground">
                 {client.client_type
                   ?.replace('_', ' ')
-                  .replace(/\b\w/g, l => l.toUpperCase()) || 'Lead'}
+                  .replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'Lead'}
               </p>
             </div>
 
@@ -274,7 +274,7 @@ export default async function ClientProfilePage() {
               <p className="text-foreground">
                 {client.lifecycle_stage
                   ?.replace('_', ' ')
-                  .replace(/\b\w/g, l => l.toUpperCase()) || 'Lead'}
+                  .replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'Lead'}
               </p>
             </div>
 

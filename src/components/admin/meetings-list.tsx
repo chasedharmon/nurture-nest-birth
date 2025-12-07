@@ -8,7 +8,7 @@ interface MeetingsListProps {
   clientId: string
 }
 
-const meetingTypeLabels = {
+const meetingTypeLabels: Record<string, string> = {
   consultation: '📋 Consultation',
   prenatal: '🤰 Prenatal Visit',
   birth: '👶 Birth Support',
@@ -17,7 +17,7 @@ const meetingTypeLabels = {
   other: '📅 Meeting',
 }
 
-const meetingStatusColors = {
+const meetingStatusColors: Record<string, string> = {
   scheduled: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
   completed:
     'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
@@ -125,21 +125,21 @@ function MeetingCard({
             )}
           </div>
 
-          {meeting.preparation_notes && (
+          {meeting.notes && (
             <div className="mt-3 p-2 bg-muted rounded text-sm">
               <p className="font-medium text-muted-foreground mb-1">
                 Preparation Notes:
               </p>
-              <p className="text-foreground">{meeting.preparation_notes}</p>
+              <p className="text-foreground">{meeting.notes}</p>
             </div>
           )}
 
-          {meeting.meeting_notes && (
+          {meeting.notes && (
             <div className="mt-3 p-2 bg-muted rounded text-sm">
               <p className="font-medium text-muted-foreground mb-1">
                 Meeting Notes:
               </p>
-              <p className="text-foreground">{meeting.meeting_notes}</p>
+              <p className="text-foreground">{meeting.notes}</p>
             </div>
           )}
         </div>

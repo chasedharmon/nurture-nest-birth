@@ -5,20 +5,22 @@ interface ActivityTimelineProps {
   activities: LeadActivity[]
 }
 
-const activityIcons = {
+const activityIcons: Record<string, string> = {
   note: '📝',
   email_sent: '📧',
   call: '📞',
   meeting: '🤝',
   status_change: '🔄',
+  system: '⚙️',
 }
 
-const activityLabels = {
+const activityLabels: Record<string, string> = {
   note: 'Note',
   email_sent: 'Email Sent',
   call: 'Call',
   meeting: 'Meeting',
   status_change: 'Status Change',
+  system: 'System',
 }
 
 export function ActivityTimeline({ activities }: ActivityTimelineProps) {

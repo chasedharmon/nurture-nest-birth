@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/card'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import type { ClientDocument } from '@/lib/supabase/types'
 
 const documentTypeLabels = {
   contract: 'Contract',
@@ -50,7 +51,8 @@ export default async function ClientDocumentsPage() {
     return null
   }
 
-  const documents = await getClientVisibleDocuments(session.clientId)
+  const documentsResult = await getClientVisibleDocuments(session.clientId)
+  const documents = Array.isArray(documentsResult) ? documentsResult : []
 
   // Group documents by type
   const documentsByType = documents.reduce(
@@ -61,15 +63,16 @@ export default async function ClientDocumentsPage() {
       acc[doc.document_type].push(doc)
       return acc
     },
-    {} as Record<string, typeof documents>
+    {} as Record<string, ClientDocument[]>
   )
 
   // Sort each group by upload date (newest first)
   Object.keys(documentsByType).forEach(type => {
-    documentsByType[type].sort(
-      (a, b) =>
-        new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
-    )
+    documentsByType[type].sort((a: ClientDocument, b: ClientDocument) => {
+      const dateA = new Date(a.uploaded_at).getTime()
+      const dateB = new Date(b.uploaded_at).getTime()
+      return dateB - dateA
+    })
   })
 
   function formatFileSize(bytes: number | null): string {
@@ -99,7 +102,9 @@ export default async function ClientDocumentsPage() {
         </Card>
       ) : (
         <div className="space-y-8">
-          {Object.entries(documentsByType).map(([type, docs]) => (
+          {(
+            Object.entries(documentsByType) as [string, ClientDocument[]][]
+          ).map(([type, docs]) => (
             <div key={type}>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-2xl">
@@ -127,9 +132,11 @@ export default async function ClientDocumentsPage() {
                           )}
                         </div>
                         <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ml-4 ${documentTypeColors[doc.document_type]}`}
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ml-4 ${documentTypeColors[doc.document_type as keyof typeof documentTypeColors] || documentTypeColors.other}`}
                         >
-                          {documentTypeLabels[doc.document_type]}
+                          {documentTypeLabels[
+                            doc.document_type as keyof typeof documentTypeLabels
+                          ] || documentTypeLabels.other}
                         </span>
                       </div>
                     </CardHeader>
@@ -140,12 +147,14 @@ export default async function ClientDocumentsPage() {
                             Uploaded{' '}
                             {format(new Date(doc.uploaded_at), 'MMM d, yyyy')}
                           </span>
-                          {doc.file_size && (
-                            <span>{formatFileSize(doc.file_size)}</span>
+                          {doc.file_size_bytes && (
+                            <span>{formatFileSize(doc.file_size_bytes)}</span>
                           )}
-                          {doc.mime_type && (
+                          {doc.file_mime_type && (
                             <span className="uppercase">
-                              {doc.mime_type.split('/')[1]?.substring(0, 4)}
+                              {doc.file_mime_type
+                                .split('/')[1]
+                                ?.substring(0, 4)}
                             </span>
                           )}
                         </div>
