@@ -98,7 +98,7 @@ export function Hero() {
 
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-muted shadow-2xl shadow-primary/10 lg:aspect-[3/4]">
               <Image
-                src="/images/hero-placeholder.jpg"
+                src="/images/hero-warm.jpg"
                 alt="Nurturing hands holding newborn baby - doula support"
                 fill
                 className="object-cover"
