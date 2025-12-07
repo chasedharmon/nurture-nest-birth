@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
+import { NewsletterSignup } from '@/components/newsletter/newsletter-signup'
 import { JSONLDScript, getArticleSchema } from '@/lib/schema'
 
 export const metadata: Metadata = {
@@ -280,6 +281,17 @@ export default function DoulaCostPost() {
               </Button>
             </div>
           </FadeIn>
+        </div>
+      </section>
+
+      {/* Newsletter Signup */}
+      <section className="border-y border-border bg-card px-6 py-12 lg:px-8">
+        <div className="mx-auto max-w-2xl">
+          <NewsletterSignup
+            variant="card"
+            title="Get More Birth & Postpartum Tips"
+            description="Join our newsletter for evidence-based insights, birth stories, and doula support tips delivered monthly."
+          />
         </div>
       </section>
     </article>

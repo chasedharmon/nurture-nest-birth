@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { siteConfig } from '@/config/site'
+import { NewsletterSignup } from '@/components/newsletter/newsletter-signup'
 
 /**
  * Footer Component
@@ -142,6 +143,17 @@ export function Footer() {
                 </ul>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Newsletter Signup */}
+        <div className="mt-12 border-t border-border pt-12">
+          <div className="mx-auto max-w-2xl">
+            <NewsletterSignup
+              variant="inline"
+              title="Stay Informed on Birth & Postpartum Care"
+              description="Get evidence-based tips, resources, and updates on doula support delivered monthly to your inbox."
+            />
           </div>
         </div>
 

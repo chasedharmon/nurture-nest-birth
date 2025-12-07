@@ -43,7 +43,9 @@ export function ResourceCard({ resource, className = '' }: ResourceCardProps) {
   }
 
   return (
-    <Card className={`transition-shadow hover:shadow-md ${className}`}>
+    <Card
+      className={`flex h-full flex-col transition-shadow hover:shadow-md ${className}`}
+    >
       <CardHeader>
         <div className="flex items-start gap-4">
           {resource.icon && (
@@ -65,12 +67,12 @@ export function ResourceCard({ resource, className = '' }: ResourceCardProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         <CardDescription className="text-base leading-relaxed">
           {resource.description}
         </CardDescription>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="mt-auto">
         <Button asChild className="w-full" onClick={handleDownload}>
           <a
             href={resource.fileUrl}

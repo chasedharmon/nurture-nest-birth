@@ -2,6 +2,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ServiceCard } from '@/components/marketing/service-card'
+import {
+  ServiceComparison,
+  type ComparisonFeature,
+  type ComparisonService,
+} from '@/components/services'
 import { spacing, maxWidth, grid, typography, icon } from '@/lib/design-system'
 
 export const metadata: Metadata = {
@@ -96,6 +101,88 @@ const services = [
         />
       </svg>
     ),
+  },
+]
+
+// Service comparison data
+const comparisonFeatures: ComparisonFeature[] = [
+  { name: 'Prenatal Visits' },
+  { name: '24/7 On-Call Support' },
+  { name: 'Labor & Birth Support' },
+  { name: 'Immediate Postpartum' },
+  { name: 'Postpartum Follow-Up' },
+  { name: 'Breastfeeding Support' },
+  { name: 'Newborn Care Education' },
+  { name: 'Light Household Help' },
+  { name: 'Emotional Support' },
+  { name: 'Age-Appropriate Activities' },
+]
+
+const comparisonServices: ComparisonService[] = [
+  {
+    name: 'Birth Doula',
+    description: 'Labor & delivery support',
+    features: [
+      '2-3 visits',
+      true,
+      true,
+      '1-2 hours',
+      '1 visit',
+      'Basic',
+      'Basic',
+      false,
+      true,
+      false,
+    ],
+    highlighted: true,
+  },
+  {
+    name: 'Postpartum',
+    description: 'Fourth trimester care',
+    features: [
+      false,
+      'During visits',
+      false,
+      true,
+      'Multiple',
+      'Basic',
+      'Comprehensive',
+      true,
+      true,
+      false,
+    ],
+  },
+  {
+    name: 'Lactation',
+    description: 'Expert feeding support',
+    features: [
+      '1 visit',
+      'Text/email',
+      false,
+      false,
+      '1-2 visits',
+      'Expert',
+      'Feeding only',
+      false,
+      true,
+      false,
+    ],
+  },
+  {
+    name: 'Sibling Prep',
+    description: 'Prepare older children',
+    features: [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+    ],
   },
 ]
 
@@ -263,8 +350,22 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Packages Info */}
+      {/* Service Comparison */}
       <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.layout}`}>
+          <ServiceComparison
+            services={comparisonServices}
+            features={comparisonFeatures}
+            title="Compare Service Offerings"
+            description="Each service is designed to support you at different stages of your journey. Mix and match to create your perfect support package."
+          />
+        </div>
+      </section>
+
+      {/* Packages Info */}
+      <section
+        className={`bg-muted/30 ${spacing.container} ${spacing.section.md}`}
+      >
         <div className={`mx-auto ${maxWidth.content}`}>
           <h2 className={`text-center ${typography.h2}`}>
             Flexible Service Packages
