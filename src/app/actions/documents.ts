@@ -53,7 +53,7 @@ export async function getClientVisibleDocuments(clientId: string) {
     .from('client_documents')
     .select('*')
     .eq('client_id', clientId)
-    .eq('is_client_visible', true)
+    .eq('is_visible_to_client', true)
     .order('uploaded_at', { ascending: false })
 
   if (error) {
@@ -176,7 +176,7 @@ export async function toggleDocumentVisibility(documentId: string) {
   // Get current visibility and client_id
   const { data: document } = await supabase
     .from('client_documents')
-    .select('is_client_visible, client_id')
+    .select('is_visible_to_client, client_id')
     .eq('id', documentId)
     .single()
 
@@ -186,7 +186,7 @@ export async function toggleDocumentVisibility(documentId: string) {
 
   const { error } = await supabase
     .from('client_documents')
-    .update({ is_client_visible: !document.is_client_visible })
+    .update({ is_visible_to_client: !document.is_visible_to_client })
     .eq('id', documentId)
 
   if (error) {
@@ -197,7 +197,7 @@ export async function toggleDocumentVisibility(documentId: string) {
   revalidatePath(`/admin/leads/${document.client_id}`)
   revalidatePath('/admin')
 
-  return { success: true, isVisible: !document.is_client_visible }
+  return { success: true, isVisible: !document.is_visible_to_client }
 }
 
 export async function deleteDocument(documentId: string) {

@@ -209,7 +209,7 @@ export async function addMeetingNotes(meetingId: string, notes: string) {
 
   const { error } = await supabase
     .from('meetings')
-    .update({ meeting_notes: notes })
+    .update({ notes })
     .eq('id', meetingId)
 
   if (error) {
@@ -254,7 +254,7 @@ export async function completeMeeting(meetingId: string, notes?: string) {
   }
 
   if (notes) {
-    updateData.meeting_notes = notes
+    updateData.notes = notes
   }
 
   const { error } = await supabase

@@ -88,11 +88,6 @@ export async function addPayment(
     return { success: false, error: error.message }
   }
 
-  // If payment is completed and linked to a service, update service payment status
-  if (payment.service_id && payment.status === 'completed') {
-    await updateServicePaymentStatusBasedOnPayments(payment.service_id)
-  }
-
   revalidatePath(`/admin/leads/${clientId}`)
   revalidatePath('/admin')
 
@@ -131,11 +126,6 @@ export async function updatePayment(
   if (error) {
     console.error('Error updating payment:', error)
     return { success: false, error: error.message }
-  }
-
-  // Update service payment status if needed
-  if (payment?.service_id) {
-    await updateServicePaymentStatusBasedOnPayments(payment.service_id)
   }
 
   if (payment?.client_id) {
@@ -178,11 +168,6 @@ export async function updatePaymentStatus(
     return { success: false, error: error.message }
   }
 
-  // Update service payment status if needed
-  if (payment?.service_id) {
-    await updateServicePaymentStatusBasedOnPayments(payment.service_id)
-  }
-
   if (payment?.client_id) {
     revalidatePath(`/admin/leads/${payment.client_id}`)
   }
@@ -215,11 +200,6 @@ export async function deletePayment(paymentId: string) {
   if (error) {
     console.error('Error deleting payment:', error)
     return { success: false, error: error.message }
-  }
-
-  // Update service payment status if needed
-  if (payment?.service_id) {
-    await updateServicePaymentStatusBasedOnPayments(payment.service_id)
   }
 
   if (payment?.client_id) {
@@ -267,45 +247,4 @@ export async function getClientPaymentSummary(clientId: string) {
   summary.outstanding = summary.total - summary.paid
 
   return { success: true, summary }
-}
-
-// Helper function to update service payment status based on payments
-async function updateServicePaymentStatusBasedOnPayments(serviceId: string) {
-  const supabase = await createClient()
-
-  // Get service price
-  const { data: service } = await supabase
-    .from('client_services')
-    .select('price')
-    .eq('id', serviceId)
-    .single()
-
-  if (!service || !service.price) {
-    return
-  }
-
-  // Get all completed payments for this service
-  const { data: payments } = await supabase
-    .from('payments')
-    .select('amount')
-    .eq('service_id', serviceId)
-    .eq('status', 'completed')
-
-  const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
-
-  let paymentStatus: 'unpaid' | 'partial' | 'paid' | 'refunded' = 'unpaid'
-
-  if (totalPaid === 0) {
-    paymentStatus = 'unpaid'
-  } else if (totalPaid >= service.price) {
-    paymentStatus = 'paid'
-  } else {
-    paymentStatus = 'partial'
-  }
-
-  // Update service payment status
-  await supabase
-    .from('client_services')
-    .update({ payment_status: paymentStatus })
-    .eq('id', serviceId)
 }

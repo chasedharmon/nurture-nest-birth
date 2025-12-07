@@ -6,7 +6,6 @@ import type {
   ClientService,
   ClientServiceInsert,
   ServiceStatus,
-  PaymentStatus,
 } from '@/lib/supabase/types'
 
 export async function getClientServices(clientId: string) {
@@ -160,50 +159,7 @@ export async function updateServiceStatus(
   return { success: true }
 }
 
-export async function updateServicePaymentStatus(
-  serviceId: string,
-  paymentStatus: PaymentStatus
-) {
-  const supabase = await createClient()
-
-  // Check auth
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { success: false, error: 'Unauthorized' }
-  }
-
-  // Get client_id for revalidation
-  const { data: service } = await supabase
-    .from('client_services')
-    .select('client_id')
-    .eq('id', serviceId)
-    .single()
-
-  const { error } = await supabase
-    .from('client_services')
-    .update({ payment_status: paymentStatus })
-    .eq('id', serviceId)
-
-  if (error) {
-    console.error('Error updating service payment status:', error)
-    return { success: false, error: error.message }
-  }
-
-  if (service?.client_id) {
-    revalidatePath(`/admin/leads/${service.client_id}`)
-  }
-  revalidatePath('/admin')
-
-  return { success: true }
-}
-
-export async function markContractSigned(
-  serviceId: string,
-  contractUrl?: string
-) {
+export async function markContractSigned(serviceId: string) {
   const supabase = await createClient()
 
   // Check auth
@@ -226,7 +182,7 @@ export async function markContractSigned(
     .from('client_services')
     .update({
       contract_signed: true,
-      contract_url: contractUrl || null,
+      contract_signed_at: new Date().toISOString(),
     })
     .eq('id', serviceId)
 

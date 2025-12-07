@@ -1,13 +1,19 @@
 'use client'
 
+import { useState } from 'react'
 import { format } from 'date-fns'
-import type { Payment } from '@/lib/supabase/types'
+import type { Payment, ClientService } from '@/lib/supabase/types'
+import { deletePayment, updatePaymentStatus } from '@/app/actions/payments'
+import { Button } from '@/components/ui/button'
+import { Select } from '@/components/ui/select-native'
+import { AddPaymentForm } from './add-payment-form'
 
 interface PaymentsListProps {
   payments: (Payment & {
     client_services?: { service_type: string; package_name?: string | null }
   })[]
   clientId: string
+  services?: ClientService[]
 }
 
 const paymentStatusColors: Record<string, string> = {
@@ -20,24 +26,26 @@ const paymentStatusColors: Record<string, string> = {
 }
 
 const paymentMethodLabels: Record<string, string> = {
-  stripe: '💳 Stripe',
-  check: '✅ Check',
-  cash: '💵 Cash',
-  venmo: '💙 Venmo',
-  zelle: '🟣 Zelle',
-  other: '💰 Other',
+  stripe: 'Stripe',
+  check: 'Check',
+  cash: 'Cash',
+  venmo: 'Venmo',
+  zelle: 'Zelle',
+  other: 'Other',
 }
 
-export function PaymentsList({ payments }: PaymentsListProps) {
-  if (payments.length === 0) {
-    return (
-      <div className="py-8 text-center text-muted-foreground">
-        <p>No payments recorded yet</p>
-        <p className="text-sm mt-1">Add a payment to track transactions</p>
-      </div>
-    )
-  }
+const paymentStatuses = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'refunded', label: 'Refunded' },
+]
 
+export function PaymentsList({
+  payments,
+  clientId,
+  services = [],
+}: PaymentsListProps) {
   // Calculate totals
   const totals = payments.reduce(
     (acc, payment) => {
@@ -61,8 +69,10 @@ export function PaymentsList({ payments }: PaymentsListProps) {
 
   return (
     <div className="space-y-6">
+      <AddPaymentForm clientId={clientId} services={services} />
+
       {/* Payment Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="border border-border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Total</p>
           <p className="text-2xl font-bold">${totals.total.toLocaleString()}</p>
@@ -85,91 +95,164 @@ export function PaymentsList({ payments }: PaymentsListProps) {
             ${(totals.total - totals.paid).toLocaleString()}
           </p>
         </div>
-        {totals.refunded > 0 && (
-          <div className="border border-border rounded-lg p-4 bg-gray-50 dark:bg-gray-950/20">
-            <p className="text-sm text-muted-foreground">Refunded</p>
-            <p className="text-2xl font-bold text-gray-600">
-              ${totals.refunded.toLocaleString()}
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Payment List */}
-      <div>
-        <h3 className="text-lg font-semibold mb-3">Payment History</h3>
-        <div className="space-y-3">
-          {payments.map(payment => (
-            <div
-              key={payment.id}
-              className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+      {payments.length === 0 ? (
+        <div className="py-8 text-center text-muted-foreground">
+          <p>No payments recorded yet</p>
+          <p className="text-sm mt-1">Add a payment to track transactions</p>
+        </div>
+      ) : (
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Payment History</h3>
+          <div className="space-y-3">
+            {payments.map(payment => (
+              <PaymentCard key={payment.id} payment={payment} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PaymentCard({
+  payment,
+}: {
+  payment: Payment & {
+    client_services?: { service_type: string; package_name?: string | null }
+  }
+}) {
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  async function handleStatusChange(newStatus: string) {
+    setIsUpdating(true)
+    await updatePaymentStatus(
+      payment.id,
+      newStatus as 'pending' | 'completed' | 'failed' | 'refunded'
+    )
+    setIsUpdating(false)
+  }
+
+  async function handleDelete() {
+    setIsDeleting(true)
+    await deletePayment(payment.id)
+    setIsDeleting(false)
+    setShowDeleteConfirm(false)
+  }
+
+  return (
+    <div className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-2xl font-bold text-foreground">
+              ${payment.amount.toLocaleString()}
+            </span>
+            <span
+              className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${paymentStatusColors[payment.status] || paymentStatusColors.pending}`}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-foreground">
-                      ${payment.amount.toLocaleString()}
-                    </span>
-                    <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${paymentStatusColors[payment.status]}`}
-                    >
-                      {payment.status}
-                    </span>
-                    {payment.payment_method && (
-                      <span className="text-sm text-muted-foreground">
-                        {paymentMethodLabels[payment.payment_method]}
-                      </span>
-                    )}
-                  </div>
+              {payment.status}
+            </span>
+            {payment.payment_method && (
+              <span className="text-sm text-muted-foreground">
+                {paymentMethodLabels[payment.payment_method] ||
+                  payment.payment_method}
+              </span>
+            )}
+          </div>
 
-                  <div className="mt-2 space-y-1 text-sm">
-                    {payment.payment_date && (
-                      <div>
-                        <span className="font-medium text-muted-foreground">
-                          Date:{' '}
-                        </span>
-                        <span className="text-foreground">
-                          {format(
-                            new Date(payment.payment_date),
-                            'MMM d, yyyy'
-                          )}
-                        </span>
-                      </div>
-                    )}
-
-                    {payment.client_services && (
-                      <div>
-                        <span className="font-medium text-muted-foreground">
-                          Service:{' '}
-                        </span>
-                        <span className="text-foreground">
-                          {payment.client_services.package_name ||
-                            payment.client_services.service_type}
-                        </span>
-                      </div>
-                    )}
-
-                    {payment.transaction_id && (
-                      <div>
-                        <span className="font-medium text-muted-foreground">
-                          Transaction ID:{' '}
-                        </span>
-                        <span className="text-foreground font-mono text-xs">
-                          {payment.transaction_id}
-                        </span>
-                      </div>
-                    )}
-
-                    {payment.notes && (
-                      <div className="mt-2">
-                        <p className="text-muted-foreground">{payment.notes}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+          <div className="mt-2 space-y-1 text-sm">
+            {payment.payment_date && (
+              <div>
+                <span className="font-medium text-muted-foreground">
+                  Date:{' '}
+                </span>
+                <span className="text-foreground">
+                  {format(new Date(payment.payment_date), 'MMM d, yyyy')}
+                </span>
               </div>
+            )}
+
+            {payment.client_services && (
+              <div>
+                <span className="font-medium text-muted-foreground">
+                  Service:{' '}
+                </span>
+                <span className="text-foreground">
+                  {payment.client_services.package_name ||
+                    payment.client_services.service_type}
+                </span>
+              </div>
+            )}
+
+            {payment.transaction_id && (
+              <div>
+                <span className="font-medium text-muted-foreground">
+                  Transaction ID:{' '}
+                </span>
+                <span className="text-foreground font-mono text-xs">
+                  {payment.transaction_id}
+                </span>
+              </div>
+            )}
+
+            {payment.notes && (
+              <div className="mt-2">
+                <p className="text-muted-foreground">{payment.notes}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-2 ml-4">
+          <Select
+            value={payment.status}
+            onChange={e => handleStatusChange(e.target.value)}
+            disabled={isUpdating}
+            className="text-xs h-8"
+          >
+            {paymentStatuses.map(status => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
+            ))}
+          </Select>
+
+          {showDeleteConfirm ? (
+            <div className="flex gap-1">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="text-xs"
+              >
+                {isDeleting ? '...' : 'Yes'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="text-xs"
+              >
+                No
+              </Button>
             </div>
-          ))}
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-100"
+            >
+              Delete
+            </Button>
+          )}
         </div>
       </div>
     </div>

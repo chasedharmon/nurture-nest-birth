@@ -135,48 +135,57 @@ export interface LeadActivity {
 export interface ClientService {
   id: string
   client_id: string
-  service_type: ServiceType
+  service_type: string
   package_name?: string | null
+  description?: string | null
+  status: string
   start_date?: string | null
   end_date?: string | null
-  status: ServiceStatus
+  total_amount?: number | null
   contract_signed: boolean
-  contract_url?: string | null
-  price?: number | null
-  payment_status: PaymentStatus
+  contract_signed_at?: string | null
   notes?: string | null
   created_at: string
   updated_at: string
+  created_by?: string | null
+  updated_by?: string | null
 }
 
 export interface Meeting {
   id: string
   client_id: string
-  meeting_type: MeetingType
+  meeting_type: string
+  title?: string | null
+  description?: string | null
   scheduled_at: string
-  duration_minutes: number
+  duration_minutes?: number | null
   location?: string | null
-  status: MeetingStatus
-  meeting_notes?: string | null
-  preparation_notes?: string | null
+  meeting_link?: string | null
+  status: string
+  notes?: string | null
+  cancellation_reason?: string | null
+  cancelled_at?: string | null
   completed_at?: string | null
-  created_by?: string | null
   created_at: string
   updated_at: string
+  created_by?: string | null
+  updated_by?: string | null
 }
 
 export interface ClientDocument {
   id: string
   client_id: string
-  document_type: DocumentType
   title: string
   description?: string | null
+  document_type: string
   file_url: string
-  file_size?: number | null
-  mime_type?: string | null
-  is_client_visible: boolean
-  uploaded_by?: string | null
+  file_size_bytes?: number | null
+  file_mime_type?: string | null
+  is_visible_to_client: boolean
   uploaded_at: string
+  uploaded_by?: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface Payment {
@@ -184,12 +193,17 @@ export interface Payment {
   client_id: string
   service_id?: string | null
   amount: number
-  payment_method?: PaymentMethod | null
+  payment_type: string
+  payment_method?: string | null
+  status: string
   transaction_id?: string | null
-  status: PaymentStatusType
   payment_date?: string | null
+  due_date?: string | null
   notes?: string | null
   created_at: string
+  updated_at: string
+  created_by?: string | null
+  updated_by?: string | null
 }
 
 export interface User {
@@ -209,5 +223,8 @@ export type ClientServiceInsert = Omit<
   'id' | 'created_at' | 'updated_at'
 >
 export type MeetingInsert = Omit<Meeting, 'id' | 'created_at' | 'updated_at'>
-export type ClientDocumentInsert = Omit<ClientDocument, 'id' | 'uploaded_at'>
-export type PaymentInsert = Omit<Payment, 'id' | 'created_at'>
+export type ClientDocumentInsert = Omit<
+  ClientDocument,
+  'id' | 'uploaded_at' | 'created_at' | 'updated_at'
+>
+export type PaymentInsert = Omit<Payment, 'id' | 'created_at' | 'updated_at'>

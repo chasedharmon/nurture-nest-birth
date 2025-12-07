@@ -151,7 +151,11 @@ export default async function LeadDetailPage({
                   <CardTitle>Payments & Transactions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <PaymentsList payments={payments} clientId={id} />
+                  <PaymentsList
+                    payments={payments}
+                    clientId={id}
+                    services={services}
+                  />
                 </CardContent>
               </Card>
             </div>
