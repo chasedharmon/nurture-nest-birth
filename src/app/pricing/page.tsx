@@ -45,7 +45,7 @@ export default function PricingPage() {
           <div className="grid gap-8 lg:grid-cols-3">
             {/* Birth Doula */}
             <FadeIn delay={0}>
-              <Card className="relative h-full overflow-hidden border-2 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+              <Card className="relative flex h-full flex-col overflow-hidden border-2 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
                 <CardHeader className="bg-gradient-to-br from-primary/5 to-secondary/5">
                   <CardTitle className="font-serif text-2xl">
                     Birth Doula Support
@@ -54,7 +54,7 @@ export default function PricingPage() {
                     Comprehensive labor & delivery support
                   </p>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="flex flex-1 flex-col pt-6">
                   <div className="mb-6">
                     <span className="text-4xl font-bold text-foreground">
                       $1,200–$1,500
@@ -64,7 +64,7 @@ export default function PricingPage() {
                   <h4 className="mb-3 font-semibold text-foreground">
                     What's Included:
                   </h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                  <ul className="mb-6 flex-1 space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                       2 prenatal visits (2 hours each)
@@ -95,7 +95,7 @@ export default function PricingPage() {
                     </li>
                   </ul>
 
-                  <div className="mt-6">
+                  <div className="mt-auto">
                     <Button asChild className="w-full">
                       <Link href="/contact">Get Started</Link>
                     </Button>
@@ -106,7 +106,7 @@ export default function PricingPage() {
 
             {/* Postpartum Care */}
             <FadeIn delay={0.1}>
-              <Card className="relative h-full overflow-hidden border-2 border-primary/40 shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/30">
+              <Card className="relative flex h-full flex-col overflow-hidden border-2 border-primary/40 shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/30">
                 <div className="absolute right-0 top-0 rounded-bl-2xl bg-primary px-4 py-1 text-sm font-medium text-primary-foreground">
                   Most Popular
                 </div>
@@ -118,7 +118,7 @@ export default function PricingPage() {
                     In-home fourth trimester support
                   </p>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="flex flex-1 flex-col pt-6">
                   <div className="mb-6">
                     <span className="text-4xl font-bold text-foreground">
                       $35–$45
@@ -129,7 +129,7 @@ export default function PricingPage() {
                   <h4 className="mb-3 font-semibold text-foreground">
                     Services Include:
                   </h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                  <ul className="mb-4 flex-1 space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                       Newborn care education
@@ -160,12 +160,12 @@ export default function PricingPage() {
                     </li>
                   </ul>
 
-                  <p className="mt-4 text-sm text-muted-foreground">
+                  <p className="mb-6 text-sm text-muted-foreground">
                     Packages available: 10, 20, or 40 hour blocks at discounted
                     rates
                   </p>
 
-                  <div className="mt-6">
+                  <div className="mt-auto">
                     <Button asChild className="w-full">
                       <Link href="/contact">Get Started</Link>
                     </Button>
@@ -176,7 +176,7 @@ export default function PricingPage() {
 
             {/* Lactation Consulting */}
             <FadeIn delay={0.2}>
-              <Card className="relative h-full overflow-hidden border-2 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+              <Card className="relative flex h-full flex-col overflow-hidden border-2 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
                 <CardHeader className="bg-gradient-to-br from-primary/5 to-secondary/5">
                   <CardTitle className="font-serif text-2xl">
                     Lactation Consulting
@@ -185,7 +185,7 @@ export default function PricingPage() {
                     Expert breastfeeding support
                   </p>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="flex flex-1 flex-col pt-6">
                   <div className="mb-6">
                     <span className="text-4xl font-bold text-foreground">
                       $125–$175
@@ -196,7 +196,7 @@ export default function PricingPage() {
                   <h4 className="mb-3 font-semibold text-foreground">
                     Consultation Includes:
                   </h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                  <ul className="mb-4 flex-1 space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                       Comprehensive feeding assessment
@@ -223,11 +223,11 @@ export default function PricingPage() {
                     </li>
                   </ul>
 
-                  <p className="mt-4 text-sm text-muted-foreground">
+                  <p className="mb-6 text-sm text-muted-foreground">
                     60–90 minute in-home visit
                   </p>
 
-                  <div className="mt-6">
+                  <div className="mt-auto">
                     <Button asChild className="w-full">
                       <Link href="/contact">Book Consultation</Link>
                     </Button>

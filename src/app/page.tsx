@@ -1,5 +1,7 @@
 import { Hero } from '@/components/marketing/hero'
 import { ServicesOverview } from '@/components/marketing/services-overview'
+import { TestimonialsPreview } from '@/components/marketing/testimonials-preview'
+import { CtaSection } from '@/components/marketing/cta-section'
 import {
   LocalBusinessStructuredData,
   OrganizationStructuredData,
@@ -12,6 +14,8 @@ export default function Home() {
       <OrganizationStructuredData />
       <Hero />
       <ServicesOverview />
+      <TestimonialsPreview />
+      <CtaSection />
     </>
   )
 }

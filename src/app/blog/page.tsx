@@ -73,8 +73,8 @@ export default function BlogPage() {
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {blogPosts.map((post, i) => (
               <FadeIn key={post.slug} delay={i * 0.1}>
-                <Link href={`/blog/${post.slug}`}>
-                  <Card className="group h-full transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+                <Link href={`/blog/${post.slug}`} className="block h-full">
+                  <Card className="group flex h-full flex-col transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
                     <CardHeader>
                       <div className="mb-3 flex items-center justify-between text-sm">
                         <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
@@ -88,8 +88,8 @@ export default function BlogPage() {
                         {post.title}
                       </h2>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm leading-relaxed text-muted-foreground">
+                    <CardContent className="flex flex-1 flex-col">
+                      <p className="flex-1 text-sm leading-relaxed text-muted-foreground">
                         {post.excerpt}
                       </p>
                       <div className="mt-4 flex items-center text-sm text-muted-foreground">

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Lora } from 'next/font/google'
-import { Header } from '@/components/marketing/header'
-import { Footer } from '@/components/marketing/footer'
+import { Header } from '@/components/layout/header'
+import { Footer } from '@/components/layout/footer'
 import './globals.css'
 
 const inter = Inter({

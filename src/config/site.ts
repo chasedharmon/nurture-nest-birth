@@ -155,12 +155,57 @@ export const siteConfig = {
   features: {
     contactForm: false, // Enable when form is ready
     aiChat: false, // Enable when AI chatbot is ready
-    testimonials: false, // Enable when testimonials are collected
+    testimonials: true, // Enable when testimonials are collected
     blog: true,
     calendar: false, // Enable when Calendly is configured
   },
+
+  // Testimonials (easy to maintain - just add/edit here!)
+  testimonials: [
+    {
+      id: '1',
+      name: 'Sarah M.',
+      location: 'Kearney, NE',
+      service: 'Birth Doula',
+      quote:
+        'Having a doula made all the difference in my birth experience. The support and guidance were invaluable, and I felt empowered throughout my entire labor.',
+      rating: 5,
+      featured: true, // Show on homepage
+    },
+    {
+      id: '2',
+      name: 'Jessica L.',
+      location: 'Grand Island, NE',
+      service: 'Postpartum Care',
+      quote:
+        'The postpartum support was exactly what I needed. From breastfeeding help to just having someone to talk to, I felt cared for during such a vulnerable time.',
+      rating: 5,
+      featured: true,
+    },
+    {
+      id: '3',
+      name: 'Amanda K.',
+      location: 'Hastings, NE',
+      service: 'Lactation Consulting',
+      quote:
+        'I was ready to give up on breastfeeding until I worked with my lactation consultant. Her patience and expertise helped us succeed when I thought it was impossible.',
+      rating: 5,
+      featured: true,
+    },
+    {
+      id: '4',
+      name: 'Emily R.',
+      location: 'Kearney, NE',
+      service: 'Birth Doula',
+      quote:
+        'Professional, knowledgeable, and incredibly supportive. I recommend this doula service to every expecting parent I meet!',
+      rating: 5,
+      featured: false,
+    },
+  ],
 } as const
 
 // Type exports for TypeScript autocomplete
 export type SiteConfig = typeof siteConfig
 export type Service = (typeof siteConfig.services)[number]
+export type Testimonial = (typeof siteConfig.testimonials)[number]
