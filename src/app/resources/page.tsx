@@ -34,7 +34,7 @@ const sampleResources: Resource[] = [
     category: 'Birth Preparation',
     fileType: 'PDF',
     fileSize: '2.5 MB',
-    fileUrl: '#', // TODO: Replace with actual file path
+    fileUrl: '/resources/birth-plan-template.pdf',
     icon: (
       <svg
         className="h-6 w-6"
@@ -58,7 +58,7 @@ const sampleResources: Resource[] = [
     category: 'Postpartum',
     fileType: 'PDF',
     fileSize: '1.8 MB',
-    fileUrl: '#', // TODO: Replace with actual file path
+    fileUrl: '/resources/postpartum-checklist.pdf',
     icon: (
       <svg
         className="h-6 w-6"
@@ -82,7 +82,7 @@ const sampleResources: Resource[] = [
     category: 'Birth Preparation',
     fileType: 'PDF',
     fileSize: '1.2 MB',
-    fileUrl: '#', // TODO: Replace with actual file path
+    fileUrl: '/resources/provider-questions.pdf',
     icon: (
       <svg
         className="h-6 w-6"
@@ -106,7 +106,7 @@ const sampleResources: Resource[] = [
     category: 'Newborn Care',
     fileType: 'PDF',
     fileSize: '3.1 MB',
-    fileUrl: '#', // TODO: Replace with actual file path
+    fileUrl: '/resources/newborn-care-guide.pdf',
     icon: (
       <svg
         className="h-6 w-6"
@@ -130,7 +130,7 @@ const sampleResources: Resource[] = [
     category: 'Breastfeeding',
     fileType: 'PDF',
     fileSize: '2.2 MB',
-    fileUrl: '#', // TODO: Replace with actual file path
+    fileUrl: '/resources/breastfeeding-guide.pdf',
     icon: (
       <svg
         className="h-6 w-6"
@@ -154,7 +154,7 @@ const sampleResources: Resource[] = [
     category: 'Birth Preparation',
     fileType: 'PDF',
     fileSize: '1.6 MB',
-    fileUrl: '#', // TODO: Replace with actual file path
+    fileUrl: '/resources/partner-guide.pdf',
     icon: (
       <svg
         className="h-6 w-6"
