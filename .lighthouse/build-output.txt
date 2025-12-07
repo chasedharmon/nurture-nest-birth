@@ -1,0 +1,39 @@
+
+> nurture-nest-birth@0.1.0 build /Users/chaseharmon/dev/projects/doula/nurture-nest-birth
+> next build
+
+   ▲ Next.js 16.0.7 (Turbopack)
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 1812.4ms
+   Running TypeScript ...
+   Collecting page data using 11 workers ...
+   Generating static pages using 11 workers (0/19) ...
+   Generating static pages using 11 workers (4/19) 
+   Generating static pages using 11 workers (9/19) 
+   Generating static pages using 11 workers (14/19) 
+ ✓ Generating static pages using 11 workers (19/19) in 419.4ms
+   Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /about
+├ ○ /blog
+├ ○ /blog/birth-plan-tips
+├ ○ /blog/doula-cost-worth-it
+├ ○ /blog/what-does-a-doula-do
+├ ○ /contact
+├ ○ /faq
+├ ○ /pricing
+├ ○ /robots.txt
+├ ○ /services
+├ ○ /services/birth-doula
+├ ○ /services/lactation
+├ ○ /services/postpartum-care
+├ ○ /services/sibling-prep
+└ ○ /sitemap.xml
+
+
+○  (Static)  prerendered as static content
+

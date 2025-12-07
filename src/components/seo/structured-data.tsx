@@ -1,43 +1,38 @@
+import { siteConfig } from '@/config/site'
+
+/**
+ * Structured Data Components (JSON-LD)
+ *
+ * These components generate JSON-LD markup for search engines.
+ * All data comes from @/config/site.ts for easy maintenance.
+ */
+
 export function LocalBusinessStructuredData() {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': 'https://nurturenestbirth.com',
-    name: 'Nurture Nest Birth',
-    description:
-      'DONA-certified doula providing birth support, postpartum care, and lactation consulting in Kearney, Nebraska.',
-    url: 'https://nurturenestbirth.com',
-    telephone: '', // Add when available
-    email: '', // Add when available
+    '@id': siteConfig.url.canonical,
+    name: siteConfig.business.name,
+    description: siteConfig.business.description,
+    url: siteConfig.url.canonical,
+    telephone: siteConfig.contact.phoneFormatted,
+    email: siteConfig.contact.email,
     address: {
       '@type': 'PostalAddress',
-      addressLocality: 'Kearney',
-      addressRegion: 'NE',
-      postalCode: '68847',
+      addressLocality: siteConfig.location.city,
+      addressRegion: siteConfig.location.stateAbbr,
+      postalCode: siteConfig.location.zipCode,
       addressCountry: 'US',
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: 40.6993,
-      longitude: -99.0817,
+      latitude: siteConfig.location.coordinates.latitude,
+      longitude: siteConfig.location.coordinates.longitude,
     },
-    areaServed: [
-      {
-        '@type': 'City',
-        name: 'Kearney',
-        '@id': 'https://en.wikipedia.org/wiki/Kearney,_Nebraska',
-      },
-      {
-        '@type': 'City',
-        name: 'Grand Island',
-        '@id': 'https://en.wikipedia.org/wiki/Grand_Island,_Nebraska',
-      },
-      {
-        '@type': 'City',
-        name: 'Hastings',
-        '@id': 'https://en.wikipedia.org/wiki/Hastings,_Nebraska',
-      },
-    ],
+    areaServed: siteConfig.location.serviceArea.map(city => ({
+      '@type': 'City',
+      name: city,
+    })),
     priceRange: '$$',
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
@@ -86,16 +81,11 @@ export function OrganizationStructuredData() {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Nurture Nest Birth',
-    url: 'https://nurturenestbirth.com',
-    logo: 'https://nurturenestbirth.com/images/hero-newborn.jpg',
-    description:
-      'DONA-certified doula providing compassionate birth and postpartum support in central Nebraska',
-    sameAs: [
-      // Add social media links when available
-      // 'https://www.facebook.com/nurturenestbirth',
-      // 'https://www.instagram.com/nurturenestbirth',
-    ],
+    name: siteConfig.business.name,
+    url: siteConfig.url.canonical,
+    logo: `${siteConfig.url.canonical}/images/hero-newborn.jpg`,
+    description: siteConfig.business.description,
+    sameAs: Object.values(siteConfig.social).filter(Boolean), // Only include non-empty social links
   }
 
   return (

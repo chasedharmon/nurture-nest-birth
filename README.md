@@ -74,27 +74,126 @@ nurture-nest-birth/
 │   ├── app/                    # Next.js App Router
 │   │   ├── layout.tsx          # Root layout with fonts
 │   │   ├── page.tsx            # Homepage
-│   │   └── globals.css         # Global styles + color palette
+│   │   ├── globals.css         # Global styles + OKLCH color palette
+│   │   ├── sitemap.ts          # Auto-generated sitemap.xml
+│   │   ├── about/page.tsx
+│   │   ├── blog/
+│   │   │   ├── page.tsx        # Blog index
+│   │   │   ├── what-does-a-doula-do/page.tsx
+│   │   │   ├── doula-cost-worth-it/page.tsx
+│   │   │   └── birth-plan-tips/page.tsx
+│   │   ├── contact/page.tsx
+│   │   ├── faq/page.tsx
+│   │   ├── pricing/page.tsx
+│   │   ├── services/
+│   │   │   ├── page.tsx        # Services index
+│   │   │   ├── birth-doula/page.tsx
+│   │   │   ├── postpartum-care/page.tsx
+│   │   │   ├── lactation/page.tsx
+│   │   │   └── sibling-prep/page.tsx
+│   │   └── testimonials/page.tsx
 │   ├── components/
-│   │   └── ui/                 # shadcn/ui components
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── form.tsx
-│   │       ├── input.tsx
-│   │       ├── textarea.tsx
-│   │       ├── label.tsx
-│   │       └── accordion.tsx
+│   │   ├── ui/                 # shadcn/ui components
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── form.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── textarea.tsx
+│   │   │   ├── label.tsx
+│   │   │   ├── accordion.tsx
+│   │   │   └── fade-in.tsx     # Custom animation component
+│   │   └── seo/
+│   │       └── structured-data.tsx  # JSON-LD for SEO
+│   ├── config/
+│   │   └── site.ts             # ⭐ Centralized site configuration
 │   └── lib/
-│       └── utils.ts            # Utility functions
+│       ├── utils.ts            # Utility functions
+│       └── metadata.ts         # SEO metadata helpers
+├── public/
+│   ├── robots.txt              # Search engine crawling rules
+│   └── images/                 # Static images
 ├── .husky/                     # Git hooks
 │   ├── pre-commit             # Run lint-staged
 │   └── commit-msg             # Validate commit messages
+├── PERFORMANCE.md              # Performance optimization guide
 ├── components.json             # shadcn/ui config
 ├── tsconfig.json              # TypeScript config (strict mode)
 ├── eslint.config.mjs          # ESLint config
 ├── .prettierrc                # Prettier config
 └── .commitlintrc.json         # Commitlint config
 ```
+
+## 🔧 Maintainability Guide
+
+This project is designed for easy maintenance. Here's what you need to know:
+
+### Making Content Changes
+
+**Most common updates are centralized in ONE file**: [`src/config/site.ts`](src/config/site.ts)
+
+#### Update Business Information
+
+Edit `src/config/site.ts` to change:
+
+- Business name, tagline, description
+- Contact info (email, phone, Calendly link)
+- Service area cities
+- Credentials
+- Social media links
+- Pricing
+
+**Example**: To update your phone number, just edit this file:
+
+```typescript
+// src/config/site.ts
+contact: {
+  phone: '(308) 555-NEW',  // ← Change here only
+  phoneFormatted: '+13085559999',
+}
+```
+
+This automatically updates it across the entire website!
+
+#### Add a New Blog Post
+
+1. Create file: `src/app/blog/your-post-title/page.tsx`
+2. Copy structure from existing blog post
+3. Update content and metadata
+4. Add to `src/app/blog/page.tsx` blog posts array
+5. Add to `src/app/sitemap.ts` routes array
+
+#### Add a New Page to Navigation
+
+1. Create page: `src/app/your-page/page.tsx`
+2. Add to navigation (when we build Header component)
+3. Add to `src/app/sitemap.ts` routes array
+
+### Code Quality is Automatic
+
+Pre-commit hooks ensure code quality:
+
+- ✅ Code automatically formatted with Prettier
+- ✅ TypeScript errors caught before commit
+- ✅ ESLint warnings shown
+- ✅ Commit messages validated
+
+**You can't commit broken code!** This protects you from mistakes.
+
+### SEO is Automated
+
+- ✅ Sitemap auto-generates at `/sitemap.xml`
+- ✅ Robots.txt configured for search engines
+- ✅ Structured data (JSON-LD) on all pages
+- ✅ OpenGraph tags for social media sharing
+- ✅ All metadata centralized in config
+
+### Performance is Built-in
+
+- ✅ Images optimized automatically (next/image)
+- ✅ Fonts optimized automatically (next/font)
+- ✅ Code splitting per route
+- ✅ Static page generation
+- ✅ See [PERFORMANCE.md](PERFORMANCE.md) for details
 
 ## Git Workflow
 
