@@ -42,6 +42,17 @@ export const EVENTS = {
   FAQ_VIEW: 'faq_view',
   FAQ_EXPAND: 'faq_expand',
 
+  // Gallery
+  GALLERY_IMAGE_VIEW: 'gallery_image_view',
+
+  // Resources
+  RESOURCE_DOWNLOAD: 'resource_download',
+
+  // Newsletter
+  NEWSLETTER_SIGNUP: 'newsletter_signup',
+  NEWSLETTER_SUCCESS: 'newsletter_success',
+  NEWSLETTER_ERROR: 'newsletter_error',
+
   // Phone/Email Actions
   PHONE_CLICK: 'phone_click',
   EMAIL_CLICK: 'email_click',
