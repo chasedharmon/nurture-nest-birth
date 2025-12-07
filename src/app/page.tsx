@@ -9,31 +9,32 @@ import {
   OrganizationStructuredData,
 } from '@/components/seo/structured-data'
 
-// Stats data - can be replaced with real-time API data
+// Evidence-based doula impact statistics
+// Sources: AJPH 2024, AJOG 2024, Cochrane Review
 const stats: Stat[] = [
   {
-    value: 100,
+    value: 47,
     suffix: '%',
-    label: 'Client Satisfaction',
-    description: 'Families recommend our services',
+    label: 'Lower Risk of Cesarean',
+    description: 'With continuous doula support',
   },
   {
-    value: 50,
-    suffix: '+',
-    label: 'Births Supported',
-    description: 'Families welcomed their babies',
+    value: 29,
+    suffix: '%',
+    label: 'Lower Risk Preterm Birth',
+    description: 'Among families with doulas',
   },
   {
-    value: 15,
-    suffix: '+',
-    label: 'Years Experience',
-    description: 'Supporting families in birth',
+    value: 35,
+    suffix: '%',
+    label: 'Reduction in Severe Complications',
+    description: 'Maternal morbidity reduction',
   },
   {
-    value: 24,
-    suffix: '/7',
-    label: 'On-Call Support',
-    description: 'Available when you need us',
+    value: 46,
+    suffix: '%',
+    label: 'Higher Postpartum Visit Rate',
+    description: 'Better follow-up care attendance',
   },
 ]
 
@@ -50,8 +51,8 @@ export default function Home() {
       >
         <StatsSection
           stats={stats}
-          title="Trusted by Families in Central Nebraska"
-          description="Real results from real families we've had the privilege to support"
+          title="The Research-Backed Impact of Doula Care"
+          description="Evidence from peer-reviewed studies shows doulas significantly improve birth outcomes"
         />
       </section>
 

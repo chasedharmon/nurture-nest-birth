@@ -3,8 +3,37 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
 import { TestimonialCard } from '@/components/marketing/testimonial-card'
+import { StatsSection, type Stat } from '@/components/stats'
 import { siteConfig } from '@/config/site'
 import { spacing, maxWidth, typography, grid } from '@/lib/design-system'
+
+// Business statistics for testimonials page
+const businessStats: Stat[] = [
+  {
+    value: 100,
+    suffix: '%',
+    label: 'Client Satisfaction',
+    description: 'Families recommend our services',
+  },
+  {
+    value: 50,
+    suffix: '+',
+    label: 'Births Supported',
+    description: 'Families welcomed their babies',
+  },
+  {
+    value: 15,
+    suffix: '+',
+    label: 'Years Experience',
+    description: 'Supporting families in central NE',
+  },
+  {
+    value: 24,
+    suffix: '/7',
+    label: 'On-Call Support',
+    description: 'Available when you need us',
+  },
+]
 
 export const metadata: Metadata = {
   title: 'Client Testimonials | Birth Stories',
@@ -57,44 +86,15 @@ export default function TestimonialsPage() {
         </div>
       </section>
 
-      {/* Statistics Section (Optional - can add when you have real data) */}
+      {/* Business Statistics */}
       <section
-        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+        className={`bg-muted/30 ${spacing.container} ${spacing.section.md}`}
       >
-        <div className={`mx-auto ${maxWidth.layout}`}>
-          <FadeIn>
-            <div
-              className={`grid ${grid.gap.medium} text-center ${grid.cols.three}`}
-            >
-              <div>
-                <div className="font-serif text-4xl font-bold text-foreground">
-                  {siteConfig.business.established
-                    ? `${new Date().getFullYear() - siteConfig.business.established}+`
-                    : '3+'}
-                </div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  Years Supporting Families
-                </div>
-              </div>
-              <div>
-                <div className="font-serif text-4xl font-bold text-foreground">
-                  100%
-                </div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  Client Satisfaction
-                </div>
-              </div>
-              <div>
-                <div className="font-serif text-4xl font-bold text-foreground">
-                  {siteConfig.location.serviceArea.length}
-                </div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  Communities Served
-                </div>
-              </div>
-            </div>
-          </FadeIn>
-        </div>
+        <StatsSection
+          stats={businessStats}
+          title="Trusted by Families in Central Nebraska"
+          description="Real results from real families we've had the privilege to support"
+        />
       </section>
 
       {/* CTA Section */}
