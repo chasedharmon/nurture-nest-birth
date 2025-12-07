@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
+import { JSONLDScript, getArticleSchema } from '@/lib/schema'
 
 export const metadata: Metadata = {
   title: 'How Much Does a Doula Cost in Nebraska? (2025 Pricing Guide)',
@@ -13,8 +14,17 @@ export const metadata: Metadata = {
 }
 
 export default function DoulaCostPost() {
+  const articleSchema = getArticleSchema({
+    title: 'How Much Does a Doula Cost in Nebraska? (2025 Pricing Guide)',
+    description:
+      'Doula cost in Kearney and Nebraska explained. Learn average fees, what affects pricing, insurance coverage, and why families say doula support is worth every penny.',
+    datePublished: '2025-12-06',
+    slug: 'doula-cost-worth-it',
+  })
+
   return (
     <article className="bg-background">
+      <JSONLDScript data={articleSchema} />
       <header className="px-6 py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-3xl">
           <FadeIn>

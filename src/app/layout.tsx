@@ -3,6 +3,11 @@ import { Inter, Lora } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import {
+  JSONLDScript,
+  getOrganizationSchema,
+  getLocalBusinessSchema,
+} from '@/lib/schema'
 import './globals.css'
 
 const inter = Inter({
@@ -92,6 +97,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <JSONLDScript data={getOrganizationSchema()} />
+        <JSONLDScript data={getLocalBusinessSchema()} />
+      </head>
       <body className={`${inter.variable} ${lora.variable} antialiased`}>
         <Header />
         <main className="min-h-screen">{children}</main>

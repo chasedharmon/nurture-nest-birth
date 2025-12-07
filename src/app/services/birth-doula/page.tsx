@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
 import { spacing, maxWidth, typography, grid } from '@/lib/design-system'
+import { JSONLDScript, getServiceSchema } from '@/lib/schema'
 
 export const metadata: Metadata = {
   title: 'Birth Doula Support | Comprehensive Labor & Delivery Care',
@@ -15,8 +16,17 @@ export const metadata: Metadata = {
 }
 
 export default function BirthDoulaPage() {
+  const serviceSchema = getServiceSchema({
+    name: 'Birth Doula Support',
+    description:
+      'DONA-certified birth doula providing continuous labor support, prenatal planning, and postpartum follow-up. Supporting all birth settings and preferences in Kearney, Nebraska.',
+    priceRange: '$800-$1500',
+    slug: 'birth-doula',
+  })
+
   return (
     <div className="bg-background">
+      <JSONLDScript data={serviceSchema} />
       {/* Hero Section */}
       <section className={`${spacing.container} ${spacing.section.lg}`}>
         <div className={`mx-auto ${maxWidth.content} text-center`}>

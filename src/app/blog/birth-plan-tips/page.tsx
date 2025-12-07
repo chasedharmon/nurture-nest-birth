@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
+import { JSONLDScript, getArticleSchema } from '@/lib/schema'
 
 export const metadata: Metadata = {
   title: 'Creating a Birth Plan That Actually Works | Doula Tips',
@@ -13,8 +14,17 @@ export const metadata: Metadata = {
 }
 
 export default function BirthPlanTipsPost() {
+  const articleSchema = getArticleSchema({
+    title: 'Creating a Birth Plan That Actually Works',
+    description:
+      'Learn how to write a realistic, flexible birth plan that helps you communicate preferences without rigid expectations. Includes free template and doula advice.',
+    datePublished: '2025-12-06',
+    slug: 'birth-plan-tips',
+  })
+
   return (
     <article className="bg-background">
+      <JSONLDScript data={articleSchema} />
       <header className="px-6 py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-3xl">
           <FadeIn>

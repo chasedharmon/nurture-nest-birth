@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
+import { JSONLDScript, getArticleSchema } from '@/lib/schema'
 
 export const metadata: Metadata = {
   title: 'What Does a Doula Do? Complete Guide to Doula Support | Kearney, NE',
@@ -13,8 +14,17 @@ export const metadata: Metadata = {
 }
 
 export default function WhatDoesDoulaDoPost() {
+  const articleSchema = getArticleSchema({
+    title: 'What Does a Doula Actually Do? A Complete Guide',
+    description:
+      'Wondering what a doula actually does? Learn about doula support during pregnancy, labor, birth, and postpartum. Includes how doulas differ from midwives and nurses.',
+    datePublished: '2025-12-06',
+    slug: 'what-does-a-doula-do',
+  })
+
   return (
     <article className="bg-background">
+      <JSONLDScript data={articleSchema} />
       {/* Header */}
       <header className="px-6 py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-3xl">

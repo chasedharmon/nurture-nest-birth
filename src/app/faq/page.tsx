@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/accordion'
 import { FadeIn } from '@/components/ui/fade-in'
 import { spacing, maxWidth, typography } from '@/lib/design-system'
+import { JSONLDScript, getFAQSchema } from '@/lib/schema'
 
 export const metadata: Metadata = {
   title: 'FAQ | Nurture Nest Birth | Common Doula Questions',
@@ -82,8 +83,11 @@ const faqs = [
 ]
 
 export default function FAQPage() {
+  const faqSchema = getFAQSchema(faqs)
+
   return (
     <div className="bg-background">
+      <JSONLDScript data={faqSchema} />
       {/* Hero Section */}
       <section className={`${spacing.container} ${spacing.section.lg}`}>
         <div className={`mx-auto ${maxWidth.content} text-center`}>
