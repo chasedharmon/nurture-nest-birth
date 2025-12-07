@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ContactForm } from '@/components/forms/contact-form'
+import { CalendlyWidget } from '@/components/calendly/calendly-widget'
 
 export const metadata: Metadata = {
   title: 'Contact | Nurture Nest Birth | Kearney, NE',
@@ -87,24 +88,23 @@ export default function ContactPage() {
                 </CardContent>
               </Card>
 
-              {/* Calendly Placeholder */}
+              {/* Calendly Widget */}
               <Card>
                 <CardHeader>
                   <CardTitle className="font-serif text-2xl">
                     Schedule a Consultation
                   </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Book a free 30-minute consultation to discuss your needs.
+                  </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex min-h-[200px] items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/10">
-                    <div className="text-center">
-                      <p className="text-muted-foreground">
-                        Calendly scheduling widget will appear here
-                      </p>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Coming soon
-                      </p>
-                    </div>
-                  </div>
+                  <CalendlyWidget
+                    url={
+                      process.env.NEXT_PUBLIC_CALENDLY_URL ||
+                      'https://calendly.com/your-calendly-username'
+                    }
+                  />
                 </CardContent>
               </Card>
             </div>
