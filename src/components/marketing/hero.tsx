@@ -3,91 +3,69 @@ import { Button } from '@/components/ui/button'
 
 export function Hero() {
   return (
-    <section className="relative bg-background px-6 py-20 md:py-32 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-8">
+    <section className="relative overflow-hidden bg-background px-6 py-20 md:py-32 lg:px-8">
+      {/* Subtle organic background shape */}
+      <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+      <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-secondary/5 blur-3xl" />
+
+      <div className="relative mx-auto max-w-7xl">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left Column - Content */}
           <div className="flex flex-col justify-center">
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+            {/* Small badge above title */}
+            <div className="mb-6 inline-flex items-center gap-2 self-start rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+              DONA Certified Doula
+            </div>
+
+            <h1 className="font-serif text-4xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               Compassionate Support for Your Birth Journey
             </h1>
-            <p className="mt-6 text-lg leading-8 text-muted-foreground">
+            <p className="mt-6 text-lg leading-relaxed text-muted-foreground sm:text-xl">
               Evidence-based doula care in Kearney, Nebraska. From pregnancy
               through postpartum, I provide nurturing support tailored to your
               family&apos;s unique needs.
             </p>
 
-            {/* Credentials */}
-            <div className="mt-8 flex flex-wrap gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <svg
-                  className="h-5 w-5 text-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span>DONA Certified</span>
+            {/* Credentials - Modern badge style */}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                Lactation Consultant
               </div>
-              <div className="flex items-center gap-2">
-                <svg
-                  className="h-5 w-5 text-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span>Lactation Consultant</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                3+ Years Experience
               </div>
-              <div className="flex items-center gap-2">
-                <svg
-                  className="h-5 w-5 text-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                <span>3+ Years Experience</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                Kearney, NE
               </div>
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons with enhanced styling */}
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Button asChild size="lg" className="text-base">
-                <Link href="/contact">Schedule a Consultation</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="text-base">
-                <Link href="/services">Explore Services</Link>
-              </Button>
-            </div>
-          </div>
-
-          {/* Right Column - Image Placeholder */}
-          <div className="relative lg:row-start-1">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted lg:aspect-[3/4]">
-              {/* Placeholder - Replace with actual image later */}
-              <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
-                <div className="text-center">
+              <Button
+                asChild
+                size="lg"
+                className="group relative overflow-hidden text-base shadow-lg shadow-accent/20 transition-all hover:shadow-xl hover:shadow-accent/30"
+              >
+                <Link href="/contact">
+                  Schedule a Consultation
                   <svg
-                    className="mx-auto h-24 w-24 text-primary/40"
+                    className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -95,11 +73,48 @@ export function Hero() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
                     />
                   </svg>
-                  <p className="mt-4 text-sm text-muted-foreground">
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="border-2 text-base transition-all hover:border-primary hover:bg-primary/5"
+              >
+                <Link href="/services">Explore Services</Link>
+              </Button>
+            </div>
+          </div>
+
+          {/* Right Column - Image Placeholder with film aesthetic */}
+          <div className="relative lg:row-start-1">
+            {/* Decorative element */}
+            <div className="absolute -left-6 -top-6 h-full w-full rounded-3xl bg-primary/10" />
+
+            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-muted shadow-2xl shadow-primary/10 lg:aspect-[3/4]">
+              {/* Film-inspired gradient placeholder */}
+              <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/15 via-background to-secondary/15">
+                <div className="text-center">
+                  <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
+                    <svg
+                      className="h-12 w-12 text-primary/60"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                  <p className="mt-6 text-sm font-medium text-muted-foreground">
                     Professional photo coming soon
                   </p>
                 </div>

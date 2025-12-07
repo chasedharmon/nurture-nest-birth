@@ -44,45 +44,63 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  /* Cream background #F5F1E8 */
-  --background: oklch(0.96 0.012 85);
-  /* Dark sage text #3a4338 */
-  --foreground: oklch(0.28 0.015 130);
-  /* White card backgrounds */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.28 0.015 130);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.28 0.015 130);
-  /* Primary: Sage #8B9D83 */
-  --primary: oklch(0.64 0.032 135);
-  --primary-foreground: oklch(1 0 0);
-  /* Secondary: Clay #C17B6C */
-  --secondary: oklch(0.66 0.065 35);
-  --secondary-foreground: oklch(1 0 0);
-  /* Muted sage tones */
-  --muted: oklch(0.92 0.01 130);
-  --muted-foreground: oklch(0.5 0.02 130);
-  /* Accent: Clay for CTAs */
-  --accent: oklch(0.66 0.065 35);
-  --accent-foreground: oklch(1 0 0);
+  /* Softer, more organic border radius */
+  --radius: 1rem;
+
+  /* Warmer cream background - film-inspired */
+  --background: oklch(0.975 0.015 75);
+
+  /* Warm charcoal text for better readability */
+  --foreground: oklch(0.25 0.01 50);
+
+  /* Soft white with warmth for cards */
+  --card: oklch(0.99 0.005 80);
+  --card-foreground: oklch(0.25 0.01 50);
+
+  --popover: oklch(0.99 0.005 80);
+  --popover-foreground: oklch(0.25 0.01 50);
+
+  /* Primary: Warmer olive/sage with golden undertones */
+  --primary: oklch(0.62 0.045 125);
+  --primary-foreground: oklch(0.99 0.005 80);
+
+  /* Secondary: Warm terracotta/clay */
+  --secondary: oklch(0.68 0.08 40);
+  --secondary-foreground: oklch(0.99 0.005 80);
+
+  /* Muted warm neutrals */
+  --muted: oklch(0.94 0.012 75);
+  --muted-foreground: oklch(0.48 0.015 50);
+
+  /* Accent: Richer terracotta for CTAs - stands out */
+  --accent: oklch(0.65 0.095 35);
+  --accent-foreground: oklch(0.99 0.005 80);
+
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.88 0.01 130);
-  --input: oklch(0.88 0.01 130);
-  --ring: oklch(0.64 0.032 135);
-  --chart-1: oklch(0.64 0.032 135);
-  --chart-2: oklch(0.66 0.065 35);
-  --chart-3: oklch(0.5 0.02 130);
-  --chart-4: oklch(0.7 0.05 85);
-  --chart-5: oklch(0.8 0.03 35);
-  --sidebar: oklch(0.96 0.012 85);
-  --sidebar-foreground: oklch(0.28 0.015 130);
-  --sidebar-primary: oklch(0.64 0.032 135);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.92 0.01 130);
-  --sidebar-accent-foreground: oklch(0.28 0.015 130);
-  --sidebar-border: oklch(0.88 0.01 130);
-  --sidebar-ring: oklch(0.64 0.032 135);
+
+  /* Softer borders with warmth */
+  --border: oklch(0.9 0.01 75);
+  --input: oklch(0.9 0.01 75);
+
+  /* Ring matches primary but slightly lighter */
+  --ring: oklch(0.62 0.045 125);
+
+  /* Chart colors - earth tones */
+  --chart-1: oklch(0.62 0.045 125);
+  --chart-2: oklch(0.65 0.095 35);
+  --chart-3: oklch(0.48 0.015 50);
+  --chart-4: oklch(0.72 0.05 85);
+  --chart-5: oklch(0.82 0.04 40);
+
+  /* Sidebar */
+  --sidebar: oklch(0.975 0.015 75);
+  --sidebar-foreground: oklch(0.25 0.01 50);
+  --sidebar-primary: oklch(0.62 0.045 125);
+  --sidebar-primary-foreground: oklch(0.99 0.005 80);
+  --sidebar-accent: oklch(0.94 0.012 75);
+  --sidebar-accent-foreground: oklch(0.25 0.01 50);
+  --sidebar-border: oklch(0.9 0.01 75);
+  --sidebar-ring: oklch(0.62 0.045 125);
 }
 
 .dark {
@@ -125,5 +143,44 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Enhanced typography with better hierarchy */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif tracking-tight;
+  }
+
+  /* Film-inspired subtle grain texture */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Smooth transitions for interactive elements */
+@layer utilities {
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .hover-lift {
+    @apply transition-smooth hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
 }
