@@ -59,6 +59,12 @@ export default async function ClientPortalLayout({
                   Payments
                 </Link>
                 <Link
+                  href="/client/invoices"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Invoices
+                </Link>
+                <Link
                   href="/client/intake"
                   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 >

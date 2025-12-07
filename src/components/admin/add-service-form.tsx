@@ -50,6 +50,7 @@ export function AddServiceForm({ clientId, onSuccess }: AddServiceFormProps) {
       total_amount: formData.get('total_amount')
         ? parseFloat(formData.get('total_amount') as string)
         : null,
+      contract_required: formData.get('contract_required') === 'true',
       contract_signed: formData.get('contract_signed') === 'true',
       notes: (formData.get('notes') as string) || null,
     })
@@ -159,16 +160,30 @@ export function AddServiceForm({ clientId, onSuccess }: AddServiceFormProps) {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="contract_signed">Contract Status</Label>
-          <Select
-            name="contract_signed"
-            id="contract_signed"
-            defaultValue="false"
-          >
-            <option value="false">Pending</option>
-            <option value="true">Signed</option>
-          </Select>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="contract_required">Contract Required</Label>
+            <Select
+              name="contract_required"
+              id="contract_required"
+              defaultValue="true"
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="contract_signed">Contract Status</Label>
+            <Select
+              name="contract_signed"
+              id="contract_signed"
+              defaultValue="false"
+            >
+              <option value="false">Pending</option>
+              <option value="true">Signed</option>
+            </Select>
+          </div>
         </div>
 
         <div className="space-y-2">

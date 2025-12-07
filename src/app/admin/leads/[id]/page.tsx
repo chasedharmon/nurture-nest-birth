@@ -7,6 +7,8 @@ import { getClientServices } from '@/app/actions/services'
 import { getClientMeetings } from '@/app/actions/meetings'
 import { getClientDocuments } from '@/app/actions/documents'
 import { getClientPayments } from '@/app/actions/payments'
+import { getClientInvoices } from '@/app/actions/invoices'
+import { getClientContractSignatures } from '@/app/actions/contracts'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatusUpdateSelect } from '@/components/admin/status-update-select'
@@ -18,6 +20,8 @@ import { ServicesList } from '@/components/admin/services-list'
 import { MeetingsList } from '@/components/admin/meetings-list'
 import { DocumentsList } from '@/components/admin/documents-list'
 import { PaymentsList } from '@/components/admin/payments-list'
+import { InvoicesList } from '@/components/admin/invoices-list'
+import { ContractsList } from '@/components/admin/contracts-list'
 import { formatDistanceToNow } from 'date-fns'
 
 const sourceLabels: Record<string, string> = {
@@ -51,6 +55,8 @@ export default async function LeadDetailPage({
     meetingsResult,
     documentsResult,
     paymentsResult,
+    invoicesResult,
+    contractsResult,
   ] = await Promise.all([
     getLeadById(id),
     getLeadActivities(id),
@@ -58,6 +64,8 @@ export default async function LeadDetailPage({
     getClientMeetings(id),
     getClientDocuments(id),
     getClientPayments(id),
+    getClientInvoices(id),
+    getClientContractSignatures(id),
   ])
 
   if (!leadResult.success || !leadResult.lead) {
@@ -74,6 +82,10 @@ export default async function LeadDetailPage({
     ? documentsResult.documents || []
     : []
   const payments = paymentsResult.success ? paymentsResult.payments || [] : []
+  const invoices = invoicesResult.success ? invoicesResult.invoices || [] : []
+  const contractSignatures = contractsResult.success
+    ? contractsResult.signatures || []
+    : []
 
   return (
     <div className="min-h-screen bg-background">
@@ -155,6 +167,42 @@ export default async function LeadDetailPage({
                     payments={payments}
                     clientId={id}
                     services={services}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          }
+          invoicesTab={
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Invoices</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <InvoicesList
+                    invoices={invoices}
+                    clientId={id}
+                    clientName={lead.name}
+                    clientEmail={lead.email}
+                    services={services}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          }
+          contractsTab={
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contracts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ContractsList
+                    signatures={contractSignatures}
+                    services={services}
+                    clientId={id}
+                    clientName={lead.name}
+                    clientEmail={lead.email}
                   />
                 </CardContent>
               </Card>

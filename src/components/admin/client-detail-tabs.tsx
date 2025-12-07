@@ -8,6 +8,8 @@ interface ClientDetailTabsProps {
   meetingsTab: React.ReactNode
   documentsTab: React.ReactNode
   paymentsTab: React.ReactNode
+  invoicesTab: React.ReactNode
+  contractsTab: React.ReactNode
   activityTab: React.ReactNode
   notesTab: React.ReactNode
 }
@@ -18,6 +20,8 @@ export function ClientDetailTabs({
   meetingsTab,
   documentsTab,
   paymentsTab,
+  invoicesTab,
+  contractsTab,
   activityTab,
   notesTab,
 }: ClientDetailTabsProps) {
@@ -29,6 +33,8 @@ export function ClientDetailTabs({
         <TabsTrigger value="meetings">Meetings</TabsTrigger>
         <TabsTrigger value="documents">Documents</TabsTrigger>
         <TabsTrigger value="payments">Payments</TabsTrigger>
+        <TabsTrigger value="invoices">Invoices</TabsTrigger>
+        <TabsTrigger value="contracts">Contracts</TabsTrigger>
         <TabsTrigger value="activity">Activity</TabsTrigger>
         <TabsTrigger value="notes">Notes</TabsTrigger>
       </TabsList>
@@ -51,6 +57,14 @@ export function ClientDetailTabs({
 
       <TabsContent value="payments" className="mt-6">
         {paymentsTab}
+      </TabsContent>
+
+      <TabsContent value="invoices" className="mt-6">
+        {invoicesTab}
+      </TabsContent>
+
+      <TabsContent value="contracts" className="mt-6">
+        {contractsTab}
       </TabsContent>
 
       <TabsContent value="activity" className="mt-6">

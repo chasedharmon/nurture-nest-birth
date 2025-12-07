@@ -18,7 +18,13 @@ export type ActivityCategory =
   | 'payment'
   | 'meeting'
 
-export type RelatedRecordType = 'service' | 'meeting' | 'payment' | 'document'
+export type RelatedRecordType =
+  | 'service'
+  | 'meeting'
+  | 'payment'
+  | 'document'
+  | 'invoice'
+  | 'contract_signature'
 
 export type ClientType = 'lead' | 'expecting' | 'postpartum' | 'past_client'
 
@@ -142,8 +148,10 @@ export interface ClientService {
   start_date?: string | null
   end_date?: string | null
   total_amount?: number | null
+  contract_required: boolean
   contract_signed: boolean
   contract_signed_at?: string | null
+  contract_signature_id?: string | null
   notes?: string | null
   created_at: string
   updated_at: string
@@ -216,6 +224,102 @@ export interface User {
   role: UserRole
 }
 
+// Invoice types
+export type InvoiceStatus =
+  | 'draft'
+  | 'sent'
+  | 'paid'
+  | 'overdue'
+  | 'cancelled'
+  | 'refunded'
+  | 'partial'
+
+export interface InvoiceLineItem {
+  description: string
+  quantity: number
+  unit_price: number
+  total: number
+}
+
+export interface Invoice {
+  id: string
+  client_id: string
+  service_id?: string | null
+  invoice_number: string
+  status: InvoiceStatus
+  subtotal: number
+  tax_rate: number
+  tax_amount: number
+  discount_amount: number
+  total: number
+  amount_paid: number
+  balance_due: number
+  issue_date: string
+  due_date?: string | null
+  paid_at?: string | null
+  sent_at?: string | null
+  line_items: InvoiceLineItem[]
+  notes?: string | null
+  client_notes?: string | null
+  terms?: string | null
+  stripe_invoice_id?: string | null
+  stripe_payment_intent_id?: string | null
+  payment_link?: string | null
+  payment_method?: string | null
+  created_at: string
+  updated_at: string
+  created_by?: string | null
+  updated_by?: string | null
+}
+
+export interface InvoicePayment {
+  id: string
+  invoice_id: string
+  amount: number
+  payment_method: string
+  payment_reference?: string | null
+  payment_date: string
+  notes?: string | null
+  stripe_payment_id?: string | null
+  stripe_charge_id?: string | null
+  created_at: string
+  created_by?: string | null
+}
+
+// Contract types
+export interface ContractTemplate {
+  id: string
+  name: string
+  description?: string | null
+  service_type?: string | null
+  content: string
+  is_active: boolean
+  is_default: boolean
+  version: number
+  created_at: string
+  updated_at: string
+  created_by?: string | null
+}
+
+export interface ContractSignature {
+  id: string
+  client_id: string
+  service_id?: string | null
+  template_id?: string | null
+  contract_content: string
+  contract_version?: number | null
+  signed_at: string
+  signer_name: string
+  signer_email: string
+  ip_address?: string | null
+  user_agent?: string | null
+  signature_data?: Record<string, unknown> | null
+  status: 'signed' | 'voided'
+  voided_at?: string | null
+  voided_reason?: string | null
+  created_at: string
+}
+
 // Database insert types (without auto-generated fields)
 export type LeadInsert = Omit<Lead, 'id' | 'created_at' | 'updated_at'>
 export type LeadActivityInsert = Omit<LeadActivity, 'id' | 'created_at'>
@@ -230,3 +334,15 @@ export type ClientDocumentInsert = Omit<
   'id' | 'uploaded_at' | 'created_at' | 'updated_at'
 >
 export type PaymentInsert = Omit<Payment, 'id' | 'created_at' | 'updated_at'>
+export type InvoiceInsert = Omit<
+  Invoice,
+  'id' | 'created_at' | 'updated_at' | 'invoice_number' | 'balance_due'
+>
+export type ContractTemplateInsert = Omit<
+  ContractTemplate,
+  'id' | 'created_at' | 'updated_at'
+>
+export type ContractSignatureInsert = Omit<
+  ContractSignature,
+  'id' | 'created_at' | 'signed_at'
+>
