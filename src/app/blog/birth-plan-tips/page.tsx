@@ -49,7 +49,7 @@ export default function BirthPlanTipsPost() {
       </header>
 
       <div className="px-6 py-8 lg:px-8">
-        <div className="prose prose-lg mx-auto max-w-3xl text-muted-foreground">
+        <div className="prose prose-lg mx-auto max-w-3xl prose-headings:font-serif prose-headings:text-foreground prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-strong:text-foreground">
           <p className="text-xl">
             Birth plans can be powerful communication tools—or sources of stress
             and disappointment. The difference? Approaching your birth plan as a

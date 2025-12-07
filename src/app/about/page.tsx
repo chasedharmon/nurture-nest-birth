@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -14,20 +15,42 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="bg-background">
-      {/* Hero Section */}
+      {/* Hero Section with Photo */}
       <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            About Me
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+            {/* Left - Photo */}
+            <div className="relative">
+              <div className="absolute -left-6 -top-6 h-full w-full rounded-3xl bg-primary/10" />
+              <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-muted shadow-2xl shadow-primary/10">
+                <Image
+                  src="/images/headshot-placeholder.jpg"
+                  alt="Professional doula headshot"
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
+              </div>
+            </div>
+
+            {/* Right - Intro */}
+            <div className="flex flex-col justify-center">
+              <div className="mb-6 inline-flex items-center gap-2 self-start rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                About Me
+              </div>
+              <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                Supporting Families Through Birth & Beyond
+              </h1>
+              <p className="mt-6 text-xl text-muted-foreground">
+                Hi, I&apos;m here to provide compassionate, evidence-based
+                support during one of life&apos;s most transformative
+                experiences.
+              </p>
+            </div>
           </div>
-          <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Supporting Families Through Birth & Beyond
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground">
-            Hi, I&apos;m here to provide compassionate, evidence-based support
-            during one of life&apos;s most transformative experiences.
-          </p>
         </div>
       </section>
 

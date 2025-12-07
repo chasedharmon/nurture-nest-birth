@@ -56,7 +56,7 @@ export default function WhatDoesDoulaDoPost() {
 
       {/* Content */}
       <div className="px-6 py-8 lg:px-8">
-        <div className="prose prose-lg mx-auto max-w-3xl text-muted-foreground">
+        <div className="prose prose-lg mx-auto max-w-3xl prose-headings:font-serif prose-headings:text-foreground prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-strong:text-foreground">
           <h2 className="font-serif text-3xl font-bold text-foreground">
             The Simple Answer
           </h2>

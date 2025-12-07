@@ -27,6 +27,12 @@ export function Header() {
             Services
           </Link>
           <Link
+            href="/blog"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Blog
+          </Link>
+          <Link
             href="/faq"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >

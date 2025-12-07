@@ -49,7 +49,7 @@ export default function DoulaCostPost() {
       </header>
 
       <div className="px-6 py-8 lg:px-8">
-        <div className="prose prose-lg mx-auto max-w-3xl text-muted-foreground">
+        <div className="prose prose-lg mx-auto max-w-3xl prose-headings:font-serif prose-headings:text-foreground prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-strong:text-foreground">
           <p className="text-xl">
             Let's talk about the elephant in the room: doula fees. If you're
             considering hiring a doula but wondering if you can afford it—or if
