@@ -14,6 +14,9 @@ export interface Stat {
   prefix?: string
   decimals?: number
   description?: string
+  icon?: React.ReactNode
+  sourceUrl?: string
+  sourceLabel?: string
 }
 
 interface StatsSectionProps {
@@ -69,27 +72,50 @@ export function StatsSection({
       )}
 
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="rounded-lg border border-border bg-card p-6 text-center shadow-sm transition-shadow hover:shadow-md"
-          >
-            <div className="font-serif text-5xl font-bold text-primary">
-              <AnimatedCounter
-                end={stat.value}
-                suffix={stat.suffix}
-                prefix={stat.prefix}
-                decimals={stat.decimals}
-              />
-            </div>
-            <p className="mt-3 font-semibold text-foreground">{stat.label}</p>
-            {stat.description && (
-              <p className="mt-2 text-sm text-muted-foreground">
-                {stat.description}
-              </p>
-            )}
-          </div>
-        ))}
+        {stats.map((stat, index) => {
+          const StatWrapper = stat.sourceUrl ? 'a' : 'div'
+          const wrapperProps = stat.sourceUrl
+            ? {
+                href: stat.sourceUrl,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                className:
+                  'group block rounded-lg border border-border bg-card p-6 text-center shadow-sm transition-all hover:border-primary/50 hover:shadow-md',
+              }
+            : {
+                className:
+                  'rounded-lg border border-border bg-card p-6 text-center shadow-sm transition-shadow hover:shadow-md',
+              }
+
+          return (
+            <StatWrapper key={index} {...wrapperProps}>
+              {stat.icon && (
+                <div className="mb-4 flex justify-center text-primary">
+                  {stat.icon}
+                </div>
+              )}
+              <div className="font-serif text-5xl font-bold text-primary">
+                <AnimatedCounter
+                  end={stat.value}
+                  suffix={stat.suffix}
+                  prefix={stat.prefix}
+                  decimals={stat.decimals}
+                />
+              </div>
+              <p className="mt-3 font-semibold text-foreground">{stat.label}</p>
+              {stat.description && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {stat.description}
+                </p>
+              )}
+              {stat.sourceUrl && stat.sourceLabel && (
+                <p className="mt-3 text-xs text-primary opacity-70 transition-opacity group-hover:opacity-100">
+                  Source: {stat.sourceLabel} →
+                </p>
+              )}
+            </StatWrapper>
+          )
+        })}
       </div>
     </div>
   )
