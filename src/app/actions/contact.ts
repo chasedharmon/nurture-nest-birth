@@ -3,6 +3,7 @@
 import { Resend } from 'resend'
 import { contactFormSchema } from '@/lib/schemas/contact'
 import { ContactFormEmail } from '@/lib/email/templates/contact-form'
+import { createClient } from '@/lib/supabase/server'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -19,6 +20,28 @@ export async function submitContactForm(formData: FormData) {
     }
 
     const validatedData = contactFormSchema.parse(rawData)
+
+    // Save to Supabase database
+    const supabase = await createClient()
+    const { data: lead, error: dbError } = await supabase
+      .from('leads')
+      .insert({
+        source: 'contact_form',
+        status: 'new',
+        name: validatedData.name,
+        email: validatedData.email,
+        phone: validatedData.phone || null,
+        due_date: validatedData.dueDate || null,
+        service_interest: validatedData.service || null,
+        message: validatedData.message,
+      })
+      .select()
+      .single()
+
+    if (dbError) {
+      console.error('Error saving to database:', dbError)
+      // Continue with email even if database save fails
+    }
 
     // Send email using Resend
     const { data, error } = await resend.emails.send({
@@ -40,6 +63,7 @@ export async function submitContactForm(formData: FormData) {
     return {
       success: true,
       messageId: data?.id,
+      leadId: lead?.id,
     }
   } catch (error) {
     console.error('Error processing contact form:', error)

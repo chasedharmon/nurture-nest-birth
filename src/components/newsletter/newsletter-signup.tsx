@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { trackEvent, EVENTS } from '@/lib/analytics'
+import { subscribeToNewsletter } from '@/app/actions/newsletter'
 
 /**
  * Newsletter Signup Component
@@ -48,16 +49,22 @@ export function NewsletterSignup({
     trackEvent(EVENTS.NEWSLETTER_SIGNUP, { email_domain: email.split('@')[1] })
 
     try {
-      // TODO: Integrate with email service (Mailchimp, ConvertKit, etc.)
-      // For now, simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Subscribe to newsletter (saves to Supabase)
+      const result = await subscribeToNewsletter(email)
 
-      // Simulate success
-      setStatus('success')
-      setEmail('')
-      trackEvent(EVENTS.NEWSLETTER_SUCCESS, {
-        email_domain: email.split('@')[1],
-      })
+      if (result.success) {
+        setStatus('success')
+        setEmail('')
+        trackEvent(EVENTS.NEWSLETTER_SUCCESS, {
+          email_domain: email.split('@')[1],
+        })
+      } else {
+        setStatus('error')
+        setErrorMessage(result.error || 'Failed to subscribe')
+        trackEvent(EVENTS.NEWSLETTER_ERROR, {
+          error: result.error || 'Unknown error',
+        })
+      }
     } catch (error) {
       setStatus('error')
       setErrorMessage(
