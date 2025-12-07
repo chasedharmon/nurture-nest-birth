@@ -3,7 +3,12 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
+import { ReadingTimeBadge } from '@/components/blog/reading-time-badge'
+import { SocialShare } from '@/components/blog/social-share'
+import { RelatedPosts } from '@/components/blog/related-posts'
 import { JSONLDScript, getArticleSchema } from '@/lib/schema'
+import { siteConfig } from '@/config/site'
+import { getRelatedPosts } from '@/lib/blog/posts'
 
 export const metadata: Metadata = {
   title: 'What Does a Doula Do? Complete Guide to Doula Support | Kearney, NE',
@@ -21,6 +26,8 @@ export default function WhatDoesDoulaDoPost() {
     datePublished: '2025-12-06',
     slug: 'what-does-a-doula-do',
   })
+
+  const relatedPosts = getRelatedPosts('what-does-a-doula-do')
 
   return (
     <article className="bg-background">
@@ -55,7 +62,7 @@ export default function WhatDoesDoulaDoPost() {
                 Birth Support
               </span>
               <time>December 6, 2025</time>
-              <span>8 min read</span>
+              <ReadingTimeBadge minutes={8} />
             </div>
           </FadeIn>
           <FadeIn delay={0.2}>
@@ -341,6 +348,18 @@ export default function WhatDoesDoulaDoPost() {
         </div>
       </div>
 
+      {/* Social Share */}
+      <div className="border-y border-border bg-muted/30 px-6 py-8 lg:px-8">
+        <div className="mx-auto max-w-3xl">
+          <SocialShare
+            title="What Does a Doula Actually Do? A Complete Guide"
+            url={`${siteConfig.url.canonical}/blog/what-does-a-doula-do`}
+            description="Learn about doula support during pregnancy, labor, birth, and postpartum."
+            className="justify-center"
+          />
+        </div>
+      </div>
+
       {/* CTA */}
       <section className="bg-primary/5 px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
@@ -367,6 +386,9 @@ export default function WhatDoesDoulaDoPost() {
           </FadeIn>
         </div>
       </section>
+
+      {/* Related Posts */}
+      <RelatedPosts posts={relatedPosts} currentSlug="what-does-a-doula-do" />
     </article>
   )
 }
