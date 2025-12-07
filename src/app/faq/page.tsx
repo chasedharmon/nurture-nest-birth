@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { FadeIn } from '@/components/ui/fade-in'
 
 export const metadata: Metadata = {
   title: 'FAQ | Nurture Nest Birth | Common Doula Questions',
@@ -85,17 +86,23 @@ export default function FAQPage() {
       {/* Hero Section */}
       <section className="px-6 py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Frequently Asked Questions
-          </div>
-          <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Your Questions Answered
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground">
-            Everything you need to know about doula support, birth services, and
-            working together.
-          </p>
+          <FadeIn>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Frequently Asked Questions
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              Your Questions Answered
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <p className="mt-6 text-xl text-muted-foreground">
+              Everything you need to know about doula support, birth services,
+              and working together.
+            </p>
+          </FadeIn>
         </div>
       </section>
 
@@ -104,23 +111,24 @@ export default function FAQPage() {
         <div className="mx-auto max-w-3xl">
           <Accordion type="single" collapsible className="space-y-6">
             {faqs.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className="group overflow-hidden rounded-2xl border-2 border-border bg-card shadow-sm transition-all hover:shadow-md data-[state=open]:border-primary/40 data-[state=open]:shadow-lg data-[state=open]:shadow-primary/10"
-              >
-                <AccordionTrigger className="px-6 py-5 text-left font-serif text-lg font-semibold text-foreground transition-colors hover:bg-primary/5 hover:no-underline [&[data-state=open]]:bg-primary/5 [&[data-state=open]]:text-primary">
-                  <span className="flex items-start gap-4">
-                    <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary transition-colors group-data-[state=open]:bg-primary group-data-[state=open]:text-primary-foreground">
-                      {index + 1}
+              <FadeIn key={index} delay={index * 0.05}>
+                <AccordionItem
+                  value={`item-${index}`}
+                  className="group overflow-hidden rounded-2xl border-2 border-border bg-card shadow-sm transition-all hover:shadow-md data-[state=open]:border-primary/40 data-[state=open]:shadow-lg data-[state=open]:shadow-primary/10"
+                >
+                  <AccordionTrigger className="px-6 py-5 text-left font-serif text-lg font-semibold text-foreground transition-colors hover:bg-primary/5 hover:no-underline [&[data-state=open]]:bg-primary/5 [&[data-state=open]]:text-primary">
+                    <span className="flex items-start gap-4">
+                      <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary transition-colors group-data-[state=open]:bg-primary group-data-[state=open]:text-primary-foreground">
+                        {index + 1}
+                      </span>
+                      <span className="flex-1">{faq.question}</span>
                     </span>
-                    <span className="flex-1">{faq.question}</span>
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 pb-6 pl-[4.5rem] text-base leading-relaxed text-muted-foreground">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-6 pl-[4.5rem] text-base leading-relaxed text-muted-foreground">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              </FadeIn>
             ))}
           </Accordion>
         </div>
@@ -129,21 +137,27 @@ export default function FAQPage() {
       {/* Still Have Questions CTA */}
       <section className="bg-primary/5 px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            Still Have Questions?
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            I&apos;m here to help! Let&apos;s schedule a free consultation to
-            discuss your specific situation.
-          </p>
-          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/contact">Get in Touch</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/about">Learn More About Me</Link>
-            </Button>
-          </div>
+          <FadeIn direction="down">
+            <h2 className="font-serif text-3xl font-bold text-foreground">
+              Still Have Questions?
+            </h2>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <p className="mt-4 text-lg text-muted-foreground">
+              I&apos;m here to help! Let&apos;s schedule a free consultation to
+              discuss your specific situation.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+              <Button asChild size="lg">
+                <Link href="/contact">Get in Touch</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/about">Learn More About Me</Link>
+              </Button>
+            </div>
+          </FadeIn>
         </div>
       </section>
     </div>

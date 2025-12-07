@@ -2,6 +2,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { FadeIn } from '@/components/ui/fade-in'
 
 export const metadata: Metadata = {
   title: 'How Much Does a Doula Cost in Nebraska? (2025 Pricing Guide)',
@@ -16,35 +17,41 @@ export default function DoulaCostPost() {
     <article className="bg-background">
       <header className="px-6 py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-3xl">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-          >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <FadeIn>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Back to Blog
-          </Link>
-          <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
-              Planning
-            </span>
-            <time>December 5, 2025</time>
-            <span>7 min read</span>
-          </div>
-          <h1 className="mt-6 font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            How Much Does a Doula Cost? (And Is It Worth It?)
-          </h1>
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              Back to Blog
+            </Link>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              <span className="rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
+                Planning
+              </span>
+              <time>December 5, 2025</time>
+              <span>7 min read</span>
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <h1 className="mt-6 font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              How Much Does a Doula Cost? (And Is It Worth It?)
+            </h1>
+          </FadeIn>
         </div>
       </header>
 
@@ -245,18 +252,24 @@ export default function DoulaCostPost() {
 
       <section className="bg-primary/5 px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            Ready to Chat About Pricing?
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            I offer flexible packages and payment plans for families in Kearney
-            and central Nebraska.
-          </p>
-          <div className="mt-8">
-            <Button asChild size="lg">
-              <Link href="/contact">Get in Touch</Link>
-            </Button>
-          </div>
+          <FadeIn direction="down">
+            <h2 className="font-serif text-3xl font-bold text-foreground">
+              Ready to Chat About Pricing?
+            </h2>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <p className="mt-4 text-lg text-muted-foreground">
+              I offer flexible packages and payment plans for families in
+              Kearney and central Nebraska.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <div className="mt-8">
+              <Button asChild size="lg">
+                <Link href="/contact">Get in Touch</Link>
+              </Button>
+            </div>
+          </FadeIn>
         </div>
       </section>
     </article>

@@ -2,6 +2,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { FadeIn } from '@/components/ui/fade-in'
 
 export const metadata: Metadata = {
   title: 'What Does a Doula Do? Complete Guide to Doula Support | Kearney, NE',
@@ -17,40 +18,49 @@ export default function WhatDoesDoulaDoPost() {
       {/* Header */}
       <header className="px-6 py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-3xl">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-          >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <FadeIn>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Back to Blog
-          </Link>
-          <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
-              Birth Support
-            </span>
-            <time>December 6, 2025</time>
-            <span>8 min read</span>
-          </div>
-          <h1 className="mt-6 font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            What Does a Doula Actually Do? A Complete Guide
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground">
-            If you're pregnant and researching your options, you've probably
-            heard the word "doula" thrown around. But what does a doula actually
-            do? And how is it different from a midwife, doctor, or nurse?
-          </p>
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              Back to Blog
+            </Link>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              <span className="rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
+                Birth Support
+              </span>
+              <time>December 6, 2025</time>
+              <span>8 min read</span>
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <h1 className="mt-6 font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              What Does a Doula Actually Do? A Complete Guide
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.3}>
+            <p className="mt-6 text-xl text-muted-foreground">
+              If you're pregnant and researching your options, you've probably
+              heard the word "doula" thrown around. But what does a doula
+              actually do? And how is it different from a midwife, doctor, or
+              nurse?
+            </p>
+          </FadeIn>
         </div>
       </header>
 
@@ -324,21 +334,27 @@ export default function WhatDoesDoulaDoPost() {
       {/* CTA */}
       <section className="bg-primary/5 px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            Interested in Doula Support in Kearney, NE?
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            I'd love to chat about how I can support your birth and postpartum
-            journey.
-          </p>
-          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/contact">Schedule a Free Consultation</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/services">View My Services</Link>
-            </Button>
-          </div>
+          <FadeIn direction="down">
+            <h2 className="font-serif text-3xl font-bold text-foreground">
+              Interested in Doula Support in Kearney, NE?
+            </h2>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <p className="mt-4 text-lg text-muted-foreground">
+              I'd love to chat about how I can support your birth and postpartum
+              journey.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+              <Button asChild size="lg">
+                <Link href="/contact">Schedule a Free Consultation</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/services">View My Services</Link>
+              </Button>
+            </div>
+          </FadeIn>
         </div>
       </section>
     </article>

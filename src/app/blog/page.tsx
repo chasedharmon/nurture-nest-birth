@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { FadeIn } from '@/components/ui/fade-in'
 
 export const metadata: Metadata = {
   title: 'Blog | Nurture Nest Birth | Doula Resources & Birth Tips',
@@ -46,17 +47,23 @@ export default function BlogPage() {
       {/* Hero */}
       <section className="px-6 py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Blog
-          </div>
-          <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Birth, Postpartum & Doula Resources
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground">
-            Evidence-based guidance and real talk about pregnancy, birth, and
-            the fourth trimester.
-          </p>
+          <FadeIn>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Blog
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              Birth, Postpartum & Doula Resources
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <p className="mt-6 text-xl text-muted-foreground">
+              Evidence-based guidance and real talk about pregnancy, birth, and
+              the fourth trimester.
+            </p>
+          </FadeIn>
         </div>
       </section>
 
@@ -64,32 +71,34 @@ export default function BlogPage() {
       <section className="px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {blogPosts.map(post => (
-              <Link key={post.slug} href={`/blog/${post.slug}`}>
-                <Card className="group h-full transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
-                  <CardHeader>
-                    <div className="mb-3 flex items-center justify-between text-sm">
-                      <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                        {post.category}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {post.readTime}
-                      </span>
-                    </div>
-                    <h2 className="font-serif text-xl font-bold text-foreground group-hover:text-primary">
-                      {post.title}
-                    </h2>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      {post.excerpt}
-                    </p>
-                    <div className="mt-4 flex items-center text-sm text-muted-foreground">
-                      <time>{post.date}</time>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+            {blogPosts.map((post, i) => (
+              <FadeIn key={post.slug} delay={i * 0.1}>
+                <Link href={`/blog/${post.slug}`}>
+                  <Card className="group h-full transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+                    <CardHeader>
+                      <div className="mb-3 flex items-center justify-between text-sm">
+                        <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                          {post.category}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {post.readTime}
+                        </span>
+                      </div>
+                      <h2 className="font-serif text-xl font-bold text-foreground group-hover:text-primary">
+                        {post.title}
+                      </h2>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm leading-relaxed text-muted-foreground">
+                        {post.excerpt}
+                      </p>
+                      <div className="mt-4 flex items-center text-sm text-muted-foreground">
+                        <time>{post.date}</time>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </FadeIn>
             ))}
           </div>
         </div>
