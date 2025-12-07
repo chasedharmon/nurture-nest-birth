@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, Lora } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { Header } from '@/components/layout/header'
@@ -26,6 +26,14 @@ const lora = Lora({
   preload: true,
   fallback: ['Georgia', 'serif'],
 })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover', // Support for notched devices
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://nurturenestbirth.com'),

@@ -168,4 +168,49 @@
     z-index: 9999;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
+
+  /* Mobile optimizations */
+  @supports (-webkit-touch-callout: none) {
+    /* Optimize tap highlight color for better touch feedback */
+    * {
+      -webkit-tap-highlight-color: oklch(0.62 0.045 125 / 0.1);
+    }
+
+    /* Support safe area insets for notched devices (iPhone X+) */
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-right: env(safe-area-inset-right);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+    }
+
+    /* Improve text selection on iOS */
+    * {
+      -webkit-touch-callout: default;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    /* Disable text selection for UI elements */
+    button,
+    a,
+    [role='button'] {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  }
+
+  /* Ensure smooth scrolling on all devices */
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Optimize focus visibility for touch and keyboard */
+  :focus-visible {
+    outline: 2px solid oklch(0.62 0.045 125);
+    outline-offset: 2px;
+  }
 }
