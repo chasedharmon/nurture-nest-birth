@@ -10,6 +10,7 @@ import {
 import { format } from 'date-fns'
 import Link from 'next/link'
 import type { ClientDocument } from '@/lib/supabase/types'
+import { ClientDocumentUpload } from '@/components/client/document-upload'
 
 const documentTypeLabels = {
   contract: 'Contract',
@@ -84,11 +85,14 @@ export default async function ClientDocumentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Your Documents</h1>
-        <p className="text-muted-foreground mt-2">
-          Access all your files, contracts, and resources
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Your Documents</h1>
+          <p className="text-muted-foreground mt-2">
+            Access all your files, contracts, and resources
+          </p>
+        </div>
+        <ClientDocumentUpload />
       </div>
 
       {documents.length === 0 ? (
