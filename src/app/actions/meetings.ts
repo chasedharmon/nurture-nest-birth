@@ -7,6 +7,7 @@ import type {
   MeetingInsert,
   MeetingStatus,
 } from '@/lib/supabase/types'
+import { sendMeetingScheduledEmail } from './notifications'
 
 export async function getClientMeetings(clientId: string) {
   const supabase = await createClient()
@@ -92,6 +93,11 @@ export async function scheduleMeeting(
     console.error('Error scheduling meeting:', error)
     return { success: false, error: error.message }
   }
+
+  // Send notification email (don't block on failure)
+  sendMeetingScheduledEmail(data.id).catch(err => {
+    console.error('[Meetings] Failed to send meeting notification:', err)
+  })
 
   revalidatePath(`/admin/leads/${clientId}`)
   revalidatePath('/admin')

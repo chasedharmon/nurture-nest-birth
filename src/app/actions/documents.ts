@@ -7,6 +7,7 @@ import type {
   ClientDocumentInsert,
   DocumentType,
 } from '@/lib/supabase/types'
+import { sendDocumentSharedEmail } from './notifications'
 
 export async function getClientDocuments(clientId: string) {
   const supabase = await createClient()
@@ -111,6 +112,13 @@ export async function addDocument(
     return { success: false, error: error.message }
   }
 
+  // Send notification email if document is visible to client
+  if (document.is_visible_to_client !== false) {
+    sendDocumentSharedEmail(data.id, clientId).catch(err => {
+      console.error('[Documents] Failed to send document notification:', err)
+    })
+  }
+
   revalidatePath(`/admin/leads/${clientId}`)
   revalidatePath('/admin')
 
@@ -184,9 +192,11 @@ export async function toggleDocumentVisibility(documentId: string) {
     return { success: false, error: 'Document not found' }
   }
 
+  const newVisibility = !document.is_visible_to_client
+
   const { error } = await supabase
     .from('client_documents')
-    .update({ is_visible_to_client: !document.is_visible_to_client })
+    .update({ is_visible_to_client: newVisibility })
     .eq('id', documentId)
 
   if (error) {
@@ -194,10 +204,17 @@ export async function toggleDocumentVisibility(documentId: string) {
     return { success: false, error: error.message }
   }
 
+  // Send notification if now visible to client
+  if (newVisibility && document.client_id) {
+    sendDocumentSharedEmail(documentId, document.client_id).catch(err => {
+      console.error('[Documents] Failed to send document notification:', err)
+    })
+  }
+
   revalidatePath(`/admin/leads/${document.client_id}`)
   revalidatePath('/admin')
 
-  return { success: true, isVisible: !document.is_visible_to_client }
+  return { success: true, isVisible: newVisibility }
 }
 
 export async function deleteDocument(documentId: string) {

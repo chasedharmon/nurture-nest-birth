@@ -7,6 +7,7 @@ import type {
   PaymentInsert,
   PaymentStatusType,
 } from '@/lib/supabase/types'
+import { sendPaymentReceivedEmail } from './notifications'
 
 export async function getClientPayments(clientId: string) {
   const supabase = await createClient()
@@ -88,6 +89,13 @@ export async function addPayment(
     return { success: false, error: error.message }
   }
 
+  // Send notification email for completed payments
+  if (payment.status === 'completed') {
+    sendPaymentReceivedEmail(data.id).catch(err => {
+      console.error('[Payments] Failed to send payment notification:', err)
+    })
+  }
+
   revalidatePath(`/admin/leads/${clientId}`)
   revalidatePath('/admin')
 
@@ -166,6 +174,13 @@ export async function updatePaymentStatus(
   if (error) {
     console.error('Error updating payment status:', error)
     return { success: false, error: error.message }
+  }
+
+  // Send notification email when status is updated to completed
+  if (status === 'completed') {
+    sendPaymentReceivedEmail(paymentId).catch(err => {
+      console.error('[Payments] Failed to send payment notification:', err)
+    })
   }
 
   if (payment?.client_id) {
