@@ -3,6 +3,7 @@ import { Inter, Lora } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import { SkipToContent } from '@/components/ui/skip-to-content'
 import {
   JSONLDScript,
   getOrganizationSchema,
@@ -106,8 +107,11 @@ export default function RootLayout({
         <JSONLDScript data={getLocalBusinessSchema()} />
       </head>
       <body className={`${inter.variable} ${lora.variable} antialiased`}>
+        <SkipToContent />
         <Header />
-        <main className="min-h-screen">{children}</main>
+        <main id="main-content" className="min-h-screen">
+          {children}
+        </main>
         <Footer />
         <Analytics />
       </body>

@@ -58,9 +58,15 @@ export function ContactForm() {
         </p>
       </CardHeader>
       <CardContent>
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form
+          className="space-y-6"
+          onSubmit={handleSubmit}
+          aria-label="Contact form"
+        >
           {message && (
             <div
+              role="alert"
+              aria-live="polite"
               className={`rounded-md p-4 ${
                 message.type === 'success'
                   ? 'bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300'
@@ -80,6 +86,7 @@ export function ContactForm() {
               placeholder="Your full name"
               required
               disabled={isSubmitting}
+              aria-required="true"
             />
           </div>
 
@@ -92,7 +99,12 @@ export function ContactForm() {
               placeholder="you@example.com"
               required
               disabled={isSubmitting}
+              aria-required="true"
+              aria-describedby="email-description"
             />
+            <span id="email-description" className="sr-only">
+              We&apos;ll use this email to respond to your inquiry
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -138,6 +150,7 @@ export function ContactForm() {
               rows={5}
               required
               disabled={isSubmitting}
+              aria-required="true"
             />
           </div>
 
@@ -146,6 +159,7 @@ export function ContactForm() {
             size="lg"
             className="w-full"
             disabled={isSubmitting}
+            aria-busy={isSubmitting}
           >
             {isSubmitting ? 'Sending...' : 'Send Message'}
           </Button>

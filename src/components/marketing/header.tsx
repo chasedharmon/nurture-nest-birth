@@ -6,17 +6,22 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav
+        aria-label="Main navigation"
         className={`mx-auto flex h-16 max-w-7xl items-center justify-between ${spacing.container}`}
       >
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <span className={`${typography.h4} font-bold`}>
+        <Link
+          href="/"
+          className="flex items-center gap-2"
+          aria-label="Nurture Nest Birth home"
+        >
+          <span className={`${typography.h4} font-bold`} aria-hidden="true">
             Nurture Nest Birth
           </span>
         </Link>
 
         {/* Navigation Links */}
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-8 md:flex" role="list">
           <Link
             href="/about"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -56,12 +61,17 @@ export function Header() {
           </Button>
 
           {/* Mobile Menu Button - Placeholder for future */}
-          <button className="md:hidden" aria-label="Menu">
+          <button
+            className="md:hidden"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+          >
             <svg
               className="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
