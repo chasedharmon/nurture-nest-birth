@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
 import { siteConfig } from '@/config/site'
-import { spacing, maxWidth, typography, badge } from '@/lib/design-system'
+import { spacing, maxWidth, typography, badge, grid } from '@/lib/design-system'
 
 /**
  * Homepage Hero Component
@@ -19,30 +19,16 @@ import { spacing, maxWidth, typography, badge } from '@/lib/design-system'
 export function Hero() {
   return (
     <section
-      className={`relative overflow-hidden ${spacing.container} ${spacing.section.lg}`}
+      className={`relative overflow-hidden bg-background ${spacing.container} ${spacing.section.lg}`}
     >
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/images/hero-newborn.jpg"
-          alt="Nurturing doula support"
-          fill
-          className="object-cover opacity-[0.08]"
-          priority
-          quality={85}
-        />
-        {/* Gradient overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/90" />
-      </div>
-
       {/* Subtle organic accent shapes */}
-      <div className="absolute -right-32 -top-32 z-0 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute -bottom-32 -left-32 z-0 h-96 w-96 rounded-full bg-secondary/5 blur-3xl" />
+      <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+      <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-secondary/5 blur-3xl" />
 
-      <div className={`relative z-10 mx-auto ${maxWidth.layout}`}>
-        <div className="flex flex-col items-start justify-center">
-          {/* Content - Centered for better readability */}
-          <div className="max-w-3xl">
+      <div className={`relative mx-auto ${maxWidth.layout}`}>
+        <div className={`grid ${grid.gap.loose} lg:grid-cols-2`}>
+          {/* Left Column - Content */}
+          <div className="flex flex-col justify-center">
             {/* Credentials Badge */}
             <FadeIn>
               <div
@@ -148,6 +134,26 @@ export function Hero() {
               </div>
             </FadeIn>
           </div>
+
+          {/* Right Column - Image Placeholder */}
+          <FadeIn delay={0.2} direction="right">
+            <div className="relative hidden lg:block">
+              <div className="absolute -right-6 -top-6 h-full w-full rounded-3xl bg-primary/10" />
+              <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-muted shadow-2xl shadow-primary/10">
+                {/* Placeholder for professional photo */}
+                <Image
+                  src="/images/hero-placeholder.jpg"
+                  alt="Compassionate doula support"
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="50vw"
+                  quality={95}
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
+              </div>
+            </div>
+          </FadeIn>
         </div>
       </div>
     </section>
