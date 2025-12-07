@@ -8,6 +8,11 @@ import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select-native'
 import { Textarea } from '@/components/ui/textarea'
 import { submitContactForm } from '@/app/actions/contact'
+import {
+  trackContactFormSubmit,
+  trackContactFormSuccess,
+  trackContactFormError,
+} from '@/lib/analytics'
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -23,23 +28,42 @@ export function ContactForm() {
 
     const form = event.currentTarget
     const formData = new FormData(form)
+    const service = formData.get('service') as string
+
+    // Track form submission
+    trackContactFormSubmit({ service })
 
     try {
       const result = await submitContactForm(formData)
 
       if (result.success) {
+        // Track success
+        trackContactFormSuccess({ service })
+
         setMessage({
           type: 'success',
           text: 'Thank you for your message! I will respond within 24 hours.',
         })
         form.reset()
       } else {
+        // Track error
+        trackContactFormError({
+          error: result.error || 'Unknown error',
+          service,
+        })
+
         setMessage({
           type: 'error',
           text: result.error || 'Something went wrong. Please try again.',
         })
       }
-    } catch {
+    } catch (error) {
+      // Track error
+      trackContactFormError({
+        error: error instanceof Error ? error.message : 'Network error',
+        service,
+      })
+
       setMessage({
         type: 'error',
         text: 'Failed to send message. Please try again or email directly.',

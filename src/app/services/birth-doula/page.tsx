@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
+import { PageViewTracker } from '@/components/analytics/page-view-tracker'
 import { spacing, maxWidth, typography, grid } from '@/lib/design-system'
 import { JSONLDScript, getServiceSchema } from '@/lib/schema'
+import { EVENTS } from '@/lib/analytics'
 
 export const metadata: Metadata = {
   title: 'Birth Doula Support | Comprehensive Labor & Delivery Care',
@@ -27,6 +29,10 @@ export default function BirthDoulaPage() {
   return (
     <div className="bg-background">
       <JSONLDScript data={serviceSchema} />
+      <PageViewTracker
+        eventName={EVENTS.SERVICE_PAGE_VIEW}
+        properties={{ service: 'birth-doula', title: 'Birth Doula Support' }}
+      />
       {/* Hero Section */}
       <section className={`${spacing.container} ${spacing.section.lg}`}>
         <div className={`mx-auto ${maxWidth.content} text-center`}>
