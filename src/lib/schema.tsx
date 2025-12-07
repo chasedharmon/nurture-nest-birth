@@ -160,7 +160,16 @@ export function getFAQSchema(
 /**
  * Component to inject JSON-LD structured data into page head
  */
-export function JSONLDScript<T>({ data }: { data: WithContext<T> }) {
+export function JSONLDScript({
+  data,
+}: {
+  data:
+    | WithContext<Organization>
+    | WithContext<LocalBusiness>
+    | WithContext<Article>
+    | WithContext<Service>
+    | WithContext<FAQPage>
+}) {
   return (
     <script
       type="application/ld+json"
