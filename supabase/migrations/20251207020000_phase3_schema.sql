@@ -24,12 +24,23 @@ UPDATE leads
 SET expected_due_date = due_date
 WHERE expected_due_date IS NULL AND due_date IS NOT NULL;
 
--- Add check constraints
-ALTER TABLE leads
-  ADD CONSTRAINT IF NOT EXISTS client_type_check
-    CHECK (client_type IN ('lead', 'expecting', 'postpartum', 'past_client')),
-  ADD CONSTRAINT IF NOT EXISTS lifecycle_stage_check
-    CHECK (lifecycle_stage IN ('lead', 'consultation_scheduled', 'active_client', 'past_client', 'inactive'));
+-- Add check constraints (drop first if they exist)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'client_type_check'
+  ) THEN
+    ALTER TABLE leads ADD CONSTRAINT client_type_check
+      CHECK (client_type IN ('lead', 'expecting', 'postpartum', 'past_client'));
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'lifecycle_stage_check'
+  ) THEN
+    ALTER TABLE leads ADD CONSTRAINT lifecycle_stage_check
+      CHECK (lifecycle_stage IN ('lead', 'consultation_scheduled', 'active_client', 'past_client', 'inactive'));
+  END IF;
+END $$;
 
 -- Create index for lifecycle_stage for dashboard queries
 CREATE INDEX IF NOT EXISTS idx_leads_lifecycle_stage ON leads(lifecycle_stage);
@@ -369,14 +380,22 @@ ALTER TABLE lead_activities
   ADD COLUMN IF NOT EXISTS is_client_visible BOOLEAN DEFAULT false;
 
 -- Add constraint for activity_category
-ALTER TABLE lead_activities
-  ADD CONSTRAINT IF NOT EXISTS activity_category_check
-    CHECK (activity_category IN ('communication', 'milestone', 'system', 'document', 'payment', 'meeting'));
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'activity_category_check'
+  ) THEN
+    ALTER TABLE lead_activities ADD CONSTRAINT activity_category_check
+      CHECK (activity_category IN ('communication', 'milestone', 'system', 'document', 'payment', 'meeting'));
+  END IF;
 
--- Add constraint for related_record_type
-ALTER TABLE lead_activities
-  ADD CONSTRAINT IF NOT EXISTS related_record_type_check
-    CHECK (related_record_type IS NULL OR related_record_type IN ('service', 'meeting', 'payment', 'document'));
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'related_record_type_check'
+  ) THEN
+    ALTER TABLE lead_activities ADD CONSTRAINT related_record_type_check
+      CHECK (related_record_type IS NULL OR related_record_type IN ('service', 'meeting', 'payment', 'document'));
+  END IF;
+END $$;
 
 -- Create index for pinned activities
 CREATE INDEX IF NOT EXISTS idx_lead_activities_pinned ON lead_activities(is_pinned) WHERE is_pinned = true;
