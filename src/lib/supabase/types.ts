@@ -166,6 +166,8 @@ export interface Meeting {
   cancellation_reason?: string | null
   cancelled_at?: string | null
   completed_at?: string | null
+  reminder_sent_at?: string | null
+  preparation_notes?: string | null
   created_at: string
   updated_at: string
   created_by?: string | null

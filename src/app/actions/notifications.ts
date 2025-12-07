@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { sendEmail, sendTrackedEmail } from '@/lib/email/send'
 import { emailConfig } from '@/lib/email/config'
 import {
@@ -81,7 +81,8 @@ export async function getNotificationLog(clientId: string, limit = 50) {
 // ============================================================================
 
 export async function getNotificationPreferences(clientId: string) {
-  const supabase = await createClient()
+  // Use admin client to bypass RLS for client portal
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('notification_preferences')
@@ -116,7 +117,8 @@ export async function updateNotificationPreferences(
     reminder_hours_before?: number
   }
 ) {
-  const supabase = await createClient()
+  // Use admin client to bypass RLS for client portal
+  const supabase = createAdminClient()
 
   const { error } = await supabase.from('notification_preferences').upsert(
     {
