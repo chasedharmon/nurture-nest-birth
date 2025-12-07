@@ -10,7 +10,7 @@ interface PaymentsListProps {
   clientId: string
 }
 
-const paymentStatusColors = {
+const paymentStatusColors: Record<string, string> = {
   pending:
     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
   completed:
@@ -19,7 +19,7 @@ const paymentStatusColors = {
   refunded: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
 }
 
-const paymentMethodLabels = {
+const paymentMethodLabels: Record<string, string> = {
   stripe: '💳 Stripe',
   check: '✅ Check',
   cash: '💵 Cash',

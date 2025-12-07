@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { verifyMagicLink } from '@/app/actions/client-auth'
 import {
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card'
 import Link from 'next/link'
 
-export default function ClientVerifyPage() {
+function VerifyContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>(
@@ -103,5 +103,31 @@ export default function ClientVerifyPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function ClientVerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">Verifying...</CardTitle>
+              <CardDescription>
+                Please wait while we verify your login link...
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <VerifyContent />
+    </Suspense>
   )
 }
