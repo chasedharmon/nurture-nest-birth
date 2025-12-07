@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 
 export function Hero() {
@@ -96,29 +97,16 @@ export function Hero() {
             <div className="absolute -left-6 -top-6 h-full w-full rounded-3xl bg-primary/10" />
 
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-muted shadow-2xl shadow-primary/10 lg:aspect-[3/4]">
-              {/* Film-inspired gradient placeholder */}
-              <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/15 via-background to-secondary/15">
-                <div className="text-center">
-                  <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
-                    <svg
-                      className="h-12 w-12 text-primary/60"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
-                  <p className="mt-6 text-sm font-medium text-muted-foreground">
-                    Professional photo coming soon
-                  </p>
-                </div>
-              </div>
+              <Image
+                src="/images/hero-placeholder.jpg"
+                alt="Nurturing hands holding newborn baby - doula support"
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              {/* Subtle overlay for warmth */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
             </div>
           </div>
         </div>
