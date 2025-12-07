@@ -1,5 +1,5 @@
 import { getClientSession } from '@/app/actions/client-auth'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { ProfileEditor } from '@/components/client/profile-editor'
 
 export default async function ClientProfilePage() {
@@ -9,8 +9,8 @@ export default async function ClientProfilePage() {
     return null
   }
 
-  // Fetch full client details
-  const supabase = await createClient()
+  // Fetch full client details - use admin client to bypass RLS
+  const supabase = createAdminClient()
   const { data: client } = await supabase
     .from('leads')
     .select('*')
@@ -29,7 +29,7 @@ export default async function ClientProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fdfbf7] via-[#f8f4ec] to-[#f5f0e8]">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <ProfileEditor client={client} />
       </div>
     </div>

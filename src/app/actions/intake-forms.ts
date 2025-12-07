@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getClientSession } from './client-auth'
 import { updateFullProfile } from './client-profile'
 import { revalidatePath } from 'next/cache'
@@ -71,7 +71,8 @@ export interface IntakeFormSubmission {
 // ============================================================================
 
 export async function getIntakeFormTemplates() {
-  const supabase = await createClient()
+  // Use admin client to bypass RLS for template fetching
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('intake_form_templates')
@@ -88,7 +89,8 @@ export async function getIntakeFormTemplates() {
 }
 
 export async function getDefaultIntakeTemplate() {
-  const supabase = await createClient()
+  // Use admin client to bypass RLS for template fetching
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('intake_form_templates')
@@ -143,7 +145,8 @@ export async function submitIntakeForm(
     return { success: false, error: 'Not authenticated' }
   }
 
-  const supabase = await createClient()
+  // Use admin client to bypass RLS for form submission
+  const supabase = createAdminClient()
 
   // Create submission record
   const { data: submission, error: submitError } = await supabase
@@ -189,7 +192,8 @@ export async function saveIntakeDraft(
     return { success: false, error: 'Not authenticated' }
   }
 
-  const supabase = await createClient()
+  // Use admin client to bypass RLS for draft saving
+  const supabase = createAdminClient()
 
   if (existingDraftId) {
     // Update existing draft
@@ -234,7 +238,8 @@ export async function saveIntakeDraft(
 // ============================================================================
 
 export async function getClientIntakeSubmissions(clientId?: string) {
-  const supabase = await createClient()
+  // Use admin client to bypass RLS
+  const supabase = createAdminClient()
 
   // If no clientId, get from session
   let targetClientId = clientId
@@ -268,7 +273,8 @@ export async function getClientIntakeSubmissions(clientId?: string) {
 }
 
 export async function getClientDraft(clientId?: string) {
-  const supabase = await createClient()
+  // Use admin client to bypass RLS
+  const supabase = createAdminClient()
 
   let targetClientId = clientId
   if (!targetClientId) {

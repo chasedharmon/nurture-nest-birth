@@ -738,55 +738,56 @@ export function IntakeForm({
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation */}
-          <div className="px-6 sm:px-8 py-5 bg-[#faf8f5]/50 border-t border-[#e8ddd4] flex justify-between items-center">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleBack}
-              disabled={currentStep === 0}
-              className="text-[#8b7355] hover:text-[#5c4a3d] hover:bg-[#e8ddd4]/50 disabled:opacity-30"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Back
-            </Button>
+          {/* Navigation - hide on welcome step since it has its own button */}
+          {currentStep > 0 && (
+            <div className="px-6 sm:px-8 py-5 bg-[#faf8f5]/50 border-t border-[#e8ddd4] flex justify-between items-center">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleBack}
+                className="text-[#8b7355] hover:text-[#5c4a3d] hover:bg-[#e8ddd4]/50"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Back
+              </Button>
 
-            {currentStep < sections.length - 1 ? (
-              <Button
-                type="button"
-                onClick={handleNext}
-                className="bg-[#8b7355] hover:bg-[#7a6347] text-white px-6 rounded-full"
-              >
-                Continue
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="bg-gradient-to-r from-[#8b7355] to-[#6d5a45] hover:from-[#7a6347] hover:to-[#5c4a3d] text-white px-8 rounded-full shadow-lg"
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center">
-                    <motion.span
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 1 }}
-                      className="mr-2"
-                    >
-                      ✦
-                    </motion.span>
-                    Submitting...
-                  </span>
-                ) : (
-                  <span className="flex items-center">
-                    Submit Form
-                    <Sparkles className="w-4 h-4 ml-2" />
-                  </span>
-                )}
-              </Button>
-            )}
-          </div>
+              {currentStep < sections.length - 1 ? (
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  className="bg-[#8b7355] hover:bg-[#7a6347] text-white px-6 rounded-full"
+                >
+                  Continue
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="bg-gradient-to-r from-[#8b7355] to-[#6d5a45] hover:from-[#7a6347] hover:to-[#5c4a3d] text-white px-8 rounded-full shadow-lg"
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center">
+                      <motion.span
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1 }}
+                        className="mr-2"
+                      >
+                        ✦
+                      </motion.span>
+                      Submitting...
+                    </span>
+                  ) : (
+                    <span className="flex items-center">
+                      Submit Form
+                      <Sparkles className="w-4 h-4 ml-2" />
+                    </span>
+                  )}
+                </Button>
+              )}
+            </div>
+          )}
         </motion.div>
 
         {/* Auto-save indicator */}
@@ -959,7 +960,7 @@ function OptionButtons({
   wrap?: boolean
 }) {
   return (
-    <div className={`flex gap-2 ${wrap ? 'flex-wrap' : ''}`}>
+    <div className={`flex gap-2 justify-center ${wrap ? 'flex-wrap' : ''}`}>
       {options.map(option => (
         <button
           key={option}
@@ -991,7 +992,7 @@ function MultiSelectButtons({
   onChange: (val: string) => void
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 justify-center">
       {options.map(option => {
         const isSelected = values.includes(option)
         return (

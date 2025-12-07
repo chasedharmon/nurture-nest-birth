@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { cookies, headers } from 'next/headers'
 import { randomBytes } from 'crypto'
 import bcrypt from 'bcryptjs'
@@ -41,7 +41,8 @@ export async function verifyPassword(
 async function createSession(
   clientId: string
 ): Promise<{ token: string; expiresAt: Date }> {
-  const supabase = await createClient()
+  // Use admin client to bypass RLS for session creation
+  const supabase = createAdminClient()
   const headersList = await headers()
 
   const token = generateSecureToken()
@@ -99,22 +100,72 @@ async function updateSessionActivity(sessionId: string) {
 export async function signInClient(email: string, password: string) {
   console.log('[Auth] Sign in attempt for:', email)
 
-  const supabase = await createClient()
+  // Use admin client to bypass RLS for auth operations
+  const supabase = createAdminClient()
 
-  // Find the client by email
-  const { data: client, error: clientError } = await supabase
+  // Find the client by email - use limit(1) to handle potential duplicates
+  // Try with password_hash first, fall back to without if column doesn't exist
+  let clients:
+    | {
+        id: string
+        name: string
+        email: string
+        password_hash?: string | null
+      }[]
+    | null = null
+  let clientError: { code: string; message: string } | null = null
+
+  // Try case-insensitive search using ilike
+  const { data: clientsWithHash, error: hashError } = await supabase
     .from('leads')
     .select('id, name, email, password_hash')
-    .eq('email', email.toLowerCase())
-    .single()
+    .ilike('email', email)
+    .limit(1)
+
+  if (hashError?.code === '42703') {
+    // Column doesn't exist, query without it
+    console.log('[Auth] password_hash column not found, using fallback query')
+    const { data: clientsNoHash, error: noHashError } = await supabase
+      .from('leads')
+      .select('id, name, email')
+      .ilike('email', email)
+      .limit(1)
+    console.log('[Auth] Fallback query result:', {
+      count: clientsNoHash?.length,
+      error: noHashError,
+    })
+    clients = clientsNoHash?.map(c => ({ ...c, password_hash: null })) || null
+    clientError = noHashError as typeof clientError
+  } else {
+    console.log('[Auth] Primary query result:', {
+      count: clientsWithHash?.length,
+      error: hashError,
+    })
+    clients = clientsWithHash
+    clientError = hashError as typeof clientError
+  }
+
+  const client = clients?.[0]
 
   if (clientError || !client) {
-    console.error('[Auth] Client lookup error:', clientError)
+    console.error(
+      '[Auth] Client lookup error:',
+      clientError,
+      '| clients found:',
+      clients?.length || 0
+    )
     return {
       success: false,
       error: 'Invalid email or password.',
     }
   }
+
+  console.log(
+    '[Auth] Found client:',
+    client.id,
+    'password_hash exists:',
+    !!client.password_hash
+  )
 
   // Check password
   let isValidPassword = false
@@ -132,7 +183,10 @@ export async function signInClient(email: string, password: string) {
   }
 
   if (!isValidPassword) {
-    console.log('[Auth] Invalid password')
+    console.log(
+      '[Auth] Invalid password - hash present:',
+      !!client.password_hash
+    )
     return {
       success: false,
       error: 'Invalid email or password.',
@@ -348,7 +402,8 @@ export async function getClientSession() {
     return null
   }
 
-  const supabase = await createClient()
+  // Use admin client to bypass RLS for session validation
+  const supabase = createAdminClient()
 
   // Validate session in database
   const { data: session, error: sessionError } = await supabase
@@ -358,18 +413,15 @@ export async function getClientSession() {
     .single()
 
   if (sessionError || !session) {
-    // Invalid session - clear cookie
-    const cookieStoreForDelete = await cookies()
-    cookieStoreForDelete.delete(CLIENT_COOKIE_NAME)
+    // Invalid session - just return null
+    // Cookie modification not allowed from Server Components
     return null
   }
 
   // Check if session is expired
   if (new Date(session.expires_at) < new Date()) {
-    // Expired - clean up
+    // Expired - clean up database record (cookie will be ignored)
     await invalidateSession(sessionToken)
-    const cookieStoreForDelete = await cookies()
-    cookieStoreForDelete.delete(CLIENT_COOKIE_NAME)
     return null
   }
 
