@@ -8,5 +8,7 @@ export {
   getAllPosts,
   getPostBySlug,
   getRelatedPosts,
+  getAllCategories,
+  getPostsByCategory,
   type BlogPost,
 } from './posts'

@@ -46,6 +46,26 @@ export const blogPosts: BlogPost[] = [
     publishedDate: '2025-12-06',
     author: 'Nurture Nest Birth',
   },
+  {
+    title: "Sarah's Home Birth Story: A Journey of Strength and Support",
+    slug: 'sarah-home-birth-story',
+    excerpt:
+      'A first-time mom shares her empowering home birth experience with continuous doula support.',
+    category: 'Birth Stories',
+    readingTime: 10,
+    publishedDate: '2025-12-05',
+    author: 'Nurture Nest Birth',
+  },
+  {
+    title: "From Hospital to Home: Emma's VBAC Success Story",
+    slug: 'emma-vbac-story',
+    excerpt:
+      'After a cesarean with her first baby, Emma achieved her dream of a vaginal birth with doula support.',
+    category: 'Birth Stories',
+    readingTime: 12,
+    publishedDate: '2025-12-04',
+    author: 'Nurture Nest Birth',
+  },
 ]
 
 /**
@@ -67,4 +87,19 @@ export function getPostBySlug(slug: string): BlogPost | undefined {
  */
 export function getRelatedPosts(currentSlug: string, limit = 3): BlogPost[] {
   return blogPosts.filter(post => post.slug !== currentSlug).slice(0, limit)
+}
+
+/**
+ * Get all unique categories
+ */
+export function getAllCategories(): string[] {
+  const categories = blogPosts.map(post => post.category)
+  return Array.from(new Set(categories)).sort()
+}
+
+/**
+ * Get posts by category
+ */
+export function getPostsByCategory(category: string): BlogPost[] {
+  return blogPosts.filter(post => post.category === category)
 }
