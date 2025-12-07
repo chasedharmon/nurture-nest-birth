@@ -1,14 +1,16 @@
+/* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { FadeIn } from '@/components/ui/fade-in'
 
 export const metadata: Metadata = {
-  title: 'Birth Doula Support | Nurture Nest Birth | Kearney, NE',
+  title: 'Birth Doula Support | Comprehensive Labor & Delivery Care',
   description:
-    'Professional birth doula services in Kearney, Nebraska. Continuous labor support, comfort measures, and advocacy for your birth preferences. DONA certified.',
+    'DONA-certified birth doula in Kearney, NE. Continuous labor support, prenatal planning, and postpartum follow-up. Supporting all birth settings and preferences.',
   keywords:
-    'birth doula Kearney NE, labor support, doula services Nebraska, DONA certified doula',
+    'birth doula Kearney, labor support, doula services Nebraska, hospital birth support, home birth doula',
 }
 
 export default function BirthDoulaPage() {
@@ -16,94 +18,68 @@ export default function BirthDoulaPage() {
     <div className="bg-background">
       {/* Hero Section */}
       <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl">
-          <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Birth Doula Support
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground">
-            Continuous, compassionate support during one of life&apos;s most
-            transformative experiences.
-          </p>
+        <div className="mx-auto max-w-4xl text-center">
+          <FadeIn>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Birth Doula Support
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              Continuous Support for Your Birth Journey
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <p className="mt-6 text-xl text-muted-foreground">
+              From active labor through the first hours with your baby, I'll be
+              by your side with physical comfort, emotional encouragement, and
+              evidence-based guidance.
+            </p>
+          </FadeIn>
         </div>
       </section>
 
       {/* What's Included */}
       <section className="bg-card px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            What&apos;s Included
-          </h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Prenatal Visits
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Two prenatal meetings to discuss your birth preferences,
-                  comfort measures, and answer questions.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Continuous Labor Support
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  I&apos;ll be by your side from active labor through the first
-                  hours postpartum.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Comfort Techniques
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Evidence-based pain relief methods including positioning,
-                  breathing, and massage.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Partner Support
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  I support your partner too, offering guidance and breaks when
-                  needed.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Postpartum Visit
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  One postpartum visit to process your birth experience and
-                  support early recovery.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  24/7 Availability
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  On-call support from 38 weeks until your baby arrives.
-                </p>
-              </CardContent>
-            </Card>
+          <FadeIn>
+            <h2 className="text-center font-serif text-3xl font-bold text-foreground">
+              What&apos;s Included
+            </h2>
+          </FadeIn>
+          <div className="mt-12 grid gap-8 md:grid-cols-2">
+            {[
+              {
+                title: '2 Prenatal Visits',
+                desc: "We'll get to know each other, discuss your birth preferences, practice comfort techniques, and create your birth plan.",
+              },
+              {
+                title: '24/7 On-Call from 38 Weeks',
+                desc: "Text or call anytime—whether it's early labor questions or 'is this it?' moments.",
+              },
+              {
+                title: 'Continuous Labor Support',
+                desc: 'I join you in active labor and stay through birth. Physical comfort measures, position changes, and emotional encouragement.',
+              },
+              {
+                title: '1 Postpartum Visit',
+                desc: "Within 1-2 weeks after birth, I'll process your birth story, answer questions, and check on your recovery.",
+              },
+            ].map((item, i) => (
+              <FadeIn key={i} delay={i * 0.1}>
+                <Card className="h-full border-2">
+                  <CardContent className="pt-6">
+                    <h3 className="font-serif text-xl font-semibold text-foreground">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                      {item.desc}
+                    </p>
+                  </CardContent>
+                </Card>
+              </FadeIn>
+            ))}
           </div>
         </div>
       </section>
