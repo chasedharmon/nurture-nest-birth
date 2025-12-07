@@ -1,7 +1,9 @@
+/* eslint-disable react/no-unescaped-entities */
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { FadeIn } from '@/components/ui/fade-in'
 
 export const metadata: Metadata = {
   title: 'Postpartum Doula Care | Nurture Nest Birth | Kearney, NE',
@@ -16,94 +18,75 @@ export default function PostpartumCarePage() {
     <div className="bg-background">
       {/* Hero Section */}
       <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl">
-          <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Postpartum Care
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground">
-            Nurturing support during the fourth trimester as your family adjusts
-            to life with your new baby.
-          </p>
+        <div className="mx-auto max-w-4xl text-center">
+          <FadeIn>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Postpartum Doula Care
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              Support for the Fourth Trimester
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <p className="mt-6 text-xl text-muted-foreground">
+              Nurturing support during the fourth trimester as your family
+              adjusts to life with your new baby.
+            </p>
+          </FadeIn>
         </div>
       </section>
 
       {/* What's Included */}
       <section className="bg-card px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            How I Support You
-          </h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Newborn Care Education
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Learn bathing, diapering, swaddling, and understanding your
-                  baby&apos;s cues.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Feeding Support
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Breastfeeding assistance, bottle feeding guidance, and
-                  combination feeding strategies.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Emotional Support
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  A listening ear as you process your birth and adjust to
-                  parenthood.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Light Household Help
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Meal prep, laundry, and tidying so you can focus on recovery
-                  and bonding.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Sibling Support
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Help older children adjust and bond with their new sibling.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground">
-                  Flexible Scheduling
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Daytime, overnight, or weekend visits based on your
-                  family&apos;s needs.
-                </p>
-              </CardContent>
-            </Card>
+          <FadeIn direction="down">
+            <h2 className="text-center font-serif text-3xl font-bold text-foreground">
+              How I Support You
+            </h2>
+          </FadeIn>
+          <div className="mt-12 grid gap-8 md:grid-cols-2">
+            {[
+              {
+                title: 'Newborn Care Education',
+                desc: "Learn bathing, diapering, swaddling, and understanding your baby's cues.",
+              },
+              {
+                title: 'Feeding Support',
+                desc: 'Breastfeeding assistance, bottle feeding guidance, and combination feeding strategies.',
+              },
+              {
+                title: 'Emotional Support',
+                desc: 'A listening ear as you process your birth and adjust to parenthood.',
+              },
+              {
+                title: 'Light Household Help',
+                desc: 'Meal prep, laundry, and tidying so you can focus on recovery and bonding.',
+              },
+              {
+                title: 'Sibling Support',
+                desc: 'Help older children adjust and bond with their new sibling.',
+              },
+              {
+                title: 'Flexible Scheduling',
+                desc: "Daytime, overnight, or weekend visits based on your family's needs.",
+              },
+            ].map((item, i) => (
+              <FadeIn key={i} delay={i * 0.1}>
+                <Card className="h-full border-2">
+                  <CardContent className="pt-6">
+                    <h3 className="font-serif text-xl font-semibold text-foreground">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                      {item.desc}
+                    </p>
+                  </CardContent>
+                </Card>
+              </FadeIn>
+            ))}
           </div>
         </div>
       </section>
@@ -111,29 +94,38 @@ export default function PostpartumCarePage() {
       {/* The Fourth Trimester */}
       <section className="px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            The Fourth Trimester
-          </h2>
+          <FadeIn>
+            <h2 className="font-serif text-3xl font-bold text-foreground">
+              The Fourth Trimester
+            </h2>
+          </FadeIn>
           <div className="mt-8 space-y-6 text-muted-foreground">
-            <p>
-              The weeks and months after birth are a time of profound adjustment
-              for the entire family. Your body is healing, your baby is learning
-              to be earthside, and you&apos;re navigating new rhythms together.
-            </p>
-            <p>
-              As your postpartum doula, I provide non-judgmental support while
-              you find your unique parenting style. Whether this is your first
-              baby or your fifth, every postpartum experience is different, and
-              you deserve knowledgeable, compassionate care.
-            </p>
-            <p>I can help you:</p>
-            <ul className="list-disc space-y-2 pl-6">
-              <li>Establish feeding routines that work for your family</li>
-              <li>Understand newborn sleep patterns</li>
-              <li>Recognize signs of postpartum mood changes</li>
-              <li>Process your birth experience</li>
-              <li>Care for yourself while caring for baby</li>
-            </ul>
+            <FadeIn delay={0.1}>
+              <p>
+                The weeks and months after birth are a time of profound
+                adjustment for the entire family. Your body is healing, your
+                baby is learning to be earthside, and you're navigating new
+                rhythms together.
+              </p>
+            </FadeIn>
+            <FadeIn delay={0.2}>
+              <p>
+                As your postpartum doula, I provide non-judgmental support while
+                you find your unique parenting style. Whether this is your first
+                baby or your fifth, every postpartum experience is different,
+                and you deserve knowledgeable, compassionate care.
+              </p>
+            </FadeIn>
+            <FadeIn delay={0.3}>
+              <p>I can help you:</p>
+              <ul className="list-disc space-y-2 pl-6">
+                <li>Establish feeding routines that work for your family</li>
+                <li>Understand newborn sleep patterns</li>
+                <li>Recognize signs of postpartum mood changes</li>
+                <li>Process your birth experience</li>
+                <li>Care for yourself while caring for baby</li>
+              </ul>
+            </FadeIn>
           </div>
         </div>
       </section>
@@ -141,20 +133,26 @@ export default function PostpartumCarePage() {
       {/* CTA Section */}
       <section className="bg-primary/5 px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            You Don&apos;t Have to Do This Alone
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Let&apos;s create a postpartum plan that supports your whole family.
-          </p>
-          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/contact">Schedule a Consultation</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/services">View All Services</Link>
-            </Button>
-          </div>
+          <FadeIn direction="down">
+            <h2 className="font-serif text-3xl font-bold text-foreground">
+              You Don't Have to Do This Alone
+            </h2>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Let's create a postpartum plan that supports your whole family.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+              <Button asChild size="lg">
+                <Link href="/contact">Schedule a Consultation</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/services">View All Services</Link>
+              </Button>
+            </div>
+          </FadeIn>
         </div>
       </section>
     </div>
