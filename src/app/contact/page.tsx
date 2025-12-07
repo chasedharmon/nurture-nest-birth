@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ContactForm } from '@/components/forms/contact-form'
 import { CalendlyWidget } from '@/components/calendly/calendly-widget'
+import { spacing, maxWidth, typography } from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'Contact | Nurture Nest Birth | Kearney, NE',
@@ -16,12 +17,10 @@ export default function ContactPage() {
   return (
     <div className="bg-background">
       {/* Hero Section */}
-      <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl">
-          <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Let&apos;s Connect
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground">
+      <section className={`${spacing.container} ${spacing.section.lg}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
+          <h1 className={typography.h1}>Let&apos;s Connect</h1>
+          <p className={`mt-6 ${typography.lead}`}>
             I&apos;d love to hear about your journey and how I can support you.
             Reach out to schedule a free consultation.
           </p>
@@ -29,8 +28,8 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Form & Info */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.layout}`}>
           <div className="grid gap-12 lg:grid-cols-2">
             {/* Contact Form */}
             <ContactForm />
@@ -113,12 +112,12 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ Teaser */}
-      <section className="bg-primary/5 px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            Have Questions First?
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+      <section
+        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
+          <h2 className={typography.h2}>Have Questions First?</h2>
+          <p className={`mt-4 ${typography.lead}`}>
             Check out my frequently asked questions or feel free to reach out
             directly.
           </p>

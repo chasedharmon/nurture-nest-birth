@@ -1,6 +1,7 @@
 import { ServiceCard } from './service-card'
 import { FadeIn } from '@/components/ui/fade-in'
 import { siteConfig } from '@/config/site'
+import { spacing, maxWidth, grid, typography } from '@/lib/design-system'
 
 /**
  * Services Overview Component
@@ -96,15 +97,13 @@ export function ServicesOverview() {
   }))
 
   return (
-    <section className="bg-card px-6 py-20 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+      <div className={`mx-auto ${maxWidth.layout}`}>
         {/* Section Header */}
         <FadeIn>
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-serif text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              How I Can Support You
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+          <div className={`mx-auto ${maxWidth.article} text-center`}>
+            <h2 className={typography.h2}>How I Can Support You</h2>
+            <p className={`mt-4 ${typography.lead}`}>
               Comprehensive doula services tailored to your family&apos;s unique
               journey through pregnancy, birth, and beyond.
             </p>
@@ -112,7 +111,7 @@ export function ServicesOverview() {
         </FadeIn>
 
         {/* Services Grid */}
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className={`mt-16 grid ${grid.gap.medium} ${grid.cols.four}`}>
           {services.map((service, index) => (
             <FadeIn key={service.href} delay={0.1 + index * 0.1}>
               <ServiceCard

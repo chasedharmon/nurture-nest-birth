@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
 import { siteConfig } from '@/config/site'
+import { spacing, maxWidth, typography } from '@/lib/design-system'
 
 /**
  * Final CTA Section Component
@@ -11,12 +12,14 @@ import { siteConfig } from '@/config/site'
  */
 export function CtaSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 px-6 py-20 lg:px-8 lg:py-32">
+    <section
+      className={`relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 ${spacing.container} ${spacing.section.lg}`}
+    >
       {/* Decorative background elements */}
       <div className="absolute -left-32 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
       <div className="absolute -right-32 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-secondary/10 blur-3xl" />
 
-      <div className="relative mx-auto max-w-4xl">
+      <div className={`relative mx-auto ${maxWidth.content}`}>
         <FadeIn>
           <div className="text-center">
             {/* Overline */}
@@ -25,12 +28,14 @@ export function CtaSection() {
             </p>
 
             {/* Main Headline */}
-            <h2 className="font-serif text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+            <h2 className={typography.h2}>
               Let&apos;s Connect About Your Birth Experience
             </h2>
 
             {/* Supporting Text */}
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+            <p
+              className={`mx-auto mt-6 ${maxWidth.article} ${typography.lead}`}
+            >
               Every birth story is unique. I&apos;d love to hear about your
               hopes and answer any questions you have. Schedule a free
               consultation to see if we&apos;re a good fit.

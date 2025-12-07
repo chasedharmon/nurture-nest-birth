@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { FadeIn } from '@/components/ui/fade-in'
+import { spacing, maxWidth, typography } from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'FAQ | Nurture Nest Birth | Common Doula Questions',
@@ -84,8 +85,8 @@ export default function FAQPage() {
   return (
     <div className="bg-background">
       {/* Hero Section */}
-      <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className={`${spacing.container} ${spacing.section.lg}`}>
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -93,12 +94,10 @@ export default function FAQPage() {
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              Your Questions Answered
-            </h1>
+            <h1 className={typography.h1}>Your Questions Answered</h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="mt-6 text-xl text-muted-foreground">
+            <p className={`mt-6 ${typography.lead}`}>
               Everything you need to know about doula support, birth services,
               and working together.
             </p>
@@ -107,8 +106,8 @@ export default function FAQPage() {
       </section>
 
       {/* FAQ Accordion */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-3xl">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.article}`}>
           <Accordion type="single" collapsible className="space-y-6">
             {faqs.map((faq, index) => (
               <FadeIn key={index} delay={index * 0.05}>
@@ -135,15 +134,15 @@ export default function FAQPage() {
       </section>
 
       {/* Still Have Questions CTA */}
-      <section className="bg-primary/5 px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
+      <section
+        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn direction="down">
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              Still Have Questions?
-            </h2>
+            <h2 className={typography.h2}>Still Have Questions?</h2>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className={`mt-4 ${typography.lead}`}>
               I&apos;m here to help! Let&apos;s schedule a free consultation to
               discuss your specific situation.
             </p>

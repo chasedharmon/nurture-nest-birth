@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { card, icon as iconStyles, typography } from '@/lib/design-system'
 
 interface ServiceCardProps {
   title: string
@@ -16,19 +17,19 @@ export function ServiceCard({
   href,
 }: ServiceCardProps) {
   return (
-    <Card className="group relative flex h-full flex-col overflow-hidden border-2 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10">
+    <Card
+      className={`group relative flex h-full flex-col overflow-hidden ${card.base} ${card.interactive}`}
+    >
       <CardHeader>
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/10 text-primary transition-transform group-hover:scale-110">
+        <div
+          className={`mb-4 flex ${iconStyles.container.lg} items-center justify-center text-primary transition-transform group-hover:scale-110`}
+        >
           {icon}
         </div>
-        <h3 className="font-serif text-xl font-bold text-foreground">
-          {title}
-        </h3>
+        <h3 className={typography.h4}>{title}</h3>
       </CardHeader>
       <CardContent className="flex-1">
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {description}
-        </p>
+        <p className={typography.small}>{description}</p>
       </CardContent>
       <CardFooter>
         <Button

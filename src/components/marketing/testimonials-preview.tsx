@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
 import { TestimonialCard } from './testimonial-card'
 import { siteConfig } from '@/config/site'
+import { spacing, maxWidth, grid, typography } from '@/lib/design-system'
 
 /**
  * Testimonials Preview Component
@@ -23,15 +24,15 @@ export function TestimonialsPreview() {
   }
 
   return (
-    <section className="bg-background px-6 py-20 lg:px-8">
-      <div className="mx-auto max-w-7xl">
+    <section
+      className={`bg-background ${spacing.container} ${spacing.section.md}`}
+    >
+      <div className={`mx-auto ${maxWidth.layout}`}>
         {/* Section Header */}
         <FadeIn>
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-serif text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              What Families Are Saying
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+          <div className={`mx-auto ${maxWidth.article} text-center`}>
+            <h2 className={typography.h2}>What Families Are Saying</h2>
+            <p className={`mt-4 ${typography.lead}`}>
               Hear from families I&apos;ve had the privilege to support through
               their birth journey.
             </p>
@@ -39,7 +40,7 @@ export function TestimonialsPreview() {
         </FadeIn>
 
         {/* Testimonials Grid */}
-        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className={`mt-16 grid ${grid.gap.medium} ${grid.cols.three}`}>
           {featuredTestimonials.map((testimonial, index) => (
             <FadeIn key={testimonial.id} delay={0.1 + index * 0.1}>
               <TestimonialCard testimonial={testimonial} />

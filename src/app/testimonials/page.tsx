@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
 import { TestimonialCard } from '@/components/marketing/testimonial-card'
 import { siteConfig } from '@/config/site'
+import { spacing, maxWidth, typography, grid } from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'Client Testimonials | Birth Stories',
@@ -28,15 +29,13 @@ export default function TestimonialsPage() {
   return (
     <div className="bg-background">
       {/* Page Header */}
-      <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className={`${spacing.container} ${spacing.section.lg}`}>
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              Client Stories
-            </h1>
+            <h1 className={typography.h1}>Client Stories</h1>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="mt-6 text-xl text-muted-foreground">
+            <p className={`mt-6 ${typography.lead}`}>
               It&apos;s an honor to support families through their birth
               journeys. Here&apos;s what some of them have shared about their
               experiences.
@@ -46,9 +45,9 @@ export default function TestimonialsPage() {
       </section>
 
       {/* Testimonials Grid */}
-      <section className="px-6 pb-20 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <section className={`${spacing.container} pb-20`}>
+        <div className={`mx-auto ${maxWidth.layout}`}>
+          <div className={`grid ${grid.gap.medium} ${grid.cols.three}`}>
             {allTestimonials.map((testimonial, index) => (
               <FadeIn key={testimonial.id} delay={index * 0.05}>
                 <TestimonialCard testimonial={testimonial} />
@@ -59,10 +58,14 @@ export default function TestimonialsPage() {
       </section>
 
       {/* Statistics Section (Optional - can add when you have real data) */}
-      <section className="bg-primary/5 px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section
+        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.layout}`}>
           <FadeIn>
-            <div className="grid gap-8 text-center sm:grid-cols-3">
+            <div
+              className={`grid ${grid.gap.medium} text-center ${grid.cols.three}`}
+            >
               <div>
                 <div className="font-serif text-4xl font-bold text-foreground">
                   {siteConfig.business.established
@@ -95,15 +98,13 @@ export default function TestimonialsPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="px-6 py-16 lg:px-8 lg:py-20">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              Ready to Write Your Birth Story?
-            </h2>
+            <h2 className={typography.h2}>Ready to Write Your Birth Story?</h2>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className={`mt-4 ${typography.lead}`}>
               Let&apos;s talk about how I can support your unique journey.
             </p>
           </FadeIn>

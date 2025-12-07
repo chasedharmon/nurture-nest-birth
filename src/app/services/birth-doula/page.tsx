@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
+import { spacing, maxWidth, typography, grid } from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'Birth Doula Support | Comprehensive Labor & Delivery Care',
@@ -17,8 +18,8 @@ export default function BirthDoulaPage() {
   return (
     <div className="bg-background">
       {/* Hero Section */}
-      <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className={`${spacing.container} ${spacing.section.lg}`}>
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -26,12 +27,12 @@ export default function BirthDoulaPage() {
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            <h1 className={typography.h1}>
               Continuous Support for Your Birth Journey
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="mt-6 text-xl text-muted-foreground">
+            <p className={`mt-6 ${typography.lead}`}>
               From active labor through the first hours with your baby, I'll be
               by your side with physical comfort, emotional encouragement, and
               evidence-based guidance.
@@ -41,14 +42,14 @@ export default function BirthDoulaPage() {
       </section>
 
       {/* What's Included */}
-      <section className="bg-card px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
-            <h2 className="text-center font-serif text-3xl font-bold text-foreground">
+            <h2 className={`text-center ${typography.h2}`}>
               What&apos;s Included
             </h2>
           </FadeIn>
-          <div className="mt-12 grid gap-8 md:grid-cols-2">
+          <div className={`mt-12 grid ${grid.gap.medium} ${grid.cols.two}`}>
             {[
               {
                 title: '2 Prenatal Visits',
@@ -85,11 +86,9 @@ export default function BirthDoulaPage() {
       </section>
 
       {/* Why Choose a Doula */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            Why Choose a Birth Doula?
-          </h2>
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
+          <h2 className={typography.h2}>Why Choose a Birth Doula?</h2>
           <div className="mt-8 space-y-6 text-muted-foreground">
             <p>
               Research shows that continuous labor support from a doula leads
@@ -113,12 +112,12 @@ export default function BirthDoulaPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-primary/5 px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            Ready to Plan Your Birth Together?
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+      <section
+        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
+          <h2 className={typography.h2}>Ready to Plan Your Birth Together?</h2>
+          <p className={`mt-4 ${typography.lead}`}>
             Let&apos;s discuss how I can support your unique birth vision.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

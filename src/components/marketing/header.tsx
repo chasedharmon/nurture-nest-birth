@@ -1,13 +1,16 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { spacing, typography } from '@/lib/design-system'
 
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
+      <nav
+        className={`mx-auto flex h-16 max-w-7xl items-center justify-between ${spacing.container}`}
+      >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-serif text-xl font-bold text-foreground">
+          <span className={`${typography.h4} font-bold`}>
             Nurture Nest Birth
           </span>
         </Link>

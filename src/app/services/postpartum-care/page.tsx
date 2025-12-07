@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
+import { spacing, maxWidth, typography, grid } from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'Postpartum Doula Care | Nurture Nest Birth | Kearney, NE',
@@ -17,8 +18,8 @@ export default function PostpartumCarePage() {
   return (
     <div className="bg-background">
       {/* Hero Section */}
-      <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className={`${spacing.container} ${spacing.section.lg}`}>
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -26,12 +27,10 @@ export default function PostpartumCarePage() {
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              Support for the Fourth Trimester
-            </h1>
+            <h1 className={typography.h1}>Support for the Fourth Trimester</h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="mt-6 text-xl text-muted-foreground">
+            <p className={`mt-6 ${typography.lead}`}>
               Nurturing support during the fourth trimester as your family
               adjusts to life with your new baby.
             </p>
@@ -40,14 +39,14 @@ export default function PostpartumCarePage() {
       </section>
 
       {/* What's Included */}
-      <section className="bg-card px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn direction="down">
-            <h2 className="text-center font-serif text-3xl font-bold text-foreground">
+            <h2 className={`text-center ${typography.h2}`}>
               How I Support You
             </h2>
           </FadeIn>
-          <div className="mt-12 grid gap-8 md:grid-cols-2">
+          <div className={`mt-12 grid ${grid.gap.medium} ${grid.cols.two}`}>
             {[
               {
                 title: 'Newborn Care Education',
@@ -92,12 +91,10 @@ export default function PostpartumCarePage() {
       </section>
 
       {/* The Fourth Trimester */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              The Fourth Trimester
-            </h2>
+            <h2 className={typography.h2}>The Fourth Trimester</h2>
           </FadeIn>
           <div className="mt-8 space-y-6 text-muted-foreground">
             <FadeIn delay={0.1}>
@@ -131,15 +128,15 @@ export default function PostpartumCarePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-primary/5 px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
+      <section
+        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn direction="down">
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              You Don't Have to Do This Alone
-            </h2>
+            <h2 className={typography.h2}>You Don't Have to Do This Alone</h2>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className={`mt-4 ${typography.lead}`}>
               Let's create a postpartum plan that supports your whole family.
             </p>
           </FadeIn>

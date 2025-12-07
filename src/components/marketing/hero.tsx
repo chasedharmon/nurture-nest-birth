@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
 import { siteConfig } from '@/config/site'
+import { spacing, maxWidth, grid, typography, badge } from '@/lib/design-system'
 
 /**
  * Homepage Hero Component
@@ -17,20 +18,28 @@ import { siteConfig } from '@/config/site'
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-background px-6 py-20 md:py-32 lg:px-8">
+    <section
+      className={`relative overflow-hidden bg-background ${spacing.container} ${spacing.section.lg}`}
+    >
       {/* Subtle organic background shapes */}
       <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-secondary/5 blur-3xl" />
 
-      <div className="relative mx-auto max-w-7xl">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+      <div className={`relative mx-auto ${maxWidth.layout}`}>
+        <div className={`grid ${grid.gap.loose} lg:${grid.cols.two}`}>
           {/* Left Column - Content */}
           <div className="flex flex-col justify-center">
             {/* Credentials Badge */}
             <FadeIn>
-              <div className="mb-6 inline-flex items-center gap-2 self-start rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <div
+                className={`mb-6 inline-flex items-center gap-2 self-start rounded-full ${badge.variants.primary} px-4 py-1.5`}
+              >
                 <svg
-                  className="h-4 w-4"
+                  className={
+                    badge.base.split(' ').includes('h-4')
+                      ? 'h-4 w-4'
+                      : 'h-4 w-4'
+                  }
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -46,7 +55,7 @@ export function Hero() {
 
             {/* Main Headline */}
             <FadeIn delay={0.1}>
-              <h1 className="font-serif text-4xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              <h1 className={typography.h1}>
                 Compassionate Birth Support in{' '}
                 <span className="text-primary">
                   {siteConfig.location.city}, {siteConfig.location.state}
@@ -56,7 +65,7 @@ export function Hero() {
 
             {/* Subheadline - Emotional Benefits */}
             <FadeIn delay={0.2}>
-              <p className="mt-6 text-lg leading-relaxed text-muted-foreground sm:text-xl">
+              <p className={`mt-6 ${typography.lead}`}>
                 Personalized doula care for your pregnancy, birth, and
                 postpartum journey—because you deserve to feel{' '}
                 <span className="font-semibold text-foreground">supported</span>

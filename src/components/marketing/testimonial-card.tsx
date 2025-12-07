@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import type { Testimonial } from '@/config/site'
+import { card, typography } from '@/lib/design-system'
 
 interface TestimonialCardProps {
   testimonial: Testimonial
@@ -13,7 +14,9 @@ interface TestimonialCardProps {
  */
 export function TestimonialCard({ testimonial }: TestimonialCardProps) {
   return (
-    <Card className="h-full border-2 transition-all duration-300 hover:border-primary/30 hover:shadow-lg">
+    <Card
+      className={`h-full ${card.base} hover:border-primary/30 hover:shadow-lg`}
+    >
       <CardContent className="flex h-full flex-col p-6">
         {/* Star Rating */}
         <div className="mb-4 flex gap-1">
@@ -35,7 +38,7 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
 
         {/* Quote */}
         <blockquote className="flex-1">
-          <p className="text-base leading-relaxed text-foreground">
+          <p className={`${typography.body} leading-relaxed`}>
             &ldquo;{testimonial.quote}&rdquo;
           </p>
         </blockquote>
@@ -43,7 +46,7 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
         {/* Client Info */}
         <div className="mt-6 border-t border-border pt-4">
           <p className="font-semibold text-foreground">{testimonial.name}</p>
-          <p className="text-sm text-muted-foreground">
+          <p className={typography.small}>
             {testimonial.location} • {testimonial.service}
           </p>
         </div>

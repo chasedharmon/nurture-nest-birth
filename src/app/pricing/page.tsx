@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
+import { spacing, maxWidth, grid, typography, card } from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'Pricing | Nurture Nest Birth | Doula Services in Kearney, NE',
@@ -17,8 +18,8 @@ export default function PricingPage() {
   return (
     <div className="bg-background">
       {/* Hero */}
-      <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className={`${spacing.container} ${spacing.section.lg}`}>
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -26,12 +27,10 @@ export default function PricingPage() {
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              Investment in Your Birth Journey
-            </h1>
+            <h1 className={typography.h1}>Investment in Your Birth Journey</h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="mt-6 text-xl text-muted-foreground">
+            <p className={`mt-6 ${typography.lead}`}>
               Transparent pricing with flexible payment options for families in
               Kearney and central Nebraska.
             </p>
@@ -40,12 +39,14 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Cards */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-8 lg:grid-cols-3">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.layout}`}>
+          <div className={`grid ${grid.gap.medium} lg:grid-cols-3`}>
             {/* Birth Doula */}
             <FadeIn delay={0}>
-              <Card className="relative flex h-full flex-col overflow-hidden border-2 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+              <Card
+                className={`relative flex h-full flex-col overflow-hidden ${card.base} ${card.interactive}`}
+              >
                 <CardHeader className="bg-gradient-to-br from-primary/5 to-secondary/5">
                   <CardTitle className="font-serif text-2xl">
                     Birth Doula Support
@@ -106,7 +107,9 @@ export default function PricingPage() {
 
             {/* Postpartum Care */}
             <FadeIn delay={0.1}>
-              <Card className="relative flex h-full flex-col overflow-hidden border-2 border-primary/40 shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/30">
+              <Card
+                className={`relative flex h-full flex-col overflow-hidden ${card.base} border-primary/40 shadow-lg shadow-primary/20 ${card.interactive} hover:shadow-2xl hover:shadow-primary/30`}
+              >
                 <div className="absolute right-0 top-0 rounded-bl-2xl bg-primary px-4 py-1 text-sm font-medium text-primary-foreground">
                   Most Popular
                 </div>
@@ -176,7 +179,9 @@ export default function PricingPage() {
 
             {/* Lactation Consulting */}
             <FadeIn delay={0.2}>
-              <Card className="relative flex h-full flex-col overflow-hidden border-2 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+              <Card
+                className={`relative flex h-full flex-col overflow-hidden ${card.base} ${card.interactive}`}
+              >
                 <CardHeader className="bg-gradient-to-br from-primary/5 to-secondary/5">
                   <CardTitle className="font-serif text-2xl">
                     Lactation Consulting
@@ -240,14 +245,14 @@ export default function PricingPage() {
       </section>
 
       {/* Additional Services */}
-      <section className="bg-card px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn direction="down">
-            <h2 className="text-center font-serif text-3xl font-bold text-foreground">
+            <h2 className={`text-center ${typography.h2}`}>
               Additional Services
             </h2>
           </FadeIn>
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
+          <div className={`mt-12 grid ${grid.gap.tight} ${grid.cols.two}`}>
             <FadeIn delay={0.1}>
               <div className="rounded-2xl border-2 border-border bg-background p-6">
                 <h3 className="font-serif text-xl font-semibold text-foreground">
@@ -282,10 +287,10 @@ export default function PricingPage() {
       </section>
 
       {/* Package Bundles */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
-            <h2 className="text-center font-serif text-3xl font-bold text-foreground">
+            <h2 className={`text-center ${typography.h2}`}>
               Package Bundles & Discounts
             </h2>
           </FadeIn>
@@ -323,10 +328,10 @@ export default function PricingPage() {
       </section>
 
       {/* Payment Info */}
-      <section className="bg-card px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn direction="down">
-            <h2 className="text-center font-serif text-3xl font-bold text-foreground">
+            <h2 className={`text-center ${typography.h2}`}>
               Payment Information
             </h2>
           </FadeIn>
@@ -382,12 +387,12 @@ export default function PricingPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-primary/5 px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
+      <section
+        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn direction="down">
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              Questions About Pricing?
-            </h2>
+            <h2 className={typography.h2}>Questions About Pricing?</h2>
           </FadeIn>
           <FadeIn delay={0.1}>
             <p className="mt-4 text-lg text-muted-foreground">

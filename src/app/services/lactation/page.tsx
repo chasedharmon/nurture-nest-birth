@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
+import { spacing, maxWidth, typography, grid } from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'Lactation Consulting | Nurture Nest Birth | Kearney, NE',
@@ -17,8 +18,8 @@ export default function LactationPage() {
   return (
     <div className="bg-background">
       {/* Hero Section */}
-      <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className={`${spacing.container} ${spacing.section.lg}`}>
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -26,12 +27,10 @@ export default function LactationPage() {
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              Expert Breastfeeding Support
-            </h1>
+            <h1 className={typography.h1}>Expert Breastfeeding Support</h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="mt-6 text-xl text-muted-foreground">
+            <p className={`mt-6 ${typography.lead}`}>
               Compassionate, evidence-based guidance to establish and maintain
               your breastfeeding journey.
             </p>
@@ -40,14 +39,12 @@ export default function LactationPage() {
       </section>
 
       {/* Common Concerns */}
-      <section className="bg-card px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn direction="down">
-            <h2 className="text-center font-serif text-3xl font-bold text-foreground">
-              I Can Help With
-            </h2>
+            <h2 className={`text-center ${typography.h2}`}>I Can Help With</h2>
           </FadeIn>
-          <div className="mt-12 grid gap-8 md:grid-cols-2">
+          <div className={`mt-12 grid ${grid.gap.medium} ${grid.cols.two}`}>
             {[
               {
                 title: 'Latch Issues',
@@ -92,12 +89,10 @@ export default function LactationPage() {
       </section>
 
       {/* What to Expect */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              What to Expect
-            </h2>
+            <h2 className={typography.h2}>What to Expect</h2>
           </FadeIn>
           <div className="mt-8 space-y-6 text-muted-foreground">
             <FadeIn delay={0.1}>
@@ -134,15 +129,15 @@ export default function LactationPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-primary/5 px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
+      <section
+        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn direction="down">
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              Feeding Your Baby Shouldn't Hurt
-            </h2>
+            <h2 className={typography.h2}>Feeding Your Baby Shouldn't Hurt</h2>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className={`mt-4 ${typography.lead}`}>
               Let's work together to make breastfeeding comfortable and
               sustainable.
             </p>

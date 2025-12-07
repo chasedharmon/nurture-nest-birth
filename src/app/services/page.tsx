@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ServiceCard } from '@/components/marketing/service-card'
+import { spacing, maxWidth, grid, typography, icon } from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'Services | Nurture Nest Birth | Doula Care in Kearney, NE',
@@ -102,20 +103,22 @@ export default function ServicesPage() {
   return (
     <div className="bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden px-6 py-16 lg:px-8 lg:py-24">
+      <section
+        className={`relative overflow-hidden ${spacing.container} ${spacing.section.lg}`}
+      >
         {/* Decorative background */}
         <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-secondary/5 blur-3xl" />
 
-        <div className="relative mx-auto max-w-4xl text-center">
+        <div className={`relative mx-auto ${maxWidth.content} text-center`}>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
             Services
           </div>
-          <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+          <h1 className={typography.h1}>
             Comprehensive Doula Care for Every Stage
           </h1>
-          <p className="mt-6 text-xl text-muted-foreground">
+          <p className={`mt-6 ${typography.lead}`}>
             From pregnancy through postpartum, I offer personalized support to
             help your family thrive.
           </p>
@@ -123,9 +126,9 @@ export default function ServicesPage() {
       </section>
 
       {/* Services Grid */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.layout}`}>
+          <div className={`grid ${grid.gap.medium} ${grid.cols.four}`}>
             {services.map(service => (
               <ServiceCard key={service.href} {...service} />
             ))}
@@ -134,16 +137,18 @@ export default function ServicesPage() {
       </section>
 
       {/* Why Choose Support */}
-      <section className="bg-card px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="text-center font-serif text-3xl font-bold text-foreground">
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
+          <h2 className={`text-center ${typography.h2}`}>
             Why Invest in Doula Support?
           </h2>
-          <div className="mt-12 grid gap-8 md:grid-cols-2">
+          <div className={`mt-12 grid ${grid.gap.medium} ${grid.cols.two}`}>
             <div className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/10">
+              <div
+                className={`flex shrink-0 items-center justify-center ${icon.container.md}`}
+              >
                 <svg
-                  className="h-6 w-6 text-primary"
+                  className={`text-primary ${icon.size.md}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -169,9 +174,11 @@ export default function ServicesPage() {
             </div>
 
             <div className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/10">
+              <div
+                className={`flex shrink-0 items-center justify-center ${icon.container.md}`}
+              >
                 <svg
-                  className="h-6 w-6 text-primary"
+                  className={`text-primary ${icon.size.md}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -196,9 +203,11 @@ export default function ServicesPage() {
             </div>
 
             <div className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/10">
+              <div
+                className={`flex shrink-0 items-center justify-center ${icon.container.md}`}
+              >
                 <svg
-                  className="h-6 w-6 text-primary"
+                  className={`text-primary ${icon.size.md}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -223,9 +232,11 @@ export default function ServicesPage() {
             </div>
 
             <div className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/10">
+              <div
+                className={`flex shrink-0 items-center justify-center ${icon.container.md}`}
+              >
                 <svg
-                  className="h-6 w-6 text-primary"
+                  className={`text-primary ${icon.size.md}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -253,9 +264,9 @@ export default function ServicesPage() {
       </section>
 
       {/* Packages Info */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="text-center font-serif text-3xl font-bold text-foreground">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
+          <h2 className={`text-center ${typography.h2}`}>
             Flexible Service Packages
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-center text-lg text-muted-foreground">
@@ -301,11 +312,11 @@ export default function ServicesPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-primary/5 px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="font-serif text-3xl font-bold text-foreground">
-            Ready to Get Started?
-          </h2>
+      <section
+        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
+          <h2 className={typography.h2}>Ready to Get Started?</h2>
           <p className="mt-4 text-lg text-muted-foreground">
             Let&apos;s schedule a free consultation to discuss your needs and
             create a personalized support plan.

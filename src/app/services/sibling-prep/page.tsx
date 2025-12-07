@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
+import { spacing, maxWidth, typography, grid } from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'Sibling Preparation | Nurture Nest Birth | Kearney, NE',
@@ -17,8 +18,8 @@ export default function SiblingPrepPage() {
   return (
     <div className="bg-background">
       {/* Hero Section */}
-      <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className={`${spacing.container} ${spacing.section.lg}`}>
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -26,12 +27,10 @@ export default function SiblingPrepPage() {
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              Preparing Big Brothers & Sisters
-            </h1>
+            <h1 className={typography.h1}>Preparing Big Brothers & Sisters</h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="mt-6 text-xl text-muted-foreground">
+            <p className={`mt-6 ${typography.lead}`}>
               Help your children feel excited, prepared, and included as they
               welcome their new sibling.
             </p>
@@ -40,14 +39,14 @@ export default function SiblingPrepPage() {
       </section>
 
       {/* What We Cover */}
-      <section className="bg-card px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn direction="down">
-            <h2 className="text-center font-serif text-3xl font-bold text-foreground">
+            <h2 className={`text-center ${typography.h2}`}>
               What We'll Explore Together
             </h2>
           </FadeIn>
-          <div className="mt-12 grid gap-8 md:grid-cols-2">
+          <div className={`mt-12 grid ${grid.gap.medium} ${grid.cols.two}`}>
             {[
               {
                 title: 'Baby Basics',
@@ -92,12 +91,10 @@ export default function SiblingPrepPage() {
       </section>
 
       {/* Session Details */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              Session Details
-            </h2>
+            <h2 className={typography.h2}>Session Details</h2>
           </FadeIn>
           <div className="mt-8 space-y-6 text-muted-foreground">
             <FadeIn delay={0.1}>
@@ -142,15 +139,15 @@ export default function SiblingPrepPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-primary/5 px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
+      <section
+        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn direction="down">
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              Help Your Child Feel Included
-            </h2>
+            <h2 className={typography.h2}>Help Your Child Feel Included</h2>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className={`mt-4 ${typography.lead}`}>
               Let's prepare your whole family for this exciting transition.
             </p>
           </FadeIn>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
+import { spacing, maxWidth, typography, grid, card } from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'Blog | Nurture Nest Birth | Doula Resources & Birth Tips',
@@ -45,8 +46,8 @@ export default function BlogPage() {
   return (
     <div className="bg-background">
       {/* Hero */}
-      <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className={`${spacing.container} ${spacing.section.lg}`}>
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -54,12 +55,12 @@ export default function BlogPage() {
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            <h1 className={typography.h1}>
               Birth, Postpartum & Doula Resources
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="mt-6 text-xl text-muted-foreground">
+            <p className={`mt-6 ${typography.lead}`}>
               Evidence-based guidance and real talk about pregnancy, birth, and
               the fourth trimester.
             </p>
@@ -68,13 +69,15 @@ export default function BlogPage() {
       </section>
 
       {/* Blog Posts */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-5xl">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.layout}`}>
+          <div className={`grid ${grid.gap.medium} ${grid.cols.three}`}>
             {blogPosts.map((post, i) => (
               <FadeIn key={post.slug} delay={i * 0.1}>
                 <Link href={`/blog/${post.slug}`} className="block h-full">
-                  <Card className="group flex h-full flex-col transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+                  <Card
+                    className={`group flex h-full flex-col ${card.base} ${card.interactive}`}
+                  >
                     <CardHeader>
                       <div className="mb-3 flex items-center justify-between text-sm">
                         <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">

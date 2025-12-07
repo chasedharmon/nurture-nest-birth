@@ -5,6 +5,14 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
+import {
+  spacing,
+  maxWidth,
+  grid,
+  typography,
+  icon,
+  card,
+} from '@/lib/design-system'
 
 export const metadata: Metadata = {
   title: 'About | Nurture Nest Birth | DONA Doula Kearney, NE',
@@ -88,9 +96,9 @@ export default function AboutPage() {
   return (
     <div className="bg-background">
       {/* Hero Section with Photo */}
-      <section className="px-6 py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+      <section className={`${spacing.container} ${spacing.section.lg}`}>
+        <div className={`mx-auto ${maxWidth.layout}`}>
+          <div className={`grid ${grid.gap.loose} lg:grid-cols-2`}>
             {/* Left - Photo */}
             <FadeIn direction="left">
               <div className="relative">
@@ -118,12 +126,12 @@ export default function AboutPage() {
                 </div>
               </FadeIn>
               <FadeIn delay={0.2}>
-                <h1 className="font-serif text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                <h1 className={typography.h1}>
                   Supporting Families Through Birth & Beyond
                 </h1>
               </FadeIn>
               <FadeIn delay={0.3}>
-                <p className="mt-6 text-xl text-muted-foreground">
+                <p className={`mt-6 ${typography.lead}`}>
                   Hi, I'm here to provide compassionate, evidence-based support
                   during one of life's most transformative experiences.
                 </p>
@@ -134,12 +142,10 @@ export default function AboutPage() {
       </section>
 
       {/* My Story */}
-      <section className="bg-card px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn direction="down">
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              My Journey to Doula Work
-            </h2>
+            <h2 className={typography.h2}>My Journey to Doula Work</h2>
           </FadeIn>
           <div className="mt-8 space-y-6 text-muted-foreground">
             <FadeIn delay={0.1}>
@@ -182,21 +188,21 @@ export default function AboutPage() {
       </section>
 
       {/* Credentials */}
-      <section className="px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              Credentials & Training
-            </h2>
+            <h2 className={typography.h2}>Credentials & Training</h2>
           </FadeIn>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
+          <div className={`mt-8 grid ${grid.gap.tight} ${grid.cols.two}`}>
             {credentials.map((item, i) => (
               <FadeIn key={i} delay={i * 0.1}>
-                <Card className="h-full">
+                <Card className={`h-full ${card.base} ${card.interactive}`}>
                   <CardContent className="pt-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/10">
+                    <div
+                      className={`mb-4 flex items-center justify-center ${icon.container.md}`}
+                    >
                       <svg
-                        className="h-6 w-6 text-primary"
+                        className={`${icon.size.md} text-primary`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -219,15 +225,13 @@ export default function AboutPage() {
       </section>
 
       {/* My Philosophy */}
-      <section className="bg-card px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn direction="down">
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              My Philosophy
-            </h2>
+            <h2 className={typography.h2}>My Philosophy</h2>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="mt-8 text-lg text-muted-foreground">
+            <p className={`mt-8 ${typography.lead}`}>
               I believe birth is a natural, powerful experience, and every
               family deserves to feel informed, supported, and respected
               throughout their journey.
@@ -256,15 +260,15 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-primary/5 px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
+      <section
+        className={`bg-primary/5 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn direction="down">
-            <h2 className="font-serif text-3xl font-bold text-foreground">
-              Let's Connect
-            </h2>
+            <h2 className={typography.h2}>Let's Connect</h2>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className={`mt-4 ${typography.lead}`}>
               I'd love to hear about your journey and discuss how I can support
               your family.
             </p>
