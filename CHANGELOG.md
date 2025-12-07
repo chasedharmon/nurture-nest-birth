@@ -2,6 +2,79 @@
 
 All notable changes to Nurture Nest Birth are documented in this file.
 
+## [Phase 4.1] - 2025-12-08 (In Progress)
+
+### Added - Foundation for Self-Service & Notifications
+
+**Email System**
+
+- `src/lib/email/` - Complete email infrastructure with Resend
+- Email templates: Magic Link, Welcome, Meeting Scheduled, Meeting Reminder, Document Shared, Payment Received
+- Shared email layout with consistent branding
+- `sendEmail()` and `sendTrackedEmail()` functions for unified email sending
+
+**Improved Authentication**
+
+- Database-backed sessions (replaces cookie-only approach)
+- bcrypt password hashing (12 rounds)
+- `requestMagicLink()` - Send magic link emails via Resend
+- Session management: create, validate, invalidate, revoke
+- Admin functions: view/revoke client sessions
+- Development fallback password (will require real password in production)
+
+**Notification System**
+
+- `notification_log` table for tracking all sent notifications
+- `notification_preferences` table for client notification settings
+- Functions: `sendWelcomeEmail()`, `sendMeetingScheduledEmail()`, `sendMeetingReminderEmail()`, `sendDocumentSharedEmail()`, `sendPaymentReceivedEmail()`
+- Notification preferences check before sending
+
+**Client Profile**
+
+- Server actions for profile updates: contact info, address, birth preferences, medical info, emergency contact
+- `updateFullProfile()` for intake form submissions
+
+**Intake Forms**
+
+- `intake_form_templates` table with JSON schema for dynamic forms
+- `intake_form_submissions` table for tracking submissions
+- Default intake form template with 7 sections (personal, pregnancy, medical, preferences, postpartum, emergency, additional)
+- Server actions: get templates, submit form, save draft, review submission
+
+**Invoicing Foundation**
+
+- `invoices` table with auto-generated invoice numbers (INV-YYYY-NNN)
+- Line items, tax, amounts, payment status tracking
+- Stripe integration fields ready (stripe_invoice_id, payment_link)
+
+**Contract Templates**
+
+- `contract_templates` table for reusable contracts
+- E-signature tracking fields on client_services (IP, user agent, signature data)
+
+### Database
+
+New tables:
+
+- `client_sessions` - Database-backed session management
+- `notification_log` - Track all notifications sent
+- `notification_preferences` - Client notification settings
+- `intake_form_templates` - Dynamic form definitions
+- `intake_form_submissions` - Submitted intake forms
+- `invoices` - Invoice tracking with auto-numbering
+- `contract_templates` - Reusable contract content
+
+Extended tables:
+
+- `leads` - Added `password_hash` column
+- `client_services` - Added contract signature tracking fields
+
+### Dependencies
+
+- `bcryptjs` - Password hashing
+
+---
+
 ## [Phase 3.3] - 2025-12-07
 
 ### Added - Admin CRUD UI
