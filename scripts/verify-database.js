@@ -20,7 +20,19 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 async function verifyDatabase() {
   console.log('🔍 Verifying Supabase database setup...\n')
 
-  const tables = ['users', 'leads', 'lead_activities']
+  const tables = [
+    'users',
+    'leads',
+    'lead_activities',
+    'client_services',
+    'meetings',
+    'client_documents',
+    'payments',
+    'invoices',
+    'invoice_payments',
+    'contract_templates',
+    'contract_signatures',
+  ]
   let allTablesExist = true
 
   for (const table of tables) {

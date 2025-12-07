@@ -70,7 +70,6 @@ export async function GET(request: Request) {
         client_id,
         scheduled_at,
         meeting_type,
-        title,
         reminder_sent_at
       `
       )

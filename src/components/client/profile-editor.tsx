@@ -32,7 +32,6 @@ import {
   User,
   MapPin,
   Heart,
-  Stethoscope,
   Phone,
   Calendar,
   Check,
@@ -865,55 +864,13 @@ export function ProfileEditor({ client }: ProfileEditorProps) {
           )}
       </EditableSection>
 
-      {/* Account Status - Read Only */}
-      <Card className="bg-stone-50/50 backdrop-blur-sm border-stone-200 shadow-sm">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#f5f0e8] rounded-xl text-[#8b7355]">
-              <Stethoscope className="h-5 w-5" />
-            </div>
-            <div>
-              <CardTitle className="text-lg text-stone-800">
-                Account Information
-              </CardTitle>
-              <CardDescription className="text-stone-500">
-                Your account status and history
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <DisplayField
-              label="Client Type"
-              value={
-                client.client_type
-                  ?.replace('_', ' ')
-                  .replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'Client'
-              }
-            />
-            <DisplayField
-              label="Stage"
-              value={
-                client.lifecycle_stage
-                  ?.replace('_', ' ')
-                  .replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'Active'
-              }
-            />
-            <DisplayField
-              label="Last Login"
-              value={
-                client.last_login_at
-                  ? format(
-                      new Date(client.last_login_at),
-                      'MMM d, yyyy • h:mm a'
-                    )
-                  : 'First visit'
-              }
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Last Login - Minimal display */}
+      {client.last_login_at && (
+        <div className="text-center text-sm text-stone-400 pt-4">
+          Last login:{' '}
+          {format(new Date(client.last_login_at), 'MMM d, yyyy • h:mm a')}
+        </div>
+      )}
     </div>
   )
 }

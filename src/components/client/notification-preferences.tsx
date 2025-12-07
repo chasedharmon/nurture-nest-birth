@@ -142,7 +142,6 @@ export function NotificationPreferences({
               id="meeting-reminders"
               checked={preferences.meeting_reminders}
               onCheckedChange={() => handleToggle('meeting_reminders')}
-              className="data-[state=checked]:bg-[#8b7355]"
             />
           </div>
 
@@ -166,7 +165,6 @@ export function NotificationPreferences({
               id="document-notifications"
               checked={preferences.document_notifications}
               onCheckedChange={() => handleToggle('document_notifications')}
-              className="data-[state=checked]:bg-[#8b7355]"
             />
           </div>
 
@@ -190,7 +188,6 @@ export function NotificationPreferences({
               id="payment-reminders"
               checked={preferences.payment_reminders}
               onCheckedChange={() => handleToggle('payment_reminders')}
-              className="data-[state=checked]:bg-[#8b7355]"
             />
           </div>
 
@@ -214,7 +211,6 @@ export function NotificationPreferences({
               id="marketing-emails"
               checked={preferences.marketing_emails}
               onCheckedChange={() => handleToggle('marketing_emails')}
-              className="data-[state=checked]:bg-[#8b7355]"
             />
           </div>
         </div>

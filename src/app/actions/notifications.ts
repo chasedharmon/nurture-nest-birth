@@ -461,3 +461,89 @@ function formatServiceType(type: string): string {
   }
   return labels[type] || type
 }
+
+// ============================================================================
+// Invoice Email Functions
+// ============================================================================
+
+/**
+ * Send invoice email to client
+ */
+export async function sendInvoiceEmail(invoiceId: string) {
+  const supabase = createAdminClient()
+
+  // Get invoice with client info
+  const { data: invoice, error } = await supabase
+    .from('invoices')
+    .select(
+      `
+      *,
+      leads:client_id (id, name, email)
+    `
+    )
+    .eq('id', invoiceId)
+    .single()
+
+  if (error || !invoice) {
+    console.error('[Notifications] Invoice not found:', invoiceId)
+    return { success: false, error: 'Invoice not found' }
+  }
+
+  const client = invoice.leads as { id: string; name: string; email: string }
+
+  // Check notification preferences
+  const prefs = await getNotificationPreferences(client.id)
+  if (!prefs.payment_reminders) {
+    console.log('[Notifications] Payment notifications disabled for client')
+    return { success: true, skipped: true }
+  }
+
+  // Format line items for email
+  const lineItemsText = (
+    invoice.line_items as Array<{
+      description: string
+      quantity: number
+      unit_price: number
+      total: number
+    }>
+  )
+    .map(item => `${item.description}: $${item.total.toFixed(2)}`)
+    .join('\n')
+
+  // Create a simple text email for now (can be enhanced with a proper template later)
+  const emailBody = `
+Dear ${client.name?.split(' ')[0] || 'Client'},
+
+You have a new invoice from ${emailConfig.branding.name}.
+
+Invoice Number: ${invoice.invoice_number}
+Amount Due: $${invoice.total.toFixed(2)}
+Due Date: ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : 'Upon Receipt'}
+
+Items:
+${lineItemsText}
+
+${invoice.client_notes ? `Notes: ${invoice.client_notes}\n` : ''}
+
+To view your invoice, please log in to your client portal:
+${emailConfig.urls.portal}/invoices/${invoice.id}
+
+If you have any questions about this invoice, please don't hesitate to reach out.
+
+Thank you for choosing ${emailConfig.branding.name}!
+
+${emailConfig.doula.name}
+${emailConfig.doula.phone}
+  `.trim()
+
+  return sendTrackedEmail({
+    to: client.email,
+    subject: `Invoice ${invoice.invoice_number} from ${emailConfig.branding.name}`,
+    template: {
+      type: 'text',
+      content: emailBody,
+    } as unknown as React.ReactElement,
+    clientId: client.id,
+    notificationType: 'invoice-sent',
+  })
+}
