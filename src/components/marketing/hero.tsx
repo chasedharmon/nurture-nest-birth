@@ -98,12 +98,13 @@ export function Hero() {
 
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-muted shadow-2xl shadow-primary/10 lg:aspect-[3/4]">
               <Image
-                src="/images/hero-warm.jpg"
+                src="/images/hero-newborn.jpg"
                 alt="Nurturing hands holding newborn baby - doula support"
                 fill
                 className="object-cover"
                 priority
                 sizes="(max-width: 768px) 100vw, 50vw"
+                quality={95}
               />
               {/* Subtle overlay for warmth */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
