@@ -1,12 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
+import { FAQAccordion } from '@/components/faq'
 import { FadeIn } from '@/components/ui/fade-in'
 import { spacing, maxWidth, typography } from '@/lib/design-system'
 import { JSONLDScript, getFAQSchema } from '@/lib/schema'
@@ -112,28 +107,9 @@ export default function FAQPage() {
       {/* FAQ Accordion */}
       <section className={`${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.article}`}>
-          <Accordion type="single" collapsible className="space-y-6">
-            {faqs.map((faq, index) => (
-              <FadeIn key={index} delay={index * 0.05}>
-                <AccordionItem
-                  value={`item-${index}`}
-                  className="group overflow-hidden rounded-2xl border-2 border-border bg-card shadow-sm transition-all hover:shadow-md data-[state=open]:border-primary/40 data-[state=open]:shadow-lg data-[state=open]:shadow-primary/10"
-                >
-                  <AccordionTrigger className="px-6 py-5 text-left font-serif text-lg font-semibold text-foreground transition-colors hover:bg-primary/5 hover:no-underline [&[data-state=open]]:bg-primary/5 [&[data-state=open]]:text-primary">
-                    <span className="flex items-start gap-4">
-                      <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary transition-colors group-data-[state=open]:bg-primary group-data-[state=open]:text-primary-foreground">
-                        {index + 1}
-                      </span>
-                      <span className="flex-1">{faq.question}</span>
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-6 pl-[4.5rem] text-base leading-relaxed text-muted-foreground">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              </FadeIn>
-            ))}
-          </Accordion>
+          <FadeIn>
+            <FAQAccordion items={faqs} />
+          </FadeIn>
         </div>
       </section>
 
