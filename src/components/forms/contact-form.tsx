@@ -1,0 +1,165 @@
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { submitContactForm } from '@/app/actions/contact'
+
+export function ContactForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+  } | null>(null)
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setIsSubmitting(true)
+    setMessage(null)
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+
+    try {
+      const result = await submitContactForm(formData)
+
+      if (result.success) {
+        setMessage({
+          type: 'success',
+          text: 'Thank you for your message! I will respond within 24 hours.',
+        })
+        form.reset()
+      } else {
+        setMessage({
+          type: 'error',
+          text: result.error || 'Something went wrong. Please try again.',
+        })
+      }
+    } catch {
+      setMessage({
+        type: 'error',
+        text: 'Failed to send message. Please try again or email directly.',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-serif text-2xl">Send Me a Message</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          I typically respond within 24 hours.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {message && (
+            <div
+              className={`rounded-md p-4 ${
+                message.type === 'success'
+                  ? 'bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                  : 'bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+              }`}
+            >
+              <p className="text-sm font-medium">{message.text}</p>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="name">Name *</Label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Your full name"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email *</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="(308) 555-1234"
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dueDate">Due Date (if applicable)</Label>
+            <Input
+              id="dueDate"
+              name="dueDate"
+              type="date"
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="service">Service Interest</Label>
+            <select
+              id="service"
+              name="service"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+              disabled={isSubmitting}
+            >
+              <option value="">Select a service...</option>
+              <option value="birth-doula">Birth Doula Support</option>
+              <option value="postpartum-care">Postpartum Care</option>
+              <option value="lactation">Lactation Consulting</option>
+              <option value="sibling-prep">Sibling Preparation</option>
+              <option value="multiple">Multiple Services</option>
+              <option value="not-sure">Not Sure Yet</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="message">Message *</Label>
+            <Textarea
+              id="message"
+              name="message"
+              placeholder="Tell me a bit about what you're looking for..."
+              rows={5}
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Sending...' : 'Send Message'}
+          </Button>
+
+          <p className="text-center text-xs text-muted-foreground">
+            By submitting this form, you agree to be contacted about doula
+            services.
+          </p>
+        </form>
+      </CardContent>
+    </Card>
+  )
+}
