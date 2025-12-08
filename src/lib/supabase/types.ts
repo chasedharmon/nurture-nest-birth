@@ -579,6 +579,7 @@ export interface ColumnConfig {
   editable?: boolean
   format?:
     | 'text'
+    | 'number'
     | 'date'
     | 'datetime'
     | 'currency'
@@ -601,10 +602,21 @@ export interface KanbanConfig {
   columnOrder?: string[]
 }
 
+export type AggregationType =
+  | 'sum'
+  | 'count'
+  | 'avg'
+  | 'min'
+  | 'max'
+  | 'count_distinct'
+
 export interface AggregationConfig {
+  id: string
   field: string
-  function: 'sum' | 'count' | 'avg' | 'min' | 'max'
+  type: AggregationType
   label: string
+  // Legacy support
+  function?: AggregationType
 }
 
 export interface ChartConfig {
@@ -613,6 +625,27 @@ export interface ChartConfig {
   yAxis?: string
   series?: string[]
   colors?: string[]
+  title?: string
+  colorScheme?: string
+  showLegend?: boolean
+  showDataLabels?: boolean
+  showGrid?: boolean
+  horizontal?: boolean
+  stacked?: boolean
+}
+
+// Report configuration used by the builder wizard
+export interface ReportConfig {
+  name: string
+  description: string
+  report_type: ReportType
+  object_type: ObjectType
+  columns: ColumnConfig[]
+  filters: FilterCondition[]
+  groupings: string[]
+  aggregations: AggregationConfig[]
+  chart_config: ChartConfig
+  visibility: ViewVisibility
 }
 
 export interface WidgetPosition {
@@ -694,6 +727,14 @@ export interface Report {
   schedule_config?: Record<string, unknown> | null
   created_at: string
   updated_at: string
+}
+
+// Report execution result
+export interface ReportExecutionResult {
+  rows: Record<string, unknown>[]
+  totalCount: number
+  aggregations?: Record<string, number | string>
+  groupedData?: Record<string, Record<string, unknown>[]>
 }
 
 // Dashboards
@@ -892,4 +933,63 @@ export interface ClientDashboardData {
   }
   activeServices: ClientService[]
   recentDocuments: ClientDocument[]
+}
+
+// =====================================================
+// Roles & Permissions Types
+// =====================================================
+
+export type PermissionAction = 'create' | 'read' | 'update' | 'delete' | '*'
+
+export interface Permissions {
+  [object: string]: PermissionAction[]
+}
+
+export interface Role {
+  id: string
+  name: string
+  description?: string | null
+  is_system: boolean
+  permissions: Permissions
+  created_at: string
+  updated_at: string
+}
+
+export interface UserInvitation {
+  id: string
+  email: string
+  role_id?: string | null
+  team_member_id?: string | null
+  invited_by?: string | null
+  token: string
+  expires_at: string
+  accepted_at?: string | null
+  created_at: string
+  // Joined data
+  role?: Role
+  team_member?: TeamMember
+}
+
+// Extended User with role info
+export interface UserWithRole extends User {
+  role_id?: string | null
+  is_active: boolean
+  invited_at?: string | null
+  invited_by?: string | null
+  last_login_at?: string | null
+  role_details?: Role
+}
+
+export type RoleInsert = Omit<Role, 'id' | 'created_at' | 'updated_at'>
+export type UserInvitationInsert = Omit<
+  UserInvitation,
+  'id' | 'created_at' | 'role' | 'team_member'
+>
+
+// =====================================================
+// Extended DashboardWidget with drill-down
+// =====================================================
+
+export interface DashboardWidgetWithDrillDown extends DashboardWidget {
+  drill_down_report_id?: string | null
 }

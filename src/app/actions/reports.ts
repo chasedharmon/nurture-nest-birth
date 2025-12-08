@@ -467,3 +467,430 @@ function formatSourceLabel(source: string): string {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 }
+
+// ============================================================================
+// REPORT CRUD OPERATIONS
+// ============================================================================
+
+import type {
+  Report,
+  ReportInsert,
+  FilterCondition,
+  ColumnConfig,
+  AggregationConfig,
+  ObjectType,
+} from '@/lib/supabase/types'
+
+export async function createReport(
+  report: Omit<ReportInsert, 'created_by'>
+): Promise<{
+  success: boolean
+  data: Report | null
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, data: null, error: 'Not authenticated' }
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('reports')
+      .insert({
+        ...report,
+        created_by: user.id,
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return { success: true, data: data as Report }
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      error: error instanceof Error ? error.message : 'Failed to create report',
+    }
+  }
+}
+
+export async function updateReport(
+  id: string,
+  updates: Partial<Omit<Report, 'id' | 'created_at' | 'created_by'>>
+): Promise<{
+  success: boolean
+  data: Report | null
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  try {
+    const { data, error } = await supabase
+      .from('reports')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return { success: true, data: data as Report }
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      error: error instanceof Error ? error.message : 'Failed to update report',
+    }
+  }
+}
+
+export async function deleteReport(id: string): Promise<{
+  success: boolean
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  try {
+    const { error } = await supabase.from('reports').delete().eq('id', id)
+
+    if (error) throw error
+
+    return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete report',
+    }
+  }
+}
+
+export async function getReportById(id: string): Promise<{
+  success: boolean
+  data: Report | null
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  try {
+    const { data, error } = await supabase
+      .from('reports')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error) throw error
+
+    return { success: true, data: data as Report }
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      error: error instanceof Error ? error.message : 'Failed to fetch report',
+    }
+  }
+}
+
+export async function listReports(): Promise<{
+  success: boolean
+  data: Report[]
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, data: [], error: 'Not authenticated' }
+  }
+
+  try {
+    // Get reports that are org-wide, shared, or owned by user
+    const { data, error } = await supabase
+      .from('reports')
+      .select('*')
+      .or(`visibility.eq.org,visibility.eq.shared,created_by.eq.${user.id}`)
+      .order('updated_at', { ascending: false })
+
+    if (error) throw error
+
+    return { success: true, data: (data || []) as Report[] }
+  } catch (error) {
+    return {
+      success: false,
+      data: [],
+      error: error instanceof Error ? error.message : 'Failed to fetch reports',
+    }
+  }
+}
+
+// ============================================================================
+// REPORT EXECUTION
+// ============================================================================
+
+// Table name mapping for ObjectType
+const TABLE_MAP: Record<ObjectType, string> = {
+  leads: 'leads',
+  clients: 'leads', // Clients are leads with status='client'
+  invoices: 'invoices',
+  meetings: 'meetings',
+  team_members: 'team_members',
+  payments: 'payments',
+  services: 'client_services',
+}
+
+// Build Supabase filter from FilterCondition
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applyFilter(query: any, filter: FilterCondition) {
+  const { field, operator, value } = filter
+
+  switch (operator) {
+    case 'equals':
+      return query.eq(field, value)
+    case 'not_equals':
+      return query.neq(field, value)
+    case 'contains':
+      return query.ilike(field, `%${value}%`)
+    case 'not_contains':
+      return query.not(field, 'ilike', `%${value}%`)
+    case 'starts_with':
+      return query.ilike(field, `${value}%`)
+    case 'ends_with':
+      return query.ilike(field, `%${value}`)
+    case 'greater_than':
+      return query.gt(field, value)
+    case 'less_than':
+      return query.lt(field, value)
+    case 'greater_or_equal':
+      return query.gte(field, value)
+    case 'less_or_equal':
+      return query.lte(field, value)
+    case 'is_null':
+      return query.is(field, null)
+    case 'is_not_null':
+      return query.not(field, 'is', null)
+    case 'in':
+      return query.in(field, Array.isArray(value) ? value : [value])
+    case 'not_in':
+      return query.not(
+        field,
+        'in',
+        `(${Array.isArray(value) ? value.join(',') : value})`
+      )
+    case 'between':
+      if (Array.isArray(value) && value.length === 2) {
+        return query.gte(field, value[0]).lte(field, value[1])
+      }
+      return query
+    case 'this_week': {
+      const now = new Date()
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()))
+      const endOfWeek = new Date(startOfWeek)
+      endOfWeek.setDate(endOfWeek.getDate() + 6)
+      return query
+        .gte(field, startOfWeek.toISOString())
+        .lte(field, endOfWeek.toISOString())
+    }
+    case 'this_month': {
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      return query
+        .gte(field, startOfMonth.toISOString())
+        .lte(field, endOfMonth.toISOString())
+    }
+    case 'this_quarter': {
+      const now = new Date()
+      const quarter = Math.floor(now.getMonth() / 3)
+      const startOfQuarter = new Date(now.getFullYear(), quarter * 3, 1)
+      const endOfQuarter = new Date(now.getFullYear(), quarter * 3 + 3, 0)
+      return query
+        .gte(field, startOfQuarter.toISOString())
+        .lte(field, endOfQuarter.toISOString())
+    }
+    case 'last_n_days': {
+      const days =
+        typeof value === 'number' ? value : parseInt(String(value), 10)
+      const startDate = new Date()
+      startDate.setDate(startDate.getDate() - days)
+      return query.gte(field, startDate.toISOString())
+    }
+    default:
+      return query
+  }
+}
+
+// Re-export from types for backwards compatibility
+export type { ReportExecutionResult } from '@/lib/supabase/types'
+import type { ReportExecutionResult } from '@/lib/supabase/types'
+
+export async function executeReport(
+  reportId: string,
+  runtimeFilters?: FilterCondition[]
+): Promise<{
+  success: boolean
+  data: ReportExecutionResult | null
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  try {
+    // Get report config
+    const { data: report, error: reportError } = await supabase
+      .from('reports')
+      .select('*')
+      .eq('id', reportId)
+      .single()
+
+    if (reportError || !report) {
+      return { success: false, data: null, error: 'Report not found' }
+    }
+
+    return executeReportConfig(report as Report, runtimeFilters)
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      error:
+        error instanceof Error ? error.message : 'Failed to execute report',
+    }
+  }
+}
+
+export async function executeReportConfig(
+  config: {
+    object_type: ObjectType
+    columns: ColumnConfig[]
+    filters: FilterCondition[]
+    groupings?: string[]
+    aggregations?: AggregationConfig[]
+  },
+  runtimeFilters?: FilterCondition[]
+): Promise<{
+  success: boolean
+  data: ReportExecutionResult | null
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  try {
+    const tableName = TABLE_MAP[config.object_type]
+    if (!tableName) {
+      return { success: false, data: null, error: 'Invalid object type' }
+    }
+
+    // Build select columns
+    const selectColumns = config.columns
+      .filter(c => c.visible !== false)
+      .map(c => c.field)
+      .join(', ')
+
+    // Start query
+    let query = supabase
+      .from(tableName)
+      .select(selectColumns || '*', { count: 'exact' })
+
+    // Apply special filter for "clients" (leads with status='client')
+    if (config.object_type === 'clients') {
+      query = query.eq('status', 'client')
+    }
+
+    // Apply saved filters
+    const allFilters = [...(config.filters || []), ...(runtimeFilters || [])]
+    for (const filter of allFilters) {
+      query = applyFilter(query, filter) as typeof query
+    }
+
+    // Execute query
+    const { data: rows, count, error } = await query
+
+    if (error) throw error
+
+    // Calculate aggregations if specified
+    let aggregations: Record<string, number> | undefined
+    if (config.aggregations && config.aggregations.length > 0) {
+      aggregations = {}
+      for (const agg of config.aggregations) {
+        const values = (rows || [])
+          .map(r => {
+            const val = r[agg.field as keyof typeof r]
+            return typeof val === 'number' ? val : parseFloat(String(val)) || 0
+          })
+          .filter(v => !isNaN(v))
+
+        const aggType = agg.function || agg.type || 'count'
+        switch (aggType) {
+          case 'sum':
+            aggregations[agg.label] = values.reduce((a, b) => a + b, 0)
+            break
+          case 'count':
+          case 'count_distinct':
+            aggregations[agg.label] = values.length
+            break
+          case 'avg':
+            aggregations[agg.label] =
+              values.length > 0
+                ? values.reduce((a, b) => a + b, 0) / values.length
+                : 0
+            break
+          case 'min':
+            aggregations[agg.label] =
+              values.length > 0 ? Math.min(...values) : 0
+            break
+          case 'max':
+            aggregations[agg.label] =
+              values.length > 0 ? Math.max(...values) : 0
+            break
+        }
+      }
+    }
+
+    // Normalize rows to Record<string, unknown>[]
+    const normalizedRows: Record<string, unknown>[] = (rows || []).map(
+      row => row as unknown as Record<string, unknown>
+    )
+
+    // Group data if groupings specified
+    let groupedData: Record<string, Record<string, unknown>[]> | undefined
+    const groupField = config.groupings?.[0]
+    if (groupField) {
+      groupedData = {}
+      for (const row of normalizedRows) {
+        const groupKey = String(row[groupField] || 'Ungrouped')
+        if (!groupedData[groupKey]) {
+          groupedData[groupKey] = []
+        }
+        groupedData[groupKey].push(row)
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        rows: normalizedRows,
+        totalCount: count || 0,
+        aggregations,
+        groupedData,
+      },
+    }
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      error:
+        error instanceof Error ? error.message : 'Failed to execute report',
+    }
+  }
+}
