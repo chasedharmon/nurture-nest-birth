@@ -49,6 +49,7 @@ export function JourneyTimeline({
   className,
 }: JourneyTimelineProps) {
   const currentPhaseIndex = PHASE_ORDER.indexOf(currentPhase)
+  const progressPercent = ((currentPhaseIndex + 0.5) / PHASE_ORDER.length) * 100
 
   // Group milestones by phase
   const milestonesByPhase = milestones.reduce(
@@ -62,19 +63,34 @@ export function JourneyTimeline({
   )
 
   return (
-    <div className={cn('w-full', className)}>
+    <div
+      className={cn('w-full', className)}
+      role="navigation"
+      aria-label="Journey progress timeline"
+    >
+      {/* Screen reader summary */}
+      <div className="sr-only">
+        Your journey is currently in the {PHASE_CONFIG[currentPhase].label}{' '}
+        phase. You are {Math.round(progressPercent)}% through your journey.
+      </div>
+
       {/* Desktop: Horizontal Timeline */}
       <div className="hidden md:block">
         <div className="relative">
           {/* Progress bar background */}
-          <div className="absolute left-0 right-0 top-6 h-1 bg-muted" />
+          <div
+            className="absolute left-0 right-0 top-6 h-1 bg-muted"
+            role="progressbar"
+            aria-valuenow={Math.round(progressPercent)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Journey progress"
+          />
 
           {/* Progress bar fill */}
           <div
             className="absolute left-0 top-6 h-1 bg-primary transition-all duration-500"
-            style={{
-              width: `${((currentPhaseIndex + 0.5) / PHASE_ORDER.length) * 100}%`,
-            }}
+            style={{ width: `${progressPercent}%` }}
           />
 
           {/* Phase nodes */}
@@ -152,9 +168,7 @@ export function JourneyTimeline({
           {/* Progress fill */}
           <div
             className="absolute left-6 top-0 w-0.5 bg-primary transition-all duration-500"
-            style={{
-              height: `${((currentPhaseIndex + 0.5) / PHASE_ORDER.length) * 100}%`,
-            }}
+            style={{ height: `${progressPercent}%` }}
           />
 
           {/* Phase nodes */}

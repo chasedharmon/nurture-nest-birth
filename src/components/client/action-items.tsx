@@ -97,21 +97,29 @@ export function ActionItems({ items, className }: ActionItemsProps) {
               return (
                 <div
                   key={item.id}
-                  className="group flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
+                  className="group flex items-center gap-3 rounded-lg border border-border p-3 transition-all duration-200 hover:bg-muted/50 hover:shadow-sm active:scale-[0.99]"
                 >
-                  {/* Checkbox */}
+                  {/* Checkbox - 44px touch target */}
                   <button
                     onClick={() => handleComplete(item.id)}
                     disabled={isPending}
+                    aria-label={`Mark "${item.title}" as complete`}
                     className={cn(
-                      'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
-                      'border-muted-foreground/30 hover:border-primary hover:bg-primary/10',
-                      isCompleting && 'border-primary bg-primary/10'
+                      'flex h-11 w-11 shrink-0 items-center justify-center -ml-1',
+                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg'
                     )}
                   >
-                    {isCompleting ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                    ) : null}
+                    <span
+                      className={cn(
+                        'flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all duration-200',
+                        'border-muted-foreground/30 hover:border-primary hover:bg-primary/10 hover:scale-110',
+                        isCompleting && 'border-primary bg-primary/10 scale-110'
+                      )}
+                    >
+                      {isCompleting ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                      ) : null}
+                    </span>
                   </button>
 
                   {/* Icon */}
@@ -137,13 +145,13 @@ export function ActionItems({ items, className }: ActionItemsProps) {
                     )}
                   </div>
 
-                  {/* Action button */}
+                  {/* Action button - always visible on mobile, hover on desktop */}
                   {item.action_url && (
                     <Link href={item.action_url}>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="shrink-0 h-9 min-w-[44px] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 hover:bg-primary/10"
                       >
                         Go
                         <ChevronRight className="ml-1 h-4 w-4" />

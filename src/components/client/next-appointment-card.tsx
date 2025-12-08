@@ -168,31 +168,36 @@ export function NextAppointmentCard({
           </div>
         )}
 
-        {/* Action buttons */}
+        {/* Action buttons - 44px minimum height for touch */}
         <div className="mt-4 flex gap-2">
-          <a
-            href={generateCalendarUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1"
+          <Button
+            asChild
+            variant="outline"
+            className="flex-1 h-11 transition-all duration-200 hover:bg-primary/5 hover:border-primary"
           >
-            <Button variant="outline" className="w-full" size="sm">
-              <Calendar className="mr-2 h-4 w-4" />
-              Add to Calendar
-            </Button>
-          </a>
-          {isVirtual && meeting.meeting_link && (
             <a
-              href={meeting.meeting_link}
+              href={generateCalendarUrl()}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1"
             >
-              <Button className="w-full" size="sm">
+              <Calendar className="mr-2 h-4 w-4" />
+              Add to Calendar
+            </a>
+          </Button>
+          {isVirtual && meeting.meeting_link && (
+            <Button
+              asChild
+              className="flex-1 h-11 transition-all duration-200 hover:shadow-md"
+            >
+              <a
+                href={meeting.meeting_link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Video className="mr-2 h-4 w-4" />
                 Join Meeting
-              </Button>
-            </a>
+              </a>
+            </Button>
           )}
         </div>
       </CardContent>

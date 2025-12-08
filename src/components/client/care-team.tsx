@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Mail, Phone, User } from 'lucide-react'
 import type { AssignmentRole } from '@/lib/supabase/types'
+import { cn } from '@/lib/utils'
 
 interface CareTeamProvider {
   id: string
@@ -67,11 +69,14 @@ export function CareTeam({ careTeam }: CareTeamProps) {
           Your Care Team
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         {careTeam.map(member => (
           <div
             key={member.id}
-            className="flex flex-col sm:flex-row gap-4 p-4 rounded-lg bg-muted/50"
+            className={cn(
+              'flex flex-col sm:flex-row gap-4 p-4 rounded-lg bg-muted/50',
+              'transition-all duration-200 hover:bg-muted/70 hover:shadow-sm'
+            )}
           >
             {/* Avatar */}
             <div className="flex-shrink-0">
@@ -137,26 +142,34 @@ export function CareTeam({ careTeam }: CareTeamProps) {
                   </p>
                 )}
 
-              {/* Contact Info */}
+              {/* Contact Buttons - Prominent with proper touch targets */}
               {(member.provider.email || member.provider.phone) && (
-                <div className="flex flex-wrap gap-4 pt-2">
+                <div className="flex flex-wrap gap-2 pt-3">
                   {member.provider.email && (
-                    <a
-                      href={`mailto:${member.provider.email}`}
-                      className="flex items-center gap-1 text-sm text-primary hover:underline"
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="h-10 min-w-[44px] gap-2 transition-all duration-200 hover:bg-primary/10 hover:border-primary"
                     >
-                      <Mail className="h-4 w-4" />
-                      {member.provider.email}
-                    </a>
+                      <a href={`mailto:${member.provider.email}`}>
+                        <Mail className="h-4 w-4" />
+                        <span className="hidden sm:inline">Email</span>
+                      </a>
+                    </Button>
                   )}
                   {member.provider.phone && (
-                    <a
-                      href={`tel:${member.provider.phone}`}
-                      className="flex items-center gap-1 text-sm text-primary hover:underline"
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="h-10 min-w-[44px] gap-2 transition-all duration-200 hover:bg-primary/10 hover:border-primary"
                     >
-                      <Phone className="h-4 w-4" />
-                      {member.provider.phone}
-                    </a>
+                      <a href={`tel:${member.provider.phone}`}>
+                        <Phone className="h-4 w-4" />
+                        <span className="hidden sm:inline">Call</span>
+                      </a>
+                    </Button>
                   )}
                 </div>
               )}
