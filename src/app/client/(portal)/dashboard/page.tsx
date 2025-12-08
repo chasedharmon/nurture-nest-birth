@@ -5,15 +5,26 @@ import { getClientVisibleDocuments } from '@/app/actions/documents'
 import { getClientPaymentSummary } from '@/app/actions/payments'
 import { getClientCareTeam } from '@/app/actions/team'
 import {
+  getClientJourneyData,
+  updateLastPortalVisit,
+} from '@/app/actions/client-journey'
+import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { CareTeam } from '@/components/client/care-team'
+import { JourneyTimeline } from '@/components/client/journey-timeline'
+import { ActionItems } from '@/components/client/action-items'
+import { NextAppointmentCard } from '@/components/client/next-appointment-card'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { FileText, DollarSign, Calendar, Baby, CreditCard } from 'lucide-react'
+import type { JourneyPhase, Meeting } from '@/lib/supabase/types'
 
 export default async function ClientDashboardPage() {
   const session = await getClientSession()
@@ -22,6 +33,9 @@ export default async function ClientDashboardPage() {
     return null // Layout will redirect
   }
 
+  // Update last portal visit
+  updateLastPortalVisit(session.clientId)
+
   // Fetch all dashboard data in parallel
   const [
     servicesResult,
@@ -29,31 +43,42 @@ export default async function ClientDashboardPage() {
     documentsResult,
     paymentSummaryResult,
     careTeamResult,
+    journeyResult,
   ] = await Promise.all([
     getClientServices(session.clientId).catch(() => null),
     getClientMeetings(session.clientId).catch(() => null),
     getClientVisibleDocuments(session.clientId).catch(() => null),
     getClientPaymentSummary(session.clientId).catch(() => null),
     getClientCareTeam(session.clientId).catch(() => null),
+    getClientJourneyData(session.clientId).catch(() => null),
   ])
 
-  // Ensure we have arrays (handle null/undefined/errors)
+  // Ensure we have arrays
   const services = Array.isArray(servicesResult) ? servicesResult : []
   const meetings = Array.isArray(meetingsResult) ? meetingsResult : []
   const documents = Array.isArray(documentsResult) ? documentsResult : []
 
-  // Ensure paymentSummary has all required properties with defaults
+  // Payment summary
   const paymentSummary =
     paymentSummaryResult && 'summary' in paymentSummaryResult
       ? paymentSummaryResult.summary
-      : {
-          total: 0,
-          paid: 0,
-          pending: 0,
-          outstanding: 0,
-        }
+      : { total: 0, paid: 0, pending: 0, outstanding: 0 }
 
-  // Filter upcoming meetings
+  // Care team
+  const careTeam =
+    careTeamResult && 'data' in careTeamResult ? careTeamResult.data || [] : []
+
+  // Journey data
+  const journeyData = journeyResult?.success ? journeyResult.data : null
+  const actionItems = journeyData?.actionItems || []
+  const milestones = journeyData?.milestones || []
+  const currentPhase: JourneyPhase = journeyData?.currentPhase || 'consultation'
+  const progress = journeyData?.progress || {
+    actionItems: { total: 0, completed: 0, percentage: 0 },
+    milestones: { total: 0, completed: 0, percentage: 0 },
+  }
+
+  // Get next upcoming meeting
   const upcomingMeetings = meetings
     .filter(
       m => m.status === 'scheduled' && new Date(m.scheduled_at) > new Date()
@@ -62,12 +87,19 @@ export default async function ClientDashboardPage() {
       (a, b) =>
         new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
     )
-    .slice(0, 3)
+
+  const nextMeeting: Meeting | null =
+    upcomingMeetings.length > 0 ? upcomingMeetings[0] : null
+
+  // Get primary doula name
+  const primaryDoula = careTeam.find(
+    member => member.assignment_role === 'primary'
+  )
 
   // Get active services
   const activeServices = services.filter(s => s.status === 'active')
 
-  // Get recent documents
+  // Recent documents
   const recentDocuments = documents
     .sort(
       (a, b) =>
@@ -75,297 +107,332 @@ export default async function ClientDashboardPage() {
     )
     .slice(0, 3)
 
-  // Extract care team
-  const careTeam =
-    careTeamResult && 'data' in careTeamResult ? careTeamResult.data || [] : []
+  // Calculate days until due date
+  const daysUntilDue = session.expectedDueDate
+    ? Math.ceil(
+        (new Date(session.expectedDueDate).getTime() - new Date().getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
+    : null
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">
-          Welcome back, {session.name?.split(' ')[0]}!
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Here&apos;s what&apos;s happening with your doula care
-        </p>
+    <div className="space-y-6">
+      {/* Welcome Header with Quick Status */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+            Welcome back, {session.name?.split(' ')[0]}!
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {currentPhase === 'consultation'
+              ? 'Getting to know each other'
+              : currentPhase === 'prenatal'
+                ? 'Preparing for your birth'
+                : currentPhase === 'birth'
+                  ? 'Your journey continues'
+                  : 'Supporting your postpartum'}
+          </p>
+        </div>
+
+        {/* Quick status badges */}
+        <div className="flex flex-wrap items-center gap-2">
+          {session.expectedDueDate &&
+            !session.actualBirthDate &&
+            daysUntilDue && (
+              <Badge
+                variant={daysUntilDue <= 14 ? 'default' : 'secondary'}
+                className="text-sm px-3 py-1"
+              >
+                <Baby className="mr-1 h-3 w-3" />
+                {daysUntilDue <= 0
+                  ? 'Due any day!'
+                  : daysUntilDue === 1
+                    ? '1 day until due date'
+                    : `${daysUntilDue} days until due date`}
+              </Badge>
+            )}
+          {paymentSummary.outstanding > 0 && (
+            <Badge variant="outline" className="text-sm px-3 py-1">
+              <DollarSign className="mr-1 h-3 w-3" />$
+              {paymentSummary.outstanding.toLocaleString()} due
+            </Badge>
+          )}
+        </div>
       </div>
 
-      {/* Due Date Card (if expecting) */}
-      {session.expectedDueDate && !session.actualBirthDate && (
-        <Card className="bg-gradient-to-r from-secondary/10 to-primary/10 border-secondary/30">
-          <CardHeader>
-            <CardTitle className="text-foreground">Your Journey</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg text-muted-foreground">
-              Expected Due Date:{' '}
-              <span className="font-semibold text-foreground">
-                {format(new Date(session.expectedDueDate), 'MMMM d, yyyy')}
-              </span>
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {/* Journey Timeline */}
+      <JourneyTimeline currentPhase={currentPhase} milestones={milestones} />
 
-      {/* Birth Announcement (if baby arrived) */}
-      {session.actualBirthDate && (
-        <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/30">
-          <CardHeader>
-            <CardTitle className="text-foreground">Congratulations!</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg text-muted-foreground">
-              Birth Date:{' '}
-              <span className="font-semibold text-foreground">
-                {format(new Date(session.actualBirthDate), 'MMMM d, yyyy')}
-              </span>
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {/* Main Dashboard Grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left Column - Next Appointment & Action Items */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Next Appointment */}
+          <NextAppointmentCard
+            meeting={nextMeeting}
+            providerName={primaryDoula?.provider?.display_name || undefined}
+          />
 
-      {/* Care Team */}
-      <CareTeam careTeam={careTeam} />
+          {/* Action Items */}
+          <ActionItems items={actionItems} />
+        </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Services
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeServices.length}</div>
-          </CardContent>
-        </Card>
+        {/* Right Column - Care Team & Payment */}
+        <div className="space-y-6">
+          {/* Care Team */}
+          <CareTeam careTeam={careTeam} />
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Upcoming Meetings
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{upcomingMeetings.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Documents
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{documents.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Balance
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${paymentSummary.outstanding.toLocaleString()}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming Meetings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Meetings</CardTitle>
-            <CardDescription>Your scheduled appointments</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {upcomingMeetings.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No upcoming meetings
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {upcomingMeetings.map(meeting => (
-                  <div
-                    key={meeting.id}
-                    className="flex items-start justify-between p-3 rounded-lg bg-muted/50"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {meeting.meeting_type
-                          .replace('_', ' ')
-                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {format(
-                          new Date(meeting.scheduled_at),
-                          'MMM d, yyyy • h:mm a'
-                        )}
-                      </p>
-                      {meeting.location && (
-                        <p className="text-sm text-muted-foreground">
-                          {meeting.location}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                <Link
-                  href="/client/meetings"
-                  className="text-sm text-primary hover:underline block"
-                >
-                  View all meetings →
-                </Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Active Services */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Services</CardTitle>
-            <CardDescription>Active care packages</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {activeServices.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No active services
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {activeServices.map(service => (
-                  <div key={service.id} className="p-3 rounded-lg bg-muted/50">
-                    <p className="font-medium text-foreground">
-                      {service.service_type
-                        .replace('_', ' ')
-                        .replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                    </p>
-                    {service.package_name && (
-                      <p className="text-sm text-muted-foreground">
-                        {service.package_name}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="inline-flex rounded-full px-2 py-1 text-xs font-medium bg-primary/10 text-primary">
-                        Active
-                      </span>
-                      {service.contract_signed && (
-                        <span className="text-xs text-primary">
-                          ✓ Contract Signed
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                <Link
-                  href="/client/services"
-                  className="text-sm text-primary hover:underline block"
-                >
-                  View all services →
-                </Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recent Documents */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Documents</CardTitle>
-            <CardDescription>Your latest files and resources</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {recentDocuments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No documents available
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {recentDocuments.map(doc => (
-                  <div
-                    key={doc.id}
-                    className="flex items-start justify-between p-3 rounded-lg bg-muted/50"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">{doc.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {doc.document_type
-                          .replace('_', ' ')
-                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                      </p>
-                    </div>
-                    <Link
-                      href={doc.file_url}
-                      target="_blank"
-                      className="text-sm text-primary hover:underline"
-                    >
-                      Download
-                    </Link>
-                  </div>
-                ))}
-                <Link
-                  href="/client/documents"
-                  className="text-sm text-primary hover:underline block"
-                >
-                  View all documents →
-                </Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Payment Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment Summary</CardTitle>
-            <CardDescription>Your account balance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+          {/* Payment Summary */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                Payment Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">
                   Total Amount
                 </span>
-                <span className="font-semibold">
+                <span className="font-medium">
                   ${paymentSummary.total.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Paid</span>
-                <span className="font-semibold text-primary">
+                <span className="font-medium text-green-600 dark:text-green-400">
                   ${paymentSummary.paid.toLocaleString()}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Pending</span>
-                <span className="font-semibold text-secondary">
-                  ${paymentSummary.pending.toLocaleString()}
-                </span>
-              </div>
-              <div className="border-t pt-3 flex justify-between items-center">
-                <span className="font-medium">Outstanding Balance</span>
-                <span className="text-xl font-bold text-secondary">
-                  ${paymentSummary.outstanding.toLocaleString()}
-                </span>
-              </div>
-              <Link
-                href="/client/payments"
-                className="text-sm text-primary hover:underline block"
-              >
-                View payment history →
+              {paymentSummary.outstanding > 0 && (
+                <div className="border-t pt-3 flex justify-between items-center">
+                  <span className="font-medium">Balance Due</span>
+                  <span className="text-lg font-bold text-primary">
+                    ${paymentSummary.outstanding.toLocaleString()}
+                  </span>
+                </div>
+              )}
+              <Link href="/client/payments" className="block pt-2">
+                <Button variant="outline" size="sm" className="w-full">
+                  View Payment History
+                </Button>
               </Link>
-            </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Bottom Section - Services, Documents, Upcoming Meetings */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Your Services */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Your Services</CardTitle>
+            <CardDescription>{activeServices.length} active</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {activeServices.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                No active services
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {activeServices.slice(0, 2).map(service => (
+                  <div key={service.id} className="p-3 rounded-lg bg-muted/50">
+                    <p className="font-medium text-sm">
+                      {service.service_type
+                        .split('_')
+                        .map(
+                          (word: string) =>
+                            word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(' ')}
+                    </p>
+                    {service.package_name && (
+                      <p className="text-xs text-muted-foreground">
+                        {service.package_name}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="default" className="text-xs">
+                        Active
+                      </Badge>
+                      {service.contract_signed && (
+                        <span className="text-xs text-green-600 dark:text-green-400">
+                          Contract Signed
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {activeServices.length > 2 && (
+                  <p className="text-xs text-muted-foreground">
+                    +{activeServices.length - 2} more
+                  </p>
+                )}
+              </div>
+            )}
+            <Link href="/client/services" className="block pt-3">
+              <Button variant="ghost" size="sm" className="w-full">
+                View All Services
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Recent Documents */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Documents
+            </CardTitle>
+            <CardDescription>{documents.length} available</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {recentDocuments.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                No documents yet
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {recentDocuments.map(doc => (
+                  <Link
+                    key={doc.id}
+                    href={doc.file_url}
+                    target="_blank"
+                    className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {doc.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {doc.document_type
+                          .split('_')
+                          .map(
+                            (word: string) =>
+                              word.charAt(0).toUpperCase() + word.slice(1)
+                          )
+                          .join(' ')}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-xs shrink-0">
+                      View
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            )}
+            <Link href="/client/documents" className="block pt-3">
+              <Button variant="ghost" size="sm" className="w-full">
+                View All Documents
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Upcoming Meetings */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Upcoming Meetings
+            </CardTitle>
+            <CardDescription>
+              {upcomingMeetings.length} scheduled
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {upcomingMeetings.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                No upcoming meetings
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {upcomingMeetings.slice(0, 3).map(meeting => (
+                  <div key={meeting.id} className="p-2 rounded-md bg-muted/50">
+                    <p className="text-sm font-medium">
+                      {meeting.meeting_type
+                        .split('_')
+                        .map(
+                          (word: string) =>
+                            word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(' ')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(
+                        new Date(meeting.scheduled_at),
+                        'MMM d, yyyy • h:mm a'
+                      )}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <Link href="/client/meetings" className="block pt-3">
+              <Button variant="ghost" size="sm" className="w-full">
+                View All Meetings
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
+
+      {/* Progress Overview */}
+      {(progress.actionItems.total > 0 || progress.milestones.total > 0) && (
+        <Card className="bg-muted/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Your Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {progress.actionItems.total > 0 && (
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-muted-foreground">Action Items</span>
+                    <span className="font-medium">
+                      {progress.actionItems.completed} /{' '}
+                      {progress.actionItems.total}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{
+                        width: `${progress.actionItems.percentage}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              {progress.milestones.total > 0 && (
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-muted-foreground">
+                      Journey Milestones
+                    </span>
+                    <span className="font-medium">
+                      {progress.milestones.completed} /{' '}
+                      {progress.milestones.total}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-secondary transition-all"
+                      style={{
+                        width: `${progress.milestones.percentage}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

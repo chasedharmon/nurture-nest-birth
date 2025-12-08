@@ -7,9 +7,8 @@ import {
   getListViews,
   getListViewById,
   executeListViewQuery,
-  getDefaultColumns,
-  getFilterOptions,
 } from '@/app/actions/list-views'
+import { getDefaultColumns, getFilterOptions } from '@/lib/list-view-utils'
 import type { Lead, FilterCondition, SortConfig } from '@/lib/supabase/types'
 import { Plus } from 'lucide-react'
 
