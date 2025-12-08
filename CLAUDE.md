@@ -1,8 +1,11 @@
 # Nurture Nest Birth - Doula CRM
 
-## Next Task
+## Project Status
 
-**Create `contract_signatures` table in Supabase** - This table is referenced by the Contracts tab but doesn't exist, causing console errors on every client detail page. See "Missing Tables" section below for details.
+**Current Phase**: Phase 6 - Production Hardening
+**Last Updated**: December 7, 2024
+
+All core features complete (Phases 1-5). Now focusing on CI/CD, cleanup, and production readiness.
 
 ## Project Overview
 
@@ -12,9 +15,10 @@ A CRM and client portal for a doula practice in Kearney, Nebraska. Built with Ne
 
 - **Framework**: Next.js 16 with Turbopack
 - **Database**: Supabase (PostgreSQL)
-- **Auth**: Supabase Auth
-- **Styling**: Tailwind CSS
-- **Testing**: Playwright E2E tests
+- **Auth**: Supabase Auth (admin) + Magic Link (clients)
+- **Styling**: Tailwind CSS 4
+- **Testing**: Playwright E2E (10 suites) + Vitest unit tests
+- **CI/CD**: GitHub Actions
 
 ## Development Commands
 
@@ -22,17 +26,20 @@ A CRM and client portal for a doula practice in Kearney, Nebraska. Built with Ne
 pnpm dev          # Start dev server
 pnpm build        # Production build
 pnpm test:e2e     # Run Playwright tests
+pnpm test:run     # Run unit tests
 pnpm lint         # Run ESLint
 pnpm type-check   # TypeScript check
 ```
 
-## Key Files
+## Key Directories
 
-- `src/app/actions/team.ts` - Team management server actions (FK queries fixed)
-- `src/components/admin/team/client-team-assignments.tsx` - Team assignments UI component
-- `src/app/admin/team/` - Team management admin pages
-- `tests/e2e/client-team-assignments.spec.ts` - E2E tests for team assignments
-- `supabase/migrations/` - Database migrations
+- `src/app/actions/` - Server actions (leads, team, invoices, contracts, etc.)
+- `src/app/admin/` - Admin CRM dashboard
+- `src/app/client/` - Client portal
+- `src/components/` - React components
+- `supabase/migrations/` - Database migrations (15 files)
+- `tests/e2e/` - Playwright E2E tests
+- `.github/workflows/` - CI/CD pipelines
 
 ## Database Notes
 
@@ -53,39 +60,53 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - `lead_status`: 'new', 'contacted', 'scheduled', 'client', 'lost' (NOT 'active')
 - `activity_type`: 'note', 'email_sent', 'call', 'meeting', 'status_change', 'system', 'document', 'invoice', 'payment', 'contract', 'team_assigned'
 
-### Missing Tables (known issues)
-
-- `contract_signatures` - Table not yet created in Supabase (causes console errors on Contracts tab)
-
 ## Test Credentials
 
 - Email: chase.d.harmon@gmail.com
 - Password: TestPassword123!
 
-## Recent Changes (Dec 2024)
+## Completed Features
 
-### Team Management Feature (Phase 5) - COMPLETE
+### Phase 1-2: Foundation & Lead Management
 
-- Team members table with roles (owner, admin, provider, assistant)
-- Client assignments (primary, backup, support roles)
+- Database schema with RLS policies
+- Admin dashboard with stats
+- Lead capture (contact form, newsletter)
+- Lead detail pages with status management
+- Activity timeline and notes
+
+### Phase 3: Enhanced CRM & Client Portal
+
+- Client services, meetings, documents, payments tabs
+- Magic link authentication for clients
+- Client dashboard, services view, documents, payments
+
+### Phase 4: Self-Service & Notifications
+
+- Email system (Resend) with templates
+- Intake forms with dynamic JSON schema
+- Invoice generation with auto-numbering
+- Contract templates and e-signatures
+- File upload to Supabase Storage
+
+### Phase 5: Team Management
+
+- Team members with roles (owner, admin, provider, assistant)
+- Client assignments (primary, backup, support)
 - Service assignments with revenue sharing
 - Time tracking and on-call scheduling
-- E2E tests for team assignments (21 tests)
 
-### Fixed Issues
+### Phase 6: Production Hardening (Current)
 
-1. PGRST201 FK ambiguity errors - resolved with explicit FK names in team.ts
-2. Activity trigger using wrong column name ('description' -> 'content')
-3. Missing 'team_assigned' enum value in activity_type
-4. Turbopack phantom module cache bug - clear with `rm -rf .next node_modules/.cache`
+- GitHub Actions CI/CD pipeline
+- File cleanup and archive organization
+- Migration file naming consistency
 
 ## Pending Tasks
 
-### High Priority
-
-- [ ] Create `contract_signatures` table in Supabase (referenced but missing - causes console errors)
-
 ### Site Configuration (src/config/site.ts)
+
+When ready to launch:
 
 - [ ] Update owner name (line 15)
 - [ ] Update established year (line 16)
@@ -94,7 +115,6 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - [ ] Update Calendly link (line 24)
 - [ ] Add OG image (line 109)
 - [ ] Update Twitter/X handle when account exists (line 110)
-- [ ] Add social media URLs when accounts are created
 
 ### Other
 
@@ -102,9 +122,24 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - [ ] Replace sample resource fileUrls with actual hosted PDFs (src/app/resources/page.tsx:27)
 - [ ] Integrate newsletter with email service (src/app/actions/newsletter.ts:45)
 
+## GitHub Actions CI/CD
+
+The project now has automated CI/CD:
+
+```
+.github/workflows/ci.yml
+```
+
+**Required GitHub Secrets:**
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `TEST_ADMIN_PASSWORD`
+
 ## Turbopack HMR Bug
 
-There's a known Turbopack caching issue causing phantom module references (`src/app/actions/data`). This is a dev environment issue, not a code bug. Clear cache with:
+There's a known Turbopack caching issue causing phantom module references. Clear cache with:
 
 ```bash
 rm -rf .next node_modules/.cache

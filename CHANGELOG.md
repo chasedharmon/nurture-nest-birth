@@ -2,7 +2,69 @@
 
 All notable changes to Nurture Nest Birth are documented in this file.
 
-## [Phase 4.1] - 2025-12-08 (In Progress)
+## [Phase 6] - 2025-12-07
+
+### Added - Production Hardening
+
+**CI/CD Pipeline**
+
+- GitHub Actions workflow (`.github/workflows/ci.yml`)
+- Automated linting and type checking on PRs
+- Unit tests with Vitest
+- E2E tests with Playwright
+- Production build verification
+
+**Database**
+
+- `contract_signatures` table for e-signature tracking
+- Activity logging triggers for contract signatures
+
+### Changed
+
+- Archived Phase 4 documentation to `docs/archive/`
+- Renamed migration files for consistent timestamp ordering
+- Updated `CLAUDE.md` with current project status
+
+### Fixed
+
+- Missing `contract_signatures` table (was causing console errors on Contracts tab)
+
+---
+
+## [Phase 5] - 2025-12-07
+
+### Added - Team Management
+
+**Team Members**
+
+- `team_members` table with roles (owner, admin, provider, assistant)
+- Team member profiles with certifications and specializations
+- Admin UI for team management (`/admin/team`)
+
+**Client Assignments**
+
+- `client_assignments` table linking clients to team members
+- Assignment roles: primary, backup, support
+- Client care team view in client portal
+
+**Service Assignments**
+
+- `service_assignments` table for provider-service mapping
+- Revenue sharing percentages per assignment
+
+**Time Tracking**
+
+- `time_entries` table for billable hours
+- On-call scheduling with `oncall_schedule` table
+
+### Testing
+
+- 21 E2E tests for team assignments
+- Tests for care team visibility in client portal
+
+---
+
+## [Phase 4] - 2025-12-08
 
 ### Added - Foundation for Self-Service & Notifications
 
@@ -192,11 +254,16 @@ Extended tables:
 
 ## Future Roadmap
 
-### Phase 3.4+ (Planned)
+### Phase 7 (Planned) - Enhanced Features
 
-- File upload integration with Supabase Storage
-- Email notifications for meetings (Resend)
-- Calendar integration
-- Invoice generation from payments
-- Stripe payment processing
-- Client profile editing
+- Stripe payment integration
+- Calendar integration (Calendly API or native)
+- Newsletter integration (ConvertKit/Mailchimp)
+- Production deployment guide
+
+### Phase 8+ (Future)
+
+- SMS notifications (Twilio)
+- In-app messaging
+- Revenue dashboards
+- Mobile PWA
