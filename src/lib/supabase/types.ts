@@ -851,19 +851,22 @@ export type ClientJourneyMilestoneInsert = Omit<
 
 export interface DashboardKPIs {
   totalLeads: number
-  newLeads: number
+  newLeadsThisMonth: number
+  newLeadsLastMonth: number
+  activeClients: number
   conversionRate: number
-  revenuePipeline: number
+  totalRevenue: number
+  pendingRevenue: number
+  revenueThisMonth: number
+  revenueLastMonth: number
   upcomingBirths: number
   overdueInvoices: number
-  activeClients: number
-  totalRevenue: number
+  meetingsThisWeek: number
 }
 
 export interface LeadFunnelData {
-  stage: LeadStatus
+  stage: string
   count: number
-  label: string
 }
 
 export interface RevenueByMonth {
