@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface ClientDetailTabsProps {
@@ -13,6 +14,8 @@ interface ClientDetailTabsProps {
   contractsTab: React.ReactNode
   activityTab: React.ReactNode
   notesTab: React.ReactNode
+  defaultTab?: string
+  onTabChange?: (tab: string) => void
 }
 
 export function ClientDetailTabs({
@@ -26,9 +29,23 @@ export function ClientDetailTabs({
   contractsTab,
   activityTab,
   notesTab,
+  defaultTab = 'overview',
+  onTabChange,
 }: ClientDetailTabsProps) {
+  const [activeTab, setActiveTab] = useState(defaultTab)
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    onTabChange?.(value)
+  }
+
   return (
-    <Tabs defaultValue="overview" className="w-full">
+    <Tabs
+      defaultValue="overview"
+      value={activeTab}
+      onValueChange={handleTabChange}
+      className="w-full"
+    >
       <TabsList className="w-full justify-start overflow-x-auto">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="team">Team</TabsTrigger>

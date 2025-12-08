@@ -2,12 +2,16 @@
 
 import { format } from 'date-fns'
 import { StatusBadge } from '@/components/admin/status-badge'
-import type { Lead } from '@/lib/supabase/types'
+import type { Lead, ClientAssignment } from '@/lib/supabase/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { UserPlus, Users, AlertCircle } from 'lucide-react'
 
 interface ClientOverviewProps {
   lead: Lead
+  assignments?: ClientAssignment[]
+  onAssignClick?: () => void
 }
 
 const sourceLabels = {
@@ -16,9 +20,109 @@ const sourceLabels = {
   manual: 'Manual Entry',
 }
 
-export function ClientOverview({ lead }: ClientOverviewProps) {
+const roleColors = {
+  primary:
+    'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+  backup: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+  support:
+    'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300',
+}
+
+const roleLabels = {
+  primary: 'Primary',
+  backup: 'Backup',
+  support: 'Support',
+}
+
+export function ClientOverview({
+  lead,
+  assignments = [],
+  onAssignClick,
+}: ClientOverviewProps) {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
+      {/* Care Team - Prominent at top */}
+      <Card
+        className={`lg:col-span-2 ${assignments.length === 0 ? 'border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20' : ''}`}
+      >
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Care Team
+            {assignments.length === 0 && (
+              <Badge
+                variant="outline"
+                className="ml-2 border-amber-500 text-amber-600 dark:border-amber-400 dark:text-amber-400"
+              >
+                <AlertCircle className="h-3 w-3 mr-1" />
+                Unassigned
+              </Badge>
+            )}
+          </CardTitle>
+          {onAssignClick && (
+            <Button size="sm" onClick={onAssignClick}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              {assignments.length === 0 ? 'Assign Provider' : 'Manage Team'}
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent>
+          {assignments.length === 0 ? (
+            <div className="flex items-center gap-3 text-amber-700 dark:text-amber-300">
+              <p className="text-sm">
+                No providers assigned yet. Assign a doula to start managing this
+                client&apos;s care.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-3">
+              {assignments.map(assignment => {
+                const member = assignment.team_member
+                if (!member) return null
+
+                return (
+                  <div
+                    key={assignment.id}
+                    className="flex items-center gap-2 rounded-lg border bg-card p-2 pr-3"
+                  >
+                    {member.avatar_url ? (
+                      <img
+                        src={member.avatar_url}
+                        alt={member.display_name}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-medium">
+                        {member.display_name
+                          .split(' ')
+                          .map(n => n[0])
+                          .join('')
+                          .slice(0, 2)
+                          .toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-medium">
+                        {member.display_name}
+                      </p>
+                      <Badge
+                        variant="secondary"
+                        className={`text-xs ${roleColors[assignment.assignment_role as keyof typeof roleColors]}`}
+                      >
+                        {
+                          roleLabels[
+                            assignment.assignment_role as keyof typeof roleLabels
+                          ]
+                        }
+                      </Badge>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
       {/* Contact Information */}
       <Card>
         <CardHeader>
