@@ -2,10 +2,16 @@
 
 ## Project Status
 
-**Current Phase**: Phase 6 - Production Hardening
-**Last Updated**: December 7, 2024
+**Current Phase**: Phase 6+ - Admin Enhancements (Salesforce-like features)
+**Last Updated**: December 8, 2024
 
-All core features complete (Phases 1-5). Now focusing on CI/CD, cleanup, and production readiness.
+All core features complete (Phases 1-5). Now adding Salesforce-style admin enhancements:
+
+- Report Builder UI (COMPLETE)
+- Dashboard Builder UI (IN PROGRESS)
+- Admin Setup area
+- Roles & Permissions management
+- User/Employee management
 
 ## Project Overview
 
@@ -33,11 +39,14 @@ pnpm type-check   # TypeScript check
 
 ## Key Directories
 
-- `src/app/actions/` - Server actions (leads, team, invoices, contracts, etc.)
+- `src/app/actions/` - Server actions (leads, team, invoices, contracts, reports, etc.)
 - `src/app/admin/` - Admin CRM dashboard
+- `src/app/admin/reports/` - Report Builder pages (new, [id], [id]/edit)
+- `src/app/admin/dashboards/` - Dashboard Builder pages
 - `src/app/client/` - Client portal
+- `src/components/admin/reports/` - Report Builder components (wizard, filters, preview)
 - `src/components/` - React components
-- `supabase/migrations/` - Database migrations (15 files)
+- `supabase/migrations/` - Database migrations (15+ files)
 - `tests/e2e/` - Playwright E2E tests
 - `.github/workflows/` - CI/CD pipelines
 
@@ -96,11 +105,36 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - Service assignments with revenue sharing
 - Time tracking and on-call scheduling
 
-### Phase 6: Production Hardening (Current)
+### Phase 6: Production Hardening
 
 - GitHub Actions CI/CD pipeline
 - File cleanup and archive organization
 - Migration file naming consistency
+
+### Phase 6+: Admin Enhancements (Current)
+
+**Report Builder UI** (COMPLETE):
+
+- Visual step-by-step wizard: Source → Fields → Filter → Group → Calc → Chart
+- Drag-and-drop column ordering with @dnd-kit
+- Filter builder with picklist dropdowns for select fields
+- Real-time preview with formula explanations
+- Save reports with visibility settings (private/shared/org)
+- View saved reports with data tables and aggregations
+- Components in `src/components/admin/reports/`
+- Pages in `src/app/admin/reports/`
+
+**Dashboard Builder UI** (PENDING):
+
+- Dashboard page scaffolding created at `src/app/admin/dashboards/page.tsx`
+- Will allow drag-and-drop widget placement
+- Widgets connected to saved reports
+
+**Admin Setup Area** (PENDING):
+
+- Centralized settings hub
+- Roles & Permissions management
+- User/Employee management
 
 ## Pending Tasks
 
