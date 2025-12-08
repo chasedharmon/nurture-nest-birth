@@ -73,11 +73,31 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 
 ## Pending Tasks
 
+### High Priority
+
 - [ ] Test team assignment in browser (Playwright MCP was disconnected)
-- [ ] Create automated E2E tests for assignments
-- [ ] Update site config: owner name, established year
-- [ ] Update site config: email, phone, Calendly link
+- [ ] Create automated E2E tests for team assignments
+
+### Site Configuration (src/config/site.ts)
+
+- [ ] Update owner name (line 15)
+- [ ] Update established year (line 16)
+- [ ] Update email address (line 21)
+- [ ] Update phone number (line 22)
+- [ ] Update Calendly link (line 24)
+- [ ] Add OG image (line 109)
+- [ ] Update Twitter/X handle when account exists (line 110)
 - [ ] Add social media URLs when accounts are created
+
+### Database
+
+- [ ] Create `contract_signatures` table in Supabase (referenced but missing)
+
+### Other
+
+- [ ] Add logo URL to email config (src/lib/email/config.ts:38)
+- [ ] Replace sample resource fileUrls with actual hosted PDFs (src/app/resources/page.tsx:27)
+- [ ] Integrate newsletter with email service (src/app/actions/newsletter.ts:45)
 
 ## Turbopack HMR Bug
 
