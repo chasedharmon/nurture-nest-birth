@@ -136,6 +136,92 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - Roles & Permissions management
 - User/Employee management
 
+---
+
+## Design Specs for Pending Features
+
+### Dashboard Builder UI
+
+**Goal:** Admins create custom dashboards by arranging widgets visually.
+
+**Components to build:**
+
+```
+src/components/admin/dashboards/
+├── dashboard-editor.tsx         # Main editor container
+├── widget-palette.tsx           # Sidebar with available widget types
+├── widget-grid-editor.tsx       # 12-column grid with drag-drop
+├── widget-config-panel.tsx      # Right panel for widget settings
+├── widget-data-source-picker.tsx # Select report, query, or static
+└── dashboard-save-dialog.tsx    # Save dashboard
+```
+
+**Features:**
+
+- 12-column responsive grid layout
+- Widget types: Metric card, Chart (bar/line/pie), Table, List
+- Widget data sources: Link to saved report, custom query, or static value
+- Drag-and-drop placement with resize handles
+- Edit mode vs preview mode toggle
+
+### Admin Setup Hub
+
+**Layout** (Salesforce-style categories):
+
+```
+/admin/setup/
+├── page.tsx           # Home with category cards
+├── users/             # User/Employee management
+├── roles/             # Roles & Permissions
+├── team/              # Team members (doulas)
+├── services/          # Service packages
+├── contracts/         # Contract templates
+├── intake-forms/      # Intake form templates
+└── integrations/      # Stripe, Resend config
+```
+
+**Setup Home UI:**
+
+- Search bar at top
+- Category sections: Administration, Business, Client Experience, Integrations
+- Each section has clickable cards linking to sub-pages
+
+### Roles & Permissions
+
+**Database schema:**
+
+```sql
+CREATE TABLE roles (
+  id UUID PRIMARY KEY,
+  name TEXT UNIQUE,
+  description TEXT,
+  is_system BOOLEAN DEFAULT false,
+  permissions JSONB DEFAULT '{}'
+);
+
+-- Default roles: admin (full), provider (limited), viewer (read-only)
+```
+
+**Permission structure:**
+
+```typescript
+interface Permissions {
+  [object: string]: ('create' | 'read' | 'update' | 'delete' | '*')[]
+}
+// Objects: leads, clients, invoices, meetings, documents, reports, dashboards, settings
+```
+
+### User/Employee Management
+
+**Features:**
+
+- List users with role, status, last login
+- Invite new user (sends email via Resend)
+- Link user to team_member profile
+- Activate/deactivate users
+
+---
+
 ## Pending Tasks
 
 ### Site Configuration (src/config/site.ts)
