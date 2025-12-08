@@ -786,3 +786,245 @@ export async function getTeamOverview() {
     },
   }
 }
+
+/**
+ * Get all team members with their client counts and hours
+ */
+export async function getTeamMembersWithStats() {
+  const supabase = await createClient()
+
+  // Get all team members
+  const { data: members, error: membersError } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_name')
+
+  if (membersError) {
+    console.error('Error fetching team members:', membersError)
+    return { success: false, error: membersError.message }
+  }
+
+  // Get client assignments grouped by team member
+  const { data: assignments, error: assignmentsError } = await supabase
+    .from('client_assignments')
+    .select(
+      `
+      team_member_id,
+      assignment_role,
+      client:leads(id, name, status, expected_due_date)
+    `
+    )
+
+  if (assignmentsError) {
+    console.error('Error fetching assignments:', assignmentsError)
+    return { success: false, error: assignmentsError.message }
+  }
+
+  // Get current month date range for hours
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    .toISOString()
+    .split('T')[0] as string
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    .toISOString()
+    .split('T')[0] as string
+
+  // Get time entries for current month
+  const { data: timeEntries, error: timeError } = await supabase
+    .from('time_entries')
+    .select('team_member_id, hours, billable')
+    .gte('entry_date', startOfMonth)
+    .lte('entry_date', endOfMonth)
+
+  if (timeError) {
+    console.error('Error fetching time entries:', timeError)
+  }
+
+  // Build stats for each member
+  interface MemberWithStats {
+    member: TeamMember
+    clientCount: number
+    primaryClientCount: number
+    backupClientCount: number
+    hoursThisMonth: number
+    billableHoursThisMonth: number
+  }
+
+  const membersWithStats: MemberWithStats[] = (members || []).map(member => {
+    const memberAssignments = (assignments || []).filter(
+      a => a.team_member_id === member.id
+    )
+    const memberTimeEntries = (timeEntries || []).filter(
+      t => t.team_member_id === member.id
+    )
+
+    return {
+      member: member as TeamMember,
+      clientCount: memberAssignments.length,
+      primaryClientCount: memberAssignments.filter(
+        a => a.assignment_role === 'primary'
+      ).length,
+      backupClientCount: memberAssignments.filter(
+        a => a.assignment_role === 'backup'
+      ).length,
+      hoursThisMonth: memberTimeEntries.reduce(
+        (sum, t) => sum + Number(t.hours),
+        0
+      ),
+      billableHoursThisMonth: memberTimeEntries
+        .filter(t => t.billable)
+        .reduce((sum, t) => sum + Number(t.hours), 0),
+    }
+  })
+
+  return { success: true, data: membersWithStats }
+}
+
+/**
+ * Get detailed view of a team member with all their clients and services
+ */
+export async function getTeamMemberWithClients(teamMemberId: string) {
+  const supabase = await createClient()
+
+  // Get team member
+  const { data: member, error: memberError } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('id', teamMemberId)
+    .single()
+
+  if (memberError) {
+    console.error('Error fetching team member:', memberError)
+    return { success: false, error: memberError.message }
+  }
+
+  // Get client assignments with full client data
+  const { data: assignments, error: assignmentsError } = await supabase
+    .from('client_assignments')
+    .select(
+      `
+      id,
+      assignment_role,
+      notes,
+      created_at,
+      client:leads(
+        id,
+        name,
+        email,
+        phone,
+        status,
+        expected_due_date,
+        actual_birth_date
+      )
+    `
+    )
+    .eq('team_member_id', teamMemberId)
+    .order('created_at', { ascending: false })
+
+  if (assignmentsError) {
+    console.error('Error fetching assignments:', assignmentsError)
+    return { success: false, error: assignmentsError.message }
+  }
+
+  // Get service assignments
+  const { data: serviceAssignments, error: serviceError } = await supabase
+    .from('service_assignments')
+    .select(
+      `
+      id,
+      assignment_role,
+      revenue_share_percent,
+      service:client_services(
+        id,
+        service_type,
+        package_name,
+        status,
+        client:leads(id, name)
+      )
+    `
+    )
+    .eq('team_member_id', teamMemberId)
+
+  if (serviceError) {
+    console.error('Error fetching service assignments:', serviceError)
+  }
+
+  // Get recent time entries
+  const { data: recentTime, error: timeError } = await supabase
+    .from('time_entries')
+    .select(
+      `
+      *,
+      client:leads(id, name)
+    `
+    )
+    .eq('team_member_id', teamMemberId)
+    .order('entry_date', { ascending: false })
+    .limit(10)
+
+  if (timeError) {
+    console.error('Error fetching time entries:', timeError)
+  }
+
+  // Get hours summary for current month
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    .toISOString()
+    .split('T')[0] as string
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    .toISOString()
+    .split('T')[0] as string
+
+  const hoursSummary = await getTimeEntrySummary(
+    teamMemberId,
+    startOfMonth,
+    endOfMonth
+  )
+
+  return {
+    success: true,
+    data: {
+      member: member as TeamMember,
+      clientAssignments: assignments || [],
+      serviceAssignments: serviceAssignments || [],
+      recentTimeEntries: recentTime || [],
+      hoursSummary: hoursSummary.success ? hoursSummary.data : null,
+    },
+  }
+}
+
+/**
+ * Get all clients with their assigned team members
+ */
+export async function getClientsWithTeamAssignments() {
+  const supabase = await createClient()
+
+  // Get all clients (leads with client status) with their assignments
+  const { data: clients, error: clientsError } = await supabase
+    .from('leads')
+    .select(
+      `
+      id,
+      name,
+      email,
+      status,
+      expected_due_date,
+      actual_birth_date,
+      client_assignments(
+        id,
+        assignment_role,
+        team_member:team_members(id, display_name, avatar_url)
+      )
+    `
+    )
+    .in('status', ['client', 'active'])
+    .order('name')
+
+  if (clientsError) {
+    console.error('Error fetching clients:', clientsError)
+    return { success: false, error: clientsError.message }
+  }
+
+  return { success: true, data: clients }
+}

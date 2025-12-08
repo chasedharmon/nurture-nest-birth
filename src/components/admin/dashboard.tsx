@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/client'
 import type { Lead } from '@/lib/supabase/types'
 import { LeadsTable } from './leads-table'
+import { Users } from 'lucide-react'
 
 interface AdminDashboardProps {
   user: {
@@ -46,9 +47,17 @@ export function AdminDashboard({ user, leads, stats }: AdminDashboardProps) {
                 Welcome back, {user.fullName || user.email}
               </p>
             </div>
-            <Button variant="outline" onClick={handleSignOut}>
-              Sign Out
-            </Button>
+            <div className="flex items-center gap-3">
+              <Link href="/admin/team">
+                <Button variant="outline" size="sm">
+                  <Users className="mr-2 h-4 w-4" />
+                  Team
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={handleSignOut}>
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
