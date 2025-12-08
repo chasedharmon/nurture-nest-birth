@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { siteConfig } from '@/config/site'
 
@@ -24,7 +25,13 @@ const navigation = [
 ]
 
 export function Header() {
+  const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Don't render on admin or client portal routes
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/client')) {
+    return null
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

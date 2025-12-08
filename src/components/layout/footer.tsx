@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { siteConfig } from '@/config/site'
 import { NewsletterSignup } from '@/components/newsletter/newsletter-signup'
 
@@ -29,6 +32,13 @@ const footerNavigation = {
 }
 
 export function Footer() {
+  const pathname = usePathname()
+
+  // Don't render on admin or client portal routes
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/client')) {
+    return null
+  }
+
   return (
     <footer className="border-t border-border bg-background">
       <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
