@@ -264,13 +264,28 @@ export default async function TeamPage() {
                                       {member.title}
                                     </p>
                                   )}
-                                  <div className="flex items-center gap-2 mt-2">
+                                  <div className="flex items-center gap-2 mt-2 flex-wrap">
                                     <Badge
                                       variant="secondary"
                                       className="text-xs"
                                     >
                                       {member.role}
                                     </Badge>
+                                    {member.is_accepting_clients ? (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs border-green-500 text-green-600 dark:border-green-400 dark:text-green-400"
+                                      >
+                                        Accepting
+                                      </Badge>
+                                    ) : (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs border-amber-500 text-amber-600 dark:border-amber-400 dark:text-amber-400"
+                                      >
+                                        Not Accepting
+                                      </Badge>
+                                    )}
                                   </div>
                                 </div>
                               </div>
