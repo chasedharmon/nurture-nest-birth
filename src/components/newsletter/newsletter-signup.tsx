@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { trackEvent, EVENTS } from '@/lib/analytics'
 import { subscribeToNewsletter } from '@/app/actions/newsletter'
+import { useOptionalPersonalization } from '@/components/personalization'
 
 /**
  * Newsletter Signup Component
@@ -31,6 +32,7 @@ export function NewsletterSignup({
     'idle' | 'loading' | 'success' | 'error'
   >('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const personalization = useOptionalPersonalization()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -58,6 +60,10 @@ export function NewsletterSignup({
         trackEvent(EVENTS.NEWSLETTER_SUCCESS, {
           email_domain: email.split('@')[1],
         })
+        // Identify visitor for personalization
+        if (personalization?.identify) {
+          personalization.identify(email)
+        }
       } else {
         setStatus('error')
         setErrorMessage(result.error || 'Failed to subscribe')

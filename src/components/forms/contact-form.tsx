@@ -13,6 +13,7 @@ import {
   trackContactFormSuccess,
   trackContactFormError,
 } from '@/lib/analytics'
+import { useOptionalPersonalization } from '@/components/personalization'
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -20,6 +21,7 @@ export function ContactForm() {
     type: 'success' | 'error'
     text: string
   } | null>(null)
+  const personalization = useOptionalPersonalization()
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -39,6 +41,17 @@ export function ContactForm() {
       if (result.success) {
         // Track success
         trackContactFormSuccess({ service })
+
+        // Identify visitor for personalization
+        const email = formData.get('email') as string
+        const name = formData.get('name') as string
+        const dueDate = formData.get('dueDate') as string
+        if (personalization?.identify && email) {
+          personalization.identify(email, name, {
+            dueDate: dueDate || undefined,
+            serviceInterest: service || undefined,
+          })
+        }
 
         setMessage({
           type: 'success',

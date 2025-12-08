@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { SkipToContent } from '@/components/ui/skip-to-content'
+import { PersonalizationProvider } from '@/components/personalization'
 import {
   JSONLDScript,
   getOrganizationSchema,
@@ -115,12 +116,14 @@ export default function RootLayout({
         <JSONLDScript data={getLocalBusinessSchema()} />
       </head>
       <body className={`${inter.variable} ${lora.variable} antialiased`}>
-        <SkipToContent />
-        <Header />
-        <main id="main-content" className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
+        <PersonalizationProvider>
+          <SkipToContent />
+          <Header />
+          <main id="main-content" className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+        </PersonalizationProvider>
         <Analytics />
       </body>
     </html>

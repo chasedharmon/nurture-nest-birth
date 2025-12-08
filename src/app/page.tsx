@@ -3,6 +3,7 @@ import { ServicesOverview } from '@/components/marketing/services-overview'
 import { TestimonialsPreview } from '@/components/marketing/testimonials-preview'
 import { CtaSection } from '@/components/marketing/cta-section'
 import { StatsSection, type Stat } from '@/components/stats'
+import { PersonalizedBannerWrapper } from '@/components/personalization/personalized-banner-wrapper'
 import { spacing } from '@/lib/design-system'
 import {
   LocalBusinessStructuredData,
@@ -112,6 +113,7 @@ export default function Home() {
     <>
       <LocalBusinessStructuredData />
       <OrganizationStructuredData />
+      <PersonalizedBannerWrapper />
       <Hero />
 
       {/* Stats Section */}
