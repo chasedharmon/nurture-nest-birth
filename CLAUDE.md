@@ -1,5 +1,9 @@
 # Nurture Nest Birth - Doula CRM
 
+## Next Task
+
+**Create `contract_signatures` table in Supabase** - This table is referenced by the Contracts tab but doesn't exist, causing console errors on every client detail page. See "Missing Tables" section below for details.
+
 ## Project Overview
 
 A CRM and client portal for a doula practice in Kearney, Nebraska. Built with Next.js 16, Supabase, and Tailwind CSS.
