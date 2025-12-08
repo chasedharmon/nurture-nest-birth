@@ -4,7 +4,17 @@ import { Resend } from 'resend'
 import { emailConfig } from './config'
 import type { EmailConfig, EmailResult } from './types'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy-initialize Resend client to avoid build-time errors when env var is missing
+let resend: Resend | null = null
+function getResend(): Resend {
+  if (!resend) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY environment variable is not set')
+    }
+    resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resend
+}
 
 /**
  * Send an email using Resend
@@ -16,7 +26,7 @@ export async function sendEmail(config: EmailConfig): Promise<EmailResult> {
   try {
     const { to, subject, template, replyTo, from, tags } = config
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: from || `${emailConfig.from.name} <${emailConfig.from.email}>`,
       to,
       subject,

@@ -5,7 +5,17 @@ import { contactFormSchema } from '@/lib/schemas/contact'
 import { ContactFormEmail } from '@/lib/email/templates/contact-form'
 import { createClient } from '@/lib/supabase/server'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy-initialize Resend client to avoid build-time errors when env var is missing
+let resend: Resend | null = null
+function getResend(): Resend {
+  if (!resend) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY environment variable is not set')
+    }
+    resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resend
+}
 
 export async function submitContactForm(formData: FormData) {
   try {
@@ -44,7 +54,7 @@ export async function submitContactForm(formData: FormData) {
     }
 
     // Send email using Resend
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
       to: process.env.CONTACT_EMAIL || 'hello@nurturenestbirth.com',
       subject: `New Contact Form Submission from ${validatedData.name}`,

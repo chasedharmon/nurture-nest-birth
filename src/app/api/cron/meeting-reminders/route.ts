@@ -1,12 +1,24 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { sendMeetingReminderEmail } from '@/app/actions/notifications'
 
-// Use service role for cron jobs to bypass RLS
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy-initialize Supabase client to avoid build-time errors when env vars are missing
+let supabase: SupabaseClient | null = null
+function getSupabase(): SupabaseClient {
+  if (!supabase) {
+    if (
+      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.SUPABASE_SERVICE_ROLE_KEY
+    ) {
+      throw new Error('Supabase environment variables are not set')
+    }
+    supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+  }
+  return supabase
+}
 
 // Verify cron secret to prevent unauthorized access
 function verifyCronSecret(request: Request): boolean {
@@ -62,7 +74,7 @@ export async function GET(request: Request) {
     // 1. Are scheduled (not cancelled/completed)
     // 2. Fall within the reminder window
     // 3. Haven't had a reminder sent yet
-    const { data: meetings, error: meetingsError } = await supabase
+    const { data: meetings, error: meetingsError } = await getSupabase()
       .from('meetings')
       .select(
         `
@@ -123,7 +135,7 @@ export async function GET(request: Request) {
 
         if (emailResult.success) {
           // Mark reminder as sent
-          await supabase
+          await getSupabase()
             .from('meetings')
             .update({ reminder_sent_at: now.toISOString() })
             .eq('id', meeting.id)
