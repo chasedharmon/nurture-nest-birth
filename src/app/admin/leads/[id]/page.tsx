@@ -13,6 +13,7 @@ import { getClientAssignments, getTeamMembers } from '@/app/actions/team'
 import { Button } from '@/components/ui/button'
 import { StatusUpdateSelect } from '@/components/admin/status-update-select'
 import { LeadDetailContent } from '@/components/admin/lead-detail-content'
+import { LoginAsClientButton } from '@/components/admin/login-as-client-button'
 import { formatDistanceToNow } from 'date-fns'
 
 const sourceLabels: Record<string, string> = {
@@ -112,7 +113,17 @@ export default async function LeadDetailPage({
                 </p>
               </div>
             </div>
-            <StatusUpdateSelect leadId={lead.id} currentStatus={lead.status} />
+            <div className="flex items-center gap-2">
+              <LoginAsClientButton
+                clientId={lead.id}
+                clientName={lead.name}
+                clientEmail={lead.email}
+              />
+              <StatusUpdateSelect
+                leadId={lead.id}
+                currentStatus={lead.status}
+              />
+            </div>
           </div>
         </div>
       </header>

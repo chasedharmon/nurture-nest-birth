@@ -53,10 +53,19 @@ export default async function ClientDashboardPage() {
     getClientJourneyData(session.clientId).catch(() => null),
   ])
 
-  // Ensure we have arrays
-  const services = Array.isArray(servicesResult) ? servicesResult : []
-  const meetings = Array.isArray(meetingsResult) ? meetingsResult : []
-  const documents = Array.isArray(documentsResult) ? documentsResult : []
+  // Extract data from server action results
+  const services =
+    servicesResult && 'services' in servicesResult
+      ? servicesResult.services || []
+      : []
+  const meetings =
+    meetingsResult && 'meetings' in meetingsResult
+      ? meetingsResult.meetings || []
+      : []
+  const documents =
+    documentsResult && 'documents' in documentsResult
+      ? documentsResult.documents || []
+      : []
 
   // Payment summary
   const paymentSummary =
@@ -89,7 +98,7 @@ export default async function ClientDashboardPage() {
     )
 
   const nextMeeting: Meeting | null =
-    upcomingMeetings.length > 0 ? upcomingMeetings[0] : null
+    upcomingMeetings.length > 0 ? (upcomingMeetings[0] ?? null) : null
 
   // Get primary doula name
   const primaryDoula = careTeam.find(

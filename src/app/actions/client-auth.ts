@@ -524,6 +524,82 @@ export async function revokeAllClientSessions(clientId: string) {
 }
 
 // ============================================================================
+// Admin "Login As" Feature
+// ============================================================================
+
+export async function loginAsClient(clientId: string) {
+  // Verify the caller is an authenticated admin
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    console.error('[Auth] Login as client failed: No authenticated admin user')
+    return {
+      success: false,
+      error: 'Unauthorized. You must be logged in as an admin.',
+    }
+  }
+
+  // Verify the user is an admin
+  const { data: adminUser, error: adminError } = await supabase
+    .from('users')
+    .select('id, role')
+    .eq('id', user.id)
+    .single()
+
+  if (adminError || !adminUser || adminUser.role !== 'admin') {
+    console.error('[Auth] Login as client failed: User is not an admin')
+    return {
+      success: false,
+      error: 'Unauthorized. Admin access required.',
+    }
+  }
+
+  // Verify the client exists
+  const adminClient = createAdminClient()
+  const { data: client, error: clientError } = await adminClient
+    .from('leads')
+    .select('id, name, email, status')
+    .eq('id', clientId)
+    .single()
+
+  if (clientError || !client) {
+    console.error(
+      '[Auth] Login as client failed: Client not found',
+      clientError
+    )
+    return {
+      success: false,
+      error: 'Client not found.',
+    }
+  }
+
+  // Create session for the client
+  try {
+    const { token, expiresAt } = await createSession(clientId)
+    await setSessionCookie(token, expiresAt)
+
+    console.log(
+      `[Auth] Admin ${user.email} logged in as client ${client.email} (${clientId})`
+    )
+
+    return {
+      success: true,
+      clientId: client.id,
+      clientName: client.name,
+      clientEmail: client.email,
+    }
+  } catch {
+    return {
+      success: false,
+      error: 'Failed to create session. Please try again.',
+    }
+  }
+}
+
+// ============================================================================
 // Helper Functions
 // ============================================================================
 
