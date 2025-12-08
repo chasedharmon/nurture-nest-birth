@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { Users, List, LogOut } from 'lucide-react'
+import { Users, List, LogOut, BarChart3, LayoutDashboard } from 'lucide-react'
 import { DoulaDashboard } from '@/components/admin/dashboards'
 import {
   getDashboardKPIs,
@@ -94,7 +94,7 @@ export default async function AdminPage() {
                 Welcome back, {profile?.full_name || user.email}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Link href="/admin/leads">
                 <Button variant="outline" size="sm">
                   <List className="mr-2 h-4 w-4" />
@@ -105,6 +105,18 @@ export default async function AdminPage() {
                 <Button variant="outline" size="sm">
                   <Users className="mr-2 h-4 w-4" />
                   Team
+                </Button>
+              </Link>
+              <Link href="/admin/reports">
+                <Button variant="outline" size="sm">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Reports
+                </Button>
+              </Link>
+              <Link href="/admin/dashboards">
+                <Button variant="outline" size="sm">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboards
                 </Button>
               </Link>
               <form action="/auth/signout" method="POST">

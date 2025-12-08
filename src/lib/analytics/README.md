@@ -64,7 +64,6 @@ Use `TrackedLink` to automatically track CTA clicks:
 
 ```tsx
 import { TrackedLink } from '@/components/analytics'
-
 ;<TrackedLink
   href="/contact"
   ctaText="Schedule Consultation"

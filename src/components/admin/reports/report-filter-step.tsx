@@ -51,6 +51,120 @@ const OPERATOR_LABELS: Record<FilterOperator, string> = {
   last_n_days: 'Last N days',
 }
 
+// Picklist options for select fields
+const PICKLIST_OPTIONS: Record<string, { value: string; label: string }[]> = {
+  'leads.status': [
+    { value: 'new', label: 'New' },
+    { value: 'contacted', label: 'Contacted' },
+    { value: 'qualified', label: 'Qualified' },
+    { value: 'proposal', label: 'Proposal' },
+    { value: 'negotiation', label: 'Negotiation' },
+    { value: 'client', label: 'Client' },
+    { value: 'lost', label: 'Lost' },
+    { value: 'inactive', label: 'Inactive' },
+  ],
+  'leads.source': [
+    { value: 'website', label: 'Website' },
+    { value: 'referral', label: 'Referral' },
+    { value: 'social_media', label: 'Social Media' },
+    { value: 'google', label: 'Google Search' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'word_of_mouth', label: 'Word of Mouth' },
+    { value: 'event', label: 'Event' },
+    { value: 'other', label: 'Other' },
+  ],
+  'leads.lifecycle_stage': [
+    { value: 'lead', label: 'Lead' },
+    { value: 'opportunity', label: 'Opportunity' },
+    { value: 'client', label: 'Client' },
+    { value: 'past_client', label: 'Past Client' },
+  ],
+  'clients.journey_phase': [
+    { value: 'intake', label: 'Intake' },
+    { value: 'prenatal', label: 'Prenatal' },
+    { value: 'labor_prep', label: 'Labor Prep' },
+    { value: 'birth', label: 'Birth' },
+    { value: 'postpartum', label: 'Postpartum' },
+    { value: 'completed', label: 'Completed' },
+  ],
+  'invoices.status': [
+    { value: 'draft', label: 'Draft' },
+    { value: 'sent', label: 'Sent' },
+    { value: 'viewed', label: 'Viewed' },
+    { value: 'partial', label: 'Partially Paid' },
+    { value: 'paid', label: 'Paid' },
+    { value: 'overdue', label: 'Overdue' },
+    { value: 'cancelled', label: 'Cancelled' },
+  ],
+  'meetings.meeting_type': [
+    { value: 'consultation', label: 'Consultation' },
+    { value: 'prenatal_visit', label: 'Prenatal Visit' },
+    { value: 'postpartum_visit', label: 'Postpartum Visit' },
+    { value: 'birth_support', label: 'Birth Support' },
+    { value: 'lactation', label: 'Lactation Support' },
+    { value: 'class', label: 'Class' },
+    { value: 'phone_call', label: 'Phone Call' },
+    { value: 'other', label: 'Other' },
+  ],
+  'meetings.status': [
+    { value: 'scheduled', label: 'Scheduled' },
+    { value: 'confirmed', label: 'Confirmed' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'cancelled', label: 'Cancelled' },
+    { value: 'no_show', label: 'No Show' },
+    { value: 'rescheduled', label: 'Rescheduled' },
+  ],
+  'team_members.role': [
+    { value: 'owner', label: 'Owner' },
+    { value: 'lead_doula', label: 'Lead Doula' },
+    { value: 'doula', label: 'Doula' },
+    { value: 'lactation_consultant', label: 'Lactation Consultant' },
+    { value: 'admin', label: 'Admin' },
+    { value: 'assistant', label: 'Assistant' },
+  ],
+  'payments.status': [
+    { value: 'pending', label: 'Pending' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'failed', label: 'Failed' },
+    { value: 'refunded', label: 'Refunded' },
+    { value: 'cancelled', label: 'Cancelled' },
+  ],
+  'payments.payment_method': [
+    { value: 'credit_card', label: 'Credit Card' },
+    { value: 'debit_card', label: 'Debit Card' },
+    { value: 'bank_transfer', label: 'Bank Transfer' },
+    { value: 'cash', label: 'Cash' },
+    { value: 'check', label: 'Check' },
+    { value: 'venmo', label: 'Venmo' },
+    { value: 'zelle', label: 'Zelle' },
+    { value: 'paypal', label: 'PayPal' },
+    { value: 'other', label: 'Other' },
+  ],
+  'services.service_type': [
+    { value: 'birth_doula', label: 'Birth Doula' },
+    { value: 'postpartum_doula', label: 'Postpartum Doula' },
+    { value: 'lactation', label: 'Lactation Support' },
+    { value: 'childbirth_education', label: 'Childbirth Education' },
+    { value: 'sibling_prep', label: 'Sibling Prep' },
+    { value: 'car_seat_safety', label: 'Car Seat Safety' },
+    { value: 'infant_massage', label: 'Infant Massage' },
+    { value: 'bundle', label: 'Bundle Package' },
+    { value: 'other', label: 'Other' },
+  ],
+  'services.status': [
+    { value: 'pending', label: 'Pending' },
+    { value: 'active', label: 'Active' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'cancelled', label: 'Cancelled' },
+    { value: 'on_hold', label: 'On Hold' },
+  ],
+  boolean: [
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' },
+  ],
+}
+
 const FIELD_OPTIONS: Record<
   ObjectType,
   { value: string; label: string; type: string }[]
@@ -144,6 +258,115 @@ function getOperatorsForFieldType(type: string): FilterOperator[] {
     default:
       return ['equals', 'not_equals']
   }
+}
+
+// Get picklist options for a field
+function getPicklistOptions(
+  objectType: ObjectType,
+  field: string,
+  fieldType: string
+): { value: string; label: string }[] | null {
+  if (fieldType === 'boolean') {
+    return PICKLIST_OPTIONS['boolean']
+  }
+  if (fieldType === 'select') {
+    const key = `${objectType}.${field}`
+    return PICKLIST_OPTIONS[key] || null
+  }
+  return null
+}
+
+// Get display label for a picklist value
+function getPicklistLabel(
+  objectType: ObjectType,
+  field: string,
+  fieldType: string,
+  value: string
+): string {
+  const options = getPicklistOptions(objectType, field, fieldType)
+  if (options) {
+    const found = options.find(o => o.value === value)
+    return found ? found.label : value
+  }
+  return value
+}
+
+// Separate component to force re-render when field type changes
+function FilterValueInput({
+  objectType,
+  field,
+  fieldType,
+  operator,
+  value,
+  onChange,
+}: {
+  objectType: ObjectType
+  field: string
+  fieldType: string
+  operator: FilterOperator
+  value: string | number | boolean | null
+  onChange: (value: string | number | boolean | null) => void
+}) {
+  const picklistOptions = getPicklistOptions(objectType, field, fieldType)
+
+  // Picklist/select fields - render dropdown
+  if (picklistOptions) {
+    return (
+      <Select
+        value={(value as string) || ''}
+        onValueChange={val => onChange(val)}
+      >
+        <SelectTrigger className="h-9">
+          <SelectValue placeholder="Select value..." />
+        </SelectTrigger>
+        <SelectContent>
+          {picklistOptions.map(option => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    )
+  }
+
+  // Date fields
+  if (fieldType === 'date') {
+    return (
+      <Input
+        type="date"
+        value={(value as string) || ''}
+        onChange={e => onChange(e.target.value)}
+        className="h-9"
+      />
+    )
+  }
+
+  // Number fields or last_n_days operator
+  if (fieldType === 'number' || operator === 'last_n_days') {
+    return (
+      <Input
+        type="number"
+        value={(value as string) || ''}
+        onChange={e => onChange(e.target.value)}
+        className="h-9"
+        placeholder={
+          operator === 'last_n_days' ? 'Number of days' : 'Enter number...'
+        }
+      />
+    )
+  }
+
+  // Default text input
+  return (
+    <Input
+      type="text"
+      value={(value as string) || ''}
+      onChange={e => onChange(e.target.value)}
+      className="h-9"
+      placeholder="Enter value..."
+    />
+  )
 }
 
 export function ReportFilterStep({
@@ -265,9 +488,10 @@ export function ReportFilterStep({
                     </Label>
                     <Select
                       value={filter.field}
-                      onValueChange={value =>
-                        updateFilter(filter.id, { field: value })
-                      }
+                      onValueChange={value => {
+                        // Reset value when field changes
+                        updateFilter(filter.id, { field: value, value: '' })
+                      }}
                     >
                       <SelectTrigger className="h-9">
                         <SelectValue />
@@ -308,32 +532,20 @@ export function ReportFilterStep({
                     </Select>
                   </div>
 
-                  {/* Value */}
-                  {needsValue && (
+                  {/* Value - use separate component with key to force re-render */}
+                  {needsValue && fieldConfig && (
                     <div className="flex-1">
                       <Label className="text-xs text-muted-foreground">
                         Value
                       </Label>
-                      <Input
-                        type={
-                          filter.operator === 'last_n_days'
-                            ? 'number'
-                            : fieldConfig?.type === 'date'
-                              ? 'date'
-                              : fieldConfig?.type === 'number'
-                                ? 'number'
-                                : 'text'
-                        }
-                        value={filter.value as string}
-                        onChange={e =>
-                          updateFilter(filter.id, { value: e.target.value })
-                        }
-                        className="h-9"
-                        placeholder={
-                          filter.operator === 'last_n_days'
-                            ? 'Number of days'
-                            : 'Enter value...'
-                        }
+                      <FilterValueInput
+                        key={`${filter.id}-${filter.field}-${fieldConfig.type}`}
+                        objectType={objectType}
+                        field={filter.field}
+                        fieldType={fieldConfig.type}
+                        operator={filter.operator}
+                        value={filter.value}
+                        onChange={value => updateFilter(filter.id, { value })}
                       />
                     </div>
                   )}
@@ -366,7 +578,16 @@ export function ReportFilterStep({
                     filter.value !== '' && (
                       <span className="font-medium">
                         {' '}
-                        &quot;{String(filter.value)}&quot;
+                        &quot;
+                        {fieldConfig
+                          ? getPicklistLabel(
+                              objectType,
+                              filter.field,
+                              fieldConfig.type,
+                              String(filter.value)
+                            )
+                          : String(filter.value)}
+                        &quot;
                       </span>
                     )}
                 </div>

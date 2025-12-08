@@ -12,10 +12,26 @@ import {
   ChevronRight,
   ChevronLeft,
   Check,
-  X,
+  HelpCircle,
+  Info,
+  Sparkles,
+  Eye,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { ReportConfig } from '@/lib/supabase/types'
 import { ReportObjectSelector } from './report-object-selector'
@@ -28,12 +44,54 @@ import { ReportSaveDialog } from './report-save-dialog'
 import { ReportPreview } from './report-preview'
 
 const STEPS = [
-  { id: 'object', label: 'Select Data', icon: Database },
-  { id: 'columns', label: 'Choose Fields', icon: Columns3 },
-  { id: 'filters', label: 'Add Filters', icon: Filter },
-  { id: 'grouping', label: 'Group By', icon: Layers },
-  { id: 'aggregations', label: 'Calculations', icon: Calculator },
-  { id: 'chart', label: 'Chart Options', icon: BarChart3 },
+  {
+    id: 'object',
+    label: 'Data Source',
+    shortLabel: 'Source',
+    icon: Database,
+    description: 'Choose what type of records to include in your report',
+    tip: 'Start by selecting the main data type. For example, select "Leads" to analyze your sales pipeline or "Invoices" for financial reports.',
+  },
+  {
+    id: 'columns',
+    label: 'Fields',
+    shortLabel: 'Fields',
+    icon: Columns3,
+    description: 'Select and arrange the fields to display',
+    tip: 'Check the fields you want to see as columns. Drag to reorder them. The preview on the right updates as you make changes.',
+  },
+  {
+    id: 'filters',
+    label: 'Filters',
+    shortLabel: 'Filter',
+    icon: Filter,
+    description: 'Narrow down the data with conditions',
+    tip: 'Add conditions to filter your data. For example, filter leads by status or invoices by date range. Filters are optional.',
+  },
+  {
+    id: 'grouping',
+    label: 'Grouping',
+    shortLabel: 'Group',
+    icon: Layers,
+    description: 'Group records by a field for summaries',
+    tip: 'Grouping organizes your data into categories. For example, group leads by source to see how many came from each channel.',
+  },
+  {
+    id: 'aggregations',
+    label: 'Calculations',
+    shortLabel: 'Calc',
+    icon: Calculator,
+    description: 'Add totals, counts, and averages',
+    tip: 'Add calculations like sum, count, or average. These appear as summary metrics above your data.',
+  },
+  {
+    id: 'chart',
+    label: 'Visualization',
+    shortLabel: 'Chart',
+    icon: BarChart3,
+    description: 'Choose how to visualize your data',
+    tip: 'Select a chart type to visualize your data. Bar charts work great for comparisons, line charts for trends over time.',
+  },
 ] as const
 
 type StepId = (typeof STEPS)[number]['id']
@@ -71,9 +129,9 @@ export function ReportBuilderWizard({
   const [config, setConfig] = useState<ReportConfig>(
     initialConfig || DEFAULT_CONFIG
   )
-  const [showPreview, setShowPreview] = useState(false)
 
   const currentStepIndex = STEPS.findIndex(s => s.id === currentStep)
+  const currentStepData = STEPS[currentStepIndex]
 
   const updateConfig = (updates: Partial<ReportConfig>) => {
     setConfig(prev => ({ ...prev, ...updates }))
@@ -122,250 +180,314 @@ export function ReportBuilderWizard({
     }
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Step Progress */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between">
-            {STEPS.map((step, index) => {
-              const Icon = step.icon
-              const isActive = step.id === currentStep
-              const isCompleted = index < currentStepIndex
+  const getStepStatus = (
+    stepId: StepId
+  ): 'complete' | 'current' | 'upcoming' => {
+    const stepIndex = STEPS.findIndex(s => s.id === stepId)
+    if (stepIndex < currentStepIndex) return 'complete'
+    if (stepIndex === currentStepIndex) return 'current'
+    return 'upcoming'
+  }
 
-              return (
-                <div key={step.id} className="flex items-center">
-                  <button
-                    onClick={() => goToStep(step.id)}
-                    className={cn(
-                      'flex items-center gap-2 px-3 py-2 rounded-lg transition-colors',
-                      isActive && 'bg-primary text-primary-foreground',
-                      isCompleted && 'text-primary',
-                      !isActive &&
-                        !isCompleted &&
-                        'text-muted-foreground hover:text-foreground'
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-full border-2',
-                        isActive &&
-                          'border-primary-foreground bg-primary-foreground/20',
-                        isCompleted &&
-                          'border-primary bg-primary text-primary-foreground',
-                        !isActive && !isCompleted && 'border-muted-foreground'
+  const visibleFieldCount = config.columns.filter(c => c.visible).length
+
+  return (
+    <TooltipProvider>
+      <div className="space-y-4">
+        {/* Compact Step Progress */}
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex">
+              {STEPS.map((step, index) => {
+                const Icon = step.icon
+                const status = getStepStatus(step.id)
+
+                return (
+                  <Tooltip key={step.id}>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => goToStep(step.id)}
+                        className={cn(
+                          'flex-1 flex items-center justify-center gap-2 py-3 px-2 border-b-2 transition-all relative',
+                          status === 'current' &&
+                            'bg-primary/5 border-primary text-primary',
+                          status === 'complete' &&
+                            'bg-green-50 border-green-500 text-green-700 dark:bg-green-950/20 dark:text-green-400',
+                          status === 'upcoming' &&
+                            'border-transparent text-muted-foreground hover:bg-muted/50'
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium',
+                            status === 'current' &&
+                              'bg-primary text-primary-foreground',
+                            status === 'complete' &&
+                              'bg-green-500 text-white dark:bg-green-600',
+                            status === 'upcoming' &&
+                              'bg-muted text-muted-foreground'
+                          )}
+                        >
+                          {status === 'complete' ? (
+                            <Check className="h-3 w-3" />
+                          ) : (
+                            <Icon className="h-3 w-3" />
+                          )}
+                        </div>
+                        <span className="hidden sm:inline text-xs font-medium">
+                          {step.shortLabel}
+                        </span>
+                        {index < STEPS.length - 1 && (
+                          <ChevronRight className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-xs">
+                      <p className="font-medium">{step.label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {step.description}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Main Content Area - Side by Side */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          {/* Left: Configuration Panel */}
+          <div className="space-y-4">
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="flex items-center gap-2">
+                      {currentStepData && (
+                        <>
+                          <currentStepData.icon className="h-5 w-5 text-primary" />
+                          {currentStepData.label}
+                        </>
                       )}
-                    >
-                      {isCompleted ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Icon className="h-4 w-4" />
-                      )}
-                    </div>
-                    <span className="hidden md:inline text-sm font-medium">
-                      {step.label}
+                    </CardTitle>
+                    <CardDescription>
+                      {currentStepData?.description}
+                    </CardDescription>
+                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left" className="max-w-xs">
+                      <div className="flex items-start gap-2">
+                        <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <p className="text-sm">{currentStepData?.tip}</p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </CardHeader>
+              <CardContent className="max-h-[500px] overflow-y-auto">
+                {currentStep === 'object' && (
+                  <ReportObjectSelector
+                    value={config.object_type}
+                    reportType={config.report_type}
+                    onChange={(objectType, reportType) =>
+                      updateConfig({
+                        object_type: objectType,
+                        report_type: reportType,
+                        columns: [], // Reset columns when object changes
+                      })
+                    }
+                  />
+                )}
+                {currentStep === 'columns' && (
+                  <ReportColumnPicker
+                    objectType={config.object_type}
+                    selectedColumns={config.columns}
+                    onChange={columns => updateConfig({ columns })}
+                  />
+                )}
+                {currentStep === 'filters' && (
+                  <ReportFilterStep
+                    objectType={config.object_type}
+                    filters={config.filters}
+                    onChange={filters => updateConfig({ filters })}
+                  />
+                )}
+                {currentStep === 'grouping' && (
+                  <ReportGroupingStep
+                    objectType={config.object_type}
+                    selectedColumns={config.columns}
+                    groupings={config.groupings}
+                    onChange={groupings => updateConfig({ groupings })}
+                  />
+                )}
+                {currentStep === 'aggregations' && (
+                  <ReportAggregationStep
+                    objectType={config.object_type}
+                    aggregations={config.aggregations}
+                    onChange={aggregations => updateConfig({ aggregations })}
+                  />
+                )}
+                {currentStep === 'chart' && (
+                  <ReportChartConfig
+                    objectType={config.object_type}
+                    groupings={config.groupings}
+                    aggregations={config.aggregations}
+                    chartConfig={config.chart_config}
+                    onChange={chart_config => updateConfig({ chart_config })}
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Navigation */}
+            <div className="flex justify-between">
+              <div className="flex gap-2">
+                <Button variant="ghost" onClick={onCancel}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={goPrev}
+                  disabled={currentStepIndex === 0}
+                >
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  Back
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                {currentStepIndex === STEPS.length - 1 ? (
+                  <ReportSaveDialog
+                    onSave={handleSave}
+                    initialName={config.name}
+                    initialDescription={config.description}
+                    initialVisibility={config.visibility}
+                    isEdit={isEdit}
+                    trigger={
+                      <Button disabled={!canProceed()}>
+                        <Save className="mr-2 h-4 w-4" />
+                        {isEdit ? 'Update Report' : 'Save Report'}
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <Button onClick={goNext} disabled={!canProceed()}>
+                    Next Step
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Live Preview */}
+          <div className="space-y-4">
+            <Card className="sticky top-4">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Eye className="h-4 w-4 text-primary" />
+                    Live Preview
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      <Sparkles className="mr-1 h-3 w-3" />
+                      Auto-updates
+                    </Badge>
+                  </div>
+                </div>
+                <CardDescription>
+                  See your report build in real-time as you configure options
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Quick Summary */}
+                <div className="mb-4 p-3 rounded-lg bg-muted/50 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Data Source</span>
+                    <Badge variant="secondary" className="capitalize">
+                      {config.object_type.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Report Type</span>
+                    <Badge variant="outline" className="capitalize">
+                      {config.report_type}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Fields Selected
                     </span>
-                  </button>
-                  {index < STEPS.length - 1 && (
-                    <ChevronRight className="mx-2 h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{visibleFieldCount}</span>
+                  </div>
+                  {config.filters.length > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Active Filters
+                      </span>
+                      <span className="font-medium">
+                        {config.filters.length}
+                      </span>
+                    </div>
+                  )}
+                  {config.groupings.length > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Grouped By</span>
+                      <span className="font-medium text-xs truncate max-w-[150px]">
+                        {config.groupings.join(', ')}
+                      </span>
+                    </div>
+                  )}
+                  {config.aggregations.length > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Calculations
+                      </span>
+                      <span className="font-medium">
+                        {config.aggregations.length}
+                      </span>
+                    </div>
                   )}
                 </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Step Content */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {STEPS[currentStepIndex]?.label || 'Report Builder'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {currentStep === 'object' && (
-                <ReportObjectSelector
-                  value={config.object_type}
+                {/* Preview Component */}
+                <ReportPreview
+                  objectType={config.object_type}
                   reportType={config.report_type}
-                  onChange={(objectType, reportType) =>
-                    updateConfig({
-                      object_type: objectType,
-                      report_type: reportType,
-                      columns: [], // Reset columns when object changes
-                    })
-                  }
-                />
-              )}
-              {currentStep === 'columns' && (
-                <ReportColumnPicker
-                  objectType={config.object_type}
-                  selectedColumns={config.columns}
-                  onChange={columns => updateConfig({ columns })}
-                />
-              )}
-              {currentStep === 'filters' && (
-                <ReportFilterStep
-                  objectType={config.object_type}
+                  columns={config.columns}
                   filters={config.filters}
-                  onChange={filters => updateConfig({ filters })}
-                />
-              )}
-              {currentStep === 'grouping' && (
-                <ReportGroupingStep
-                  objectType={config.object_type}
-                  selectedColumns={config.columns}
-                  groupings={config.groupings}
-                  onChange={groupings => updateConfig({ groupings })}
-                />
-              )}
-              {currentStep === 'aggregations' && (
-                <ReportAggregationStep
-                  objectType={config.object_type}
-                  aggregations={config.aggregations}
-                  onChange={aggregations => updateConfig({ aggregations })}
-                />
-              )}
-              {currentStep === 'chart' && (
-                <ReportChartConfig
-                  objectType={config.object_type}
                   groupings={config.groupings}
                   aggregations={config.aggregations}
                   chartConfig={config.chart_config}
-                  onChange={chart_config => updateConfig({ chart_config })}
                 />
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Navigation */}
-          <div className="flex justify-between mt-4">
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button
-                variant="outline"
-                onClick={goPrev}
-                disabled={currentStepIndex === 0}
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Previous
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowPreview(!showPreview)}
-              >
-                {showPreview ? 'Hide Preview' : 'Preview Report'}
-              </Button>
-              {currentStepIndex === STEPS.length - 1 ? (
-                <ReportSaveDialog
-                  onSave={handleSave}
-                  initialName={config.name}
-                  initialDescription={config.description}
-                  initialVisibility={config.visibility}
-                  isEdit={isEdit}
-                  trigger={
-                    <Button disabled={!canProceed()}>
-                      <Save className="mr-2 h-4 w-4" />
-                      {isEdit ? 'Update Report' : 'Save Report'}
-                    </Button>
-                  }
-                />
-              ) : (
-                <Button onClick={goNext} disabled={!canProceed()}>
-                  Next
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              )}
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        {/* Live Preview Panel */}
-        <div className="hidden lg:block">
-          <Card className="sticky top-4">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">
-                Report Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
+        {/* Help Tips Section */}
+        <Card className="bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900">
+          <CardContent className="py-3">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
               <div>
-                <span className="text-muted-foreground">Data Source:</span>
-                <span className="ml-2 font-medium capitalize">
-                  {config.object_type.replace('_', ' ')}
-                </span>
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  {currentStepData?.label} - Quick Tip
+                </p>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  {currentStepData?.tip}
+                </p>
               </div>
-              <div>
-                <span className="text-muted-foreground">Report Type:</span>
-                <span className="ml-2 font-medium capitalize">
-                  {config.report_type}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Fields:</span>
-                <span className="ml-2 font-medium">
-                  {config.columns.filter(c => c.visible).length} selected
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Filters:</span>
-                <span className="ml-2 font-medium">
-                  {config.filters.length} active
-                </span>
-              </div>
-              {config.groupings.length > 0 && (
-                <div>
-                  <span className="text-muted-foreground">Grouped by:</span>
-                  <span className="ml-2 font-medium">
-                    {config.groupings.join(', ')}
-                  </span>
-                </div>
-              )}
-              {config.aggregations.length > 0 && (
-                <div>
-                  <span className="text-muted-foreground">Calculations:</span>
-                  <span className="ml-2 font-medium">
-                    {config.aggregations.map(a => a.label).join(', ')}
-                  </span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Preview Section (bottom panel when toggled) */}
-      {showPreview && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Report Preview</CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowPreview(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <ReportPreview
-              objectType={config.object_type}
-              reportType={config.report_type}
-              columns={config.columns}
-              filters={config.filters}
-              groupings={config.groupings}
-              aggregations={config.aggregations}
-              chartConfig={config.chart_config}
-            />
+            </div>
           </CardContent>
         </Card>
-      )}
-    </div>
+      </div>
+    </TooltipProvider>
   )
 }

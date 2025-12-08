@@ -1,6 +1,6 @@
 'use client'
 
-import { GripVertical, Eye, EyeOff } from 'lucide-react'
+import { GripVertical, Eye, EyeOff, HelpCircle, Info } from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -20,6 +20,12 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import type { ObjectType, ColumnConfig } from '@/lib/supabase/types'
 
@@ -168,6 +174,17 @@ function SortableColumn({
   )
 }
 
+// Format type descriptions for tooltips
+const FORMAT_DESCRIPTIONS: Record<string, string> = {
+  text: 'Plain text value',
+  badge: 'Displayed as a colored label',
+  currency: 'Formatted as dollar amount',
+  date: 'Formatted as date (mm/dd/yyyy)',
+  datetime: 'Formatted with date and time',
+  boolean: 'Displayed as Yes/No',
+  number: 'Numeric value',
+}
+
 export function ReportColumnPicker({
   objectType,
   selectedColumns,
@@ -220,48 +237,110 @@ export function ReportColumnPicker({
   const visibleCount = columns.filter(c => c.visible).length
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium">Select Fields</h3>
-          <p className="text-sm text-muted-foreground">
-            Choose which fields to include in your report. Drag to reorder.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={selectAll}>
-            Select All
-          </Button>
-          <Button variant="outline" size="sm" onClick={selectNone}>
-            Clear All
-          </Button>
-        </div>
-      </div>
-
-      <div className="text-sm text-muted-foreground">
-        {visibleCount} of {columns.length} fields selected
-      </div>
-
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={columns.map(c => c.field)}
-          strategy={verticalListSortingStrategy}
-        >
-          <div className="space-y-2">
-            {columns.map(column => (
-              <SortableColumn
-                key={column.field}
-                column={column}
-                onToggle={() => toggleColumn(column.field)}
-              />
-            ))}
+    <TooltipProvider>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div>
+              <h3 className="text-lg font-medium">Select Fields</h3>
+              <p className="text-sm text-muted-foreground">
+                Choose which fields to include. Drag to reorder columns.
+              </p>
+            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="p-1 rounded-full hover:bg-muted">
+                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    How field selection works:
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• Check fields to add them as columns</li>
+                    <li>• Drag the grip handle to reorder</li>
+                    <li>• Order here = column order in report</li>
+                    <li>• At least one field is required</li>
+                  </ul>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
-        </SortableContext>
-      </DndContext>
-    </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={selectAll}>
+              Select All
+            </Button>
+            <Button variant="outline" size="sm" onClick={selectNone}>
+              Clear All
+            </Button>
+          </div>
+        </div>
+
+        {/* Selection status with visual indicator */}
+        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+          <Info className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">
+            <span className="font-medium">{visibleCount}</span> of{' '}
+            <span className="font-medium">{columns.length}</span> fields
+            selected
+            {visibleCount === 0 && (
+              <span className="text-orange-600 dark:text-orange-400 ml-2">
+                — Select at least one field to continue
+              </span>
+            )}
+          </span>
+        </div>
+
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={columns.map(c => c.field)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {columns.map(column => (
+                <Tooltip key={column.field}>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <SortableColumn
+                        column={column}
+                        onToggle={() => toggleColumn(column.field)}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-xs">
+                    <p className="font-medium">{column.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Field:{' '}
+                      <code className="bg-muted px-1 rounded">
+                        {column.field}
+                      </code>
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Format:{' '}
+                      {FORMAT_DESCRIPTIONS[column.format || 'text'] ||
+                        column.format}
+                    </p>
+                    {column.visible && (
+                      <p className="text-xs text-primary mt-1">
+                        Column position:{' '}
+                        {columns
+                          .filter(c => c.visible)
+                          .findIndex(c => c.field === column.field) + 1}
+                      </p>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </div>
+    </TooltipProvider>
   )
 }
