@@ -7,13 +7,13 @@
 
 ### Phase 6+ Progress
 
-| Feature                | Status      | Notes                                         |
-| ---------------------- | ----------- | --------------------------------------------- |
-| Report Builder UI      | ✅ COMPLETE | Wizard, filters, preview, save/edit           |
-| Dashboard Builder UI   | ✅ COMPLETE | 12-col grid, drag-drop, 8 widget types        |
-| Admin Setup Hub        | ⏳ NEXT     | Centralized settings area                     |
-| Roles & Permissions UI | ⏳ PENDING  | DB ready (`roles` table exists)               |
-| User Management UI     | ⏳ PENDING  | DB ready (`users`, `user_invitations` tables) |
+| Feature                | Status      | Notes                                       |
+| ---------------------- | ----------- | ------------------------------------------- |
+| Report Builder UI      | ✅ COMPLETE | Wizard, filters, preview, save/edit         |
+| Dashboard Builder UI   | ✅ COMPLETE | 12-col grid, drag-drop, 8 widget types      |
+| Admin Setup Hub        | ✅ COMPLETE | Salesforce-style settings at `/admin/setup` |
+| Roles & Permissions UI | ✅ COMPLETE | Matrix editor, system roles, custom roles   |
+| User Management UI     | ✅ COMPLETE | User list, invitations, role assignment     |
 
 ### Future Features (Not Started)
 
@@ -144,29 +144,24 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - Pages: list (`/admin/dashboards`), new (`/admin/dashboards/new`), view (`/admin/dashboards/[id]`), edit (`/admin/dashboards/[id]/edit`)
 - Server actions in `src/app/actions/dashboards.ts`
 
+**Admin Setup Hub** (COMPLETE):
+
+- Salesforce-style centralized settings area at `/admin/setup/`
+- Category cards: Administration, Business, Client Experience, Integrations
+- **Users** (`/admin/setup/users/`): List users with role, status, last login; invite new users via Resend; activate/deactivate users
+- **Roles & Permissions** (`/admin/setup/roles/`): List/edit roles with permissions matrix; system roles (admin, provider, viewer) + custom roles
+- **Team Members**: Links to existing `/admin/team`
+- **Contract Templates** (`/admin/setup/contracts/`): List/manage templates with service type, version, status
+- **Intake Forms** (`/admin/setup/intake-forms/`): List/manage form templates with field count
+- **Integrations** (`/admin/setup/integrations/`): Display Stripe, Resend, Supabase config status
+- **Services & Company**: Stub pages for future development
+- Components in `src/components/admin/setup/`
+- Server actions in `src/app/actions/setup.ts`
+- Permission constants in `src/lib/permissions.ts`
+
 ---
 
-## Design Specs for Next Feature: Admin Setup Hub
-
-**Layout** (Salesforce-style categories):
-
-```
-/admin/setup/
-├── page.tsx           # Home with category cards
-├── users/             # User/Employee management
-├── roles/             # Roles & Permissions
-├── team/              # Team members (doulas)
-├── services/          # Service packages
-├── contracts/         # Contract templates
-├── intake-forms/      # Intake form templates
-└── integrations/      # Stripe, Resend config
-```
-
-**Setup Home UI:**
-
-- Search bar at top
-- Category sections: Administration, Business, Client Experience, Integrations
-- Each section has clickable cards linking to sub-pages
+## Database Schema Reference
 
 ### Roles & Permissions
 
