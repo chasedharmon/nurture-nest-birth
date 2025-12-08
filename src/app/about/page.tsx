@@ -5,14 +5,19 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
+import { CertificationBadges } from '@/components/marketing/certification-badges'
+import { spacing, maxWidth, typography } from '@/lib/design-system'
+import { siteConfig } from '@/config/site'
 import {
-  spacing,
-  maxWidth,
-  grid,
-  typography,
-  icon,
-  card,
-} from '@/lib/design-system'
+  Heart,
+  MapPin,
+  Users,
+  Sparkles,
+  Quote,
+  Car,
+  Baby,
+  Shield,
+} from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'About | Nurture Nest Birth | DONA Doula Kearney, NE',
@@ -23,86 +28,16 @@ export const metadata: Metadata = {
 }
 
 export default function AboutPage() {
-  const credentials = [
-    {
-      icon: (
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      ),
-      title: 'DONA Certified Doula',
-      desc: 'Certified through DONA International for both birth and postpartum doula support.',
-    },
-    {
-      icon: (
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-        />
-      ),
-      title: 'Certified Lactation Consultant',
-      desc: 'Specialized training in breastfeeding support and lactation education.',
-    },
-    {
-      icon: (
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-        />
-      ),
-      title: 'Family Studies Degree',
-      desc: "Bachelor's degree in Family Studies with focus on child development and family dynamics.",
-    },
-    {
-      icon: (
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-        />
-      ),
-      title: 'Home Visitation Specialist',
-      desc: '3+ years supporting families in their homes through early childhood programs.',
-    },
-  ]
-
-  const philosophy = [
-    {
-      title: 'Evidence-Based & Personalized',
-      desc: "I combine the latest research with an understanding that every family's needs and preferences are unique.",
-    },
-    {
-      title: 'Non-Judgmental Support',
-      desc: 'Whether you choose medicated or unmedicated birth, formula or breastfeeding, hospital or home—I support your informed choices.',
-    },
-    {
-      title: 'Whole Family Centered',
-      desc: 'I support partners, siblings, and the entire family system as you welcome your new baby.',
-    },
-    {
-      title: 'Accessible & Local',
-      desc: 'Proudly serving Kearney, Grand Island, Hastings, and surrounding communities in central Nebraska.',
-    },
-  ]
-
   return (
     <div className="bg-background">
       {/* Hero Section with Photo */}
       <section className={`${spacing.container} ${spacing.section.lg}`}>
         <div className={`mx-auto ${maxWidth.layout}`}>
-          <div className={`grid ${grid.gap.loose} lg:grid-cols-2`}>
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
             {/* Left - Photo */}
             <FadeIn direction="left">
-              <div className="relative">
-                <div className="absolute -left-6 -top-6 h-full w-full rounded-3xl bg-primary/10" />
+              <div className="relative mx-auto max-w-md lg:max-w-none">
+                <div className="absolute -left-4 -top-4 h-full w-full rounded-3xl bg-primary/10 md:-left-6 md:-top-6" />
                 <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-muted shadow-2xl shadow-primary/10">
                   <Image
                     src="/images/headshot-placeholder.jpg"
@@ -114,6 +49,20 @@ export default function AboutPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5" />
                 </div>
+                {/* Photo overlay badge */}
+                <div className="absolute -bottom-4 -right-4 rounded-xl bg-card p-4 shadow-lg md:-bottom-6 md:-right-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                      <Heart className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">Central Nebraska</p>
+                      <p className="text-xs text-muted-foreground">
+                        Serving families since 2022
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </FadeIn>
 
@@ -122,19 +71,42 @@ export default function AboutPage() {
               <FadeIn delay={0.1}>
                 <div className="mb-6 inline-flex items-center gap-2 self-start rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
                   <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  About Me
+                  Meet Your Doula
                 </div>
               </FadeIn>
               <FadeIn delay={0.2}>
                 <h1 className={typography.h1}>
-                  Supporting Families Through Birth & Beyond
+                  Hi, I'm [Your Name]
+                  <span className="block text-primary">
+                    Your Partner in Birth & Parenthood
+                  </span>
                 </h1>
               </FadeIn>
               <FadeIn delay={0.3}>
                 <p className={`mt-6 ${typography.lead}`}>
-                  Hi, I'm here to provide compassionate, evidence-based support
-                  during one of life's most transformative experiences.
+                  I'm a DONA-certified doula, lactation consultant, and mom who
+                  believes every family deserves compassionate, evidence-based
+                  support during the transformative journey into parenthood.
                 </p>
+              </FadeIn>
+              <FadeIn delay={0.4}>
+                <div className="mt-8 flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    <span>Kearney, Nebraska</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span>100+ families supported</span>
+                  </div>
+                </div>
+              </FadeIn>
+              <FadeIn delay={0.5}>
+                <div className="mt-8">
+                  <Button asChild size="lg">
+                    <Link href="/contact">Let's Talk About Your Journey</Link>
+                  </Button>
+                </div>
               </FadeIn>
             </div>
           </div>
@@ -145,117 +117,308 @@ export default function AboutPage() {
       <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn direction="down">
-            <h2 className={typography.h2}>My Journey to Doula Work</h2>
+            <h2 className={typography.h2}>Why I Became a Doula</h2>
           </FadeIn>
           <div className="mt-8 space-y-6 text-muted-foreground">
             <FadeIn delay={0.1}>
-              <p>
-                My passion for supporting families began long before I became a
-                doula. With a degree in Family Studies and years of experience
-                as a Home Visitation Specialist, I've had the privilege of
-                walking alongside families during pivotal moments in their
-                lives.
+              <p className="text-lg">
+                My path to doula work wasn't a straight line—it was a journey
+                shaped by education, personal experience, and a deep calling to
+                support families.
               </p>
             </FadeIn>
             <FadeIn delay={0.2}>
               <p>
-                What drew me to birth work was witnessing firsthand how
-                transformative compassionate, continuous support can be. I've
-                seen how the right information, a steady presence, and genuine
-                care can empower families to feel confident and capable.
+                I earned my degree in Family Studies, which gave me a strong
+                foundation in child development, family dynamics, and the
+                research behind healthy family relationships. After graduation,
+                I worked as a Home Visitation Specialist, spending years in
+                families' homes during some of their most vulnerable and joyful
+                moments.
               </p>
             </FadeIn>
             <FadeIn delay={0.3}>
               <p>
-                After becoming a parent myself, I knew I wanted to dedicate my
-                work to ensuring every family has access to the kind of support
-                that makes a real difference. That's what led me to pursue
-                certification as a DONA birth and postpartum doula, as well as
-                becoming a Certified Lactation Consultant.
+                <strong className="text-foreground">
+                  Then I became a mother myself.
+                </strong>{' '}
+                Like so many parents, I experienced the overwhelming mix of
+                emotions that comes with welcoming a new life. I also
+                experienced how much of a difference the right support can
+                make—and how isolating it can feel when that support isn't
+                there.
               </p>
             </FadeIn>
             <FadeIn delay={0.4}>
               <p>
-                Today, I combine evidence-based knowledge with genuine empathy
-                to help families navigate pregnancy, birth, and the postpartum
-                period. Whether you're preparing for your first baby or your
-                fifth, I believe every family deserves personalized,
-                non-judgmental support.
+                That experience lit a fire in me. I knew I wanted to be the
+                person who shows up for families during birth and postpartum—not
+                as an expert who has all the answers, but as a knowledgeable,
+                steady presence who helps parents find their own confidence and
+                strength.
               </p>
             </FadeIn>
+            <FadeIn delay={0.5}>
+              <p>
+                I pursued DONA certification for both birth and postpartum
+                support, became a certified lactation consultant, and continued
+                adding specialized training that helps me serve families more
+                completely—including car seat safety certification and infant
+                massage instruction.
+              </p>
+            </FadeIn>
+          </div>
+
+          <FadeIn delay={0.6}>
+            <blockquote className="mt-10 border-l-4 border-primary pl-6">
+              <Quote className="mb-2 h-8 w-8 text-primary/30" />
+              <p className="text-lg italic text-foreground">
+                "I don't do this work because I have all the answers. I do it
+                because I know how powerful it is to have someone in your corner
+                who believes in you—especially when you're learning to believe
+                in yourself as a parent."
+              </p>
+            </blockquote>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Credentials Section - Using New Component */}
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.layout}`}>
+          <FadeIn>
+            <div className="text-center">
+              <h2 className={typography.h2}>Training & Certifications</h2>
+              <p className="mt-4 text-muted-foreground">
+                I've invested in comprehensive training so I can offer you the
+                highest quality, evidence-based support.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="mt-12">
+            <CertificationBadges variant="full" columns={3} />
           </div>
         </div>
       </section>
 
-      {/* Credentials */}
-      <section className={`${spacing.container} ${spacing.section.md}`}>
+      {/* What Sets Me Apart - Differentiators */}
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
-            <h2 className={typography.h2}>Credentials & Training</h2>
+            <h2 className={typography.h2}>More Than Birth Support</h2>
+            <p className="mt-4 text-muted-foreground">
+              What makes my practice unique is the breadth of support I can
+              offer your family—before, during, and after baby arrives.
+            </p>
           </FadeIn>
-          <div className={`mt-8 grid ${grid.gap.tight} ${grid.cols.two}`}>
-            {credentials.map((item, i) => (
-              <FadeIn key={i} delay={i * 0.1}>
-                <Card className={`h-full ${card.base} ${card.interactive}`}>
-                  <CardContent className="pt-6">
-                    <div
-                      className={`mb-4 flex items-center justify-center ${icon.container.md}`}
-                    >
-                      <svg
-                        className={`${icon.size.md} text-primary`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        {item.icon}
-                      </svg>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <FadeIn delay={0.1}>
+              <Card className="h-full border-2 border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                      <Car className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <h3 className="font-semibold text-foreground">
-                      {item.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {item.desc}
-                    </p>
-                  </CardContent>
-                </Card>
-              </FadeIn>
-            ))}
+                    <div>
+                      <h3 className="font-serif text-lg font-semibold">
+                        Car Seat Safety Expert
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        CPST Certified
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    <strong className="text-foreground">
+                      73% of car seats are installed incorrectly.
+                    </strong>{' '}
+                    As a certified Child Passenger Safety Technician, I can
+                    ensure your baby's car seat is installed properly before you
+                    even leave the hospital. Most doulas can't offer this—it's a
+                    certification I pursued specifically because car seat safety
+                    is too important to leave to chance.
+                  </p>
+                  <Link
+                    href="/services/car-seat-safety"
+                    className="mt-4 inline-flex text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                  >
+                    Learn about car seat checks →
+                  </Link>
+                </CardContent>
+              </Card>
+            </FadeIn>
+
+            <FadeIn delay={0.2}>
+              <Card className="h-full border-2 border-teal-200 bg-teal-50/50 dark:border-teal-900 dark:bg-teal-950/20">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/30">
+                      <Baby className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif text-lg font-semibold">
+                        Infant Massage Instructor
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        CIMI Certified
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    Research shows infant massage can{' '}
+                    <strong className="text-foreground">
+                      improve sleep, reduce colic symptoms, and deepen
+                      parent-baby bonding
+                    </strong>
+                    . I'm trained to teach you gentle massage techniques that
+                    help soothe your baby while building your confidence in
+                    reading their cues. It's included in my postpartum packages
+                    or available standalone.
+                  </p>
+                  <Link
+                    href="/services/infant-massage"
+                    className="mt-4 inline-flex text-sm font-medium text-teal-600 hover:underline dark:text-teal-400"
+                  >
+                    Learn about infant massage →
+                  </Link>
+                </CardContent>
+              </Card>
+            </FadeIn>
           </div>
         </div>
       </section>
 
       {/* My Philosophy */}
-      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+      <section className={`${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
-          <FadeIn direction="down">
+          <FadeIn>
             <h2 className={typography.h2}>My Philosophy</h2>
-          </FadeIn>
-          <FadeIn delay={0.1}>
-            <p className={`mt-8 ${typography.lead}`}>
-              I believe birth is a natural, powerful experience, and every
-              family deserves to feel informed, supported, and respected
-              throughout their journey.
+            <p className="mt-4 text-lg text-muted-foreground">
+              These are the beliefs that guide every interaction with the
+              families I serve.
             </p>
           </FadeIn>
-          <div className="mt-8 space-y-4">
-            {philosophy.map((item, i) => (
-              <FadeIn key={i} delay={(i + 2) * 0.1}>
+
+          <div className="mt-10 space-y-8">
+            {[
+              {
+                icon: Heart,
+                title: 'Your Choices, My Support',
+                desc: "Hospital birth, home birth, epidural, unmedicated, breastfeeding, formula—I'm not here to judge or push an agenda. I'm here to support YOUR informed decisions, whatever they are. There's no \"right\" way to birth or parent.",
+              },
+              {
+                icon: Sparkles,
+                title: 'Evidence-Based, Heart-Centered',
+                desc: "I stay current on research so I can give you accurate information. But data doesn't give birth—you do. I combine the best evidence with an understanding of your unique needs, preferences, and circumstances.",
+              },
+              {
+                icon: Users,
+                title: 'The Whole Family Matters',
+                desc: "Birth doesn't just happen to the birthing person—it transforms partners, siblings, and entire families. I support everyone involved, helping partners feel confident and siblings feel included.",
+              },
+              {
+                icon: Shield,
+                title: 'Your Body, Your Baby, Your Voice',
+                desc: "My job isn't to speak for you or make decisions for you. It's to help you feel informed and empowered so YOU can advocate for yourself. I'm your support system, not your substitute.",
+              },
+            ].map((item, i) => (
+              <FadeIn key={i} delay={i * 0.1}>
                 <div className="flex gap-4">
-                  <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <span className="h-2 w-2 rounded-full bg-primary" />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                    <item.icon className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">
+                    <h3 className="font-serif text-lg font-semibold">
                       {item.title}
                     </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {item.desc}
-                    </p>
+                    <p className="mt-2 text-muted-foreground">{item.desc}</p>
                   </div>
                 </div>
               </FadeIn>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Personal Touches */}
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
+          <FadeIn>
+            <h2 className={typography.h2}>Beyond the Credentials</h2>
+            <p className="mt-4 text-muted-foreground">
+              A few things that might not fit on a resume but help you know who
+              you're inviting into your birth space.
+            </p>
+          </FadeIn>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2">
+            {[
+              {
+                emoji: '🌽',
+                text: 'Nebraska born and raised—I understand the unique needs of families in our community',
+              },
+              {
+                emoji: '👶',
+                text: 'Mom to [X] kids, so I know parenthood from the inside out',
+              },
+              {
+                emoji: '☕',
+                text: 'Powered by strong coffee and a genuine love for what I do',
+              },
+              {
+                emoji: '📚',
+                text: 'Perpetual learner—always taking new courses and staying current',
+              },
+              {
+                emoji: '🤝',
+                text: 'Connected with local providers and resources across central Nebraska',
+              },
+              {
+                emoji: '💜',
+                text: "Available 24/7 for my birth clients—because babies don't follow schedules",
+              },
+            ].map((item, i) => (
+              <FadeIn key={i} delay={i * 0.05}>
+                <div className="flex items-start gap-3 rounded-lg border bg-background p-4">
+                  <span className="text-2xl">{item.emoji}</span>
+                  <p className="text-sm text-muted-foreground">{item.text}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Service Area */}
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
+          <FadeIn>
+            <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-8 text-center">
+              <MapPin className="mx-auto h-10 w-10 text-primary" />
+              <h2 className="mt-4 font-serif text-2xl font-semibold">
+                Proudly Serving Central Nebraska
+              </h2>
+              <p className="mt-2 text-muted-foreground">
+                I provide in-home support throughout the area
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-2">
+                {siteConfig.location.serviceArea.map((area, i) => (
+                  <span
+                    key={i}
+                    className="rounded-full bg-background px-4 py-1.5 text-sm font-medium border"
+                  >
+                    {area}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-6 text-sm text-muted-foreground">
+                Not in my service area? Virtual consultations available, and I'm
+                happy to refer you to trusted colleagues.
+              </p>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
@@ -265,12 +428,12 @@ export default function AboutPage() {
       >
         <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn direction="down">
-            <h2 className={typography.h2}>Let's Connect</h2>
+            <h2 className={typography.h2}>Ready to Connect?</h2>
           </FadeIn>
           <FadeIn delay={0.1}>
             <p className={`mt-4 ${typography.lead}`}>
-              I'd love to hear about your journey and discuss how I can support
-              your family.
+              I'd love to hear about your journey and answer any questions. A
+              free consultation is the perfect way to see if we're a good fit.
             </p>
           </FadeIn>
           <FadeIn delay={0.2}>
@@ -279,7 +442,7 @@ export default function AboutPage() {
                 <Link href="/contact">Schedule a Free Consultation</Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link href="/services">View Services</Link>
+                <Link href="/services">Explore My Services</Link>
               </Button>
             </div>
           </FadeIn>
