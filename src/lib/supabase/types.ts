@@ -473,7 +473,10 @@ export type TimeEntryInsert = Omit<
   | 'client'
   | 'service'
   | 'meeting'
->
+  | 'invoiced' // Has default value in DB
+> & {
+  invoiced?: boolean
+}
 export type OnCallScheduleInsert = Omit<
   OnCallSchedule,
   'id' | 'created_at' | 'team_member'

@@ -1,12 +1,24 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { getTeamMembers, getCurrentOnCall } from '@/app/actions/team'
+import {
+  getTeamMembers,
+  getCurrentOnCall,
+  getOnCallSchedule,
+  getTimeEntries,
+} from '@/app/actions/team'
+import type { TeamMember, OnCallSchedule } from '@/lib/supabase/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TeamMembersTable } from '@/components/admin/team/team-members-table'
-import { OnCallBadge } from '@/components/admin/team/on-call-badge'
-import { AddTeamMemberDialog } from '@/components/admin/team/add-team-member-dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  TeamMembersTable,
+  OnCallBadge,
+  AddTeamMemberDialog,
+  TimeEntryForm,
+  TimeEntriesList,
+  OnCallScheduleManager,
+} from '@/components/admin/team'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -20,17 +32,32 @@ export default async function TeamPage() {
     redirect('/login')
   }
 
-  // Get team members and on-call info
-  const [teamResult, onCallResult] = await Promise.all([
-    getTeamMembers({ includeInactive: true }),
-    getCurrentOnCall(),
-  ])
+  // Get all team data in parallel
+  const [teamResult, onCallResult, schedulesResult, timeEntriesResult] =
+    await Promise.all([
+      getTeamMembers({ includeInactive: true }),
+      getCurrentOnCall(),
+      getOnCallSchedule(),
+      getTimeEntries({}),
+    ])
 
-  const teamMembers = teamResult.success ? teamResult.data || [] : []
-  const currentOnCall = onCallResult.success ? onCallResult.data || [] : []
+  const teamMembers: TeamMember[] = teamResult.success
+    ? teamResult.data || []
+    : []
+  const currentOnCall: OnCallSchedule[] = onCallResult.success
+    ? onCallResult.data || []
+    : []
+  const schedules: OnCallSchedule[] = schedulesResult.success
+    ? schedulesResult.data || []
+    : []
+  const timeEntries = timeEntriesResult.success
+    ? timeEntriesResult.data || []
+    : []
 
-  const activeCount = teamMembers.filter(m => m.is_active).length
-  const inactiveCount = teamMembers.filter(m => !m.is_active).length
+  const activeCount = teamMembers.filter((m: TeamMember) => m.is_active).length
+  const inactiveCount = teamMembers.filter(
+    (m: TeamMember) => !m.is_active
+  ).length
 
   return (
     <div className="min-h-screen bg-background">
@@ -81,24 +108,70 @@ export default async function TeamPage() {
           </Card>
         )}
 
-        {/* Team Members Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Team Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {teamMembers.length === 0 ? (
-              <div className="py-12 text-center text-muted-foreground">
-                <p>No team members yet</p>
-                <p className="mt-1 text-sm">
-                  Add your first team member to get started
-                </p>
+        {/* Tabs for Team, Time Tracking, and On-Call */}
+        <Tabs defaultValue="members" className="w-full">
+          <TabsList>
+            <TabsTrigger value="members">Team Members</TabsTrigger>
+            <TabsTrigger value="time">Time Tracking</TabsTrigger>
+            <TabsTrigger value="oncall">On-Call Schedule</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="members" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Team Members</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {teamMembers.length === 0 ? (
+                  <div className="py-12 text-center text-muted-foreground">
+                    <p>No team members yet</p>
+                    <p className="mt-1 text-sm">
+                      Add your first team member to get started
+                    </p>
+                  </div>
+                ) : (
+                  <TeamMembersTable members={teamMembers} />
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="time" className="mt-6">
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-1">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Log Time</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <TimeEntryForm teamMembers={teamMembers} />
+                  </CardContent>
+                </Card>
               </div>
-            ) : (
-              <TeamMembersTable members={teamMembers} />
-            )}
-          </CardContent>
-        </Card>
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Time Entries</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <TimeEntriesList
+                      entries={timeEntries}
+                      showMember={true}
+                      showClient={true}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="oncall" className="mt-6">
+            <OnCallScheduleManager
+              schedules={schedules}
+              teamMembers={teamMembers}
+            />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   )
