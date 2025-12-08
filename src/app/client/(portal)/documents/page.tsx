@@ -56,24 +56,24 @@ export default async function ClientDocumentsPage() {
   const documents = documentsResult.success ? documentsResult.documents : []
 
   // Group documents by type
-  const documentsByType = documents.reduce(
-    (acc, doc) => {
-      if (!acc[doc.document_type]) {
-        acc[doc.document_type] = []
-      }
-      acc[doc.document_type].push(doc)
-      return acc
-    },
-    {} as Record<string, ClientDocument[]>
-  )
+  const documentsByType = (documents ?? []).reduce<
+    Record<string, ClientDocument[]>
+  >((acc, doc) => {
+    const type = doc.document_type
+    const existing = acc[type] ?? []
+    return { ...acc, [type]: [...existing, doc] }
+  }, {})
 
   // Sort each group by upload date (newest first)
   Object.keys(documentsByType).forEach(type => {
-    documentsByType[type].sort((a: ClientDocument, b: ClientDocument) => {
-      const dateA = new Date(a.uploaded_at).getTime()
-      const dateB = new Date(b.uploaded_at).getTime()
-      return dateB - dateA
-    })
+    const docs = documentsByType[type]
+    if (docs) {
+      docs.sort((a: ClientDocument, b: ClientDocument) => {
+        const dateA = new Date(a.uploaded_at).getTime()
+        const dateB = new Date(b.uploaded_at).getTime()
+        return dateB - dateA
+      })
+    }
   })
 
   function formatFileSize(bytes: number | null): string {

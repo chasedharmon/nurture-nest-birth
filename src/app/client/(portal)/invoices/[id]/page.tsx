@@ -4,6 +4,7 @@ import { getClientSession } from '@/app/actions/client-auth'
 import { getInvoice } from '@/app/actions/invoices'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { PrintButton } from '@/components/client/print-button'
 import { format } from 'date-fns'
 import {
   ArrowLeft,
@@ -11,7 +12,6 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  Printer,
 } from 'lucide-react'
 import { emailConfig } from '@/lib/email/config'
 import type { InvoiceLineItem } from '@/lib/supabase/types'
@@ -103,10 +103,7 @@ export default async function ClientInvoiceDetailPage({
             </Button>
           </Link>
         </div>
-        <Button variant="outline" onClick={() => window.print()}>
-          <Printer className="h-4 w-4 mr-2" />
-          Print
-        </Button>
+        <PrintButton />
       </div>
 
       {/* Invoice Card */}

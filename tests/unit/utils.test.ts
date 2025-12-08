@@ -106,7 +106,7 @@ describe('Utility Functions', () => {
       documentType: string,
       mimeType: string
     ): boolean => {
-      const allowed = ALLOWED_TYPES[documentType] || ALLOWED_TYPES.other
+      const allowed = ALLOWED_TYPES[documentType] ?? ALLOWED_TYPES.other ?? []
       return allowed.includes(mimeType)
     }
 

@@ -153,7 +153,7 @@ export const siteConfig = {
 
   // Feature Flags (for gradually rolling out features)
   features: {
-    contactForm: false, // Enable when form is ready
+    contactForm: true, // Contact form is fully implemented
     aiChat: false, // Enable when AI chatbot is ready
     testimonials: true, // Enable when testimonials are collected
     blog: true,
