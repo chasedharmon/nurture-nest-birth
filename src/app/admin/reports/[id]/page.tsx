@@ -20,39 +20,13 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { getReportById, executeReport } from '@/app/actions/reports'
-import type { ColumnConfig } from '@/lib/supabase/types'
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts'
+import type { ColumnConfig, ChartConfig } from '@/lib/supabase/types'
+import { ReportChartDisplay } from '@/components/admin/reports/report-chart-display'
 
 interface ReportViewPageProps {
   params: Promise<{ id: string }>
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
-
-const CHART_COLORS = [
-  '#3b82f6',
-  '#8b5cf6',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#06b6d4',
-  '#ec4899',
-]
 
 function formatCellValue(value: unknown, format?: string): string {
   if (value === null || value === undefined) return '—'
@@ -91,109 +65,7 @@ async function ReportContent({ id }: { id: string }) {
     c => c.visible
   )
   const groupings = (report.groupings as string[]) || []
-  const chartConfig = report.chart_config || {}
-
-  const renderChart = () => {
-    if (!data || data.rows.length === 0) return null
-
-    const chartData = data.rows.map(row => {
-      const item: Record<string, unknown> = {}
-      const groupField = groupings[0] || visibleColumns[0]?.field || 'id'
-      item.name = row[groupField] || 'Unknown'
-
-      visibleColumns.forEach(col => {
-        if (col.format === 'currency' || col.format === 'number') {
-          item[col.label] = row[col.field] || 0
-        }
-      })
-
-      return item
-    })
-
-    const dataKey =
-      visibleColumns.find(c => c.format === 'currency' || c.format === 'number')
-        ?.label || 'value'
-
-    switch (chartConfig.type || 'bar') {
-      case 'bar':
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey={dataKey} fill={CHART_COLORS[0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        )
-      case 'line':
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey={dataKey}
-                stroke={CHART_COLORS[0]}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        )
-      case 'area':
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <AreaChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Area
-                type="monotone"
-                dataKey={dataKey}
-                fill={CHART_COLORS[0]}
-                stroke={CHART_COLORS[0]}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        )
-      case 'pie':
-      case 'donut':
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <PieChart>
-              <Pie
-                data={chartData}
-                dataKey={dataKey}
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={chartConfig.type === 'donut' ? 120 : 150}
-                innerRadius={chartConfig.type === 'donut' ? 80 : 0}
-                label
-              >
-                {chartData.map((_entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={CHART_COLORS[index % CHART_COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        )
-      default:
-        return null
-    }
-  }
+  const chartConfig = (report.chart_config || {}) as ChartConfig
 
   return (
     <div className="space-y-6">
@@ -262,7 +134,14 @@ async function ReportContent({ id }: { id: string }) {
           <CardHeader>
             <CardTitle>{chartConfig.title || 'Chart'}</CardTitle>
           </CardHeader>
-          <CardContent>{renderChart()}</CardContent>
+          <CardContent>
+            <ReportChartDisplay
+              data={data.rows}
+              chartConfig={chartConfig}
+              groupings={groupings}
+              visibleColumns={visibleColumns}
+            />
+          </CardContent>
         </Card>
       )}
 
