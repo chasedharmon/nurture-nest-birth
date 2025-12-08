@@ -17,6 +17,26 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    title: 'The Evidence on Doula Support: What Research Really Tells Us',
+    slug: 'evidence-doula-support',
+    excerpt:
+      'Peer-reviewed research on doula care benefits including cesarean reduction, birth outcomes, and maternal satisfaction.',
+    category: 'Research',
+    readingTime: 10,
+    publishedDate: '2025-12-07',
+    author: 'Nurture Nest Birth',
+  },
+  {
+    title: 'Car Seat Safety: What Every New Parent Needs to Know',
+    slug: 'car-seat-safety-guide',
+    excerpt:
+      'Essential car seat safety guide from a certified CPST. 73% of car seats are installed incorrectly—learn how to avoid common mistakes.',
+    category: 'Safety',
+    readingTime: 8,
+    publishedDate: '2025-12-07',
+    author: 'Nurture Nest Birth',
+  },
+  {
     title: 'What Does a Doula Actually Do? A Complete Guide',
     slug: 'what-does-a-doula-do',
     excerpt:
