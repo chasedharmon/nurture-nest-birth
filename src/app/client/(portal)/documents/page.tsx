@@ -53,7 +53,7 @@ export default async function ClientDocumentsPage() {
   }
 
   const documentsResult = await getClientVisibleDocuments(session.clientId)
-  const documents = Array.isArray(documentsResult) ? documentsResult : []
+  const documents = documentsResult.success ? documentsResult.documents : []
 
   // Group documents by type
   const documentsByType = documents.reduce(

@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import type {
   ClientDocument,
   ClientDocumentInsert,
@@ -48,7 +48,9 @@ export async function getDocumentsByType(
 }
 
 export async function getClientVisibleDocuments(clientId: string) {
-  const supabase = await createClient()
+  // Use admin client to bypass RLS since this is called from client portal
+  // which uses session-based auth instead of Supabase auth
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('client_documents')
