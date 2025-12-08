@@ -146,15 +146,21 @@ export async function getClientAssignments(clientId: string) {
     .select(
       `
       *,
-      team_member:team_members(*)
+      team_member:team_members!client_assignments_team_member_id_fkey(*)
     `
     )
     .eq('client_id', clientId)
     .order('assignment_role')
 
   if (error) {
-    console.error('Error fetching client assignments:', error)
-    return { success: false, error: error.message }
+    console.error(
+      'Error fetching client assignments:',
+      JSON.stringify(error, null, 2)
+    )
+    console.error('Error code:', error.code)
+    console.error('Error message:', error.message)
+    console.error('Error details:', error.details)
+    return { success: false, error: error.message || 'Unknown error' }
   }
 
   return { success: true, data: data as ClientAssignment[] }
@@ -173,7 +179,7 @@ export async function getClientCareTeam(clientId: string) {
       id,
       assignment_role,
       notes,
-      team_member:team_members(
+      team_member:team_members!client_assignments_team_member_id_fkey(
         id,
         display_name,
         title,
@@ -292,7 +298,7 @@ export async function assignClientToTeamMember(data: ClientAssignmentInsert) {
     .select(
       `
       *,
-      team_member:team_members(*)
+      team_member:team_members!client_assignments_team_member_id_fkey(*)
     `
     )
     .single()
@@ -320,7 +326,7 @@ export async function updateClientAssignment(
     .select(
       `
       *,
-      team_member:team_members(*)
+      team_member:team_members!client_assignments_team_member_id_fkey(*)
     `
     )
     .single()
@@ -624,7 +630,7 @@ export async function getOnCallSchedule(options?: {
     .select(
       `
       *,
-      team_member:team_members(id, display_name, phone, oncall_phone)
+      team_member:team_members!oncall_schedule_team_member_id_fkey(id, display_name, phone, oncall_phone)
     `
     )
     .order('start_date')
@@ -668,7 +674,7 @@ export async function createOnCallSchedule(data: OnCallScheduleInsert) {
     .select(
       `
       *,
-      team_member:team_members(id, display_name, phone, oncall_phone)
+      team_member:team_members!oncall_schedule_team_member_id_fkey(id, display_name, phone, oncall_phone)
     `
     )
     .single()
@@ -907,7 +913,7 @@ export async function getTeamMemberWithClients(teamMemberId: string) {
       id,
       assignment_role,
       notes,
-      created_at,
+      assigned_at,
       client:leads(
         id,
         name,
@@ -920,7 +926,7 @@ export async function getTeamMemberWithClients(teamMemberId: string) {
     `
     )
     .eq('team_member_id', teamMemberId)
-    .order('created_at', { ascending: false })
+    .order('assigned_at', { ascending: false })
 
   if (assignmentsError) {
     console.error('Error fetching assignments:', assignmentsError)
@@ -1014,11 +1020,11 @@ export async function getClientsWithTeamAssignments() {
       client_assignments(
         id,
         assignment_role,
-        team_member:team_members(id, display_name, avatar_url)
+        team_member:team_members!client_assignments_team_member_id_fkey(id, display_name, avatar_url)
       )
     `
     )
-    .in('status', ['client', 'active'])
+    .eq('status', 'client')
     .order('name')
 
   if (clientsError) {

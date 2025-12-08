@@ -415,7 +415,7 @@ BEGIN
   SELECT name INTO v_client_name FROM leads WHERE id = NEW.client_id;
   SELECT display_name INTO v_member_name FROM team_members WHERE id = NEW.team_member_id;
 
-  INSERT INTO lead_activities (lead_id, activity_type, description, created_by_user_id)
+  INSERT INTO lead_activities (lead_id, activity_type, content, created_by_user_id)
   VALUES (
     NEW.client_id,
     'team_assigned',

@@ -32,6 +32,12 @@ async function verifyDatabase() {
     'invoice_payments',
     'contract_templates',
     'contract_signatures',
+    // Team management tables
+    'team_members',
+    'client_assignments',
+    'service_assignments',
+    'time_entries',
+    'oncall_schedule',
   ]
   let allTablesExist = true
 
