@@ -1,0 +1,178 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Mail, Phone, User } from 'lucide-react'
+import type { AssignmentRole } from '@/lib/supabase/types'
+
+interface CareTeamProvider {
+  id: string
+  display_name: string
+  title?: string | null
+  bio?: string | null
+  avatar_url?: string | null
+  certifications?: string[] | null
+  specialties?: string[] | null
+  email?: string | null
+  phone?: string | null
+  oncall_phone?: string | null
+}
+
+interface CareTeamMember {
+  id: string
+  assignment_role: AssignmentRole
+  notes?: string | null
+  provider: CareTeamProvider
+}
+
+interface CareTeamProps {
+  careTeam: CareTeamMember[]
+}
+
+const roleLabels: Record<AssignmentRole, string> = {
+  primary: 'Primary Provider',
+  backup: 'Backup Provider',
+  support: 'Support',
+}
+
+const roleColors: Record<AssignmentRole, string> = {
+  primary:
+    'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+  backup: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
+  support:
+    'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300',
+}
+
+export function CareTeam({ careTeam }: CareTeamProps) {
+  if (careTeam.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Your Care Team
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            Your care team hasn&apos;t been assigned yet. We&apos;ll update this
+            once your providers are confirmed.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <User className="h-5 w-5" />
+          Your Care Team
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {careTeam.map(member => (
+          <div
+            key={member.id}
+            className="flex flex-col sm:flex-row gap-4 p-4 rounded-lg bg-muted/50"
+          >
+            {/* Avatar */}
+            <div className="flex-shrink-0">
+              {member.provider.avatar_url ? (
+                <img
+                  src={member.provider.avatar_url}
+                  alt={member.provider.display_name}
+                  className="h-16 w-16 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary text-xl font-medium">
+                  {member.provider.display_name
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="font-semibold text-lg">
+                  {member.provider.display_name}
+                </h3>
+                <Badge
+                  variant="secondary"
+                  className={roleColors[member.assignment_role]}
+                >
+                  {roleLabels[member.assignment_role]}
+                </Badge>
+              </div>
+
+              {member.provider.title && (
+                <p className="text-muted-foreground">{member.provider.title}</p>
+              )}
+
+              {member.provider.bio && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {member.provider.bio}
+                </p>
+              )}
+
+              {/* Certifications */}
+              {member.provider.certifications &&
+                member.provider.certifications.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {member.provider.certifications.map((cert, i) => (
+                      <Badge key={i} variant="outline" className="text-xs">
+                        {cert}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+              {/* Specialties */}
+              {member.provider.specialties &&
+                member.provider.specialties.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Specialties: {member.provider.specialties.join(', ')}
+                  </p>
+                )}
+
+              {/* Contact Info */}
+              {(member.provider.email || member.provider.phone) && (
+                <div className="flex flex-wrap gap-4 pt-2">
+                  {member.provider.email && (
+                    <a
+                      href={`mailto:${member.provider.email}`}
+                      className="flex items-center gap-1 text-sm text-primary hover:underline"
+                    >
+                      <Mail className="h-4 w-4" />
+                      {member.provider.email}
+                    </a>
+                  )}
+                  {member.provider.phone && (
+                    <a
+                      href={`tel:${member.provider.phone}`}
+                      className="flex items-center gap-1 text-sm text-primary hover:underline"
+                    >
+                      <Phone className="h-4 w-4" />
+                      {member.provider.phone}
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Notes from admin */}
+              {member.notes && (
+                <p className="text-xs text-muted-foreground italic pt-1">
+                  {member.notes}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  )
+}

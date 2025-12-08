@@ -3,6 +3,7 @@ import { getClientServices } from '@/app/actions/services'
 import { getClientMeetings } from '@/app/actions/meetings'
 import { getClientVisibleDocuments } from '@/app/actions/documents'
 import { getClientPaymentSummary } from '@/app/actions/payments'
+import { getClientCareTeam } from '@/app/actions/team'
 import {
   Card,
   CardContent,
@@ -10,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { CareTeam } from '@/components/client/care-team'
 import { format } from 'date-fns'
 import Link from 'next/link'
 
@@ -26,11 +28,13 @@ export default async function ClientDashboardPage() {
     meetingsResult,
     documentsResult,
     paymentSummaryResult,
+    careTeamResult,
   ] = await Promise.all([
     getClientServices(session.clientId).catch(() => null),
     getClientMeetings(session.clientId).catch(() => null),
     getClientVisibleDocuments(session.clientId).catch(() => null),
     getClientPaymentSummary(session.clientId).catch(() => null),
+    getClientCareTeam(session.clientId).catch(() => null),
   ])
 
   // Ensure we have arrays (handle null/undefined/errors)
@@ -70,6 +74,10 @@ export default async function ClientDashboardPage() {
         new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
     )
     .slice(0, 3)
+
+  // Extract care team
+  const careTeam =
+    careTeamResult && 'data' in careTeamResult ? careTeamResult.data || [] : []
 
   return (
     <div className="space-y-8">
@@ -120,6 +128,9 @@ export default async function ClientDashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Care Team */}
+      <CareTeam careTeam={careTeam} />
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

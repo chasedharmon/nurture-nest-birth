@@ -160,6 +160,97 @@ export async function getClientAssignments(clientId: string) {
   return { success: true, data: data as ClientAssignment[] }
 }
 
+/**
+ * Get care team for client portal (respects visibility settings)
+ */
+export async function getClientCareTeam(clientId: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('client_assignments')
+    .select(
+      `
+      id,
+      assignment_role,
+      notes,
+      team_member:team_members(
+        id,
+        display_name,
+        title,
+        bio,
+        avatar_url,
+        email,
+        phone,
+        certifications,
+        specialties,
+        show_email_to_clients,
+        show_phone_to_clients,
+        is_available_oncall,
+        oncall_phone
+      )
+    `
+    )
+    .eq('client_id', clientId)
+    .order('assignment_role')
+
+  if (error) {
+    console.error('Error fetching client care team:', error)
+    return { success: false, error: error.message }
+  }
+
+  // Filter out sensitive info based on visibility settings
+  interface CareTeamMember {
+    id: string
+    assignment_role: AssignmentRole
+    notes: string | null
+    provider: {
+      id: string
+      display_name: string
+      title: string | null
+      bio: string | null
+      avatar_url: string | null
+      certifications: string[] | null
+      specialties: string[] | null
+      email: string | null
+      phone: string | null
+      oncall_phone: string | null
+    }
+  }
+
+  const careTeam: CareTeamMember[] = []
+
+  for (const assignment of data || []) {
+    // Handle both single object and array from join
+    const memberData = assignment.team_member
+    const member = Array.isArray(memberData) ? memberData[0] : memberData
+    if (!member) continue
+
+    careTeam.push({
+      id: assignment.id as string,
+      assignment_role: assignment.assignment_role as AssignmentRole,
+      notes: assignment.notes as string | null,
+      provider: {
+        id: member.id,
+        display_name: member.display_name,
+        title: member.title || null,
+        bio: member.bio || null,
+        avatar_url: member.avatar_url || null,
+        certifications: member.certifications || null,
+        specialties: member.specialties || null,
+        // Only show contact info if visibility is enabled
+        email: member.show_email_to_clients ? member.email : null,
+        phone: member.show_phone_to_clients ? member.phone : null,
+        oncall_phone:
+          member.is_available_oncall && member.show_phone_to_clients
+            ? member.oncall_phone || member.phone
+            : null,
+      },
+    })
+  }
+
+  return { success: true, data: careTeam }
+}
+
 export async function getTeamMemberClients(
   teamMemberId: string,
   options?: {
