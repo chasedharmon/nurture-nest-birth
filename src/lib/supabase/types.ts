@@ -346,3 +346,162 @@ export type ContractSignatureInsert = Omit<
   ContractSignature,
   'id' | 'created_at' | 'signed_at'
 >
+
+// =====================================================
+// Team Member Types (Phase 5: Multi-Provider Support)
+// =====================================================
+
+export type TeamMemberRole = 'owner' | 'admin' | 'provider' | 'assistant'
+
+export type AssignmentRole = 'primary' | 'backup' | 'support'
+
+export type TimeEntryType =
+  | 'client_work'
+  | 'travel'
+  | 'on_call'
+  | 'birth_support'
+  | 'admin'
+  | 'training'
+  | 'other'
+
+export type OnCallType = 'primary' | 'backup'
+
+export interface TeamMember {
+  id: string
+  user_id?: string | null
+  role: TeamMemberRole
+  display_name: string
+  email: string
+  phone?: string | null
+  title?: string | null
+  bio?: string | null
+  avatar_url?: string | null
+  certifications: string[]
+  specialties: string[]
+  is_active: boolean
+  is_accepting_clients: boolean
+  max_active_clients?: number | null
+  hourly_rate?: number | null
+  is_available_oncall: boolean
+  oncall_phone?: string | null
+  show_email_to_clients: boolean
+  show_phone_to_clients: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ClientAssignment {
+  id: string
+  client_id: string
+  team_member_id: string
+  assignment_role: AssignmentRole
+  notes?: string | null
+  assigned_at: string
+  assigned_by?: string | null
+  // Joined data
+  team_member?: TeamMember
+  client?: Lead
+}
+
+export interface ServiceAssignment {
+  id: string
+  service_id: string
+  team_member_id: string
+  assignment_role: AssignmentRole
+  revenue_share_percent: number
+  assigned_at: string
+  // Joined data
+  team_member?: TeamMember
+  service?: ClientService
+}
+
+export interface TimeEntry {
+  id: string
+  team_member_id: string
+  client_id?: string | null
+  service_id?: string | null
+  meeting_id?: string | null
+  entry_date: string
+  hours: number
+  entry_type: TimeEntryType
+  description?: string | null
+  billable: boolean
+  hourly_rate_override?: number | null
+  invoiced: boolean
+  invoice_id?: string | null
+  created_at: string
+  updated_at: string
+  // Joined data
+  team_member?: TeamMember
+  client?: Lead
+  service?: ClientService
+  meeting?: Meeting
+}
+
+export interface OnCallSchedule {
+  id: string
+  team_member_id: string
+  start_date: string
+  end_date: string
+  oncall_type: OnCallType
+  notes?: string | null
+  created_at: string
+  created_by?: string | null
+  // Joined data
+  team_member?: TeamMember
+}
+
+// Team member insert types
+export type TeamMemberInsert = Omit<
+  TeamMember,
+  'id' | 'created_at' | 'updated_at'
+>
+export type ClientAssignmentInsert = Omit<
+  ClientAssignment,
+  'id' | 'assigned_at' | 'team_member' | 'client'
+>
+export type ServiceAssignmentInsert = Omit<
+  ServiceAssignment,
+  'id' | 'assigned_at' | 'team_member' | 'service'
+>
+export type TimeEntryInsert = Omit<
+  TimeEntry,
+  | 'id'
+  | 'created_at'
+  | 'updated_at'
+  | 'team_member'
+  | 'client'
+  | 'service'
+  | 'meeting'
+>
+export type OnCallScheduleInsert = Omit<
+  OnCallSchedule,
+  'id' | 'created_at' | 'team_member'
+>
+
+// Helper types for team-related queries
+export interface TeamMemberWithStats extends TeamMember {
+  active_client_count?: number
+  total_hours_this_month?: number
+  total_revenue_this_month?: number
+}
+
+export interface ClientTeamInfo {
+  team_member_id: string
+  display_name: string
+  role: TeamMemberRole
+  assignment_role: AssignmentRole
+  email: string
+  phone?: string | null
+  show_email_to_clients: boolean
+  show_phone_to_clients: boolean
+}
+
+export interface CurrentOnCall {
+  team_member_id: string
+  display_name: string
+  oncall_type: OnCallType
+  oncall_phone?: string | null
+  start_date: string
+  end_date: string
+}

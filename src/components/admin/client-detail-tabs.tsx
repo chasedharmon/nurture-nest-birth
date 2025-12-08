@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface ClientDetailTabsProps {
   overviewTab: React.ReactNode
+  teamTab: React.ReactNode
   servicesTab: React.ReactNode
   meetingsTab: React.ReactNode
   documentsTab: React.ReactNode
@@ -16,6 +17,7 @@ interface ClientDetailTabsProps {
 
 export function ClientDetailTabs({
   overviewTab,
+  teamTab,
   servicesTab,
   meetingsTab,
   documentsTab,
@@ -29,6 +31,7 @@ export function ClientDetailTabs({
     <Tabs defaultValue="overview" className="w-full">
       <TabsList className="w-full justify-start overflow-x-auto">
         <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="team">Team</TabsTrigger>
         <TabsTrigger value="services">Services</TabsTrigger>
         <TabsTrigger value="meetings">Meetings</TabsTrigger>
         <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -41,6 +44,10 @@ export function ClientDetailTabs({
 
       <TabsContent value="overview" className="mt-6">
         {overviewTab}
+      </TabsContent>
+
+      <TabsContent value="team" className="mt-6">
+        {teamTab}
       </TabsContent>
 
       <TabsContent value="services" className="mt-6">

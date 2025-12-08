@@ -9,6 +9,7 @@ import { getClientDocuments } from '@/app/actions/documents'
 import { getClientPayments } from '@/app/actions/payments'
 import { getClientInvoices } from '@/app/actions/invoices'
 import { getClientContractSignatures } from '@/app/actions/contracts'
+import { getClientAssignments, getTeamMembers } from '@/app/actions/team'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatusUpdateSelect } from '@/components/admin/status-update-select'
@@ -22,6 +23,7 @@ import { DocumentsList } from '@/components/admin/documents-list'
 import { PaymentsList } from '@/components/admin/payments-list'
 import { InvoicesList } from '@/components/admin/invoices-list'
 import { ContractsList } from '@/components/admin/contracts-list'
+import { ClientTeamAssignments } from '@/components/admin/team'
 import { formatDistanceToNow } from 'date-fns'
 
 const sourceLabels: Record<string, string> = {
@@ -57,6 +59,8 @@ export default async function LeadDetailPage({
     paymentsResult,
     invoicesResult,
     contractsResult,
+    assignmentsResult,
+    teamMembersResult,
   ] = await Promise.all([
     getLeadById(id),
     getLeadActivities(id),
@@ -66,6 +70,8 @@ export default async function LeadDetailPage({
     getClientPayments(id),
     getClientInvoices(id),
     getClientContractSignatures(id),
+    getClientAssignments(id),
+    getTeamMembers(),
   ])
 
   if (!leadResult.success || !leadResult.lead) {
@@ -85,6 +91,12 @@ export default async function LeadDetailPage({
   const invoices = invoicesResult.success ? invoicesResult.invoices || [] : []
   const contractSignatures = contractsResult.success
     ? contractsResult.signatures || []
+    : []
+  const assignments = assignmentsResult.success
+    ? assignmentsResult.data || []
+    : []
+  const teamMembers = teamMembersResult.success
+    ? teamMembersResult.data || []
     : []
 
   return (
@@ -120,6 +132,13 @@ export default async function LeadDetailPage({
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <ClientDetailTabs
           overviewTab={<ClientOverview lead={lead} />}
+          teamTab={
+            <ClientTeamAssignments
+              clientId={id}
+              assignments={assignments}
+              availableMembers={teamMembers}
+            />
+          }
           servicesTab={
             <div className="space-y-6">
               <Card>

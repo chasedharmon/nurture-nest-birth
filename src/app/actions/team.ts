@@ -1,0 +1,697 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+import type {
+  TeamMember,
+  TeamMemberInsert,
+  TeamMemberRole,
+  ClientAssignment,
+  ClientAssignmentInsert,
+  ServiceAssignment,
+  ServiceAssignmentInsert,
+  TimeEntry,
+  TimeEntryInsert,
+  OnCallSchedule,
+  OnCallScheduleInsert,
+  AssignmentRole,
+} from '@/lib/supabase/types'
+
+// =====================================================
+// TEAM MEMBER CRUD
+// =====================================================
+
+export async function getTeamMembers(options?: {
+  includeInactive?: boolean
+  role?: TeamMemberRole
+}) {
+  const supabase = await createClient()
+
+  let query = supabase.from('team_members').select('*').order('display_name')
+
+  if (!options?.includeInactive) {
+    query = query.eq('is_active', true)
+  }
+
+  if (options?.role) {
+    query = query.eq('role', options.role)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('Error fetching team members:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, data: data as TeamMember[] }
+}
+
+export async function getTeamMemberById(id: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    console.error('Error fetching team member:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, data: data as TeamMember }
+}
+
+export async function getTeamMemberByUserId(userId: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('user_id', userId)
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No matching record found
+      return { success: true, data: null }
+    }
+    console.error('Error fetching team member by user ID:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, data: data as TeamMember }
+}
+
+export async function createTeamMember(data: TeamMemberInsert) {
+  const supabase = await createClient()
+
+  const { data: newMember, error } = await supabase
+    .from('team_members')
+    .insert(data)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error creating team member:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/team')
+  return { success: true, data: newMember as TeamMember }
+}
+
+export async function updateTeamMember(
+  id: string,
+  data: Partial<TeamMemberInsert>
+) {
+  const supabase = await createClient()
+
+  const { data: updated, error } = await supabase
+    .from('team_members')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating team member:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/team')
+  revalidatePath(`/admin/team/${id}`)
+  return { success: true, data: updated as TeamMember }
+}
+
+export async function deactivateTeamMember(id: string) {
+  return updateTeamMember(id, { is_active: false })
+}
+
+export async function reactivateTeamMember(id: string) {
+  return updateTeamMember(id, { is_active: true })
+}
+
+// =====================================================
+// CLIENT ASSIGNMENTS
+// =====================================================
+
+export async function getClientAssignments(clientId: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('client_assignments')
+    .select(
+      `
+      *,
+      team_member:team_members(*)
+    `
+    )
+    .eq('client_id', clientId)
+    .order('assignment_role')
+
+  if (error) {
+    console.error('Error fetching client assignments:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, data: data as ClientAssignment[] }
+}
+
+export async function getTeamMemberClients(
+  teamMemberId: string,
+  options?: {
+    assignmentRole?: AssignmentRole
+  }
+) {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('client_assignments')
+    .select(
+      `
+      *,
+      client:leads(*)
+    `
+    )
+    .eq('team_member_id', teamMemberId)
+
+  if (options?.assignmentRole) {
+    query = query.eq('assignment_role', options.assignmentRole)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('Error fetching team member clients:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, data: data as ClientAssignment[] }
+}
+
+export async function assignClientToTeamMember(data: ClientAssignmentInsert) {
+  const supabase = await createClient()
+
+  const { data: assignment, error } = await supabase
+    .from('client_assignments')
+    .insert(data)
+    .select(
+      `
+      *,
+      team_member:team_members(*)
+    `
+    )
+    .single()
+
+  if (error) {
+    console.error('Error creating client assignment:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath(`/admin/leads/${data.client_id}`)
+  revalidatePath('/admin/team')
+  return { success: true, data: assignment as ClientAssignment }
+}
+
+export async function updateClientAssignment(
+  id: string,
+  data: Partial<Pick<ClientAssignment, 'assignment_role' | 'notes'>>
+) {
+  const supabase = await createClient()
+
+  const { data: updated, error } = await supabase
+    .from('client_assignments')
+    .update(data)
+    .eq('id', id)
+    .select(
+      `
+      *,
+      team_member:team_members(*)
+    `
+    )
+    .single()
+
+  if (error) {
+    console.error('Error updating client assignment:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  return { success: true, data: updated as ClientAssignment }
+}
+
+export async function removeClientAssignment(id: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('client_assignments')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error removing client assignment:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  return { success: true }
+}
+
+// =====================================================
+// SERVICE ASSIGNMENTS
+// =====================================================
+
+export async function getServiceAssignments(serviceId: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('service_assignments')
+    .select(
+      `
+      *,
+      team_member:team_members(*)
+    `
+    )
+    .eq('service_id', serviceId)
+    .order('assignment_role')
+
+  if (error) {
+    console.error('Error fetching service assignments:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, data: data as ServiceAssignment[] }
+}
+
+export async function assignServiceToTeamMember(data: ServiceAssignmentInsert) {
+  const supabase = await createClient()
+
+  const { data: assignment, error } = await supabase
+    .from('service_assignments')
+    .insert(data)
+    .select(
+      `
+      *,
+      team_member:team_members(*)
+    `
+    )
+    .single()
+
+  if (error) {
+    console.error('Error creating service assignment:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  return { success: true, data: assignment as ServiceAssignment }
+}
+
+export async function updateServiceAssignment(
+  id: string,
+  data: Partial<
+    Pick<ServiceAssignment, 'assignment_role' | 'revenue_share_percent'>
+  >
+) {
+  const supabase = await createClient()
+
+  const { data: updated, error } = await supabase
+    .from('service_assignments')
+    .update(data)
+    .eq('id', id)
+    .select(
+      `
+      *,
+      team_member:team_members(*)
+    `
+    )
+    .single()
+
+  if (error) {
+    console.error('Error updating service assignment:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  return { success: true, data: updated as ServiceAssignment }
+}
+
+export async function removeServiceAssignment(id: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('service_assignments')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error removing service assignment:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  return { success: true }
+}
+
+// =====================================================
+// TIME ENTRIES
+// =====================================================
+
+export async function getTimeEntries(options: {
+  teamMemberId?: string
+  clientId?: string
+  startDate?: string
+  endDate?: string
+  entryType?: string
+  billable?: boolean
+  invoiced?: boolean
+  limit?: number
+}) {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('time_entries')
+    .select(
+      `
+      *,
+      team_member:team_members(id, display_name),
+      client:leads(id, name),
+      service:client_services(id, service_type, package_name)
+    `
+    )
+    .order('entry_date', { ascending: false })
+
+  if (options.teamMemberId) {
+    query = query.eq('team_member_id', options.teamMemberId)
+  }
+  if (options.clientId) {
+    query = query.eq('client_id', options.clientId)
+  }
+  if (options.startDate) {
+    query = query.gte('entry_date', options.startDate)
+  }
+  if (options.endDate) {
+    query = query.lte('entry_date', options.endDate)
+  }
+  if (options.entryType) {
+    query = query.eq('entry_type', options.entryType)
+  }
+  if (options.billable !== undefined) {
+    query = query.eq('billable', options.billable)
+  }
+  if (options.invoiced !== undefined) {
+    query = query.eq('invoiced', options.invoiced)
+  }
+  if (options.limit) {
+    query = query.limit(options.limit)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('Error fetching time entries:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, data: data as TimeEntry[] }
+}
+
+export async function createTimeEntry(data: TimeEntryInsert) {
+  const supabase = await createClient()
+
+  const { data: entry, error } = await supabase
+    .from('time_entries')
+    .insert(data)
+    .select(
+      `
+      *,
+      team_member:team_members(id, display_name),
+      client:leads(id, name)
+    `
+    )
+    .single()
+
+  if (error) {
+    console.error('Error creating time entry:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/time')
+  revalidatePath('/admin/team')
+  return { success: true, data: entry as TimeEntry }
+}
+
+export async function updateTimeEntry(
+  id: string,
+  data: Partial<TimeEntryInsert>
+) {
+  const supabase = await createClient()
+
+  const { data: updated, error } = await supabase
+    .from('time_entries')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating time entry:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/time')
+  return { success: true, data: updated as TimeEntry }
+}
+
+export async function deleteTimeEntry(id: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase.from('time_entries').delete().eq('id', id)
+
+  if (error) {
+    console.error('Error deleting time entry:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/time')
+  return { success: true }
+}
+
+export async function getTimeEntrySummary(
+  teamMemberId: string,
+  startDate: string,
+  endDate: string
+) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('time_entries')
+    .select('hours, entry_type, billable')
+    .eq('team_member_id', teamMemberId)
+    .gte('entry_date', startDate)
+    .lte('entry_date', endDate)
+
+  if (error) {
+    console.error('Error fetching time entry summary:', error)
+    return { success: false, error: error.message }
+  }
+
+  const summary = {
+    totalHours: 0,
+    billableHours: 0,
+    byType: {} as Record<string, number>,
+  }
+
+  for (const entry of data || []) {
+    summary.totalHours += Number(entry.hours)
+    if (entry.billable) {
+      summary.billableHours += Number(entry.hours)
+    }
+    summary.byType[entry.entry_type] =
+      (summary.byType[entry.entry_type] || 0) + Number(entry.hours)
+  }
+
+  return { success: true, data: summary }
+}
+
+// =====================================================
+// ON-CALL SCHEDULE
+// =====================================================
+
+export async function getOnCallSchedule(options?: {
+  startDate?: string
+  endDate?: string
+  teamMemberId?: string
+  currentOnly?: boolean
+}) {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('oncall_schedule')
+    .select(
+      `
+      *,
+      team_member:team_members(id, display_name, phone, oncall_phone)
+    `
+    )
+    .order('start_date')
+
+  if (options?.teamMemberId) {
+    query = query.eq('team_member_id', options.teamMemberId)
+  }
+
+  if (options?.currentOnly) {
+    const today = new Date().toISOString().split('T')[0]
+    query = query.lte('start_date', today).gte('end_date', today)
+  } else {
+    if (options?.startDate) {
+      query = query.gte('end_date', options.startDate)
+    }
+    if (options?.endDate) {
+      query = query.lte('start_date', options.endDate)
+    }
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('Error fetching on-call schedule:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, data: data as OnCallSchedule[] }
+}
+
+export async function getCurrentOnCall() {
+  return getOnCallSchedule({ currentOnly: true })
+}
+
+export async function createOnCallSchedule(data: OnCallScheduleInsert) {
+  const supabase = await createClient()
+
+  const { data: schedule, error } = await supabase
+    .from('oncall_schedule')
+    .insert(data)
+    .select(
+      `
+      *,
+      team_member:team_members(id, display_name, phone, oncall_phone)
+    `
+    )
+    .single()
+
+  if (error) {
+    console.error('Error creating on-call schedule:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/oncall')
+  revalidatePath('/admin/team')
+  return { success: true, data: schedule as OnCallSchedule }
+}
+
+export async function updateOnCallSchedule(
+  id: string,
+  data: Partial<OnCallScheduleInsert>
+) {
+  const supabase = await createClient()
+
+  const { data: updated, error } = await supabase
+    .from('oncall_schedule')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating on-call schedule:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/oncall')
+  return { success: true, data: updated as OnCallSchedule }
+}
+
+export async function deleteOnCallSchedule(id: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase.from('oncall_schedule').delete().eq('id', id)
+
+  if (error) {
+    console.error('Error deleting on-call schedule:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/oncall')
+  return { success: true }
+}
+
+// =====================================================
+// TEAM STATS & REPORTING
+// =====================================================
+
+export async function getTeamMemberStats(teamMemberId: string) {
+  const supabase = await createClient()
+
+  // Get active client count
+  const { count: activeClientCount } = await supabase
+    .from('client_assignments')
+    .select('*', { count: 'exact', head: true })
+    .eq('team_member_id', teamMemberId)
+
+  // Get current month date range
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    .toISOString()
+    .split('T')[0] as string
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    .toISOString()
+    .split('T')[0] as string
+
+  // Get hours this month
+  const hoursResult = await getTimeEntrySummary(
+    teamMemberId,
+    startOfMonth,
+    endOfMonth
+  )
+
+  return {
+    success: true,
+    data: {
+      activeClientCount: activeClientCount || 0,
+      hoursThisMonth: hoursResult.success ? hoursResult.data?.totalHours : 0,
+      billableHoursThisMonth: hoursResult.success
+        ? hoursResult.data?.billableHours
+        : 0,
+    },
+  }
+}
+
+export async function getTeamOverview() {
+  const supabase = await createClient()
+
+  // Get all active team members with their stats
+  const { data: members, error } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_name')
+
+  if (error) {
+    console.error('Error fetching team overview:', error)
+    return { success: false, error: error.message }
+  }
+
+  // Get current on-call
+  const onCallResult = await getCurrentOnCall()
+
+  return {
+    success: true,
+    data: {
+      members: members as TeamMember[],
+      currentOnCall: onCallResult.success ? onCallResult.data : [],
+    },
+  }
+}
