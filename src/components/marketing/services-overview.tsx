@@ -73,6 +73,36 @@ const serviceIcons: Record<string, React.ReactNode> = {
       />
     </svg>
   ),
+  'car-seat-safety': (
+    <svg
+      className="h-6 w-6"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M8 7h.01M8 11h.01M12 7h.01M12 11h.01M16 7h.01M16 11h.01M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zM9 19v2m6-2v2"
+      />
+    </svg>
+  ),
+  'infant-massage': (
+    <svg
+      className="h-6 w-6"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"
+      />
+    </svg>
+  ),
 }
 
 // Full service descriptions (more detailed than shortDescription in config)
@@ -85,6 +115,10 @@ const serviceDescriptions: Record<string, string> = {
     'Expert guidance to establish and maintain a successful breastfeeding relationship. I provide personalized support for latch issues, supply concerns, and feeding plans.',
   'sibling-prep':
     'Help your older children feel excited and prepared for their new sibling. Age-appropriate education and activities to ease the transition for the whole family.',
+  'car-seat-safety':
+    'As a certified Child Passenger Safety Technician, I ensure your car seat is installed correctly and your baby travels safely from day one.',
+  'infant-massage':
+    'Learn gentle massage techniques to soothe your baby, ease gas and colic, improve sleep, and deepen your bond through nurturing touch.',
 }
 
 export function ServicesOverview() {
