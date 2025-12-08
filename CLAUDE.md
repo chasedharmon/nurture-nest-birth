@@ -25,7 +25,9 @@ pnpm type-check   # TypeScript check
 ## Key Files
 
 - `src/app/actions/team.ts` - Team management server actions (FK queries fixed)
+- `src/components/admin/team/client-team-assignments.tsx` - Team assignments UI component
 - `src/app/admin/team/` - Team management admin pages
+- `tests/e2e/client-team-assignments.spec.ts` - E2E tests for team assignments
 - `supabase/migrations/` - Database migrations
 
 ## Database Notes
@@ -49,7 +51,7 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 
 ### Missing Tables (known issues)
 
-- `contract_signatures` - Table not yet created in Supabase
+- `contract_signatures` - Table not yet created in Supabase (causes console errors on Contracts tab)
 
 ## Test Credentials
 
@@ -58,25 +60,26 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 
 ## Recent Changes (Dec 2024)
 
-### Team Management Feature (Phase 5)
+### Team Management Feature (Phase 5) - COMPLETE
 
 - Team members table with roles (owner, admin, provider, assistant)
 - Client assignments (primary, backup, support roles)
 - Service assignments with revenue sharing
 - Time tracking and on-call scheduling
+- E2E tests for team assignments (21 tests)
 
 ### Fixed Issues
 
-1. PGRST201 FK ambiguity errors - resolved with explicit FK names
+1. PGRST201 FK ambiguity errors - resolved with explicit FK names in team.ts
 2. Activity trigger using wrong column name ('description' -> 'content')
 3. Missing 'team_assigned' enum value in activity_type
+4. Turbopack phantom module cache bug - clear with `rm -rf .next node_modules/.cache`
 
 ## Pending Tasks
 
 ### High Priority
 
-- [ ] Test team assignment in browser (Playwright MCP was disconnected)
-- [ ] Create automated E2E tests for team assignments
+- [ ] Create `contract_signatures` table in Supabase (referenced but missing - causes console errors)
 
 ### Site Configuration (src/config/site.ts)
 
@@ -88,10 +91,6 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - [ ] Add OG image (line 109)
 - [ ] Update Twitter/X handle when account exists (line 110)
 - [ ] Add social media URLs when accounts are created
-
-### Database
-
-- [ ] Create `contract_signatures` table in Supabase (referenced but missing)
 
 ### Other
 
@@ -105,4 +104,10 @@ There's a known Turbopack caching issue causing phantom module references (`src/
 
 ```bash
 rm -rf .next node_modules/.cache
+```
+
+Also clear Playwright's browser cache if issues persist:
+
+```bash
+rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
 ```
