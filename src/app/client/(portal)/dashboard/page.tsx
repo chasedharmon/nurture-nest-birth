@@ -93,16 +93,14 @@ export default async function ClientDashboardPage() {
 
       {/* Due Date Card (if expecting) */}
       {session.expectedDueDate && !session.actualBirthDate && (
-        <Card className="bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/20 dark:to-purple-900/20 border-pink-200 dark:border-pink-800">
+        <Card className="bg-gradient-to-r from-secondary/10 to-primary/10 border-secondary/30">
           <CardHeader>
-            <CardTitle className="text-pink-900 dark:text-pink-300">
-              Your Journey
-            </CardTitle>
+            <CardTitle className="text-foreground">Your Journey</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg text-pink-800 dark:text-pink-200">
+            <p className="text-lg text-muted-foreground">
               Expected Due Date:{' '}
-              <span className="font-semibold">
+              <span className="font-semibold text-foreground">
                 {format(new Date(session.expectedDueDate), 'MMMM d, yyyy')}
               </span>
             </p>
@@ -112,16 +110,14 @@ export default async function ClientDashboardPage() {
 
       {/* Birth Announcement (if baby arrived) */}
       {session.actualBirthDate && (
-        <Card className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-800">
+        <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/30">
           <CardHeader>
-            <CardTitle className="text-blue-900 dark:text-blue-300">
-              Congratulations!
-            </CardTitle>
+            <CardTitle className="text-foreground">Congratulations!</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg text-blue-800 dark:text-blue-200">
+            <p className="text-lg text-muted-foreground">
               Birth Date:{' '}
-              <span className="font-semibold">
+              <span className="font-semibold text-foreground">
                 {format(new Date(session.actualBirthDate), 'MMMM d, yyyy')}
               </span>
             </p>
@@ -258,11 +254,11 @@ export default async function ClientDashboardPage() {
                       </p>
                     )}
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="inline-flex rounded-full px-2 py-1 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                      <span className="inline-flex rounded-full px-2 py-1 text-xs font-medium bg-primary/10 text-primary">
                         Active
                       </span>
                       {service.contract_signed && (
-                        <span className="text-xs text-green-600 dark:text-green-400">
+                        <span className="text-xs text-primary">
                           ✓ Contract Signed
                         </span>
                       )}
@@ -344,19 +340,19 @@ export default async function ClientDashboardPage() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Paid</span>
-                <span className="font-semibold text-green-600 dark:text-green-400">
+                <span className="font-semibold text-primary">
                   ${paymentSummary.paid.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Pending</span>
-                <span className="font-semibold text-yellow-600 dark:text-yellow-400">
+                <span className="font-semibold text-secondary">
                   ${paymentSummary.pending.toLocaleString()}
                 </span>
               </div>
               <div className="border-t pt-3 flex justify-between items-center">
                 <span className="font-medium">Outstanding Balance</span>
-                <span className="text-xl font-bold text-red-600 dark:text-red-400">
+                <span className="text-xl font-bold text-secondary">
                   ${paymentSummary.outstanding.toLocaleString()}
                 </span>
               </div>

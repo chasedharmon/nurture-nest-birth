@@ -48,7 +48,7 @@ export default function InfantMassagePage() {
       <section className={`${spacing.container} ${spacing.section.lg}`}>
         <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-pink-100 px-4 py-1.5 text-sm font-medium text-pink-700 dark:bg-pink-900/30 dark:text-pink-300">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-secondary/10 px-4 py-1.5 text-sm font-medium text-secondary">
               <Hand className="h-4 w-4" />
               Certified Instructor
             </div>
@@ -83,10 +83,10 @@ export default function InfantMassagePage() {
           <div className="mt-12 grid gap-8 md:grid-cols-2">
             {/* For Baby */}
             <FadeIn delay={0.1}>
-              <Card className="h-full border-2 border-pink-200 dark:border-pink-800">
+              <Card className="h-full border-2 border-secondary/20">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 rounded-lg bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300">
+                    <div className="p-2 rounded-lg bg-secondary/10 text-secondary">
                       <Baby className="h-6 w-6" />
                     </div>
                     <h3 className="font-serif text-xl font-semibold text-foreground">
@@ -117,9 +117,7 @@ export default function InfantMassagePage() {
                       },
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3">
-                        <div className="text-pink-600 dark:text-pink-400 mt-0.5">
-                          {item.icon}
-                        </div>
+                        <div className="text-secondary mt-0.5">{item.icon}</div>
                         <div>
                           <p className="font-medium text-foreground">
                             {item.title}
@@ -137,10 +135,10 @@ export default function InfantMassagePage() {
 
             {/* For Parents */}
             <FadeIn delay={0.2}>
-              <Card className="h-full border-2 border-purple-200 dark:border-purple-800">
+              <Card className="h-full border-2 border-primary/20">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
                       <Users className="h-6 w-6" />
                     </div>
                     <h3 className="font-serif text-xl font-semibold text-foreground">
@@ -171,9 +169,7 @@ export default function InfantMassagePage() {
                       },
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3">
-                        <div className="text-purple-600 dark:text-purple-400 mt-0.5">
-                          {item.icon}
-                        </div>
+                        <div className="text-primary mt-0.5">{item.icon}</div>
                         <div>
                           <p className="font-medium text-foreground">
                             {item.title}
@@ -252,7 +248,7 @@ export default function InfantMassagePage() {
             <FadeIn delay={0.1}>
               <Card className="h-full border-2">
                 <CardContent className="pt-6 text-center">
-                  <div className="mx-auto w-fit p-4 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 mb-4">
+                  <div className="mx-auto w-fit p-4 rounded-full bg-secondary/10 text-secondary mb-4">
                     <Users className="h-8 w-8" />
                   </div>
                   <h3 className="font-serif text-xl font-semibold text-foreground">
@@ -264,19 +260,19 @@ export default function InfantMassagePage() {
                   </p>
                   <ul className="mt-6 space-y-2 text-sm text-muted-foreground text-left">
                     <li className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-pink-500" />
+                      <Clock className="h-4 w-4 text-secondary" />
                       One-on-one instruction in your home
                     </li>
                     <li className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-pink-500" />
+                      <Clock className="h-4 w-4 text-secondary" />
                       Full body massage techniques
                     </li>
                     <li className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-pink-500" />
+                      <Clock className="h-4 w-4 text-secondary" />
                       Handout with stroke guide
                     </li>
                     <li className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-pink-500" />
+                      <Clock className="h-4 w-4 text-secondary" />
                       Sample massage oil included
                     </li>
                   </ul>

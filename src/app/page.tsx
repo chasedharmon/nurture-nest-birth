@@ -157,19 +157,19 @@ export default function Home() {
           </FadeIn>
 
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Car Seat Safety Card */}
+            {/* Car Seat Safety Card - Uses muted/neutral (education group) */}
             <FadeIn delay={0.1}>
-              <Card className="group h-full overflow-hidden border-2 transition-all hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-800">
+              <Card className="group h-full overflow-hidden border-2 border-border transition-all hover:border-muted-foreground/30 hover:shadow-lg">
                 <CardContent className="relative pt-6">
-                  <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-blue-100/50 transition-transform group-hover:scale-150 dark:bg-blue-900/20" />
+                  <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-muted transition-transform group-hover:scale-150" />
                   <div className="relative">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
-                      <Car className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+                      <Car className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <h3 className="mt-4 font-serif text-xl font-semibold">
                       Car Seat Safety Expert
                     </h3>
-                    <p className="mt-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+                    <p className="mt-2 text-sm font-medium text-muted-foreground">
                       CPST Certified
                     </p>
                     <p className="mt-3 text-sm text-muted-foreground">
@@ -181,7 +181,7 @@ export default function Home() {
                     </p>
                     <Link
                       href="/services/car-seat-safety"
-                      className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                      className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                     >
                       Learn more <ArrowRight className="h-3 w-3" />
                     </Link>
@@ -190,19 +190,19 @@ export default function Home() {
               </Card>
             </FadeIn>
 
-            {/* Infant Massage Card */}
+            {/* Infant Massage Card - Uses secondary/terracotta (specialized group) */}
             <FadeIn delay={0.2}>
-              <Card className="group h-full overflow-hidden border-2 transition-all hover:border-teal-300 hover:shadow-lg dark:hover:border-teal-800">
+              <Card className="group h-full overflow-hidden border-2 border-secondary/20 transition-all hover:border-secondary/40 hover:shadow-lg">
                 <CardContent className="relative pt-6">
-                  <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-teal-100/50 transition-transform group-hover:scale-150 dark:bg-teal-900/20" />
+                  <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-secondary/10 transition-transform group-hover:scale-150" />
                   <div className="relative">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 dark:bg-teal-900/30">
-                      <Baby className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10">
+                      <Baby className="h-6 w-6 text-secondary" />
                     </div>
                     <h3 className="mt-4 font-serif text-xl font-semibold">
                       Infant Massage Instructor
                     </h3>
-                    <p className="mt-2 text-sm font-medium text-teal-600 dark:text-teal-400">
+                    <p className="mt-2 text-sm font-medium text-secondary">
                       CIMI Certified
                     </p>
                     <p className="mt-3 text-sm text-muted-foreground">
@@ -214,7 +214,7 @@ export default function Home() {
                     </p>
                     <Link
                       href="/services/infant-massage"
-                      className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-teal-600 hover:underline dark:text-teal-400"
+                      className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                     >
                       Learn more <ArrowRight className="h-3 w-3" />
                     </Link>
@@ -223,19 +223,19 @@ export default function Home() {
               </Card>
             </FadeIn>
 
-            {/* Evidence-Based Care Card */}
+            {/* Evidence-Based Care Card - Uses primary/olive (core group) */}
             <FadeIn delay={0.3}>
-              <Card className="group h-full overflow-hidden border-2 transition-all hover:border-purple-300 hover:shadow-lg dark:hover:border-purple-800">
+              <Card className="group h-full overflow-hidden border-2 border-primary/20 transition-all hover:border-primary/40 hover:shadow-lg">
                 <CardContent className="relative pt-6">
-                  <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-purple-100/50 transition-transform group-hover:scale-150 dark:bg-purple-900/20" />
+                  <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-primary/10 transition-transform group-hover:scale-150" />
                   <div className="relative">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/30">
-                      <Shield className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                      <Shield className="h-6 w-6 text-primary" />
                     </div>
                     <h3 className="mt-4 font-serif text-xl font-semibold">
                       Extensively Trained
                     </h3>
-                    <p className="mt-2 text-sm font-medium text-purple-600 dark:text-purple-400">
+                    <p className="mt-2 text-sm font-medium text-primary">
                       7+ Certifications
                     </p>
                     <p className="mt-3 text-sm text-muted-foreground">
@@ -248,7 +248,7 @@ export default function Home() {
                     </p>
                     <Link
                       href="/about"
-                      className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-purple-600 hover:underline dark:text-purple-400"
+                      className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                     >
                       See all credentials <ArrowRight className="h-3 w-3" />
                     </Link>

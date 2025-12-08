@@ -8,37 +8,37 @@ import { FileText, CheckCircle, Clock, AlertCircle, Send } from 'lucide-react'
 const invoiceStatusConfig = {
   draft: {
     label: 'Pending',
-    color: 'bg-gray-100 text-gray-800',
+    color: 'bg-muted text-muted-foreground',
     icon: Clock,
   },
   sent: {
     label: 'Awaiting Payment',
-    color: 'bg-blue-100 text-blue-800',
+    color: 'bg-secondary/10 text-secondary',
     icon: Send,
   },
   paid: {
     label: 'Paid',
-    color: 'bg-green-100 text-green-800',
+    color: 'bg-primary/10 text-primary',
     icon: CheckCircle,
   },
   partial: {
     label: 'Partial Payment',
-    color: 'bg-yellow-100 text-yellow-800',
+    color: 'bg-secondary/10 text-secondary',
     icon: Clock,
   },
   overdue: {
     label: 'Overdue',
-    color: 'bg-red-100 text-red-800',
+    color: 'bg-destructive/10 text-destructive',
     icon: AlertCircle,
   },
   cancelled: {
     label: 'Cancelled',
-    color: 'bg-gray-100 text-gray-500',
+    color: 'bg-muted text-muted-foreground',
     icon: FileText,
   },
   refunded: {
     label: 'Refunded',
-    color: 'bg-purple-100 text-purple-800',
+    color: 'bg-muted text-muted-foreground',
     icon: FileText,
   },
 }
@@ -95,20 +95,20 @@ export default async function ClientInvoicesPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-primary">
               ${totals.paid.toLocaleString()}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-2 border-primary/20">
+        <Card className="border-2 border-secondary/20">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Outstanding Balance
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-bold text-secondary">
               ${totals.outstanding.toLocaleString()}
             </div>
           </CardContent>
@@ -182,7 +182,9 @@ export default async function ClientInvoicesPage() {
                               {invoice.due_date && (
                                 <span
                                   className={
-                                    isOverdue ? 'text-red-600 font-medium' : ''
+                                    isOverdue
+                                      ? 'text-secondary font-medium'
+                                      : ''
                                   }
                                 >
                                   Due:{' '}
@@ -219,16 +221,18 @@ export default async function ClientInvoicesPage() {
 
       {/* Payment Information */}
       {totals.outstanding > 0 && (
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className="bg-primary/5 border-primary/20">
           <CardHeader>
-            <CardTitle className="text-blue-900">Payment Information</CardTitle>
+            <CardTitle className="text-foreground">
+              Payment Information
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-blue-800">
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p>
               If you have any questions about your invoices or would like to
               make a payment, please contact your doula.
             </p>
-            <p className="font-medium">
+            <p className="font-medium text-foreground">
               Accepted payment methods: Credit Card, Check, Cash, Venmo, Zelle
             </p>
           </CardContent>

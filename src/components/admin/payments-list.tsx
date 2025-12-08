@@ -17,12 +17,10 @@ interface PaymentsListProps {
 }
 
 const paymentStatusColors: Record<string, string> = {
-  pending:
-    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
-  completed:
-    'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
-  failed: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
-  refunded: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
+  pending: 'bg-secondary/10 text-secondary',
+  completed: 'bg-primary/10 text-primary',
+  failed: 'bg-destructive/10 text-destructive',
+  refunded: 'bg-muted text-muted-foreground',
 }
 
 const paymentMethodLabels: Record<string, string> = {
@@ -77,21 +75,21 @@ export function PaymentsList({
           <p className="text-sm text-muted-foreground">Total</p>
           <p className="text-2xl font-bold">${totals.total.toLocaleString()}</p>
         </div>
-        <div className="border border-border rounded-lg p-4 bg-green-50 dark:bg-green-950/20">
+        <div className="border border-border rounded-lg p-4 bg-primary/5">
           <p className="text-sm text-muted-foreground">Paid</p>
-          <p className="text-2xl font-bold text-green-600">
+          <p className="text-2xl font-bold text-primary">
             ${totals.paid.toLocaleString()}
           </p>
         </div>
-        <div className="border border-border rounded-lg p-4 bg-yellow-50 dark:bg-yellow-950/20">
+        <div className="border border-border rounded-lg p-4 bg-secondary/5">
           <p className="text-sm text-muted-foreground">Pending</p>
-          <p className="text-2xl font-bold text-yellow-600">
+          <p className="text-2xl font-bold text-secondary">
             ${totals.pending.toLocaleString()}
           </p>
         </div>
         <div className="border border-border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Outstanding</p>
-          <p className="text-2xl font-bold text-red-600">
+          <p className="text-2xl font-bold text-secondary">
             ${(totals.total - totals.paid).toLocaleString()}
           </p>
         </div>
@@ -248,7 +246,7 @@ function PaymentCard({
               variant="ghost"
               size="sm"
               onClick={() => setShowDeleteConfirm(true)}
-              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-100"
+              className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               Delete
             </Button>

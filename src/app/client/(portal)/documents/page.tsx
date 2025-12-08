@@ -33,16 +33,16 @@ const documentTypeIcons = {
 }
 
 const documentTypeColors = {
-  contract:
-    'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300',
-  birth_plan:
-    'bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-300',
-  resource: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
-  photo: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
-  invoice:
-    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
-  form: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300',
-  other: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
+  // Core documents - Primary (olive)
+  contract: 'bg-primary/10 text-primary',
+  birth_plan: 'bg-primary/10 text-primary',
+  // Resources & media - Secondary (terracotta)
+  resource: 'bg-secondary/10 text-secondary',
+  photo: 'bg-secondary/10 text-secondary',
+  // Financial & forms - Muted (neutral)
+  invoice: 'bg-muted text-muted-foreground',
+  form: 'bg-muted text-muted-foreground',
+  other: 'bg-muted text-muted-foreground',
 }
 
 export default async function ClientDocumentsPage() {

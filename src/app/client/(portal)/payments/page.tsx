@@ -16,12 +16,10 @@ const paymentMethodIcons = {
 }
 
 const paymentStatusColors = {
-  pending:
-    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
-  completed:
-    'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
-  failed: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
-  refunded: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
+  pending: 'bg-secondary/10 text-secondary',
+  completed: 'bg-primary/10 text-primary',
+  failed: 'bg-destructive/10 text-destructive',
+  refunded: 'bg-muted text-muted-foreground',
 }
 
 export default async function ClientPaymentsPage() {
@@ -89,7 +87,7 @@ export default async function ClientPaymentsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <div className="text-2xl font-bold text-primary">
               ${paymentSummary.paid.toLocaleString()}
             </div>
           </CardContent>
@@ -102,20 +100,20 @@ export default async function ClientPaymentsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+            <div className="text-2xl font-bold text-secondary">
               ${paymentSummary.pending.toLocaleString()}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-2 border-primary/20">
+        <Card className="border-2 border-secondary/20">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Outstanding Balance
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+            <div className="text-2xl font-bold text-secondary">
               ${paymentSummary.outstanding.toLocaleString()}
             </div>
           </CardContent>
@@ -216,18 +214,18 @@ export default async function ClientPaymentsPage() {
 
       {/* Payment Information */}
       {paymentSummary.outstanding > 0 && (
-        <Card className="bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800">
+        <Card className="bg-primary/5 border-primary/20">
           <CardHeader>
-            <CardTitle className="text-blue-900 dark:text-blue-300">
+            <CardTitle className="text-foreground">
               Payment Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p>
               If you have any questions about your balance or would like to make
               a payment, please contact your doula.
             </p>
-            <p className="font-medium">
+            <p className="font-medium text-foreground">
               Accepted payment methods: Credit Card, Check, Cash, Venmo, Zelle
             </p>
           </CardContent>

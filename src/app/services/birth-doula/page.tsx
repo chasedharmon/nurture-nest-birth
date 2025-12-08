@@ -166,7 +166,7 @@ export default function BirthDoulaPage() {
                   "You've had a difficult or traumatic birth before",
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                     <span className="text-muted-foreground">{item}</span>
                   </div>
                 ))}
@@ -440,7 +440,7 @@ export default function BirthDoulaPage() {
             <FadeIn delay={0.1}>
               <Card className="text-center h-full">
                 <CardContent className="pt-6">
-                  <div className="mx-auto w-fit p-4 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 mb-4">
+                  <div className="mx-auto w-fit p-4 rounded-full bg-muted text-muted-foreground mb-4">
                     <Building className="h-8 w-8" />
                   </div>
                   <h3 className="font-serif text-lg font-semibold text-foreground">
@@ -457,7 +457,7 @@ export default function BirthDoulaPage() {
             <FadeIn delay={0.2}>
               <Card className="text-center h-full">
                 <CardContent className="pt-6">
-                  <div className="mx-auto w-fit p-4 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 mb-4">
+                  <div className="mx-auto w-fit p-4 rounded-full bg-secondary/10 text-secondary mb-4">
                     <Stethoscope className="h-8 w-8" />
                   </div>
                   <h3 className="font-serif text-lg font-semibold text-foreground">
@@ -474,7 +474,7 @@ export default function BirthDoulaPage() {
             <FadeIn delay={0.3}>
               <Card className="text-center h-full">
                 <CardContent className="pt-6">
-                  <div className="mx-auto w-fit p-4 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 mb-4">
+                  <div className="mx-auto w-fit p-4 rounded-full bg-primary/10 text-primary mb-4">
                     <Home className="h-8 w-8" />
                   </div>
                   <h3 className="font-serif text-lg font-semibold text-foreground">
@@ -561,7 +561,7 @@ export default function BirthDoulaPage() {
               'Work against your wishes',
             ].map((item, i) => (
               <FadeIn key={i} delay={i * 0.05}>
-                <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950/20 text-sm text-red-700 dark:text-red-300">
+                <div className="p-4 rounded-lg bg-muted text-sm text-muted-foreground">
                   {item}
                 </div>
               </FadeIn>

@@ -47,7 +47,7 @@ export default function CarSeatSafetyPage() {
       <section className={`${spacing.container} ${spacing.section.lg}`}>
         <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-1.5 text-sm font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-muted px-4 py-1.5 text-sm font-medium text-foreground">
               <Car className="h-4 w-4" />
               Certified CPST
             </div>
@@ -67,20 +67,18 @@ export default function CarSeatSafetyPage() {
 
       {/* Stat Section */}
       <section
-        className={`bg-red-50 dark:bg-red-950/20 ${spacing.container} ${spacing.section.md}`}
+        className={`bg-secondary/5 ${spacing.container} ${spacing.section.md}`}
       >
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
             <div className="flex flex-col items-center text-center">
-              <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-              <p className="text-4xl font-bold text-red-600 dark:text-red-400">
-                46%
-              </p>
-              <p className="text-lg text-red-700 dark:text-red-300 mt-2">
+              <AlertTriangle className="h-12 w-12 text-secondary mb-4" />
+              <p className="text-4xl font-bold text-secondary">46%</p>
+              <p className="text-lg text-foreground mt-2">
                 of car seats are misused in ways that could reduce their
                 effectiveness in a crash
               </p>
-              <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 — National Highway Traffic Safety Administration (NHTSA)
               </p>
             </div>
@@ -123,7 +121,7 @@ export default function CarSeatSafetyPage() {
                 <Card className="h-full border-2">
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                      <div className="p-2 rounded-lg bg-muted text-foreground">
                         {item.icon}
                       </div>
                       <h3 className="font-serif text-xl font-semibold text-foreground">
@@ -165,11 +163,9 @@ export default function CarSeatSafetyPage() {
               'Bulky clothing under harness straps',
             ].map((mistake, i) => (
               <FadeIn key={i} delay={i * 0.05}>
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20">
-                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <p className="text-sm text-amber-900 dark:text-amber-200">
-                    {mistake}
-                  </p>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/5 border border-secondary/20">
+                  <AlertTriangle className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                  <p className="text-sm text-muted-foreground">{mistake}</p>
                 </div>
               </FadeIn>
             ))}
@@ -206,7 +202,7 @@ export default function CarSeatSafetyPage() {
               <FadeIn key={i} delay={i * 0.1}>
                 <Card className="text-center">
                   <CardContent className="pt-6">
-                    <div className="mx-auto w-fit p-3 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 mb-4">
+                    <div className="mx-auto w-fit p-3 rounded-full bg-muted text-foreground mb-4">
                       {item.icon}
                     </div>
                     <h3 className="font-serif text-lg font-semibold text-foreground">
@@ -279,7 +275,7 @@ export default function CarSeatSafetyPage() {
                   </Button>
                 </div>
               </div>
-              <div className="p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+              <div className="p-8 bg-card rounded-2xl shadow-lg border">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground uppercase tracking-wider">
                     Standalone Check

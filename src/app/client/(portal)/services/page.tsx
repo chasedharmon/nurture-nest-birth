@@ -18,20 +18,17 @@ const serviceTypeLabels = {
 }
 
 const serviceStatusColors = {
-  pending:
-    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
-  active:
-    'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
-  completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
-  cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
+  pending: 'bg-secondary/10 text-secondary',
+  active: 'bg-primary/10 text-primary',
+  completed: 'bg-muted text-muted-foreground',
+  cancelled: 'bg-muted text-muted-foreground',
 }
 
 const paymentStatusColors = {
-  unpaid: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
-  partial:
-    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
-  paid: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
-  refunded: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
+  unpaid: 'bg-secondary/10 text-secondary',
+  partial: 'bg-secondary/10 text-secondary',
+  paid: 'bg-primary/10 text-primary',
+  refunded: 'bg-muted text-muted-foreground',
 }
 
 export default async function ClientServicesPage() {
@@ -136,11 +133,11 @@ export default async function ClientServicesPage() {
                     </p>
                     <p className="text-foreground">
                       {service.contract_signed ? (
-                        <span className="text-green-600 dark:text-green-400 font-medium">
+                        <span className="text-primary font-medium">
                           ✓ Signed
                         </span>
                       ) : (
-                        <span className="text-yellow-600 dark:text-yellow-400 font-medium">
+                        <span className="text-secondary font-medium">
                           ⏳ Pending Signature
                         </span>
                       )}

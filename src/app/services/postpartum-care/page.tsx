@@ -99,10 +99,10 @@ export default function PostpartumCarePage() {
           </FadeIn>
           <div className="mt-12 grid md:grid-cols-2 gap-8">
             <FadeIn delay={0.1}>
-              <Card className="h-full border-2 border-pink-200 dark:border-pink-800">
+              <Card className="h-full border-2 border-secondary/20">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300">
+                    <div className="p-2 rounded-lg bg-secondary/10 text-secondary">
                       <Baby className="h-6 w-6" />
                     </div>
                     <h3 className="font-serif text-xl font-semibold text-foreground">
@@ -115,19 +115,19 @@ export default function PostpartumCarePage() {
                   </p>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-pink-500 mt-1">•</span>
+                      <span className="text-secondary mt-1">•</span>
                       Frequent feeding (8-12+ times per day)
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-pink-500 mt-1">•</span>
+                      <span className="text-secondary mt-1">•</span>
                       Lots of holding, skin-to-skin, and closeness
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-pink-500 mt-1">•</span>
+                      <span className="text-secondary mt-1">•</span>
                       Help regulating temperature and emotions
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-pink-500 mt-1">•</span>
+                      <span className="text-secondary mt-1">•</span>
                       Patient caregivers learning their cues
                     </li>
                   </ul>
@@ -135,10 +135,10 @@ export default function PostpartumCarePage() {
               </Card>
             </FadeIn>
             <FadeIn delay={0.2}>
-              <Card className="h-full border-2 border-purple-200 dark:border-purple-800">
+              <Card className="h-full border-2 border-primary/20">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
                       <Heart className="h-6 w-6" />
                     </div>
                     <h3 className="font-serif text-xl font-semibold text-foreground">
@@ -151,19 +151,19 @@ export default function PostpartumCarePage() {
                   </p>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-purple-500 mt-1">•</span>
+                      <span className="text-primary mt-1">•</span>
                       Rest and physical recovery time
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-purple-500 mt-1">•</span>
+                      <span className="text-primary mt-1">•</span>
                       Nourishing food and hydration
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-purple-500 mt-1">•</span>
+                      <span className="text-primary mt-1">•</span>
                       Emotional support and reassurance
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-purple-500 mt-1">•</span>
+                      <span className="text-primary mt-1">•</span>
                       Someone to share the load
                     </li>
                   </ul>
@@ -231,7 +231,7 @@ export default function PostpartumCarePage() {
               <Card className="h-full border-2">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                    <div className="p-3 rounded-full bg-secondary/10 text-secondary">
                       <Sun className="h-6 w-6" />
                     </div>
                     <h3 className="font-serif text-xl font-semibold text-foreground">
@@ -243,35 +243,35 @@ export default function PostpartumCarePage() {
                   </p>
                   <ul className="space-y-3 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-1">•</span>
+                      <span className="text-secondary mt-1">•</span>
                       <span>
                         <strong>Feeding support</strong> - watch and assist with
                         breastfeeding or bottle prep
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-1">•</span>
+                      <span className="text-secondary mt-1">•</span>
                       <span>
                         <strong>Baby care education</strong> - bathing,
                         swaddling, soothing
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-1">•</span>
+                      <span className="text-secondary mt-1">•</span>
                       <span>
                         <strong>Light housework</strong> - laundry, dishes, meal
                         prep
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-1">•</span>
+                      <span className="text-secondary mt-1">•</span>
                       <span>
                         <strong>Sibling care</strong> - engaging older kids
                         while you rest or nurse
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-1">•</span>
+                      <span className="text-secondary mt-1">•</span>
                       <span>
                         <strong>Your nap</strong> - I watch baby while you sleep
                       </span>
@@ -295,7 +295,7 @@ export default function PostpartumCarePage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+                    <div className="p-3 rounded-full bg-primary/10 text-primary">
                       <Moon className="h-6 w-6" />
                     </div>
                     <h3 className="font-serif text-xl font-semibold text-foreground">
@@ -307,35 +307,35 @@ export default function PostpartumCarePage() {
                   </p>
                   <ul className="space-y-3 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-indigo-500 mt-1">•</span>
+                      <span className="text-primary mt-1">•</span>
                       <span>
                         <strong>Nighttime baby care</strong> - soothing,
                         changing, settling
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-indigo-500 mt-1">•</span>
+                      <span className="text-primary mt-1">•</span>
                       <span>
                         <strong>Feeding support</strong> - bring baby to you for
                         nursing, or handle bottle feeds
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-indigo-500 mt-1">•</span>
+                      <span className="text-primary mt-1">•</span>
                       <span>
                         <strong>You actually sleep</strong> - 5-8 hours of
                         uninterrupted rest
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-indigo-500 mt-1">•</span>
+                      <span className="text-primary mt-1">•</span>
                       <span>
                         <strong>Morning update</strong> - detailed log of the
                         night
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-indigo-500 mt-1">•</span>
+                      <span className="text-primary mt-1">•</span>
                       <span>
                         <strong>Light prep</strong> - breakfast ready, kitchen
                         tidied
@@ -494,20 +494,20 @@ export default function PostpartumCarePage() {
 
       {/* Bonus: Infant Massage */}
       <section
-        className={`bg-pink-50 dark:bg-pink-950/20 ${spacing.container} ${spacing.section.md}`}
+        className={`bg-secondary/5 ${spacing.container} ${spacing.section.md}`}
       >
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="flex-shrink-0">
-                <div className="p-6 rounded-full bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300">
+                <div className="p-6 rounded-full bg-secondary/10 text-secondary">
                   <Hand className="h-12 w-12" />
                 </div>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="h-5 w-5 text-pink-500" />
-                  <span className="text-sm font-medium text-pink-600 dark:text-pink-400">
+                  <Sparkles className="h-5 w-5 text-secondary" />
+                  <span className="text-sm font-medium text-secondary">
                     Included Benefit
                   </span>
                 </div>
@@ -557,7 +557,7 @@ export default function PostpartumCarePage() {
               </p>
             </FadeIn>
             <FadeIn delay={0.2}>
-              <Card className="h-full border-2 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
+              <Card className="h-full border-2 border-secondary/20 bg-secondary/5">
                 <CardContent className="pt-6">
                   <h3 className="font-semibold text-foreground mb-3">
                     When to Seek Additional Help
@@ -570,7 +570,7 @@ export default function PostpartumCarePage() {
                     <li>• Inability to sleep even when baby sleeps</li>
                     <li>• Withdrawing from family and friends</li>
                   </ul>
-                  <p className="mt-4 text-sm font-medium text-amber-700 dark:text-amber-300">
+                  <p className="mt-4 text-sm font-medium text-secondary">
                     If you experience these symptoms, reach out to your provider
                     or call Postpartum Support International: 1-800-944-4773
                   </p>

@@ -28,11 +28,10 @@ const meetingTypeLabels = {
 }
 
 const meetingStatusColors = {
-  scheduled: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
-  completed:
-    'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
-  cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
-  no_show: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300',
+  scheduled: 'bg-secondary/10 text-secondary',
+  completed: 'bg-primary/10 text-primary',
+  cancelled: 'bg-muted text-muted-foreground',
+  no_show: 'bg-muted text-muted-foreground',
 }
 
 export default async function ClientMeetingsPage() {
@@ -87,7 +86,7 @@ export default async function ClientMeetingsPage() {
             {upcomingMeetings.map(meeting => (
               <Card
                 key={meeting.id}
-                className="bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800"
+                className="bg-secondary/5 border-secondary/20"
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">

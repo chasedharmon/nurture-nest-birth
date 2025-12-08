@@ -215,11 +215,11 @@ export default function AboutPage() {
 
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             <FadeIn delay={0.1}>
-              <Card className="h-full border-2 border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
+              <Card className="h-full border-2 border-border bg-muted/30">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                      <Car className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
+                      <Car className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <div>
                       <h3 className="font-serif text-lg font-semibold">
@@ -242,7 +242,7 @@ export default function AboutPage() {
                   </p>
                   <Link
                     href="/services/car-seat-safety"
-                    className="mt-4 inline-flex text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                    className="mt-4 inline-flex text-sm font-medium text-primary hover:underline"
                   >
                     Learn about car seat checks →
                   </Link>
@@ -251,19 +251,17 @@ export default function AboutPage() {
             </FadeIn>
 
             <FadeIn delay={0.2}>
-              <Card className="h-full border-2 border-teal-200 bg-teal-50/50 dark:border-teal-900 dark:bg-teal-950/20">
+              <Card className="h-full border-2 border-secondary/20 bg-secondary/5">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/30">
-                      <Baby className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/10">
+                      <Baby className="h-6 w-6 text-secondary" />
                     </div>
                     <div>
                       <h3 className="font-serif text-lg font-semibold">
                         Infant Massage Instructor
                       </h3>
-                      <p className="text-xs text-muted-foreground">
-                        CIMI Certified
-                      </p>
+                      <p className="text-xs text-secondary">CIMI Certified</p>
                     </div>
                   </div>
                   <p className="mt-4 text-sm text-muted-foreground">
@@ -279,7 +277,7 @@ export default function AboutPage() {
                   </p>
                   <Link
                     href="/services/infant-massage"
-                    className="mt-4 inline-flex text-sm font-medium text-teal-600 hover:underline dark:text-teal-400"
+                    className="mt-4 inline-flex text-sm font-medium text-primary hover:underline"
                   >
                     Learn about infant massage →
                   </Link>

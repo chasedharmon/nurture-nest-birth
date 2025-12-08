@@ -34,11 +34,9 @@ const roleLabels: Record<AssignmentRole, string> = {
 }
 
 const roleColors: Record<AssignmentRole, string> = {
-  primary:
-    'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
-  backup: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300',
-  support:
-    'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300',
+  primary: 'bg-primary/10 text-primary',
+  backup: 'bg-secondary/10 text-secondary',
+  support: 'bg-muted text-muted-foreground',
 }
 
 export function CareTeam({ careTeam }: CareTeamProps) {

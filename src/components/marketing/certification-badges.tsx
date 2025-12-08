@@ -19,6 +19,17 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
+/**
+ * Certification Badge Component
+ *
+ * Redesigned to use cohesive brand colors:
+ * - Core certifications (DONA): Primary olive tones
+ * - Specialized services: Secondary terracotta tones
+ * - Education/Training: Neutral muted tones
+ *
+ * This creates visual cohesion while still differentiating credential types.
+ */
+
 interface Certification {
   id: string
   name: string
@@ -26,9 +37,7 @@ interface Certification {
   organization: string
   description: string
   icon: LucideIcon
-  color: string
-  bgColor: string
-  borderColor: string
+  group: 'core' | 'specialized' | 'education'
 }
 
 const certifications: Certification[] = [
@@ -40,9 +49,7 @@ const certifications: Certification[] = [
     description:
       "Trained and certified by DONA International, the world's oldest and largest doula certifying organization. Includes extensive training in labor support, comfort measures, and advocacy.",
     icon: Heart,
-    color: 'text-rose-600 dark:text-rose-400',
-    bgColor: 'bg-rose-100 dark:bg-rose-950/30',
-    borderColor: 'border-rose-200 dark:border-rose-800',
+    group: 'core',
   },
   {
     id: 'dona-postpartum',
@@ -52,9 +59,7 @@ const certifications: Certification[] = [
     description:
       'Certified to provide evidence-based postpartum support including newborn care, feeding assistance, family adjustment, and recovery support during the fourth trimester.',
     icon: Baby,
-    color: 'text-purple-600 dark:text-purple-400',
-    bgColor: 'bg-purple-100 dark:bg-purple-950/30',
-    borderColor: 'border-purple-200 dark:border-purple-800',
+    group: 'core',
   },
   {
     id: 'lactation',
@@ -64,9 +69,7 @@ const certifications: Certification[] = [
     description:
       'Trained to provide evidence-based lactation support, including latch assessment, supply management, and troubleshooting common breastfeeding challenges.',
     icon: HandHeart,
-    color: 'text-amber-600 dark:text-amber-400',
-    bgColor: 'bg-amber-100 dark:bg-amber-950/30',
-    borderColor: 'border-amber-200 dark:border-amber-800',
+    group: 'specialized',
   },
   {
     id: 'cpst',
@@ -76,9 +79,7 @@ const certifications: Certification[] = [
     description:
       'Nationally certified to properly install car seats and educate families on child passenger safety. Studies show 73% of car seats are installed incorrectly—a CPST ensures your child travels safely.',
     icon: Shield,
-    color: 'text-blue-600 dark:text-blue-400',
-    bgColor: 'bg-blue-100 dark:bg-blue-950/30',
-    borderColor: 'border-blue-200 dark:border-blue-800',
+    group: 'education',
   },
   {
     id: 'infant-massage',
@@ -88,9 +89,7 @@ const certifications: Certification[] = [
     description:
       'Trained to teach parents therapeutic massage techniques that promote bonding, improve sleep, relieve colic and gas, and support healthy infant development.',
     icon: Baby,
-    color: 'text-teal-600 dark:text-teal-400',
-    bgColor: 'bg-teal-100 dark:bg-teal-950/30',
-    borderColor: 'border-teal-200 dark:border-teal-800',
+    group: 'specialized',
   },
   {
     id: 'family-studies',
@@ -100,9 +99,7 @@ const certifications: Certification[] = [
     description:
       'Academic foundation in child development, family dynamics, and human services that informs a holistic approach to supporting families through major life transitions.',
     icon: GraduationCap,
-    color: 'text-indigo-600 dark:text-indigo-400',
-    bgColor: 'bg-indigo-100 dark:bg-indigo-950/30',
-    borderColor: 'border-indigo-200 dark:border-indigo-800',
+    group: 'education',
   },
   {
     id: 'home-visitation',
@@ -112,11 +109,43 @@ const certifications: Certification[] = [
     description:
       'Specialized training in providing support to families in their home environment, understanding family dynamics, and connecting families with community resources.',
     icon: Home,
-    color: 'text-green-600 dark:text-green-400',
-    bgColor: 'bg-green-100 dark:bg-green-950/30',
-    borderColor: 'border-green-200 dark:border-green-800',
+    group: 'education',
   },
 ]
+
+/**
+ * Get cohesive styling based on credential group
+ * Uses brand palette instead of rainbow colors
+ */
+function getGroupStyle(group: Certification['group']) {
+  switch (group) {
+    case 'core':
+      // Primary olive tones - for main doula certifications
+      return {
+        icon: 'text-primary',
+        bg: 'bg-primary/10',
+        border: 'border-primary/20',
+        hoverBorder: 'hover:border-primary/40',
+      }
+    case 'specialized':
+      // Secondary terracotta tones - for specialized services
+      return {
+        icon: 'text-secondary',
+        bg: 'bg-secondary/10',
+        border: 'border-secondary/20',
+        hoverBorder: 'hover:border-secondary/40',
+      }
+    case 'education':
+    default:
+      // Neutral tones - for academic/training credentials
+      return {
+        icon: 'text-muted-foreground',
+        bg: 'bg-muted',
+        border: 'border-border',
+        hoverBorder: 'hover:border-muted-foreground/30',
+      }
+  }
+}
 
 interface CertificationBadgesProps {
   variant?: 'full' | 'compact' | 'icons-only'
@@ -145,56 +174,51 @@ export function CertificationBadges({
     4: 'sm:grid-cols-2 lg:grid-cols-4',
   }
 
+  // Icons-only variant (for homepage banner)
   if (variant === 'icons-only') {
     return (
-      <TooltipProvider>
-        <div className={cn('flex flex-wrap gap-3', className)}>
+      <TooltipProvider delayDuration={100}>
+        <div className={cn('flex flex-wrap justify-center gap-3', className)}>
           {filteredCertifications.map((cert, index) => {
+            const style = getGroupStyle(cert.group)
+
             const Badge = (
               <div
-                key={cert.id}
                 className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-full border-2 transition-transform hover:scale-110',
-                  cert.bgColor,
-                  cert.borderColor
+                  'flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-300',
+                  style.bg,
+                  style.border,
+                  style.hoverBorder,
+                  'hover:scale-110'
                 )}
               >
-                <cert.icon className={cn('h-6 w-6', cert.color)} />
+                <cert.icon className={cn('h-5 w-5', style.icon)} />
               </div>
             )
 
-            if (!showTooltips) {
-              return animated ? (
-                <FadeIn key={cert.id} delay={index * 0.1}>
-                  {Badge}
-                </FadeIn>
-              ) : (
-                Badge
-              )
-            }
-
-            return animated ? (
-              <FadeIn key={cert.id} delay={index * 0.1}>
-                <Tooltip>
-                  <TooltipTrigger asChild>{Badge}</TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs">
-                    <p className="font-semibold">{cert.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {cert.organization}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </FadeIn>
-            ) : (
+            const content = showTooltips ? (
               <Tooltip key={cert.id}>
                 <TooltipTrigger asChild>{Badge}</TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-xs">
-                  <p className="font-semibold">{cert.name}</p>
+                <TooltipContent
+                  side="bottom"
+                  className="max-w-xs border border-border bg-card text-card-foreground shadow-lg"
+                >
+                  <p className="font-semibold text-foreground">{cert.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {cert.organization}
                   </p>
                 </TooltipContent>
               </Tooltip>
+            ) : (
+              Badge
+            )
+
+            return animated ? (
+              <FadeIn key={cert.id} delay={index * 0.1}>
+                {content}
+              </FadeIn>
+            ) : (
+              <div key={cert.id}>{content}</div>
             )
           })}
         </div>
@@ -202,52 +226,51 @@ export function CertificationBadges({
     )
   }
 
+  // Compact variant (pill badges)
   if (variant === 'compact') {
     return (
-      <TooltipProvider>
+      <TooltipProvider delayDuration={100}>
         <div className={cn('flex flex-wrap gap-2', className)}>
           {filteredCertifications.map((cert, index) => {
+            const style = getGroupStyle(cert.group)
+
             const Badge = (
               <div
-                key={cert.id}
                 className={cn(
-                  'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted/50',
-                  cert.borderColor
+                  'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-all duration-300',
+                  style.border,
+                  style.hoverBorder,
+                  'hover:bg-muted/50'
                 )}
               >
-                <cert.icon className={cn('h-4 w-4', cert.color)} />
-                <span>{cert.shortName}</span>
+                <cert.icon className={cn('h-4 w-4', style.icon)} />
+                <span className="text-foreground">{cert.shortName}</span>
               </div>
             )
 
-            if (!showTooltips) {
-              return animated ? (
-                <FadeIn key={cert.id} delay={index * 0.05}>
-                  {Badge}
-                </FadeIn>
-              ) : (
-                Badge
-              )
-            }
+            const content = showTooltips ? (
+              <Tooltip key={cert.id}>
+                <TooltipTrigger asChild>{Badge}</TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  className="max-w-xs border border-border bg-card text-card-foreground shadow-lg"
+                >
+                  <p className="font-semibold text-foreground">{cert.name}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {cert.description}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              Badge
+            )
 
             return animated ? (
               <FadeIn key={cert.id} delay={index * 0.05}>
-                <Tooltip>
-                  <TooltipTrigger asChild>{Badge}</TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs">
-                    <p className="font-semibold">{cert.name}</p>
-                    <p className="mt-1 text-xs">{cert.description}</p>
-                  </TooltipContent>
-                </Tooltip>
+                {content}
               </FadeIn>
             ) : (
-              <Tooltip key={cert.id}>
-                <TooltipTrigger asChild>{Badge}</TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-xs">
-                  <p className="font-semibold">{cert.name}</p>
-                  <p className="mt-1 text-xs">{cert.description}</p>
-                </TooltipContent>
-              </Tooltip>
+              <div key={cert.id}>{content}</div>
             )
           })}
         </div>
@@ -255,41 +278,45 @@ export function CertificationBadges({
     )
   }
 
-  // Full variant with cards
+  // Full variant (cards)
   return (
     <div className={cn('grid gap-4', gridCols[columns], className)}>
       {filteredCertifications.map((cert, index) => {
+        const style = getGroupStyle(cert.group)
+
         const Card = (
           <div
-            key={cert.id}
             className={cn(
-              'group relative overflow-hidden rounded-xl border-2 p-5 transition-all hover:shadow-md',
-              cert.borderColor,
-              'hover:border-primary/30'
+              'group relative overflow-hidden rounded-xl border-2 bg-card p-5 transition-all duration-300',
+              style.border,
+              style.hoverBorder,
+              'hover:shadow-lg hover:shadow-primary/5'
             )}
           >
+            {/* Subtle background accent */}
             <div
               className={cn(
-                'absolute right-0 top-0 h-24 w-24 -translate-y-8 translate-x-8 rounded-full opacity-20 transition-transform group-hover:scale-150',
-                cert.bgColor
+                'absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-50 transition-transform duration-500 group-hover:scale-150',
+                style.bg
               )}
             />
+
             <div className="relative">
               <div
                 className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-lg',
-                  cert.bgColor
+                  'flex h-12 w-12 items-center justify-center rounded-xl',
+                  style.bg
                 )}
               >
-                <cert.icon className={cn('h-6 w-6', cert.color)} />
+                <cert.icon className={cn('h-6 w-6', style.icon)} />
               </div>
-              <h3 className="mt-4 font-serif text-lg font-semibold">
+              <h3 className="mt-4 font-serif text-lg font-semibold text-foreground">
                 {cert.name}
               </h3>
               <p className="mt-1 text-xs text-muted-foreground">
                 {cert.organization}
               </p>
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 {cert.description}
               </p>
             </div>
@@ -301,7 +328,7 @@ export function CertificationBadges({
             {Card}
           </FadeIn>
         ) : (
-          Card
+          <div key={cert.id}>{Card}</div>
         )
       })}
     </div>
@@ -319,31 +346,35 @@ export function CertificationBadge({
   const cert = certifications.find(c => c.id === certificationId)
   if (!cert) return null
 
+  const style = getGroupStyle(cert.group)
+
   if (variant === 'compact') {
     return (
       <div
         className={cn(
           'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium',
-          cert.borderColor
+          style.border
         )}
       >
-        <cert.icon className={cn('h-4 w-4', cert.color)} />
-        <span>{cert.shortName}</span>
+        <cert.icon className={cn('h-4 w-4', style.icon)} />
+        <span className="text-foreground">{cert.shortName}</span>
       </div>
     )
   }
 
   return (
-    <div className={cn('rounded-xl border-2 p-5', cert.borderColor)}>
+    <div className={cn('rounded-xl border-2 bg-card p-5', style.border)}>
       <div
         className={cn(
-          'flex h-12 w-12 items-center justify-center rounded-lg',
-          cert.bgColor
+          'flex h-12 w-12 items-center justify-center rounded-xl',
+          style.bg
         )}
       >
-        <cert.icon className={cn('h-6 w-6', cert.color)} />
+        <cert.icon className={cn('h-6 w-6', style.icon)} />
       </div>
-      <h3 className="mt-4 font-serif text-lg font-semibold">{cert.name}</h3>
+      <h3 className="mt-4 font-serif text-lg font-semibold text-foreground">
+        {cert.name}
+      </h3>
       <p className="mt-1 text-xs text-muted-foreground">{cert.organization}</p>
       <p className="mt-3 text-sm text-muted-foreground">{cert.description}</p>
     </div>
@@ -361,8 +392,8 @@ export function FeaturedCertifications({ className }: { className?: string }) {
   ]
 
   return (
-    <div className={cn('rounded-xl bg-card border p-6', className)}>
-      <div className="flex items-center gap-2 mb-4">
+    <div className={cn('rounded-xl border bg-card p-6', className)}>
+      <div className="mb-4 flex items-center gap-2">
         <Award className="h-5 w-5 text-primary" />
         <h3 className="font-serif text-lg font-semibold">
           Certifications & Training

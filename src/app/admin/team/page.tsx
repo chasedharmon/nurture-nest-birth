@@ -119,8 +119,8 @@ export default async function TeamPage() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <span className="relative flex h-3 w-3">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-primary" />
                 </span>
                 Currently On-Call
               </CardTitle>
@@ -171,7 +171,7 @@ export default async function TeamPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">{totalClients}</div>
                   {unassignedClients > 0 && (
-                    <p className="text-xs text-yellow-600 mt-1">
+                    <p className="text-xs text-secondary mt-1">
                       {unassignedClients} unassigned
                     </p>
                   )}
@@ -274,14 +274,14 @@ export default async function TeamPage() {
                                     {member.is_accepting_clients ? (
                                       <Badge
                                         variant="outline"
-                                        className="text-xs border-green-500 text-green-600 dark:border-green-400 dark:text-green-400"
+                                        className="text-xs border-primary text-primary"
                                       >
                                         Accepting
                                       </Badge>
                                     ) : (
                                       <Badge
                                         variant="outline"
-                                        className="text-xs border-amber-500 text-amber-600 dark:border-amber-400 dark:text-amber-400"
+                                        className="text-xs border-secondary text-secondary"
                                       >
                                         Not Accepting
                                       </Badge>
@@ -427,7 +427,7 @@ export default async function TeamPage() {
                                   )}
                                 </div>
                               ) : (
-                                <span className="text-sm text-yellow-600">
+                                <span className="text-sm text-secondary">
                                   Not assigned
                                 </span>
                               )}
