@@ -1,5 +1,6 @@
 -- Add missing file columns to client_documents table
 -- This adds the file_size_bytes and file_mime_type columns needed for file uploads
+-- Also adds missing activity_type enum values for activity logging triggers
 
 -- Add file_size_bytes column if it doesn't exist
 DO $$
@@ -63,3 +64,11 @@ BEGIN
     END IF;
   END IF;
 END $$;
+
+-- Add missing values to activity_type enum for activity logging triggers
+-- These are needed by triggers on client_documents, invoices, contracts tables
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'system';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'document';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'invoice';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'payment';
+ALTER TYPE activity_type ADD VALUE IF NOT EXISTS 'contract';
