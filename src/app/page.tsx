@@ -15,7 +15,7 @@ import {
   LocalBusinessStructuredData,
   OrganizationStructuredData,
 } from '@/components/seo/structured-data'
-import { Car, Baby, Shield, MapPin, ArrowRight, Sparkles } from 'lucide-react'
+import { Car, Hand, Shield, MapPin, ArrowRight, Sparkles } from 'lucide-react'
 
 // Evidence-based doula impact statistics
 // Sources: AJPH 2024, AJOG 2024, Cochrane Review
@@ -197,7 +197,7 @@ export default function Home() {
                   <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-secondary/10 transition-transform group-hover:scale-150" />
                   <div className="relative">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10">
-                      <Baby className="h-6 w-6 text-secondary" />
+                      <Hand className="h-6 w-6 text-secondary" />
                     </div>
                     <h3 className="mt-4 font-serif text-xl font-semibold">
                       Infant Massage Instructor

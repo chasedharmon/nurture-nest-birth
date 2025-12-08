@@ -259,8 +259,8 @@ export default function PostpartumCarePage() {
                     <li className="flex items-start gap-2">
                       <span className="text-secondary mt-1">•</span>
                       <span>
-                        <strong>Light housework</strong> - laundry, dishes, meal
-                        prep
+                        <strong>Light housework</strong> - baby laundry, baby
+                        dishes, nursery organization
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
@@ -390,7 +390,7 @@ export default function PostpartumCarePage() {
                 time: '10:45 AM',
                 icon: <Moon className="h-5 w-5" />,
                 title: 'Your Rest',
-                desc: 'Baby is content and drowsy. You take a nap while I watch the baby, fold laundry, and prep lunch.',
+                desc: 'Baby is content and drowsy. You take a nap while I watch the baby, fold baby laundry, and do light meal prep.',
               },
               {
                 time: '12:00 PM',
@@ -402,7 +402,7 @@ export default function PostpartumCarePage() {
                 time: '12:45 PM',
                 icon: <Shirt className="h-5 w-5" />,
                 title: 'Wrap Up',
-                desc: 'Kitchen is tidy, laundry is done. I leave you with a peaceful house and a sleeping baby.',
+                desc: 'Baby dishes washed, baby laundry is done. I leave you with a peaceful nursery and a sleeping baby.',
               },
             ].map((item, i) => (
               <FadeIn key={i} delay={i * 0.1}>
@@ -458,13 +458,13 @@ export default function PostpartumCarePage() {
               },
               {
                 icon: <Utensils className="h-6 w-6" />,
-                title: 'Meal Prep',
-                desc: 'Light cooking, preparing nourishing snacks, and ensuring you eat while caring for baby.',
+                title: 'Light Meal Prep',
+                desc: "Simple meal preparation, nourishing snacks, and ensuring you eat while caring for baby. Note: I'm not a housekeeper—this is light support focused on your recovery.",
               },
               {
                 icon: <Shirt className="h-6 w-6" />,
                 title: 'Light Housework',
-                desc: 'Laundry (baby and yours), dishes, tidying—so you can focus on recovery and bonding.',
+                desc: 'Baby laundry, baby dishes, and nursery organization—so you can focus on recovery and bonding. Not general housekeeping.',
               },
               {
                 icon: <Users className="h-6 w-6" />,

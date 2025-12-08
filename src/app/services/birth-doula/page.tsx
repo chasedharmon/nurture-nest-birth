@@ -208,7 +208,7 @@ export default function BirthDoulaPage() {
               {
                 icon: <Calendar className="h-6 w-6" />,
                 title: 'Initial Consultation',
-                timing: 'Free, 30-60 minutes',
+                timing: 'Free, 1-2 hours',
                 desc: "We'll meet (in person or virtually) to discuss your birth vision, answer your questions, and see if we're a good fit. No pressure, no commitment.",
               },
               {

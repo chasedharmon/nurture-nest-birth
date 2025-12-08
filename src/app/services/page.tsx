@@ -42,7 +42,7 @@ const services = [
   {
     title: 'Postpartum Care',
     description:
-      'In-home support during the fourth trimester. Newborn care education, feeding assistance, emotional support, and light household help so you can rest and bond.',
+      'In-home support during the fourth trimester. Newborn care education, feeding assistance, emotional support, and light baby-focused help (baby laundry, baby dishes, nursery organization) so you can rest and bond.',
     href: '/services/postpartum-care',
     icon: (
       <svg
