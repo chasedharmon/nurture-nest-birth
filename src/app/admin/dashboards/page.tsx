@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Plus, LayoutDashboard, BarChart3 } from 'lucide-react'
+import { Plus, LayoutDashboard, BarChart3, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -9,22 +9,22 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { listDashboards, getAvailableReports } from '@/app/actions/dashboards'
 
 export const metadata = {
   title: 'Dashboards | Nurture Nest Birth',
   description: 'Create and manage custom dashboards',
 }
 
-export default function DashboardsPage() {
-  // TODO: Fetch dashboards from database once dashboard builder is implemented
-  const dashboards: Array<{
-    id: string
-    name: string
-    description: string
-    widget_count: number
-    created_at: string
-    is_default: boolean
-  }> = []
+export default async function DashboardsPage() {
+  const [dashboardsResult, reportsResult] = await Promise.all([
+    listDashboards(),
+    getAvailableReports(),
+  ])
+
+  const dashboards = dashboardsResult.success ? dashboardsResult.data : []
+  const reportCount = reportsResult.success ? reportsResult.data.length : 0
+  const totalWidgets = dashboards.reduce((sum, d) => sum + d.widget_count, 0)
 
   return (
     <div className="space-y-6">
@@ -36,36 +36,13 @@ export default function DashboardsPage() {
             Create and manage custom dashboards with widgets and charts
           </p>
         </div>
-        <Button asChild disabled>
+        <Button asChild>
           <Link href="/admin/dashboards/new">
             <Plus className="mr-2 h-4 w-4" />
             New Dashboard
           </Link>
         </Button>
       </div>
-
-      {/* Coming Soon Notice */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <LayoutDashboard className="h-5 w-5 text-primary" />
-            <CardTitle className="text-base">
-              Dashboard Builder Coming Soon
-            </CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            The Dashboard Builder will allow you to create custom dashboards by
-            dragging and dropping widgets, connecting them to your saved
-            reports, and visualizing your data in real-time. For now, use the{' '}
-            <Link href="/admin/reports" className="text-primary underline">
-              Report Builder
-            </Link>{' '}
-            to create and save reports that will power your future dashboards.
-          </p>
-        </CardContent>
-      </Card>
 
       {/* Dashboard list or empty state */}
       {dashboards.length === 0 ? (
@@ -74,9 +51,9 @@ export default function DashboardsPage() {
             <LayoutDashboard className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No dashboards yet</h3>
             <p className="text-muted-foreground text-center mb-6 max-w-sm">
-              Custom dashboards will let you combine multiple reports and KPIs
-              into a single view. Start by creating reports, then build
-              dashboards from them.
+              Create custom dashboards to combine multiple reports and KPIs into
+              a single view. Drag and drop widgets to build your perfect
+              dashboard.
             </p>
             <div className="flex gap-3">
               <Button variant="outline" asChild>
@@ -86,9 +63,9 @@ export default function DashboardsPage() {
                 </Link>
               </Button>
               <Button asChild>
-                <Link href="/admin/reports/new">
+                <Link href="/admin/dashboards/new">
                   <Plus className="mr-2 h-4 w-4" />
-                  Create Report
+                  Create Dashboard
                 </Link>
               </Button>
             </div>
@@ -107,11 +84,17 @@ export default function DashboardsPage() {
                         {dashboard.name}
                       </CardTitle>
                     </div>
-                    {dashboard.is_default && (
-                      <Badge variant="secondary" className="text-xs">
-                        Default
+                    <div className="flex items-center gap-1">
+                      {dashboard.is_default && (
+                        <Badge variant="secondary" className="text-xs">
+                          <Star className="h-3 w-3 mr-1 fill-current" />
+                          Default
+                        </Badge>
+                      )}
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {dashboard.visibility}
                       </Badge>
-                    )}
+                    </div>
                   </div>
                   {dashboard.description && (
                     <CardDescription className="line-clamp-2">
@@ -121,7 +104,10 @@ export default function DashboardsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span>{dashboard.widget_count} widgets</span>
+                    <span>
+                      {dashboard.widget_count} widget
+                      {dashboard.widget_count !== 1 ? 's' : ''}
+                    </span>
                     <span>•</span>
                     <span>
                       {new Date(dashboard.created_at).toLocaleDateString()}
@@ -149,9 +135,7 @@ export default function DashboardsPage() {
             <CardDescription>Total Widgets</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {dashboards.reduce((sum, d) => sum + d.widget_count, 0)}
-            </div>
+            <div className="text-2xl font-bold">{totalWidgets}</div>
           </CardContent>
         </Card>
         <Card>
@@ -159,7 +143,7 @@ export default function DashboardsPage() {
             <CardDescription>Available Reports</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">—</div>
+            <div className="text-2xl font-bold">{reportCount}</div>
             <Link
               href="/admin/reports"
               className="text-xs text-primary hover:underline"

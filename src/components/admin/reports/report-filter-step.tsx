@@ -267,7 +267,7 @@ function getPicklistOptions(
   fieldType: string
 ): { value: string; label: string }[] | null {
   if (fieldType === 'boolean') {
-    return PICKLIST_OPTIONS['boolean']
+    return PICKLIST_OPTIONS['boolean'] || null
   }
   if (fieldType === 'select') {
     const key = `${objectType}.${field}`
@@ -544,7 +544,7 @@ export function ReportFilterStep({
                         field={filter.field}
                         fieldType={fieldConfig.type}
                         operator={filter.operator}
-                        value={filter.value}
+                        value={filter.value as string | number | boolean | null}
                         onChange={value => updateFilter(filter.id, { value })}
                       />
                     </div>

@@ -8,7 +8,7 @@
 All core features complete (Phases 1-5). Now adding Salesforce-style admin enhancements:
 
 - Report Builder UI (COMPLETE)
-- Dashboard Builder UI (IN PROGRESS)
+- Dashboard Builder UI (COMPLETE)
 - Admin Setup area
 - Roles & Permissions management
 - User/Employee management
@@ -124,11 +124,17 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - Components in `src/components/admin/reports/`
 - Pages in `src/app/admin/reports/`
 
-**Dashboard Builder UI** (PENDING):
+**Dashboard Builder UI** (COMPLETE):
 
-- Dashboard page scaffolding created at `src/app/admin/dashboards/page.tsx`
-- Will allow drag-and-drop widget placement
-- Widgets connected to saved reports
+- 12-column responsive grid layout with drag-and-drop placement
+- Widget types: Metric card, Chart (bar/line/pie/donut), Table, List, Funnel, Gauge, Calendar, Report
+- Widget data sources: Link to saved report, custom query, or static value
+- Edit/preview mode toggle for testing layouts
+- Widget configuration panel with type-specific settings
+- Save dashboards with visibility settings (private/shared/org)
+- Components in `src/components/admin/dashboards/`
+- Pages: list (`/admin/dashboards`), new (`/admin/dashboards/new`), view (`/admin/dashboards/[id]`), edit (`/admin/dashboards/[id]/edit`)
+- Server actions in `src/app/actions/dashboards.ts`
 
 **Admin Setup Area** (PENDING):
 
@@ -139,30 +145,6 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 ---
 
 ## Design Specs for Pending Features
-
-### Dashboard Builder UI
-
-**Goal:** Admins create custom dashboards by arranging widgets visually.
-
-**Components to build:**
-
-```
-src/components/admin/dashboards/
-├── dashboard-editor.tsx         # Main editor container
-├── widget-palette.tsx           # Sidebar with available widget types
-├── widget-grid-editor.tsx       # 12-column grid with drag-drop
-├── widget-config-panel.tsx      # Right panel for widget settings
-├── widget-data-source-picker.tsx # Select report, query, or static
-└── dashboard-save-dialog.tsx    # Save dashboard
-```
-
-**Features:**
-
-- 12-column responsive grid layout
-- Widget types: Metric card, Chart (bar/line/pie), Table, List
-- Widget data sources: Link to saved report, custom query, or static value
-- Drag-and-drop placement with resize handles
-- Edit mode vs preview mode toggle
 
 ### Admin Setup Hub
 
