@@ -63,6 +63,8 @@ export const siteConfig = {
     'DONA Certified Birth Doula',
     'DONA Certified Postpartum Doula',
     'Certified Lactation Consultant',
+    'Child Passenger Safety Technician (CPST)',
+    'Certified Infant Massage Instructor (CIMI)',
     'Family Studies Degree',
     'Home Visitation Specialist',
   ],
@@ -88,6 +90,16 @@ export const siteConfig = {
       slug: 'sibling-prep',
       name: 'Sibling Preparation',
       shortDescription: 'Preparing older siblings for a new baby',
+    },
+    {
+      slug: 'car-seat-safety',
+      name: 'Car Seat Safety',
+      shortDescription: 'Certified car seat installation checks and education',
+    },
+    {
+      slug: 'infant-massage',
+      name: 'Infant Massage',
+      shortDescription: 'Learn gentle massage techniques to bond with baby',
     },
   ],
 

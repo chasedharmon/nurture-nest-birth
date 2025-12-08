@@ -71,6 +71,12 @@ export default async function ClientPortalLayout({
                   Intake
                 </Link>
                 <Link
+                  href="/client/resources"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Resources
+                </Link>
+                <Link
                   href="/client/profile"
                   className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 >
