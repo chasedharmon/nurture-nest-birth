@@ -5,13 +5,21 @@
 **Current Phase**: Phase 6+ - Admin Enhancements (Salesforce-like features)
 **Last Updated**: December 8, 2024
 
-All core features complete (Phases 1-5). Now adding Salesforce-style admin enhancements:
+### Phase 6+ Progress
 
-- Report Builder UI (COMPLETE)
-- Dashboard Builder UI (COMPLETE)
-- Admin Setup area
-- Roles & Permissions management
-- User/Employee management
+| Feature                | Status      | Notes                                         |
+| ---------------------- | ----------- | --------------------------------------------- |
+| Report Builder UI      | ✅ COMPLETE | Wizard, filters, preview, save/edit           |
+| Dashboard Builder UI   | ✅ COMPLETE | 12-col grid, drag-drop, 8 widget types        |
+| Admin Setup Hub        | ⏳ NEXT     | Centralized settings area                     |
+| Roles & Permissions UI | ⏳ PENDING  | DB ready (`roles` table exists)               |
+| User Management UI     | ⏳ PENDING  | DB ready (`users`, `user_invitations` tables) |
+
+### Future Features (Not Started)
+
+- Email Templates System (WYSIWYG editor, variables)
+- Advanced Scheduling (calendar sync, availability)
+- Automation Rules Engine (trigger-based workflows)
 
 ## Project Overview
 
@@ -136,17 +144,9 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - Pages: list (`/admin/dashboards`), new (`/admin/dashboards/new`), view (`/admin/dashboards/[id]`), edit (`/admin/dashboards/[id]/edit`)
 - Server actions in `src/app/actions/dashboards.ts`
 
-**Admin Setup Area** (PENDING):
-
-- Centralized settings hub
-- Roles & Permissions management
-- User/Employee management
-
 ---
 
-## Design Specs for Pending Features
-
-### Admin Setup Hub
+## Design Specs for Next Feature: Admin Setup Hub
 
 **Layout** (Salesforce-style categories):
 
