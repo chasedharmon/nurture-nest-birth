@@ -4,14 +4,28 @@ import { Button } from '@/components/ui/button'
 import { FadeIn } from '@/components/ui/fade-in'
 import { ResourcesGrid, type Resource } from '@/components/resources'
 import { spacing, maxWidth, typography } from '@/lib/design-system'
+import {
+  FileText,
+  CheckSquare,
+  HelpCircle,
+  BookOpen,
+  Heart,
+  Users,
+  Briefcase,
+  Car,
+  Baby,
+  Moon,
+} from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Free Resources | Birth & Postpartum Guides',
+  title: 'Free Resources | Birth & Postpartum Guides | Nurture Nest Birth',
   description:
-    'Download free birth planning templates, postpartum checklists, and evidence-based guides to help you prepare for your birth journey in Kearney, Nebraska.',
+    'Download free birth planning templates, hospital bag checklists, postpartum guides, and car seat safety quick reference. Evidence-based resources for expectant families in Kearney, Nebraska.',
   keywords: [
     'birth plan template',
+    'hospital bag checklist',
     'postpartum checklist',
+    'car seat safety guide',
     'doula resources Kearney',
     'birth preparation guide Nebraska',
   ],
@@ -21,155 +35,109 @@ export const metadata: Metadata = {
  * Resources Page
  *
  * Provides downloadable resources for expectant families.
- * Currently features sample resources - replace fileUrl with actual PDF links.
+ * Upload actual PDFs to /public/resources/ folder and update fileUrl.
  */
 
-// Sample resources - TODO: Replace fileUrl with actual hosted PDF links
-// For now, these are placeholders. Upload actual PDFs to /public/resources/ folder
-const sampleResources: Resource[] = [
+const resources: Resource[] = [
   {
-    title: 'Birth Plan Template',
+    title: 'Birth Preferences Worksheet',
     description:
-      'A comprehensive template to help you communicate your preferences for labor, delivery, and immediate postpartum care with your healthcare team.',
+      'More than a birth plan—a comprehensive worksheet to explore your preferences for labor, delivery, and immediate postpartum. Includes questions to discuss with your provider and doula.',
     category: 'Birth Preparation',
     fileType: 'PDF',
     fileSize: '2.5 MB',
-    fileUrl: '/resources/birth-plan-template.pdf',
-    icon: (
-      <svg
-        className="h-6 w-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-        />
-      </svg>
-    ),
+    fileUrl: '/resources/birth-preferences-worksheet.pdf',
+    icon: <FileText className="h-6 w-6" />,
   },
   {
-    title: 'Postpartum Essentials Checklist',
+    title: 'Hospital Bag Checklist',
     description:
-      'Everything you need to prepare for the fourth trimester. Covers physical recovery, emotional wellness, baby care basics, and support resources.',
-    category: 'Postpartum',
-    fileType: 'PDF',
-    fileSize: '1.8 MB',
-    fileUrl: '/resources/postpartum-checklist.pdf',
-    icon: (
-      <svg
-        className="h-6 w-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: 'Questions to Ask Your Healthcare Provider',
-    description:
-      'Evidence-based questions to discuss with your OB, midwife, or hospital staff. Covers prenatal care, birth preferences, and postpartum planning.',
+      'The ultimate packing guide for labor, hospital stay, and coming home. Separate sections for birthing person, partner, and baby—with notes on what the hospital provides.',
     category: 'Birth Preparation',
     fileType: 'PDF',
-    fileSize: '1.2 MB',
-    fileUrl: '/resources/provider-questions.pdf',
-    icon: (
-      <svg
-        className="h-6 w-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    ),
+    fileSize: '1.5 MB',
+    fileUrl: '/resources/hospital-bag-checklist.pdf',
+    icon: <Briefcase className="h-6 w-6" />,
   },
   {
-    title: 'Newborn Care Basics Guide',
+    title: 'Postpartum Preparation Guide',
     description:
-      'Essential information for first-time parents covering feeding, diapering, sleep safety, and when to call your pediatrician.',
+      'Prepare for the fourth trimester before baby arrives. Covers physical recovery, emotional wellness, meal prep tips, support system planning, and red flags to watch for.',
+    category: 'Postpartum',
+    fileType: 'PDF',
+    fileSize: '3.2 MB',
+    fileUrl: '/resources/postpartum-prep-guide.pdf',
+    icon: <Moon className="h-6 w-6" />,
+  },
+  {
+    title: 'Car Seat Safety Quick Reference',
+    description:
+      'One-page guide to car seat installation and safety. Covers proper harness fit, recline angle, installation checks, and common mistakes to avoid. From a certified CPST.',
+    category: 'Safety',
+    fileType: 'PDF',
+    fileSize: '800 KB',
+    fileUrl: '/resources/car-seat-quick-reference.pdf',
+    icon: <Car className="h-6 w-6" />,
+  },
+  {
+    title: 'Newborn Care Basics',
+    description:
+      'Essential information for the first weeks at home. Covers feeding cues, diaper changes, safe sleep (ABCs), umbilical cord care, and when to call your pediatrician.',
     category: 'Newborn Care',
     fileType: 'PDF',
-    fileSize: '3.1 MB',
-    fileUrl: '/resources/newborn-care-guide.pdf',
-    icon: (
-      <svg
-        className="h-6 w-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-        />
-      </svg>
-    ),
+    fileSize: '2.8 MB',
+    fileUrl: '/resources/newborn-care-basics.pdf',
+    icon: <Baby className="h-6 w-6" />,
   },
   {
-    title: 'Breastfeeding Tips & Troubleshooting',
+    title: 'Breastfeeding Quick Start Guide',
     description:
-      'Practical advice for establishing breastfeeding, common challenges and solutions, and when to seek lactation support.',
+      'Get off to a good start with breastfeeding. Covers early latching, hunger cues, how to tell if baby is getting enough, and when to seek lactation support.',
     category: 'Breastfeeding',
     fileType: 'PDF',
-    fileSize: '2.2 MB',
-    fileUrl: '/resources/breastfeeding-guide.pdf',
-    icon: (
-      <svg
-        className="h-6 w-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-        />
-      </svg>
-    ),
+    fileSize: '2.1 MB',
+    fileUrl: '/resources/breastfeeding-quick-start.pdf',
+    icon: <Heart className="h-6 w-6" />,
   },
   {
     title: 'Partner Support Guide',
     description:
-      'How partners can actively support during pregnancy, labor, and postpartum. Includes practical tips and communication strategies.',
+      'How partners can actively support during pregnancy, labor, and postpartum. Practical tips for each stage, communication strategies, and self-care reminders.',
     category: 'Birth Preparation',
     fileType: 'PDF',
-    fileSize: '1.6 MB',
-    fileUrl: '/resources/partner-guide.pdf',
-    icon: (
-      <svg
-        className="h-6 w-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-        />
-      </svg>
-    ),
+    fileSize: '1.8 MB',
+    fileUrl: '/resources/partner-support-guide.pdf',
+    icon: <Users className="h-6 w-6" />,
+  },
+  {
+    title: 'Questions for Your Provider',
+    description:
+      'Evidence-based questions to discuss with your OB, midwife, or pediatrician. Organized by trimester and topic, with space for notes.',
+    category: 'Birth Preparation',
+    fileType: 'PDF',
+    fileSize: '1.2 MB',
+    fileUrl: '/resources/provider-questions.pdf',
+    icon: <HelpCircle className="h-6 w-6" />,
+  },
+  {
+    title: 'Postpartum Recovery Checklist',
+    description:
+      'Track your physical and emotional recovery day by day. Includes warning signs, self-care reminders, and space to note questions for your provider visits.',
+    category: 'Postpartum',
+    fileType: 'PDF',
+    fileSize: '1.4 MB',
+    fileUrl: '/resources/postpartum-recovery-checklist.pdf',
+    icon: <CheckSquare className="h-6 w-6" />,
+  },
+  {
+    title: 'Local Resources Directory',
+    description:
+      'Central Nebraska-specific resources including hospitals, pediatricians, lactation consultants, mental health support, and community programs.',
+    category: 'Local Resources',
+    fileType: 'PDF',
+    fileSize: '600 KB',
+    fileUrl: '/resources/central-nebraska-resources.pdf',
+    icon: <BookOpen className="h-6 w-6" />,
   },
 ]
 
@@ -180,12 +148,19 @@ export default function ResourcesPage() {
       <section className={`${spacing.container} ${spacing.section.lg}`}>
         <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
-            <h1 className={typography.h1}>Free Resources</h1>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <FileText className="h-4 w-4" />
+              Free Downloads
+            </div>
           </FadeIn>
           <FadeIn delay={0.1}>
+            <h1 className={typography.h1}>Free Resources</h1>
+          </FadeIn>
+          <FadeIn delay={0.2}>
             <p className={`mt-6 ${typography.lead}`}>
-              Evidence-based guides, checklists, and templates to help you
-              prepare for birth and parenthood with confidence.
+              Evidence-based guides, checklists, and worksheets to help you
+              prepare for birth and parenthood with confidence. All resources
+              are free to download—no email required.
             </p>
           </FadeIn>
         </div>
@@ -194,23 +169,43 @@ export default function ResourcesPage() {
       {/* Resources Grid */}
       <section className={`${spacing.container} pb-20`}>
         <div className={`mx-auto ${maxWidth.layout}`}>
-          <ResourcesGrid resources={sampleResources} />
+          <ResourcesGrid resources={resources} />
+        </div>
+      </section>
+
+      {/* Newsletter Signup */}
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
+          <FadeIn>
+            <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-8 text-center">
+              <h2 className="font-serif text-2xl font-semibold">
+                Get Updates When New Resources Are Added
+              </h2>
+              <p className="mt-2 text-muted-foreground">
+                Join our newsletter for new guides, birth stories, and
+                evidence-based insights delivered monthly.
+              </p>
+              <div className="mt-6 flex justify-center">
+                <Button asChild>
+                  <Link href="/contact">Subscribe to Newsletter</Link>
+                </Button>
+              </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section
-        className={`bg-muted/30 ${spacing.container} ${spacing.section.md}`}
-      >
+      <section className={`${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content} text-center`}>
           <FadeIn>
-            <h2 className={typography.h2}>Need More Personalized Support?</h2>
+            <h2 className={typography.h2}>Need Personalized Support?</h2>
           </FadeIn>
           <FadeIn delay={0.1}>
             <p className={`mt-4 ${typography.lead}`}>
-              These resources are just the beginning. Let&apos;s discuss how
-              customized doula support can make your birth experience exactly
-              what you envision.
+              These resources are a great starting point, but every birth
+              journey is unique. Customized doula support can help you prepare
+              for exactly what you need.
             </p>
           </FadeIn>
           <FadeIn delay={0.2}>
