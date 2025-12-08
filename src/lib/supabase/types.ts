@@ -508,3 +508,385 @@ export interface CurrentOnCall {
   start_date: string
   end_date: string
 }
+
+// =====================================================
+// Salesforce-Like Features (Phase 7)
+// =====================================================
+
+// UI Preferences
+export type UIDensity = 'compact' | 'comfortable' | 'spacious'
+export type ThemePreference = 'light' | 'dark' | 'system'
+export type ViewVisibility = 'private' | 'shared' | 'org'
+export type ViewMode = 'table' | 'kanban' | 'calendar' | 'cards'
+export type ReportType = 'tabular' | 'summary' | 'matrix' | 'chart'
+export type WidgetType =
+  | 'metric'
+  | 'chart'
+  | 'table'
+  | 'report'
+  | 'list'
+  | 'funnel'
+  | 'gauge'
+  | 'calendar'
+export type ObjectType =
+  | 'leads'
+  | 'clients'
+  | 'invoices'
+  | 'meetings'
+  | 'team_members'
+  | 'payments'
+  | 'services'
+export type DataSource = 'report' | 'query' | 'static'
+export type ChartType = 'bar' | 'line' | 'pie' | 'donut' | 'area' | 'scatter'
+
+// Filter system
+export type FilterOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'contains'
+  | 'not_contains'
+  | 'starts_with'
+  | 'ends_with'
+  | 'greater_than'
+  | 'less_than'
+  | 'greater_or_equal'
+  | 'less_or_equal'
+  | 'is_null'
+  | 'is_not_null'
+  | 'in'
+  | 'not_in'
+  | 'between'
+  | 'this_week'
+  | 'this_month'
+  | 'this_quarter'
+  | 'last_n_days'
+
+export interface FilterCondition {
+  id: string
+  field: string
+  operator: FilterOperator
+  value: unknown
+  logic?: 'AND' | 'OR'
+}
+
+export interface ColumnConfig {
+  field: string
+  label: string
+  visible: boolean
+  width?: number
+  sortable?: boolean
+  filterable?: boolean
+  editable?: boolean
+  format?:
+    | 'text'
+    | 'date'
+    | 'datetime'
+    | 'currency'
+    | 'badge'
+    | 'link'
+    | 'avatar'
+    | 'boolean'
+  formatOptions?: Record<string, unknown>
+}
+
+export interface SortConfig {
+  field: string
+  direction: 'asc' | 'desc'
+}
+
+export interface KanbanConfig {
+  statusField: string
+  swimlaneField?: string
+  cardFields: string[]
+  columnOrder?: string[]
+}
+
+export interface AggregationConfig {
+  field: string
+  function: 'sum' | 'count' | 'avg' | 'min' | 'max'
+  label: string
+}
+
+export interface ChartConfig {
+  type: ChartType
+  xAxis?: string
+  yAxis?: string
+  series?: string[]
+  colors?: string[]
+}
+
+export interface WidgetPosition {
+  widget_id: string
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+// User Preferences
+export interface UserPreferences {
+  id: string
+  user_id: string
+  ui_density: UIDensity
+  theme: ThemePreference
+  sidebar_collapsed: boolean
+  default_lead_view_id?: string | null
+  default_client_view_id?: string | null
+  default_invoice_view_id?: string | null
+  default_meeting_view_id?: string | null
+  dashboard_layout: Record<string, unknown>
+  default_dashboard_id?: string | null
+  pinned_reports: string[]
+  recent_leads: string[]
+  recent_clients: string[]
+  email_notifications: boolean
+  in_app_notifications: boolean
+  created_at: string
+  updated_at: string
+}
+
+// List Views
+export interface ListView {
+  id: string
+  created_by: string
+  name: string
+  description?: string | null
+  object_type: ObjectType
+  visibility: ViewVisibility
+  is_default: boolean
+  is_pinned: boolean
+  filters: FilterCondition[]
+  columns: ColumnConfig[]
+  sort_config: SortConfig
+  group_by?: string | null
+  view_mode: ViewMode
+  kanban_config: KanbanConfig
+  quick_filters: FilterCondition[]
+  created_at: string
+  updated_at: string
+}
+
+// Saved Filters
+export interface SavedFilter {
+  id: string
+  created_by: string
+  name: string
+  object_type: ObjectType
+  filter_config: FilterCondition[]
+  visibility: ViewVisibility
+  created_at: string
+}
+
+// Reports
+export interface Report {
+  id: string
+  created_by: string
+  name: string
+  description?: string | null
+  report_type: ReportType
+  object_type: ObjectType
+  columns: ColumnConfig[]
+  filters: FilterCondition[]
+  groupings: string[]
+  aggregations: AggregationConfig[]
+  chart_config: ChartConfig
+  visibility: ViewVisibility
+  schedule_config?: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+}
+
+// Dashboards
+export interface Dashboard {
+  id: string
+  created_by: string
+  name: string
+  description?: string | null
+  layout: WidgetPosition[]
+  visibility: ViewVisibility
+  is_default: boolean
+  auto_refresh_seconds: number
+  created_at: string
+  updated_at: string
+  widgets?: DashboardWidget[]
+}
+
+// Dashboard Widgets
+export interface DashboardWidget {
+  id: string
+  dashboard_id: string
+  widget_type: WidgetType
+  title: string
+  config: Record<string, unknown>
+  grid_x: number
+  grid_y: number
+  grid_width: number
+  grid_height: number
+  data_source?: DataSource | null
+  report_id?: string | null
+  query_config: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+// =====================================================
+// Client Journey Types
+// =====================================================
+
+export type JourneyPhase = 'consultation' | 'prenatal' | 'birth' | 'postpartum'
+
+export type ActionItemType =
+  | 'intake_form'
+  | 'sign_contract'
+  | 'upload_document'
+  | 'schedule_meeting'
+  | 'make_payment'
+  | 'review_document'
+  | 'custom'
+
+export type ActionItemStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'completed'
+  | 'skipped'
+
+// Action Item Templates
+export interface ActionItemTemplate {
+  id: string
+  name: string
+  description?: string | null
+  service_type?: ServiceType | null
+  default_items: ActionItemTemplateItem[]
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  created_by?: string | null
+}
+
+export interface ActionItemTemplateItem {
+  title: string
+  action_type: ActionItemType
+  priority: number
+  action_url?: string
+  description?: string
+}
+
+// Client Action Items
+export interface ClientActionItem {
+  id: string
+  client_id: string
+  service_id?: string | null
+  template_id?: string | null
+  title: string
+  description?: string | null
+  action_type: ActionItemType
+  status: ActionItemStatus
+  completed_at?: string | null
+  priority: number
+  display_order: number
+  due_date?: string | null
+  auto_complete_trigger?: string | null
+  action_url?: string | null
+  created_at: string
+  updated_at: string
+  created_by?: string | null
+}
+
+// Client Journey Milestones
+export interface ClientJourneyMilestone {
+  id: string
+  client_id: string
+  milestone_type: string
+  milestone_label: string
+  phase: JourneyPhase
+  completed_at?: string | null
+  expected_date?: string | null
+  display_order: number
+  created_at: string
+}
+
+// Extended Lead with journey fields
+export interface LeadWithJourney extends Lead {
+  journey_phase?: JourneyPhase | null
+  journey_started_at?: string | null
+  last_portal_visit?: string | null
+  preferred_provider_id?: string | null
+}
+
+// =====================================================
+// Insert Types for New Tables
+// =====================================================
+
+export type UserPreferencesInsert = Omit<
+  UserPreferences,
+  'id' | 'created_at' | 'updated_at'
+>
+export type ListViewInsert = Omit<ListView, 'id' | 'created_at' | 'updated_at'>
+export type SavedFilterInsert = Omit<SavedFilter, 'id' | 'created_at'>
+export type ReportInsert = Omit<Report, 'id' | 'created_at' | 'updated_at'>
+export type DashboardInsert = Omit<
+  Dashboard,
+  'id' | 'created_at' | 'updated_at' | 'widgets'
+>
+export type DashboardWidgetInsert = Omit<
+  DashboardWidget,
+  'id' | 'created_at' | 'updated_at'
+>
+export type ActionItemTemplateInsert = Omit<
+  ActionItemTemplate,
+  'id' | 'created_at' | 'updated_at'
+>
+export type ClientActionItemInsert = Omit<
+  ClientActionItem,
+  'id' | 'created_at' | 'updated_at'
+>
+export type ClientJourneyMilestoneInsert = Omit<
+  ClientJourneyMilestone,
+  'id' | 'created_at'
+>
+
+// =====================================================
+// Helper Types for Dashboard KPIs
+// =====================================================
+
+export interface DashboardKPIs {
+  totalLeads: number
+  newLeads: number
+  conversionRate: number
+  revenuePipeline: number
+  upcomingBirths: number
+  overdueInvoices: number
+  activeClients: number
+  totalRevenue: number
+}
+
+export interface LeadFunnelData {
+  stage: LeadStatus
+  count: number
+  label: string
+}
+
+export interface RevenueByMonth {
+  month: string
+  total: number
+  count: number
+}
+
+// =====================================================
+// Client Portal Dashboard Types
+// =====================================================
+
+export interface ClientDashboardData {
+  client: LeadWithJourney
+  nextAppointment?: Meeting | null
+  actionItems: ClientActionItem[]
+  journeyMilestones: ClientJourneyMilestone[]
+  careTeam: ClientTeamInfo[]
+  paymentSummary: {
+    total: number
+    paid: number
+    balance: number
+  }
+  activeServices: ClientService[]
+  recentDocuments: ClientDocument[]
+}
