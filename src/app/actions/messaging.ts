@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { canSendMessage, canDeleteMessage } from '@/lib/permissions/messaging'
 
 // Types for messaging
 export interface Conversation {
@@ -314,12 +315,26 @@ export async function sendMessage(data: {
     return { success: false, error: 'Not authenticated' }
   }
 
-  // Get user's name
+  // Get user's role for permission check
   const { data: userData } = await supabase
     .from('users')
-    .select('full_name')
+    .select('full_name, role')
     .eq('id', user.id)
     .single()
+
+  // Permission check: Can this user send to this conversation?
+  const canSend = await canSendMessage(
+    { id: user.id, role: userData?.role },
+    null, // Not a client
+    data.conversationId
+  )
+
+  if (!canSend) {
+    return {
+      success: false,
+      error: 'You do not have permission to send messages to this conversation',
+    }
+  }
 
   const { data: message, error } = await supabase
     .from('messages')
@@ -380,6 +395,45 @@ export async function editMessage(id: string, content: string) {
 
 export async function deleteMessage(id: string) {
   const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // Get the message to check ownership
+  const { data: message, error: fetchError } = await supabase
+    .from('messages')
+    .select('id, conversation_id, sender_user_id, sender_client_id')
+    .eq('id', id)
+    .single()
+
+  if (fetchError || !message) {
+    return { success: false, error: 'Message not found' }
+  }
+
+  // Get user's role for permission check
+  const { data: userData } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  // Permission check: Can this user delete this message?
+  const canDelete = await canDeleteMessage(
+    { id: user.id, role: userData?.role },
+    null, // Not a client
+    message
+  )
+
+  if (!canDelete) {
+    return {
+      success: false,
+      error: 'You do not have permission to delete this message',
+    }
+  }
 
   const { error } = await supabase
     .from('messages')
@@ -456,6 +510,7 @@ export async function getUnreadCount() {
 export async function getClientConversations(clientId: string) {
   const supabase = await createClient()
 
+  // Clients can only see client-direct conversations
   const { data, error } = await supabase
     .from('conversations')
     .select(
@@ -467,6 +522,7 @@ export async function getClientConversations(clientId: string) {
     `
     )
     .eq('client_id', clientId)
+    .in('conversation_type', ['client-direct', 'direct']) // Only client-visible types
     .eq('status', 'active')
     .order('last_message_at', { ascending: false, nullsFirst: false })
 
@@ -496,6 +552,20 @@ export async function sendClientMessage(data: {
   content: string
 }) {
   const supabase = await createClient()
+
+  // Permission check: Can this client send to this conversation?
+  const canSend = await canSendMessage(
+    null, // Not a team user
+    { clientId: data.clientId, name: data.clientName, email: '' },
+    data.conversationId
+  )
+
+  if (!canSend) {
+    return {
+      success: false,
+      error: 'You do not have permission to send messages to this conversation',
+    }
+  }
 
   const { data: message, error } = await supabase
     .from('messages')
