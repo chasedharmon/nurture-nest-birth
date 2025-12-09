@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Message } from '@/app/actions/messaging'
+import { markClientConversationAsRead } from '@/app/actions/messaging'
 import {
   useRealtimeMessages,
   type MessageWithStatus,
@@ -62,6 +63,16 @@ export function ClientMessageThread({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length])
+
+  // Mark conversation as read after a delay
+  // This prevents the race condition where messages are marked read before they're seen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      markClientConversationAsRead(conversationId, clientId)
+    }, 1500) // Wait 1.5 seconds for user to actually see messages
+
+    return () => clearTimeout(timer)
+  }, [conversationId, clientId])
 
   // Retry failed message
   const handleRetry = async (message: MessageWithStatus) => {

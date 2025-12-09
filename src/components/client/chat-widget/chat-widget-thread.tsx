@@ -5,7 +5,10 @@ import { format, isToday, isYesterday, isSameDay } from 'date-fns'
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { getMessages } from '@/app/actions/messaging'
+import {
+  getMessages,
+  markClientConversationAsRead,
+} from '@/app/actions/messaging'
 import {
   useRealtimeMessages,
   type MessageWithStatus,
@@ -170,6 +173,16 @@ function ChatWidgetThreadContent({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length, bottomRef])
+
+  // Mark conversation as read after a delay
+  // This prevents the race condition where messages are marked read before they're seen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      markClientConversationAsRead(conversationId, clientId)
+    }, 1500) // Wait 1.5 seconds for user to actually see messages
+
+    return () => clearTimeout(timer)
+  }, [conversationId, clientId])
 
   // Group messages by date
   const groupedMessages: { date: Date; messages: MessageWithStatus[] }[] = []

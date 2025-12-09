@@ -95,9 +95,14 @@ export function MessageThread({
   const scrollRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  // Mark conversation as read on mount (moved from server component to avoid revalidatePath during render)
+  // Mark conversation as read after a delay
+  // This prevents the race condition where messages are marked read before they're seen
   useEffect(() => {
-    markConversationAsRead(conversationId)
+    const timer = setTimeout(() => {
+      markConversationAsRead(conversationId)
+    }, 1500) // Wait 1.5 seconds for user to actually see messages
+
+    return () => clearTimeout(timer)
   }, [conversationId])
 
   // Scroll to bottom on initial load and new messages

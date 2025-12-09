@@ -1,10 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
 import { getClientSession } from '@/app/actions/client-auth'
-import {
-  getConversationById,
-  getMessages,
-  markClientConversationAsRead,
-} from '@/app/actions/messaging'
+import { getConversationById, getMessages } from '@/app/actions/messaging'
 import { ClientMessageThread } from '@/components/client/messages/client-message-thread'
 import { ClientMessageComposer } from '@/components/client/messages/client-message-composer'
 import { ClientConversationHeader } from '@/components/client/messages/client-conversation-header'
@@ -56,8 +52,8 @@ export default async function ClientConversationPage({
     notFound()
   }
 
-  // Mark conversation as read for this client
-  await markClientConversationAsRead(id, session.clientId)
+  // Note: markConversationAsRead is called in ClientMessageThread after a delay
+  // to prevent race conditions with new incoming messages
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
