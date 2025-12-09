@@ -7,13 +7,43 @@
 
 ### Phase 6+ Progress
 
-| Feature                | Status      | Notes                                       |
-| ---------------------- | ----------- | ------------------------------------------- |
-| Report Builder UI      | ✅ COMPLETE | Wizard, filters, preview, save/edit         |
-| Dashboard Builder UI   | ✅ COMPLETE | 12-col grid, drag-drop, 8 widget types      |
-| Admin Setup Hub        | ✅ COMPLETE | Salesforce-style settings at `/admin/setup` |
-| Roles & Permissions UI | ✅ COMPLETE | Matrix editor, system roles, custom roles   |
-| User Management UI     | ✅ COMPLETE | User list, invitations, role assignment     |
+| Feature                  | Status         | Notes                                       |
+| ------------------------ | -------------- | ------------------------------------------- |
+| Report Builder UI        | ✅ COMPLETE    | Wizard, filters, preview, save/edit         |
+| Dashboard Builder UI     | ✅ COMPLETE    | 12-col grid, drag-drop, 8 widget types      |
+| Admin Setup Hub          | 🔄 IN PROGRESS | Salesforce-style settings at `/admin/setup` |
+| Contract Template Editor | ✅ COMPLETE    | Create/edit templates with placeholders     |
+| Roles & Permissions UI   | ⚠️ NEEDS WORK  | UI/UX issues, needs role hierarchy          |
+| User Management UI       | ⚠️ NEEDS WORK  | Missing manual add, invitation issues       |
+
+### Setup Hub - Next Steps (Priority Order)
+
+1. **User Management Fixes** (HIGH)
+   - Add "Create User" option (manual add, not just invite)
+   - Debug invitation flow (email sending, accept page)
+   - Create `/accept-invite` page if missing
+
+2. **Role System Redesign** (HIGH)
+   - Add role hierarchy (admin > power_user > user > viewer)
+   - Redesign Create Role dialog - use full page or wizard instead of scrolling modal
+   - Add role presets (Admin=all, Power User=most, User=basic)
+   - Better UX for permission matrix
+
+3. **Business Section** (MEDIUM)
+   - Implement Company Profile page (business info, branding)
+   - Implement Services & Packages page
+
+4. **Polish & QA** (MEDIUM)
+   - Fix Header/Footer hiding on admin routes
+   - Test Team Members link from Setup
+   - Remove/consolidate "Coming Soon" items
+
+### Known Issues
+
+- **Invitation System**: Missing `/accept-invite` page to handle invitation tokens
+- **Create Role Dialog**: Scrolling issues, cramped UX
+- **Team Members**: Link may be broken from Setup page
+- **Coming Soon**: Multiple placeholder pages need implementation or removal
 
 ### Future Features (Not Started)
 
