@@ -44,10 +44,10 @@ test.describe('Team Internal Messaging', () => {
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
-    // Click New Conversation button
-    const newConversationButton = page.locator(
-      'button:has-text("New Conversation")'
-    )
+    // Click New Conversation button (in header to avoid duplicate matches)
+    const newConversationButton = page
+      .locator('header')
+      .getByRole('button', { name: 'New Conversation' })
     await expect(newConversationButton).toBeVisible({ timeout: 10000 })
     await newConversationButton.click()
 
@@ -96,10 +96,10 @@ test.describe('Team Internal Messaging', () => {
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
-    // Open dialog
-    const newConversationButton = page.locator(
-      'button:has-text("New Conversation")'
-    )
+    // Open dialog (using header to avoid duplicate matches)
+    const newConversationButton = page
+      .locator('header')
+      .getByRole('button', { name: 'New Conversation' })
     await newConversationButton.click()
     await page.waitForTimeout(500)
 
@@ -136,8 +136,11 @@ test.describe('Team Internal Messaging', () => {
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
-    // Open dialog
-    await page.locator('button:has-text("New Conversation")').click()
+    // Open dialog (using header to avoid duplicate matches)
+    await page
+      .locator('header')
+      .getByRole('button', { name: 'New Conversation' })
+      .click()
     await page.waitForTimeout(500)
 
     // Click Team tab
@@ -201,8 +204,11 @@ test.describe('Team Internal Messaging', () => {
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
-    // Open dialog
-    await page.locator('button:has-text("New Conversation")').click()
+    // Open dialog (using header to avoid duplicate matches)
+    await page
+      .locator('header')
+      .getByRole('button', { name: 'New Conversation' })
+      .click()
     await page.waitForTimeout(500)
 
     // Click Team tab
