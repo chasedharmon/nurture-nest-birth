@@ -10,7 +10,6 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   ClipboardList,
   ChevronLeft,
@@ -19,6 +18,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import { IntakeFormsTable } from './intake-forms-table'
+import { IntakeFormBuilderDialog } from '@/components/admin/setup/intake-form-builder-dialog'
 
 export default async function IntakeFormsPage() {
   const supabase = await createClient()
@@ -67,13 +67,14 @@ export default async function IntakeFormsPage() {
                 </div>
               </div>
             </div>
-            <Button disabled>
-              <Plus className="mr-2 h-4 w-4" />
-              New Form
-              <Badge variant="outline" className="ml-2 text-xs">
-                Coming Soon
-              </Badge>
-            </Button>
+            <IntakeFormBuilderDialog
+              trigger={
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Form
+                </Button>
+              }
+            />
           </div>
         </div>
       </header>

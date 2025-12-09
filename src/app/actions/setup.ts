@@ -1123,6 +1123,193 @@ export async function toggleIntakeFormTemplateActive(
   }
 }
 
+// Form field schema for intake form builder
+export interface IntakeFormField {
+  id: string
+  type:
+    | 'text'
+    | 'textarea'
+    | 'select'
+    | 'checkbox'
+    | 'radio'
+    | 'date'
+    | 'file'
+    | 'number'
+    | 'email'
+    | 'phone'
+  label: string
+  placeholder?: string
+  helpText?: string
+  required: boolean
+  options?: string[] // For select, radio, checkbox groups
+  validation?: {
+    minLength?: number
+    maxLength?: number
+    min?: number
+    max?: number
+    pattern?: string
+  }
+  conditionalLogic?: {
+    field: string // ID of the field to check
+    operator: 'equals' | 'not_equals' | 'contains' | 'not_empty'
+    value?: string
+  }
+}
+
+export interface IntakeFormSchema {
+  fields: IntakeFormField[]
+  version: number
+}
+
+export type IntakeFormTemplateInsert = {
+  name: string
+  description?: string | null
+  service_type?: string | null
+  schema: IntakeFormSchema
+  is_active?: boolean
+}
+
+export type IntakeFormTemplateUpdate = Partial<IntakeFormTemplateInsert>
+
+export async function getIntakeFormTemplate(templateId: string): Promise<{
+  success: boolean
+  template?: IntakeFormTemplate
+  error?: string
+}> {
+  try {
+    const supabase = createAdminClient()
+
+    const { data: template, error } = await supabase
+      .from('intake_form_templates')
+      .select('*')
+      .eq('id', templateId)
+      .single()
+
+    if (error) throw error
+
+    return { success: true, template }
+  } catch (error) {
+    console.error('[Setup] Failed to get intake form template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get intake form template',
+    }
+  }
+}
+
+export async function createIntakeFormTemplate(
+  data: IntakeFormTemplateInsert
+): Promise<{
+  success: boolean
+  template?: IntakeFormTemplate
+  error?: string
+}> {
+  try {
+    const supabase = createAdminClient()
+
+    const { data: template, error } = await supabase
+      .from('intake_form_templates')
+      .insert({
+        name: data.name,
+        description: data.description || null,
+        service_type: data.service_type || null,
+        schema: data.schema,
+        is_active: data.is_active ?? true,
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/intake-forms')
+    return { success: true, template }
+  } catch (error) {
+    console.error('[Setup] Failed to create intake form template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to create intake form template',
+    }
+  }
+}
+
+export async function updateIntakeFormTemplate(
+  templateId: string,
+  data: IntakeFormTemplateUpdate
+): Promise<{
+  success: boolean
+  template?: IntakeFormTemplate
+  error?: string
+}> {
+  try {
+    const supabase = createAdminClient()
+
+    const { data: template, error } = await supabase
+      .from('intake_form_templates')
+      .update({
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
+        ...(data.service_type !== undefined && {
+          service_type: data.service_type,
+        }),
+        ...(data.schema !== undefined && { schema: data.schema }),
+        ...(data.is_active !== undefined && { is_active: data.is_active }),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', templateId)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/intake-forms')
+    return { success: true, template }
+  } catch (error) {
+    console.error('[Setup] Failed to update intake form template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update intake form template',
+    }
+  }
+}
+
+export async function deleteIntakeFormTemplate(
+  templateId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+
+    const { error } = await supabase
+      .from('intake_form_templates')
+      .delete()
+      .eq('id', templateId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/intake-forms')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to delete intake form template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete intake form template',
+    }
+  }
+}
+
 // Note: Permission constants and types are exported from '@/lib/permissions'
 
 // ============================================================================

@@ -5,16 +5,35 @@ import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
   toggleIntakeFormTemplateActive,
+  deleteIntakeFormTemplate,
   type IntakeFormTemplate,
 } from '@/app/actions/setup'
-import { MoreHorizontal, Eye, EyeOff, ClipboardList } from 'lucide-react'
+import { IntakeFormBuilderDialog } from '@/components/admin/setup/intake-form-builder-dialog'
+import {
+  MoreHorizontal,
+  Eye,
+  EyeOff,
+  ClipboardList,
+  Pencil,
+  Trash2,
+  Loader2,
+} from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
 interface IntakeFormsTableProps {
@@ -44,6 +63,10 @@ const serviceTypeLabels: Record<string, string> = {
 export function IntakeFormsTable({ templates }: IntakeFormsTableProps) {
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [templateToDelete, setTemplateToDelete] =
+    useState<IntakeFormTemplate | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const handleToggleActive = async (template: IntakeFormTemplate) => {
     setIsProcessing(true)
@@ -53,6 +76,25 @@ export function IntakeFormsTable({ templates }: IntakeFormsTableProps) {
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  const handleDelete = async () => {
+    if (!templateToDelete) return
+
+    setIsDeleting(true)
+    try {
+      await deleteIntakeFormTemplate(templateToDelete.id)
+      setDeleteDialogOpen(false)
+      setTemplateToDelete(null)
+      router.refresh()
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const openDeleteDialog = (template: IntakeFormTemplate) => {
+    setTemplateToDelete(template)
+    setDeleteDialogOpen(true)
   }
 
   const countFields = (schema: Record<string, unknown>): number => {
@@ -159,6 +201,15 @@ export function IntakeFormsTable({ templates }: IntakeFormsTableProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      <IntakeFormBuilderDialog
+                        template={template}
+                        trigger={
+                          <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                        }
+                      />
                       <DropdownMenuItem
                         onClick={() => handleToggleActive(template)}
                       >
@@ -174,6 +225,14 @@ export function IntakeFormsTable({ templates }: IntakeFormsTableProps) {
                           </>
                         )}
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => openDeleteDialog(template)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </td>
@@ -184,10 +243,40 @@ export function IntakeFormsTable({ templates }: IntakeFormsTableProps) {
 
         {templates.length === 0 && (
           <div className="py-12 text-center text-muted-foreground">
-            No intake forms found. Form builder coming soon.
+            No intake forms found. Click &quot;New Form&quot; to create one.
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Intake Form</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &quot;{templateToDelete?.name}
+              &quot;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
