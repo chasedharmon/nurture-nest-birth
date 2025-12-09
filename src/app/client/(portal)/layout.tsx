@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { MobileNav } from '@/components/client/mobile-nav'
 import { ClientNavMessageBadge } from '@/components/client/nav-message-badge'
 import { ClientMessageNotifications } from '@/components/client/message-notifications'
+import { ChatWidget } from '@/components/client/chat-widget'
 import { getClientUnreadCount } from '@/app/actions/messaging'
 
 export default async function ClientPortalLayout({
@@ -129,6 +130,13 @@ export default async function ClientPortalLayout({
 
       {/* Message Notifications */}
       <ClientMessageNotifications clientId={session.clientId} />
+
+      {/* Floating Chat Widget */}
+      <ChatWidget
+        clientId={session.clientId}
+        clientName={session.name}
+        initialUnreadCount={unreadCount}
+      />
     </div>
   )
 }
