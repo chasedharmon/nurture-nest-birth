@@ -91,6 +91,7 @@ export default async function ClientConversationPage({
         <ClientMessageThread
           messages={messages}
           clientId={session.clientId}
+          clientName={session.name}
           conversationId={id}
         />
 

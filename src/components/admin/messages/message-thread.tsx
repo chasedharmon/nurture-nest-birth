@@ -4,8 +4,16 @@ import { useEffect, useRef, useState } from 'react'
 import { format, isToday, isYesterday, isSameDay } from 'date-fns'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/client'
-import { MoreVertical, Pencil, Trash2, Check, X } from 'lucide-react'
+import {
+  MoreVertical,
+  Pencil,
+  Trash2,
+  Check,
+  X,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+} from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,13 +21,30 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea'
-import { editMessage, deleteMessage } from '@/app/actions/messaging'
 import type { Message } from '@/app/actions/messaging'
+import {
+  useRealtimeMessages,
+  type MessageWithStatus,
+} from '@/lib/hooks/use-realtime-messages'
+import { useConnectionStatus } from '@/lib/hooks/use-connection-status'
+import { useReadReceipts, formatSeenBy } from '@/lib/hooks/use-read-receipts'
+import { MessageStatus, SeenBy } from '@/components/ui/message-status'
+import { cn } from '@/lib/utils'
+
+interface Participant {
+  id: string
+  user_id: string | null
+  client_id: string | null
+  display_name: string
+  last_read_at: string | null
+}
 
 interface MessageThreadProps {
   messages: Message[]
   currentUserId: string
+  currentUserName: string
   conversationId: string
+  participants?: Participant[]
 }
 
 function formatMessageDate(date: Date): string {
@@ -39,9 +64,31 @@ function formatMessageTime(date: Date): string {
 export function MessageThread({
   messages: initialMessages,
   currentUserId,
+  currentUserName,
   conversationId,
+  participants = [],
 }: MessageThreadProps) {
-  const [messages, setMessages] = useState(initialMessages)
+  // Use the realtime messages hook
+  const { messages, editMessage, deleteMessage } = useRealtimeMessages({
+    conversationId,
+    initialMessages,
+    currentUserId,
+    currentUserName,
+  })
+
+  // Connection status for offline indicator
+  const { isOnline, isReconnecting } = useConnectionStatus({
+    channelName: `messages:${conversationId}`,
+  })
+
+  // Read receipts
+  const { getMessageStatus, seenBy } = useReadReceipts({
+    conversationId,
+    currentUserId,
+    isClient: false,
+    participants,
+  })
+
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editContent, setEditContent] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -52,79 +99,37 @@ export function MessageThread({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages.length])
 
-  // Subscribe to realtime updates
-  useEffect(() => {
-    const supabase = createClient()
-
-    const channel = supabase
-      .channel(`messages:${conversationId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        payload => {
-          const newMessage = payload.new as Message
-          setMessages(prev => [...prev, newMessage])
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        payload => {
-          const updatedMessage = payload.new as Message
-          setMessages(prev =>
-            prev.map(m => (m.id === updatedMessage.id ? updatedMessage : m))
-          )
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [conversationId])
-
   const handleEdit = async (messageId: string) => {
     if (!editContent.trim()) return
 
     const result = await editMessage(messageId, editContent)
     if (result.success) {
-      setMessages(prev =>
-        prev.map(m =>
-          m.id === messageId
-            ? { ...m, content: editContent, is_edited: true }
-            : m
-        )
-      )
       setEditingId(null)
       setEditContent('')
     }
   }
 
   const handleDelete = async (messageId: string) => {
-    const result = await deleteMessage(messageId)
-    if (result.success) {
-      setMessages(prev => prev.filter(m => m.id !== messageId))
-    }
+    await deleteMessage(messageId)
   }
 
-  const startEditing = (message: Message) => {
+  const startEditing = (message: MessageWithStatus) => {
     setEditingId(message.id)
     setEditContent(message.content)
   }
 
+  // Retry failed message
+  const handleRetry = async (message: MessageWithStatus) => {
+    if (message.status === 'failed' && message.tempId) {
+      // Remove the failed message and resend
+      // The hook will handle the retry via the composer
+      await deleteMessage(message.id)
+    }
+  }
+
   // Group messages by date
-  const groupedMessages: { date: Date; messages: Message[] }[] = []
-  let currentGroup: { date: Date; messages: Message[] } | null = null
+  const groupedMessages: { date: Date; messages: MessageWithStatus[] }[] = []
+  let currentGroup: { date: Date; messages: MessageWithStatus[] } | null = null
 
   messages.forEach(message => {
     const messageDate = new Date(message.created_at)
@@ -135,8 +140,37 @@ export function MessageThread({
     currentGroup.messages.push(message)
   })
 
+  // Find the last own message for "Seen by" display
+  const lastOwnMessage = [...messages]
+    .reverse()
+    .find(m => m.sender_user_id === currentUserId)
+  const seenByText = formatSeenBy(seenBy)
+
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto py-4 space-y-6">
+      {/* Connection status banner */}
+      {(!isOnline || isReconnecting) && (
+        <div className="sticky top-0 z-10 mx-4">
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg px-4 py-2 flex items-center gap-2">
+            {isReconnecting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin text-yellow-600" />
+                <span className="text-sm text-yellow-700 dark:text-yellow-300">
+                  Reconnecting...
+                </span>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <span className="text-sm text-yellow-700 dark:text-yellow-300">
+                  You&apos;re offline. Messages will send when you reconnect.
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {groupedMessages.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full text-center">
           <p className="text-muted-foreground">No messages yet</p>
@@ -157,7 +191,7 @@ export function MessageThread({
             </div>
 
             {/* Messages */}
-            {group.messages.map(message => {
+            {group.messages.map((message, msgIndex) => {
               const isOwnMessage = message.sender_user_id === currentUserId
               const initials = message.sender_name
                 .split(' ')
@@ -166,12 +200,27 @@ export function MessageThread({
                 .toUpperCase()
                 .slice(0, 2)
 
+              const isPending = message.status === 'pending'
+              const isFailed = message.status === 'failed'
+
+              // Get read receipt status
+              const readStatus = getMessageStatus(message, isPending)
+
+              // Is this the last message in the conversation and from current user?
+              const isLastOwnMessage =
+                isOwnMessage &&
+                lastOwnMessage?.id === message.id &&
+                groupIndex === groupedMessages.length - 1 &&
+                msgIndex === group.messages.length - 1
+
               return (
                 <div
                   key={message.id}
-                  className={`flex gap-3 ${
-                    isOwnMessage ? 'flex-row-reverse' : ''
-                  }`}
+                  className={cn(
+                    'flex gap-3',
+                    isOwnMessage && 'flex-row-reverse',
+                    isPending && 'opacity-70'
+                  )}
                 >
                   <Avatar className="h-8 w-8 shrink-0">
                     <AvatarFallback
@@ -186,9 +235,10 @@ export function MessageThread({
                   </Avatar>
 
                   <div
-                    className={`flex flex-col max-w-[70%] ${
+                    className={cn(
+                      'flex flex-col max-w-[70%]',
                       isOwnMessage ? 'items-end' : 'items-start'
-                    }`}
+                    )}
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs font-medium">
@@ -200,6 +250,13 @@ export function MessageThread({
                       {message.is_edited && (
                         <span className="text-xs text-muted-foreground italic">
                           (edited)
+                        </span>
+                      )}
+                      {/* Status indicators */}
+                      {isFailed && (
+                        <span className="text-xs text-destructive flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          Failed
                         </span>
                       )}
                     </div>
@@ -237,19 +294,42 @@ export function MessageThread({
                       ) : (
                         <>
                           <div
-                            className={`rounded-2xl px-4 py-2 ${
+                            className={cn(
+                              'rounded-2xl px-4 py-2',
                               isOwnMessage
                                 ? 'bg-primary text-primary-foreground rounded-br-md'
-                                : 'bg-muted rounded-bl-md'
-                            }`}
+                                : 'bg-muted rounded-bl-md',
+                              isFailed &&
+                                'bg-destructive/10 border border-destructive/20'
+                            )}
                           >
                             <p className="text-sm whitespace-pre-wrap">
                               {message.content}
                             </p>
                           </div>
 
-                          {/* Actions dropdown for own messages */}
-                          {isOwnMessage && (
+                          {/* Read receipt for own messages */}
+                          {isOwnMessage && !isFailed && (
+                            <div className="flex justify-end mt-0.5">
+                              <MessageStatus status={readStatus} />
+                            </div>
+                          )}
+
+                          {/* Retry button for failed messages */}
+                          {isFailed && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="mt-1 text-destructive hover:text-destructive"
+                              onClick={() => handleRetry(message)}
+                            >
+                              <RefreshCw className="h-3 w-3 mr-1" />
+                              Retry
+                            </Button>
+                          )}
+
+                          {/* Actions dropdown for own messages (not pending/failed) */}
+                          {isOwnMessage && !isPending && !isFailed && (
                             <div className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -282,6 +362,14 @@ export function MessageThread({
                         </>
                       )}
                     </div>
+
+                    {/* Seen by indicator (only on last own message) */}
+                    {isLastOwnMessage && seenByText && (
+                      <SeenBy
+                        names={seenBy.map(s => s.name)}
+                        className="mt-1"
+                      />
+                    )}
                   </div>
                 </div>
               )

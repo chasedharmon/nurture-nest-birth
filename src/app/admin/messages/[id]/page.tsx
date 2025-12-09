@@ -48,10 +48,25 @@ export default async function ConversationPage({
     redirect('/login')
   }
 
-  const [conversationResult, messagesResult] = await Promise.all([
-    getConversationById(id),
-    getMessages(id),
-  ])
+  // Get the current user's name from the users table
+  const { data: userData } = await supabase
+    .from('users')
+    .select('name')
+    .eq('id', user.id)
+    .single()
+
+  const currentUserName =
+    userData?.name || user.email?.split('@')[0] || 'Team Member'
+
+  const [conversationResult, messagesResult, participantsResult] =
+    await Promise.all([
+      getConversationById(id),
+      getMessages(id),
+      supabase
+        .from('conversation_participants')
+        .select('id, user_id, client_id, display_name, last_read_at')
+        .eq('conversation_id', id),
+    ])
 
   if (!conversationResult.success || !conversationResult.conversation) {
     notFound()
@@ -59,6 +74,7 @@ export default async function ConversationPage({
 
   const conversation = conversationResult.conversation
   const messages = messagesResult.messages || []
+  const participants = participantsResult.data || []
 
   // Mark conversation as read
   await markConversationAsRead(id)
@@ -131,13 +147,19 @@ export default async function ConversationPage({
           <MessageThread
             messages={messages}
             currentUserId={user.id}
+            currentUserName={currentUserName}
             conversationId={id}
+            participants={participants}
           />
 
           {/* Composer */}
           {conversation.status === 'active' ? (
             <div className="border-t border-border bg-card py-4 shrink-0">
-              <MessageComposer conversationId={id} />
+              <MessageComposer
+                conversationId={id}
+                userId={user.id}
+                userName={currentUserName}
+              />
             </div>
           ) : (
             <div className="border-t border-border bg-muted/50 py-4 text-center shrink-0">
