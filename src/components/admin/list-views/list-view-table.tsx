@@ -219,7 +219,7 @@ function formatStatusLabel(status: string): string {
 function getBadgeVariant(
   value: string,
   _options?: Record<string, unknown>
-): 'default' | 'secondary' | 'error' | 'outline' {
+): 'default' | 'secondary' | 'destructive' | 'outline' {
   const positiveStatuses = [
     'client',
     'active',
@@ -245,7 +245,7 @@ function getBadgeVariant(
     return 'default'
   }
   if (negativeStatuses.includes(lowerValue)) {
-    return 'error'
+    return 'destructive'
   }
   if (pendingStatuses.includes(lowerValue)) {
     return 'secondary'

@@ -15,12 +15,14 @@ import {
   ClipboardList,
   Receipt,
   Sparkles,
+  MessageSquare,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/client/dashboard', label: 'Dashboard', icon: Home },
+  { href: '/client/messages', label: 'Messages', icon: MessageSquare },
   { href: '/client/services', label: 'Services', icon: Sparkles },
   { href: '/client/meetings', label: 'Meetings', icon: Calendar },
   { href: '/client/documents', label: 'Documents', icon: FileText },

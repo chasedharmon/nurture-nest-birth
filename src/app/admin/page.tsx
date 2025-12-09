@@ -9,8 +9,10 @@ import {
   BarChart3,
   LayoutDashboard,
   Settings,
+  MessageSquare,
 } from 'lucide-react'
 import { DoulaDashboard } from '@/components/admin/dashboards'
+import { Badge } from '@/components/ui/badge'
 import {
   getDashboardKPIs,
   getLeadFunnelData,
@@ -20,6 +22,7 @@ import {
   getOverdueInvoices,
   getLeadSourceDistribution,
 } from '@/app/actions/reports'
+import { getUnreadCount } from '@/app/actions/messaging'
 
 export const metadata = {
   title: 'Admin Dashboard | Nurture Nest Birth',
@@ -53,6 +56,7 @@ export default async function AdminPage() {
     upcomingBirthsResult,
     overdueInvoicesResult,
     leadSourcesResult,
+    unreadMessagesResult,
   ] = await Promise.all([
     getDashboardKPIs(),
     getLeadFunnelData(),
@@ -61,7 +65,10 @@ export default async function AdminPage() {
     getUpcomingBirths(5),
     getOverdueInvoices(5),
     getLeadSourceDistribution(),
+    getUnreadCount(),
   ])
+
+  const unreadMessages = unreadMessagesResult.count || 0
 
   // Default KPIs if fetch fails
   const defaultKPIs = {
@@ -106,6 +113,20 @@ export default async function AdminPage() {
                 <Button variant="outline" size="sm">
                   <List className="mr-2 h-4 w-4" />
                   Leads
+                </Button>
+              </Link>
+              <Link href="/admin/messages">
+                <Button variant="outline" size="sm" className="relative">
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  Messages
+                  {unreadMessages > 0 && (
+                    <Badge
+                      variant="default"
+                      className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+                    >
+                      {unreadMessages > 9 ? '9+' : unreadMessages}
+                    </Badge>
+                  )}
                 </Button>
               </Link>
               <Link href="/admin/team">

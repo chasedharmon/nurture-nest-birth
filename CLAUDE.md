@@ -16,7 +16,7 @@
 | Canned Email Templates | ✅ COMPLETE | Database, UI, CRUD actions                 |
 | Welcome Packets        | ✅ COMPLETE | Database schema, UI (full editor later)    |
 | Workflow Automation    | ✅ COMPLETE | Visual canvas builder with ReactFlow       |
-| Unified Messaging      | 🔲 PENDING  | In-app messaging system                    |
+| Unified Messaging      | ✅ COMPLETE | In-app messaging with realtime             |
 | Scheduling Rails       | 🔲 PENDING  | Availability/booking type tables           |
 
 **Workflow Automation Files:**
@@ -32,6 +32,24 @@
 - `src/app/api/cron/workflow-scheduler/route.ts` - Scheduled workflow cron
 - `supabase/migrations/20251213000000_workflow_automation.sql` - Database schema
 - `tests/e2e/admin-workflows.spec.ts` - E2E tests (38 passing)
+
+**Unified Messaging Files:**
+
+- `src/app/admin/messages/page.tsx` - Conversations list with stats, search, tabs
+- `src/app/admin/messages/[id]/page.tsx` - Conversation detail with message thread
+- `src/components/admin/messages/conversation-list.tsx` - Conversation list component
+- `src/components/admin/messages/message-thread.tsx` - Message thread with timestamps
+- `src/components/admin/messages/message-composer.tsx` - Message input with Enter to send
+- `src/components/admin/messages/new-conversation-dialog.tsx` - New conversation modal
+- `src/components/admin/messages/conversation-actions.tsx` - Archive/close/reopen actions
+- `src/app/client/(portal)/messages/page.tsx` - Client portal conversations list
+- `src/app/client/(portal)/messages/[id]/page.tsx` - Client conversation detail
+- `src/components/client/messages/client-conversation-list.tsx` - Client conversation list
+- `src/components/client/messages/client-message-thread.tsx` - Client message thread
+- `src/components/client/messages/client-message-composer.tsx` - Client message input
+- `src/app/actions/messaging.ts` - Server actions (CRUD, read status, search)
+- `supabase/migrations/20251214000000_unified_messaging.sql` - Database schema
+- `tests/e2e/admin-messages.spec.ts` - E2E tests (21 tests)
 
 **Phase 7 Other Files:**
 
@@ -98,7 +116,7 @@ A CRM and client portal for a doula practice in Kearney, Nebraska. Built with Ne
 - **Database**: Supabase (PostgreSQL)
 - **Auth**: Supabase Auth (admin) + Magic Link (clients)
 - **Styling**: Tailwind CSS 4
-- **Testing**: Playwright E2E (10 suites) + Vitest unit tests
+- **Testing**: Playwright E2E (11 suites) + Vitest unit tests
 - **CI/CD**: GitHub Actions
 
 ## Development Commands
@@ -226,6 +244,23 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - Components in `src/components/admin/workflows/`
 - Pages: list (`/admin/workflows`), new (`/admin/workflows/new`), builder (`/admin/workflows/[id]`)
 - Server actions in `src/app/actions/workflows.ts`
+
+**Unified Messaging** (COMPLETE):
+
+- In-app messaging system for doula-client communication
+- Real-time updates via Supabase Realtime (messages table)
+- Conversation statuses: active, closed, archived
+- Unread message badges in navigation (admin and client portals)
+- Admin features: Start conversation, search, archive/close/reopen
+- Client portal: View and reply to conversations with doula
+- Database tables: conversations, conversation_participants, messages
+- Helper functions: `mark_conversation_read`, `get_user_unread_count`, `get_or_create_client_conversation`
+- RLS policies for secure access (admin sees all, clients see their own)
+- UI components: Avatar, Popover, Command (cmdk) for client search
+- E2E tests: 21 tests for admin messaging (requires TEST_ADMIN_PASSWORD env var)
+- Components in `src/components/admin/messages/` and `src/components/client/messages/`
+- Pages: admin list (`/admin/messages`), admin detail (`/admin/messages/[id]`), client list (`/client/messages`), client detail (`/client/messages/[id]`)
+- Server actions in `src/app/actions/messaging.ts`
 
 **Admin Setup Hub** (COMPLETE):
 

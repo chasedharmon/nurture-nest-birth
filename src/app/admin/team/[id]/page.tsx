@@ -138,7 +138,7 @@ export default async function TeamMemberDetailPage({
                     )}
                     <Badge variant="secondary">{roleLabels[member.role]}</Badge>
                     {!member.is_active && (
-                      <Badge variant="error">Inactive</Badge>
+                      <Badge variant="destructive">Inactive</Badge>
                     )}
                   </div>
                 </div>

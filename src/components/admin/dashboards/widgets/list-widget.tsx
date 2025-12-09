@@ -52,12 +52,12 @@ export function ListWidget({
 
   const getStatusBadgeVariant = (
     status: string
-  ): 'default' | 'secondary' | 'error' | 'outline' => {
+  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
     const positiveStatuses = ['client', 'active', 'paid', 'completed']
     const negativeStatuses = ['lost', 'cancelled', 'overdue', 'failed']
 
     if (positiveStatuses.includes(status.toLowerCase())) return 'default'
-    if (negativeStatuses.includes(status.toLowerCase())) return 'error'
+    if (negativeStatuses.includes(status.toLowerCase())) return 'destructive'
     return 'secondary'
   }
 

@@ -1,0 +1,632 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+// Types for messaging
+export interface Conversation {
+  id: string
+  subject: string | null
+  conversation_type: 'direct' | 'group' | 'system'
+  client_id: string | null
+  status: 'active' | 'closed' | 'archived'
+  is_archived: boolean
+  last_message_at: string | null
+  last_message_preview: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ConversationWithDetails extends Conversation {
+  client?: {
+    id: string
+    name: string
+    email: string
+  } | null
+  participants: {
+    id: string
+    user_id: string | null
+    client_id: string | null
+    display_name: string | null
+    unread_count: number
+    last_read_at: string | null
+  }[]
+  unread_count?: number
+}
+
+export interface Message {
+  id: string
+  conversation_id: string
+  sender_user_id: string | null
+  sender_client_id: string | null
+  sender_name: string
+  content: string
+  content_type: 'text' | 'html' | 'markdown'
+  attachments: Array<{
+    name: string
+    url: string
+    type: string
+    size: number
+  }>
+  is_system_message: boolean
+  is_read: boolean
+  reply_to_id: string | null
+  is_edited: boolean
+  edited_at: string | null
+  is_deleted: boolean
+  created_at: string
+}
+
+// ============================================================================
+// CONVERSATION ACTIONS
+// ============================================================================
+
+export async function getConversations(
+  options: {
+    status?: 'active' | 'closed' | 'archived' | 'all'
+    limit?: number
+    offset?: number
+  } = {}
+) {
+  const supabase = await createClient()
+  const { status = 'active', limit = 50, offset = 0 } = options
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  let query = supabase
+    .from('conversations')
+    .select(
+      `
+      *,
+      client:leads!conversations_client_id_fkey(id, name, email),
+      participants:conversation_participants(
+        id, user_id, client_id, display_name, unread_count, last_read_at
+      )
+    `,
+      { count: 'exact' }
+    )
+    .order('last_message_at', { ascending: false, nullsFirst: false })
+    .range(offset, offset + limit - 1)
+
+  if (status !== 'all') {
+    query = query.eq('status', status)
+  }
+
+  const { data, error, count } = await query
+
+  if (error) {
+    console.error('Error fetching conversations:', error)
+    return { success: false, error: error.message }
+  }
+
+  // Get unread count for current user
+  const conversationsWithUnread = data?.map(conv => {
+    const userParticipant = conv.participants?.find(
+      (p: { user_id: string | null }) => p.user_id === user.id
+    )
+    return {
+      ...conv,
+      unread_count: userParticipant?.unread_count || 0,
+    }
+  })
+
+  return {
+    success: true,
+    conversations: conversationsWithUnread as ConversationWithDetails[],
+    total: count || 0,
+  }
+}
+
+export async function getConversationById(id: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('conversations')
+    .select(
+      `
+      *,
+      client:leads!conversations_client_id_fkey(id, name, email),
+      participants:conversation_participants(
+        id, user_id, client_id, display_name, unread_count, last_read_at,
+        user:users(id, full_name, email),
+        lead:leads(id, name, email)
+      )
+    `
+    )
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    console.error('Error fetching conversation:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, conversation: data as ConversationWithDetails }
+}
+
+export async function createConversation(data: {
+  clientId: string
+  subject?: string
+  initialMessage?: string
+}) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // Use the helper function to get or create conversation
+  const { data: conversationId, error: fnError } = await supabase.rpc(
+    'get_or_create_client_conversation',
+    {
+      p_client_id: data.clientId,
+      p_user_id: user.id,
+      p_subject: data.subject || null,
+    }
+  )
+
+  if (fnError) {
+    console.error('Error creating conversation:', fnError)
+    return { success: false, error: fnError.message }
+  }
+
+  // If there's an initial message, send it
+  if (data.initialMessage) {
+    const { data: userData } = await supabase
+      .from('users')
+      .select('full_name')
+      .eq('id', user.id)
+      .single()
+
+    const { error: msgError } = await supabase.from('messages').insert({
+      conversation_id: conversationId,
+      sender_user_id: user.id,
+      sender_name: userData?.full_name || 'Team Member',
+      content: data.initialMessage,
+      content_type: 'text',
+    })
+
+    if (msgError) {
+      console.error('Error sending initial message:', msgError)
+      // Don't fail the whole operation, conversation was created
+    }
+  }
+
+  revalidatePath('/admin/messages')
+
+  return { success: true, conversationId }
+}
+
+export async function archiveConversation(id: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('conversations')
+    .update({ status: 'archived', is_archived: true })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error archiving conversation:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/messages')
+
+  return { success: true }
+}
+
+export async function closeConversation(id: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('conversations')
+    .update({ status: 'closed' })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error closing conversation:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/messages')
+
+  return { success: true }
+}
+
+export async function reopenConversation(id: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('conversations')
+    .update({ status: 'active', is_archived: false })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error reopening conversation:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/messages')
+
+  return { success: true }
+}
+
+// ============================================================================
+// MESSAGE ACTIONS
+// ============================================================================
+
+export async function getMessages(
+  conversationId: string,
+  options: {
+    limit?: number
+    before?: string // cursor for pagination
+  } = {}
+) {
+  const supabase = await createClient()
+  const { limit = 50, before } = options
+
+  let query = supabase
+    .from('messages')
+    .select('*')
+    .eq('conversation_id', conversationId)
+    .eq('is_deleted', false)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (before) {
+    query = query.lt('created_at', before)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('Error fetching messages:', error)
+    return { success: false, error: error.message }
+  }
+
+  // Reverse to get chronological order
+  const messages = (data || []).reverse()
+
+  return { success: true, messages: messages as Message[] }
+}
+
+export async function sendMessage(data: {
+  conversationId: string
+  content: string
+  contentType?: 'text' | 'html' | 'markdown'
+  attachments?: Array<{ name: string; url: string; type: string; size: number }>
+  replyToId?: string
+}) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // Get user's name
+  const { data: userData } = await supabase
+    .from('users')
+    .select('full_name')
+    .eq('id', user.id)
+    .single()
+
+  const { data: message, error } = await supabase
+    .from('messages')
+    .insert({
+      conversation_id: data.conversationId,
+      sender_user_id: user.id,
+      sender_name: userData?.full_name || 'Team Member',
+      content: data.content,
+      content_type: data.contentType || 'text',
+      attachments: data.attachments || [],
+      reply_to_id: data.replyToId || null,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error sending message:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/messages')
+  revalidatePath(`/admin/messages/${data.conversationId}`)
+
+  return { success: true, message: message as Message }
+}
+
+export async function editMessage(id: string, content: string) {
+  const supabase = await createClient()
+
+  // First get the original message
+  const { data: original, error: fetchError } = await supabase
+    .from('messages')
+    .select('content')
+    .eq('id', id)
+    .single()
+
+  if (fetchError) {
+    return { success: false, error: fetchError.message }
+  }
+
+  const { error } = await supabase
+    .from('messages')
+    .update({
+      content,
+      is_edited: true,
+      edited_at: new Date().toISOString(),
+      original_content: original.content,
+    })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error editing message:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
+}
+
+export async function deleteMessage(id: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('messages')
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error deleting message:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
+}
+
+// ============================================================================
+// READ STATUS ACTIONS
+// ============================================================================
+
+export async function markConversationAsRead(conversationId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  const { error } = await supabase.rpc('mark_conversation_read', {
+    p_conversation_id: conversationId,
+    p_user_id: user.id,
+    p_client_id: null,
+  })
+
+  if (error) {
+    console.error('Error marking conversation as read:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin/messages')
+
+  return { success: true }
+}
+
+export async function getUnreadCount() {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Not authenticated', count: 0 }
+  }
+
+  const { data, error } = await supabase.rpc('get_user_unread_count', {
+    p_user_id: user.id,
+  })
+
+  if (error) {
+    console.error('Error getting unread count:', error)
+    return { success: false, error: error.message, count: 0 }
+  }
+
+  return { success: true, count: data || 0 }
+}
+
+// ============================================================================
+// CLIENT PORTAL ACTIONS
+// ============================================================================
+
+export async function getClientConversations(clientId: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('conversations')
+    .select(
+      `
+      *,
+      participants:conversation_participants(
+        id, user_id, client_id, display_name, unread_count, last_read_at
+      )
+    `
+    )
+    .eq('client_id', clientId)
+    .eq('status', 'active')
+    .order('last_message_at', { ascending: false, nullsFirst: false })
+
+  if (error) {
+    console.error('Error fetching client conversations:', error)
+    return { success: false, error: error.message }
+  }
+
+  // Get unread count for client
+  const conversationsWithUnread = data?.map(conv => {
+    const clientParticipant = conv.participants?.find(
+      (p: { client_id: string | null }) => p.client_id === clientId
+    )
+    return {
+      ...conv,
+      unread_count: clientParticipant?.unread_count || 0,
+    }
+  })
+
+  return { success: true, conversations: conversationsWithUnread }
+}
+
+export async function sendClientMessage(data: {
+  conversationId: string
+  clientId: string
+  clientName: string
+  content: string
+}) {
+  const supabase = await createClient()
+
+  const { data: message, error } = await supabase
+    .from('messages')
+    .insert({
+      conversation_id: data.conversationId,
+      sender_client_id: data.clientId,
+      sender_name: data.clientName,
+      content: data.content,
+      content_type: 'text',
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error sending client message:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, message: message as Message }
+}
+
+export async function markClientConversationAsRead(
+  conversationId: string,
+  clientId: string
+) {
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('mark_conversation_read', {
+    p_conversation_id: conversationId,
+    p_user_id: null,
+    p_client_id: clientId,
+  })
+
+  if (error) {
+    console.error('Error marking conversation as read:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
+}
+
+export async function getClientUnreadCount(clientId: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('conversation_participants')
+    .select('unread_count')
+    .eq('client_id', clientId)
+
+  if (error) {
+    console.error('Error getting client unread count:', error)
+    return { success: false, error: error.message, count: 0 }
+  }
+
+  const total = data?.reduce((sum, p) => sum + (p.unread_count || 0), 0) || 0
+
+  return { success: true, count: total }
+}
+
+// ============================================================================
+// SEARCH & UTILITIES
+// ============================================================================
+
+export async function searchConversations(query: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // Search in conversation subjects and client names
+  const { data, error } = await supabase
+    .from('conversations')
+    .select(
+      `
+      *,
+      client:leads!conversations_client_id_fkey(id, name, email),
+      participants:conversation_participants(
+        id, user_id, client_id, display_name, unread_count
+      )
+    `
+    )
+    .or(`subject.ilike.%${query}%`)
+    .order('last_message_at', { ascending: false, nullsFirst: false })
+    .limit(20)
+
+  if (error) {
+    console.error('Error searching conversations:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, conversations: data }
+}
+
+export async function getConversationForClient(clientId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // Check if conversation exists
+  const { data: existing, error: checkError } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('client_id', clientId)
+    .eq('conversation_type', 'direct')
+    .eq('status', 'active')
+    .single()
+
+  if (checkError && checkError.code !== 'PGRST116') {
+    // PGRST116 = no rows returned, which is fine
+    console.error('Error checking for conversation:', checkError)
+    return { success: false, error: checkError.message }
+  }
+
+  if (existing) {
+    return { success: true, conversationId: existing.id, isNew: false }
+  }
+
+  // Create new conversation
+  const result = await createConversation({ clientId })
+  if (!result.success) {
+    return result
+  }
+
+  return { success: true, conversationId: result.conversationId, isNew: true }
+}
