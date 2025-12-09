@@ -3,6 +3,8 @@ import { getClientSession, signOutClient } from '@/app/actions/client-auth'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MobileNav } from '@/components/client/mobile-nav'
+import { ClientNavMessageBadge } from '@/components/client/nav-message-badge'
+import { getClientUnreadCount } from '@/app/actions/messaging'
 
 export default async function ClientPortalLayout({
   children,
@@ -14,6 +16,10 @@ export default async function ClientPortalLayout({
   if (!session) {
     redirect('/client/login')
   }
+
+  // Fetch unread message count for the client
+  const unreadResult = await getClientUnreadCount(session.clientId)
+  const unreadCount = unreadResult.count || 0
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5 dark:from-background dark:via-primary/5 dark:to-secondary/5">
@@ -40,12 +46,10 @@ export default async function ClientPortalLayout({
                 >
                   Dashboard
                 </Link>
-                <Link
-                  href="/client/messages"
-                  className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors"
-                >
-                  Messages
-                </Link>
+                <ClientNavMessageBadge
+                  clientId={session.clientId}
+                  initialCount={unreadCount}
+                />
                 <Link
                   href="/client/services"
                   className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors"

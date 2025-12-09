@@ -9,10 +9,9 @@ import {
   BarChart3,
   LayoutDashboard,
   Settings,
-  MessageSquare,
 } from 'lucide-react'
 import { DoulaDashboard } from '@/components/admin/dashboards'
-import { Badge } from '@/components/ui/badge'
+import { NavMessageBadge } from '@/components/admin/nav-message-badge'
 import {
   getDashboardKPIs,
   getLeadFunnelData,
@@ -115,20 +114,7 @@ export default async function AdminPage() {
                   Leads
                 </Button>
               </Link>
-              <Link href="/admin/messages">
-                <Button variant="outline" size="sm" className="relative">
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  Messages
-                  {unreadMessages > 0 && (
-                    <Badge
-                      variant="default"
-                      className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                    >
-                      {unreadMessages > 9 ? '9+' : unreadMessages}
-                    </Badge>
-                  )}
-                </Button>
-              </Link>
+              <NavMessageBadge userId={user.id} initialCount={unreadMessages} />
               <Link href="/admin/team">
                 <Button variant="outline" size="sm">
                   <Users className="mr-2 h-4 w-4" />
