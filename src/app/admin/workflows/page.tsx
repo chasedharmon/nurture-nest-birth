@@ -19,6 +19,7 @@ import {
   CreditCard,
   Users,
   FileText,
+  LayoutTemplate,
 } from 'lucide-react'
 import {
   Dialog,
@@ -119,11 +120,17 @@ export default async function WorkflowsPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Link href="/admin/workflows/templates">
+                <Button variant="outline">
+                  <LayoutTemplate className="mr-2 h-4 w-4" />
+                  Browse Templates
+                </Button>
+              </Link>
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline">
                     <Zap className="mr-2 h-4 w-4" />
-                    From Template
+                    Quick Start
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-2xl">
