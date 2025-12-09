@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { OnlineDot } from '@/components/ui/online-indicator'
 import { usePresence } from '@/lib/hooks/use-presence'
+import { Users, Lock } from 'lucide-react'
 import type { ConversationWithDetails } from '@/app/actions/messaging'
 
 interface ConversationListProps {
@@ -32,17 +33,64 @@ export function ConversationList({
     <div className="space-y-2">
       {conversations.map(conversation => {
         const hasUnread = (conversation.unread_count || 0) > 0
-        const clientName = conversation.client?.name || 'Unknown Client'
-        const clientId = conversation.client?.id
-        const initials = clientName
-          .split(' ')
-          .map(n => n[0])
-          .join('')
-          .toUpperCase()
-          .slice(0, 2)
+        const conversationType = conversation.conversation_type
+        const isTeamConversation =
+          conversationType === 'team-internal' ||
+          conversationType === 'team-about-client'
+        const isAboutClient = conversationType === 'team-about-client'
 
-        // Check if the client is online
-        const clientIsOnline = clientId ? isUserOnline(clientId) : false
+        // For team conversations, show participant names
+        // For client conversations, show client name
+        let displayName: string
+        let subText: string | undefined
+        let initials: string
+
+        if (isTeamConversation) {
+          // Show participant names (excluding current user)
+          const otherParticipants =
+            conversation.participants?.filter(
+              p => p.user_id !== currentUserId && p.display_name
+            ) || []
+          if (otherParticipants.length > 0) {
+            displayName = otherParticipants
+              .map(p => p.display_name)
+              .slice(0, 3)
+              .join(', ')
+            if (otherParticipants.length > 3) {
+              displayName += ` +${otherParticipants.length - 3}`
+            }
+          } else {
+            displayName = 'Team Discussion'
+          }
+
+          // If about a client, show which client
+          if (isAboutClient && conversation.client) {
+            subText = `About: ${conversation.client.name}`
+          } else if (conversation.subject) {
+            subText = conversation.subject
+          }
+
+          initials = 'TM' // Team Members
+        } else {
+          // Client conversation
+          const clientName = conversation.client?.name || 'Unknown Client'
+          displayName = clientName
+          subText = conversation.client?.email
+          initials = clientName
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2)
+        }
+
+        // Check online status
+        const clientId = conversation.client?.id
+        const isOnline = isTeamConversation
+          ? false // Don't show online dot for team conversations
+          : clientId
+            ? isUserOnline(clientId)
+            : false
 
         return (
           <Link
@@ -62,14 +110,20 @@ export function ConversationList({
                         className={
                           hasUnread
                             ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
+                            : isTeamConversation
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'bg-muted'
                         }
                       >
-                        {initials}
+                        {isTeamConversation ? (
+                          <Users className="h-5 w-5" />
+                        ) : (
+                          initials
+                        )}
                       </AvatarFallback>
                     </Avatar>
-                    {/* Online dot */}
-                    {clientIsOnline && (
+                    {/* Online dot for clients */}
+                    {!isTeamConversation && isOnline && (
                       <OnlineDot
                         isOnline={true}
                         size="md"
@@ -86,8 +140,17 @@ export function ConversationList({
                             hasUnread ? 'text-foreground' : ''
                           }`}
                         >
-                          {clientName}
+                          {displayName}
                         </span>
+                        {isTeamConversation && (
+                          <Badge
+                            variant="outline"
+                            className="text-xs flex items-center gap-1 shrink-0"
+                          >
+                            <Lock className="h-3 w-3" />
+                            Team
+                          </Badge>
+                        )}
                         {hasUnread && (
                           <Badge variant="default" className="h-5 text-xs">
                             {conversation.unread_count}
@@ -120,11 +183,13 @@ export function ConversationList({
                       </p>
                     )}
 
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs text-muted-foreground">
-                        {conversation.client?.email}
-                      </span>
-                    </div>
+                    {subText && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-xs text-muted-foreground">
+                          {subText}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>

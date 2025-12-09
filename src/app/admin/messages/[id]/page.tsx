@@ -17,7 +17,20 @@ export async function generateMetadata({
     return { title: 'Message Not Found | Nurture Nest Birth' }
   }
 
-  const clientName = result.conversation.client?.name || 'Unknown Client'
+  const conversation = result.conversation
+  const isTeamConversation =
+    conversation.conversation_type === 'team-internal' ||
+    conversation.conversation_type === 'team-about-client'
+
+  if (isTeamConversation) {
+    const subject = conversation.subject || 'Team Discussion'
+    return {
+      title: `${subject} - Messages | Nurture Nest Birth`,
+      description: `Team conversation: ${subject}`,
+    }
+  }
+
+  const clientName = conversation.client?.name || 'Unknown Client'
   return {
     title: `${clientName} - Messages | Nurture Nest Birth`,
     description: `Conversation with ${clientName}`,
@@ -85,7 +98,10 @@ export default async function ConversationPage({
             ? { id: client.id, name: client.name, email: client.email }
             : null
         }
+        participants={participants}
         status={conversation.status}
+        conversationType={conversation.conversation_type}
+        subject={conversation.subject}
       />
 
       {/* Message Thread */}

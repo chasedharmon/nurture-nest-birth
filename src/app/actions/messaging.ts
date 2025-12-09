@@ -5,10 +5,18 @@ import { revalidatePath } from 'next/cache'
 import { canSendMessage, canDeleteMessage } from '@/lib/permissions/messaging'
 
 // Types for messaging
+export type ConversationType =
+  | 'direct' // Legacy: direct message
+  | 'group' // Legacy: group message
+  | 'system' // System-generated messages
+  | 'client-direct' // Client <-> Practice (client + all team can see)
+  | 'team-internal' // Team-only discussion (no clients)
+  | 'team-about-client' // Team discussing a specific client (client cannot see)
+
 export interface Conversation {
   id: string
   subject: string | null
-  conversation_type: 'direct' | 'group' | 'system'
+  conversation_type: ConversationType
   client_id: string | null
   status: 'active' | 'closed' | 'archived'
   is_archived: boolean
@@ -67,10 +75,18 @@ export async function getConversations(
     status?: 'active' | 'closed' | 'archived' | 'all'
     limit?: number
     offset?: number
+    includeTeam?: boolean // Include team-internal conversations
+    filter?: 'all' | 'clients' | 'team' // Filter by type
   } = {}
 ) {
   const supabase = await createClient()
-  const { status = 'active', limit = 50, offset = 0 } = options
+  const {
+    status = 'active',
+    limit = 50,
+    offset = 0,
+    includeTeam = true,
+    filter = 'all',
+  } = options
 
   const {
     data: { user },
@@ -98,6 +114,19 @@ export async function getConversations(
     query = query.eq('status', status)
   }
 
+  // Apply conversation type filter
+  if (filter === 'clients') {
+    query = query.in('conversation_type', ['client-direct', 'direct'])
+  } else if (filter === 'team') {
+    query = query.in('conversation_type', [
+      'team-internal',
+      'team-about-client',
+    ])
+  } else if (!includeTeam) {
+    // Legacy behavior: exclude team conversations
+    query = query.in('conversation_type', ['client-direct', 'direct', 'group'])
+  }
+
   const { data, error, count } = await query
 
   if (error) {
@@ -105,8 +134,25 @@ export async function getConversations(
     return { success: false, error: error.message }
   }
 
+  // For team conversations, filter to only those where user is a participant
+  const filteredData = data?.filter(conv => {
+    const isTeamConv =
+      conv.conversation_type === 'team-internal' ||
+      conv.conversation_type === 'team-about-client'
+
+    if (isTeamConv) {
+      // User must be a participant in team conversations
+      return conv.participants?.some(
+        (p: { user_id: string | null }) => p.user_id === user.id
+      )
+    }
+
+    // For client conversations, RLS handles visibility
+    return true
+  })
+
   // Get unread count for current user
-  const conversationsWithUnread = data?.map(conv => {
+  const conversationsWithUnread = filteredData?.map(conv => {
     const userParticipant = conv.participants?.find(
       (p: { user_id: string | null }) => p.user_id === user.id
     )
@@ -785,6 +831,184 @@ export async function getClientUnreadCount(clientId: string) {
 // ============================================================================
 // SEARCH & UTILITIES
 // ============================================================================
+
+// ============================================================================
+// TEAM CONVERSATION ACTIONS
+// ============================================================================
+
+export async function createTeamConversation(data: {
+  participantUserIds: string[]
+  subject?: string
+  initialMessage?: string
+  aboutClientId?: string // For team-about-client conversations
+}) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // Ensure current user is in participants list
+  const participantIds = Array.from(
+    new Set([user.id, ...data.participantUserIds])
+  )
+
+  if (participantIds.length < 2) {
+    return {
+      success: false,
+      error: 'Team conversations require at least 2 participants',
+    }
+  }
+
+  // Determine conversation type
+  const conversationType = data.aboutClientId
+    ? 'team-about-client'
+    : 'team-internal'
+
+  // Create the conversation
+  const { data: conversation, error: convError } = await supabase
+    .from('conversations')
+    .insert({
+      subject: data.subject || null,
+      conversation_type: conversationType,
+      client_id: data.aboutClientId || null,
+      status: 'active',
+    })
+    .select()
+    .single()
+
+  if (convError) {
+    console.error('Error creating team conversation:', convError)
+    return { success: false, error: convError.message }
+  }
+
+  // Get user names for participants
+  const { data: users, error: usersError } = await supabase
+    .from('users')
+    .select('id, full_name')
+    .in('id', participantIds)
+
+  if (usersError) {
+    console.error('Error fetching user names:', usersError)
+    // Continue anyway - we'll use fallback names
+  }
+
+  const userMap = new Map(users?.map(u => [u.id, u.full_name]) || [])
+
+  // Add all participants
+  const participantRecords = participantIds.map(userId => ({
+    conversation_id: conversation.id,
+    user_id: userId,
+    display_name: userMap.get(userId) || 'Team Member',
+    unread_count: userId === user.id ? 0 : 1, // Creator has 0 unread
+  }))
+
+  const { error: partError } = await supabase
+    .from('conversation_participants')
+    .insert(participantRecords)
+
+  if (partError) {
+    console.error('Error adding participants:', partError)
+    // Clean up conversation
+    await supabase.from('conversations').delete().eq('id', conversation.id)
+    return { success: false, error: partError.message }
+  }
+
+  // If there's an initial message, send it
+  if (data.initialMessage) {
+    const senderName = userMap.get(user.id) || 'Team Member'
+
+    const { error: msgError } = await supabase.from('messages').insert({
+      conversation_id: conversation.id,
+      sender_user_id: user.id,
+      sender_name: senderName,
+      content: data.initialMessage,
+      content_type: 'text',
+    })
+
+    if (msgError) {
+      console.error('Error sending initial message:', msgError)
+      // Don't fail the whole operation, conversation was created
+    }
+  }
+
+  revalidatePath('/admin/messages')
+
+  return { success: true, conversationId: conversation.id }
+}
+
+export async function getTeamConversations(
+  options: {
+    status?: 'active' | 'closed' | 'archived' | 'all'
+    limit?: number
+    offset?: number
+  } = {}
+) {
+  const supabase = await createClient()
+  const { status = 'active', limit = 50, offset = 0 } = options
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // Get team conversations where user is a participant
+  let query = supabase
+    .from('conversations')
+    .select(
+      `
+      *,
+      client:leads!conversations_client_id_fkey(id, name, email),
+      participants:conversation_participants(
+        id, user_id, client_id, display_name, unread_count, last_read_at
+      )
+    `,
+      { count: 'exact' }
+    )
+    .in('conversation_type', ['team-internal', 'team-about-client'])
+    .order('last_message_at', { ascending: false, nullsFirst: false })
+    .range(offset, offset + limit - 1)
+
+  if (status !== 'all') {
+    query = query.eq('status', status)
+  }
+
+  const { data, error, count } = await query
+
+  if (error) {
+    console.error('Error fetching team conversations:', error)
+    return { success: false, error: error.message }
+  }
+
+  // Filter to only conversations where user is a participant
+  const userConversations = data?.filter(conv =>
+    conv.participants?.some(
+      (p: { user_id: string | null }) => p.user_id === user.id
+    )
+  )
+
+  // Get unread count for current user
+  const conversationsWithUnread = userConversations?.map(conv => {
+    const userParticipant = conv.participants?.find(
+      (p: { user_id: string | null }) => p.user_id === user.id
+    )
+    return {
+      ...conv,
+      unread_count: userParticipant?.unread_count || 0,
+    }
+  })
+
+  return {
+    success: true,
+    conversations: conversationsWithUnread as ConversationWithDetails[],
+    total: count || 0,
+  }
+}
 
 export async function searchConversations(query: string) {
   const supabase = await createClient()
