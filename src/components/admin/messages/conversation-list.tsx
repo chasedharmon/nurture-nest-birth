@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { OnlineDot } from '@/components/ui/online-indicator'
+import { PulsingBadge } from '@/components/ui/pulsing-badge'
 import { usePresence } from '@/lib/hooks/use-presence'
 import { Users, Lock } from 'lucide-react'
 import type { ConversationWithDetails } from '@/app/actions/messaging'
@@ -152,9 +153,10 @@ export function ConversationList({
                           </Badge>
                         )}
                         {hasUnread && (
-                          <Badge variant="default" className="h-5 text-xs">
-                            {conversation.unread_count}
-                          </Badge>
+                          <PulsingBadge
+                            count={conversation.unread_count}
+                            size="sm"
+                          />
                         )}
                       </div>
                       {conversation.last_message_at && (

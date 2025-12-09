@@ -10,7 +10,7 @@
 import Link from 'next/link'
 import { MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { PulsingBadge } from '@/components/ui/pulsing-badge'
 import { useUnreadCount } from '@/lib/hooks/use-unread-count'
 
 interface NavMessageBadgeProps {
@@ -33,12 +33,11 @@ export function NavMessageBadge({
         <MessageSquare className="mr-2 h-4 w-4" />
         Messages
         {unreadCount > 0 && (
-          <Badge
-            variant="default"
-            className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
-          >
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </Badge>
+          <PulsingBadge
+            count={unreadCount}
+            size="sm"
+            className="absolute -top-1 -right-1"
+          />
         )}
       </Button>
     </Link>
