@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { DoulaDashboard } from '@/components/admin/dashboards'
 import { NavMessageBadge } from '@/components/admin/nav-message-badge'
+import { AdminMessageNotifications } from '@/components/admin/message-notifications'
 import {
   getDashboardKPIs,
   getLeadFunnelData,
@@ -162,6 +163,9 @@ export default async function AdminPage() {
           leadSources={leadSources}
         />
       </main>
+
+      {/* Message Notifications */}
+      <AdminMessageNotifications userId={user.id} />
     </div>
   )
 }

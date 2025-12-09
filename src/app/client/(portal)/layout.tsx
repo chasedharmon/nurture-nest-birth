@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MobileNav } from '@/components/client/mobile-nav'
 import { ClientNavMessageBadge } from '@/components/client/nav-message-badge'
+import { ClientMessageNotifications } from '@/components/client/message-notifications'
 import { getClientUnreadCount } from '@/app/actions/messaging'
 
 export default async function ClientPortalLayout({
@@ -125,6 +126,9 @@ export default async function ClientPortalLayout({
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {children}
       </main>
+
+      {/* Message Notifications */}
+      <ClientMessageNotifications clientId={session.clientId} />
     </div>
   )
 }
