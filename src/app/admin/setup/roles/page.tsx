@@ -10,8 +10,8 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { RolesTable, CreateRoleDialog } from '@/components/admin/setup'
-import { Shield, ChevronLeft, Lock, Settings } from 'lucide-react'
+import { RolesTable } from '@/components/admin/setup'
+import { Shield, ChevronLeft, Lock, Settings, Plus } from 'lucide-react'
 
 export default async function RolesPage() {
   const supabase = await createClient()
@@ -58,7 +58,12 @@ export default async function RolesPage() {
                 </div>
               </div>
             </div>
-            <CreateRoleDialog />
+            <Link href="/admin/setup/roles/new">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Role
+              </Button>
+            </Link>
           </div>
         </div>
       </header>

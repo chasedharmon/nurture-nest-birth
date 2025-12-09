@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getCompanySettings } from '@/app/actions/setup'
 import {
   Card,
   CardContent,
@@ -9,8 +10,8 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Building2, ChevronLeft, Construction } from 'lucide-react'
+import { Building2, ChevronLeft } from 'lucide-react'
+import { CompanySettingsForm } from './company-settings-form'
 
 export default async function CompanyPage() {
   const supabase = await createClient()
@@ -22,6 +23,9 @@ export default async function CompanyPage() {
   if (!user) {
     redirect('/login')
   }
+
+  const settingsResult = await getCompanySettings()
+  const settings = settingsResult.success ? settingsResult.settings : null
 
   return (
     <div className="min-h-screen bg-background">
@@ -53,26 +57,32 @@ export default async function CompanyPage() {
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <Card className="mx-auto max-w-lg">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 rounded-full bg-amber-100 p-3 text-amber-600 dark:bg-amber-900/20 dark:text-amber-300">
-              <Construction className="h-8 w-8" />
-            </div>
-            <CardTitle>Coming Soon</CardTitle>
-            <CardDescription>
-              Company profile configuration is under development.
-            </CardDescription>
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Info Card */}
+        <Card className="mb-6 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-blue-800 dark:text-blue-300">
+              About Company Settings
+            </CardTitle>
           </CardHeader>
-          <CardContent className="text-center">
-            <p className="mb-4 text-sm text-muted-foreground">
-              This feature will allow you to configure business information,
-              logo, contact details, and branding settings that appear
-              throughout the CRM and client portal.
-            </p>
-            <Badge variant="outline">Planned for Phase 7</Badge>
+          <CardContent>
+            <CardDescription className="text-blue-700 dark:text-blue-400">
+              Configure your business information, contact details, and branding
+              settings. This information appears on invoices, contracts, and
+              throughout the client portal.
+            </CardDescription>
           </CardContent>
         </Card>
+
+        {settings ? (
+          <CompanySettingsForm settings={settings} />
+        ) : (
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              Failed to load company settings. Please try refreshing the page.
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   )

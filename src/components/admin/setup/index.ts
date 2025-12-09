@@ -1,4 +1,5 @@
 export { InviteUserDialog } from './invite-user-dialog'
+export { CreateUserDialog } from './create-user-dialog'
 export { UsersTable } from './users-table'
 export { EditUserDialog } from './edit-user-dialog'
 export { InvitationsTable } from './invitations-table'

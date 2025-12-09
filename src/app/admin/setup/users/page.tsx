@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   InviteUserDialog,
+  CreateUserDialog,
   UsersTable,
   InvitationsTable,
 } from '@/components/admin/setup'
@@ -79,10 +80,16 @@ export default async function UsersPage() {
                 </div>
               </div>
             </div>
-            <InviteUserDialog
-              roles={roles}
-              unlinkedTeamMembers={unlinkedTeamMembers}
-            />
+            <div className="flex items-center gap-2">
+              <CreateUserDialog
+                roles={roles}
+                unlinkedTeamMembers={unlinkedTeamMembers}
+              />
+              <InviteUserDialog
+                roles={roles}
+                unlinkedTeamMembers={unlinkedTeamMembers}
+              />
+            </div>
           </div>
         </div>
       </header>

@@ -24,7 +24,6 @@ import {
 import { deleteRole } from '@/app/actions/setup'
 import type { Role } from '@/lib/supabase/types'
 import { MoreHorizontal, Pencil, Trash2, Shield, Lock } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
 import { EditRoleDialog } from './edit-role-dialog'
 import { PermissionsMatrixReadOnly } from './permissions-matrix'
 
@@ -77,6 +76,9 @@ export function RolesTable({ roles }: RolesTableProps) {
                 Role
               </th>
               <th className="px-4 py-3 font-medium text-muted-foreground">
+                Level
+              </th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">
                 Description
               </th>
               <th className="px-4 py-3 font-medium text-muted-foreground">
@@ -84,9 +86,6 @@ export function RolesTable({ roles }: RolesTableProps) {
               </th>
               <th className="px-4 py-3 font-medium text-muted-foreground">
                 Type
-              </th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">
-                Updated
               </th>
               <th className="px-4 py-3 font-medium text-muted-foreground">
                 Actions
@@ -106,6 +105,11 @@ export function RolesTable({ roles }: RolesTableProps) {
                     </Badge>
                   </div>
                 </td>
+                <td className="px-4 py-4">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                    {role.hierarchy_level}
+                  </span>
+                </td>
                 <td className="max-w-xs px-4 py-4 text-muted-foreground">
                   {role.description || '—'}
                 </td>
@@ -124,11 +128,6 @@ export function RolesTable({ roles }: RolesTableProps) {
                   ) : (
                     <Badge variant="outline">Custom</Badge>
                   )}
-                </td>
-                <td className="px-4 py-4 text-muted-foreground">
-                  {formatDistanceToNow(new Date(role.updated_at), {
-                    addSuffix: true,
-                  })}
                 </td>
                 <td className="px-4 py-4">
                   <DropdownMenu>

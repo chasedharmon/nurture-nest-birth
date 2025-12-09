@@ -9,6 +9,11 @@ import type {
   Permissions,
   TeamMember,
   ContractTemplate,
+  CompanySettings,
+  CompanySettingsUpdate,
+  ServicePackage,
+  ServicePackageInsert,
+  ServicePackageUpdate,
 } from '@/lib/supabase/types'
 import { Resend } from 'resend'
 
@@ -27,7 +32,7 @@ export async function getRoles(): Promise<{
     const { data: roles, error } = await supabase
       .from('roles')
       .select('*')
-      .order('is_system', { ascending: false })
+      .order('hierarchy_level', { ascending: true })
       .order('name')
 
     if (error) throw error
@@ -70,6 +75,7 @@ export async function createRole(data: {
   name: string
   description?: string
   permissions: Permissions
+  hierarchyLevel?: number
 }): Promise<{ success: boolean; role?: Role; error?: string }> {
   try {
     const supabase = createAdminClient()
@@ -80,6 +86,7 @@ export async function createRole(data: {
         name: data.name.toLowerCase().replace(/\s+/g, '_'),
         description: data.description || null,
         permissions: data.permissions,
+        hierarchy_level: data.hierarchyLevel ?? 100,
         is_system: false,
       })
       .select()
@@ -604,6 +611,239 @@ export async function cancelInvitation(
   }
 }
 
+export async function validateInvitation(token: string): Promise<{
+  success: boolean
+  invitation?: {
+    email: string
+    roleName?: string
+    teamMemberName?: string
+    expiresAt: string
+  }
+  error?: string
+}> {
+  try {
+    const supabase = createAdminClient()
+
+    const { data: invitation, error } = await supabase
+      .from('user_invitations')
+      .select(
+        `
+        *,
+        role:roles(name),
+        team_member:team_members(display_name)
+      `
+      )
+      .eq('token', token)
+      .single()
+
+    if (error || !invitation) {
+      return { success: false, error: 'Invalid invitation token' }
+    }
+
+    // Check if already accepted
+    if (invitation.accepted_at) {
+      return {
+        success: false,
+        error: 'This invitation has already been accepted',
+      }
+    }
+
+    // Check if expired
+    if (new Date(invitation.expires_at) < new Date()) {
+      return { success: false, error: 'This invitation has expired' }
+    }
+
+    return {
+      success: true,
+      invitation: {
+        email: invitation.email,
+        roleName: invitation.role?.name,
+        teamMemberName: invitation.team_member?.display_name,
+        expiresAt: invitation.expires_at,
+      },
+    }
+  } catch (error) {
+    console.error('[Setup] Failed to validate invitation:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to validate invitation',
+    }
+  }
+}
+
+export async function acceptInvitation(data: {
+  token: string
+  fullName: string
+  password: string
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+
+    // Get invitation details
+    const { data: invitation, error: fetchError } = await supabase
+      .from('user_invitations')
+      .select('*')
+      .eq('token', data.token)
+      .single()
+
+    if (fetchError || !invitation) {
+      return { success: false, error: 'Invalid invitation token' }
+    }
+
+    // Check if already accepted
+    if (invitation.accepted_at) {
+      return {
+        success: false,
+        error: 'This invitation has already been accepted',
+      }
+    }
+
+    // Check if expired
+    if (new Date(invitation.expires_at) < new Date()) {
+      return { success: false, error: 'This invitation has expired' }
+    }
+
+    // Create auth user via Supabase Admin API
+    const { data: authData, error: authError } =
+      await supabase.auth.admin.createUser({
+        email: invitation.email,
+        password: data.password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: data.fullName,
+        },
+      })
+
+    if (authError || !authData.user) {
+      console.error('[Setup] Failed to create auth user:', authError)
+      return {
+        success: false,
+        error: authError?.message || 'Failed to create user account',
+      }
+    }
+
+    // Create user record in our users table
+    const { error: userError } = await supabase.from('users').insert({
+      id: authData.user.id,
+      email: invitation.email,
+      full_name: data.fullName,
+      role_id: invitation.role_id,
+      is_active: true,
+      invited_by: invitation.invited_by,
+      invited_at: invitation.created_at,
+    })
+
+    if (userError) {
+      console.error('[Setup] Failed to create user record:', userError)
+      // Try to clean up auth user
+      await supabase.auth.admin.deleteUser(authData.user.id)
+      return { success: false, error: 'Failed to create user record' }
+    }
+
+    // Link to team member if specified
+    if (invitation.team_member_id) {
+      await supabase
+        .from('team_members')
+        .update({ user_id: authData.user.id })
+        .eq('id', invitation.team_member_id)
+    }
+
+    // Mark invitation as accepted
+    await supabase
+      .from('user_invitations')
+      .update({ accepted_at: new Date().toISOString() })
+      .eq('id', invitation.id)
+
+    revalidatePath('/admin/setup/users')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to accept invitation:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to accept invitation',
+    }
+  }
+}
+
+export async function createUser(data: {
+  email: string
+  fullName: string
+  password: string
+  roleId?: string
+  teamMemberId?: string
+}): Promise<{ success: boolean; userId?: string; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+
+    // Check if email already exists
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', data.email.toLowerCase())
+      .single()
+
+    if (existingUser) {
+      return { success: false, error: 'A user with this email already exists' }
+    }
+
+    // Create auth user via Supabase Admin API
+    const { data: authData, error: authError } =
+      await supabase.auth.admin.createUser({
+        email: data.email.toLowerCase(),
+        password: data.password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: data.fullName,
+        },
+      })
+
+    if (authError || !authData.user) {
+      console.error('[Setup] Failed to create auth user:', authError)
+      return {
+        success: false,
+        error: authError?.message || 'Failed to create user account',
+      }
+    }
+
+    // Create user record in our users table
+    const { error: userError } = await supabase.from('users').insert({
+      id: authData.user.id,
+      email: data.email.toLowerCase(),
+      full_name: data.fullName,
+      role_id: data.roleId || null,
+      is_active: true,
+    })
+
+    if (userError) {
+      console.error('[Setup] Failed to create user record:', userError)
+      // Try to clean up auth user
+      await supabase.auth.admin.deleteUser(authData.user.id)
+      return { success: false, error: 'Failed to create user record' }
+    }
+
+    // Link to team member if specified
+    if (data.teamMemberId) {
+      await supabase
+        .from('team_members')
+        .update({ user_id: authData.user.id })
+        .eq('id', data.teamMemberId)
+    }
+
+    revalidatePath('/admin/setup/users')
+    return { success: true, userId: authData.user.id }
+  } catch (error) {
+    console.error('[Setup] Failed to create user:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create user',
+    }
+  }
+}
+
 // ============================================================================
 // TEAM MEMBERS (for linking to users)
 // ============================================================================
@@ -877,3 +1117,220 @@ export async function toggleIntakeFormTemplateActive(
 }
 
 // Note: Permission constants and types are exported from '@/lib/permissions'
+
+// ============================================================================
+// COMPANY SETTINGS
+// ============================================================================
+
+export async function getCompanySettings(): Promise<{
+  success: boolean
+  settings?: CompanySettings
+  error?: string
+}> {
+  try {
+    const supabase = createAdminClient()
+
+    const { data: settings, error } = await supabase
+      .from('company_settings')
+      .select('*')
+      .limit(1)
+      .single()
+
+    if (error) throw error
+
+    return { success: true, settings: settings as CompanySettings }
+  } catch (error) {
+    console.error('[Setup] Failed to get company settings:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get company settings',
+    }
+  }
+}
+
+export async function updateCompanySettings(
+  data: CompanySettingsUpdate
+): Promise<{ success: boolean; settings?: CompanySettings; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+
+    // Get the existing settings ID first
+    const { data: existing, error: fetchError } = await supabase
+      .from('company_settings')
+      .select('id')
+      .limit(1)
+      .single()
+
+    if (fetchError) throw fetchError
+
+    const { data: settings, error } = await supabase
+      .from('company_settings')
+      .update(data)
+      .eq('id', existing.id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/company')
+    return { success: true, settings: settings as CompanySettings }
+  } catch (error) {
+    console.error('[Setup] Failed to update company settings:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update company settings',
+    }
+  }
+}
+
+// ============================================================================
+// SERVICE PACKAGES
+// ============================================================================
+
+export async function getServicePackages(): Promise<{
+  success: boolean
+  packages?: ServicePackage[]
+  error?: string
+}> {
+  try {
+    const supabase = createAdminClient()
+
+    const { data: packages, error } = await supabase
+      .from('service_packages')
+      .select('*')
+      .order('display_order', { ascending: true })
+      .order('name')
+
+    if (error) throw error
+
+    return { success: true, packages: (packages as ServicePackage[]) || [] }
+  } catch (error) {
+    console.error('[Setup] Failed to get service packages:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get service packages',
+    }
+  }
+}
+
+export async function createServicePackage(
+  data: ServicePackageInsert
+): Promise<{ success: boolean; package?: ServicePackage; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+
+    const { data: pkg, error } = await supabase
+      .from('service_packages')
+      .insert(data)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/services')
+    return { success: true, package: pkg as ServicePackage }
+  } catch (error) {
+    console.error('[Setup] Failed to create service package:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to create service package',
+    }
+  }
+}
+
+export async function updateServicePackage(
+  packageId: string,
+  data: ServicePackageUpdate
+): Promise<{ success: boolean; package?: ServicePackage; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+
+    const { data: pkg, error } = await supabase
+      .from('service_packages')
+      .update(data)
+      .eq('id', packageId)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/services')
+    return { success: true, package: pkg as ServicePackage }
+  } catch (error) {
+    console.error('[Setup] Failed to update service package:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update service package',
+    }
+  }
+}
+
+export async function deleteServicePackage(
+  packageId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+
+    const { error } = await supabase
+      .from('service_packages')
+      .delete()
+      .eq('id', packageId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/services')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to delete service package:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete service package',
+    }
+  }
+}
+
+export async function toggleServicePackageActive(
+  packageId: string,
+  isActive: boolean
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+
+    const { error } = await supabase
+      .from('service_packages')
+      .update({ is_active: isActive })
+      .eq('id', packageId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/services')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to toggle service package:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to toggle service package',
+    }
+  }
+}

@@ -951,6 +951,7 @@ export interface Role {
   description?: string | null
   is_system: boolean
   permissions: Permissions
+  hierarchy_level: number
   created_at: string
   updated_at: string
 }
@@ -985,6 +986,84 @@ export type UserInvitationInsert = Omit<
   UserInvitation,
   'id' | 'created_at' | 'role' | 'team_member'
 >
+
+// =====================================================
+// Company Settings Types
+// =====================================================
+
+export interface BusinessHours {
+  open: string | null
+  close: string | null
+}
+
+export interface CompanySettings {
+  id: string
+  company_name: string
+  tagline?: string | null
+  legal_name?: string | null
+  email?: string | null
+  phone?: string | null
+  website?: string | null
+  address_line1?: string | null
+  address_line2?: string | null
+  city?: string | null
+  state?: string | null
+  postal_code?: string | null
+  country: string
+  logo_url?: string | null
+  favicon_url?: string | null
+  primary_color: string
+  secondary_color: string
+  timezone: string
+  currency: string
+  business_hours: Record<string, BusinessHours | null>
+  invoice_prefix: string
+  invoice_footer?: string | null
+  tax_rate: number
+  tax_id?: string | null
+  payment_terms: string
+  portal_welcome_message?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type CompanySettingsUpdate = Partial<
+  Omit<CompanySettings, 'id' | 'created_at' | 'updated_at'>
+>
+
+// =====================================================
+// Service Packages Types
+// =====================================================
+
+export type ServicePriceType = 'fixed' | 'hourly' | 'custom'
+
+export interface ServicePackage {
+  id: string
+  name: string
+  description?: string | null
+  service_type: ServiceType
+  base_price: number
+  price_type: ServicePriceType
+  included_features: string[]
+  contract_template_id?: string | null
+  intake_form_template_id?: string | null
+  requires_contract: boolean
+  requires_deposit: boolean
+  deposit_amount?: number | null
+  deposit_percent?: number | null
+  is_active: boolean
+  is_featured: boolean
+  display_order: number
+  created_at: string
+  updated_at: string
+}
+
+export type ServicePackageInsert = Omit<
+  ServicePackage,
+  'id' | 'created_at' | 'updated_at'
+>
+
+export type ServicePackageUpdate = Partial<ServicePackageInsert>
 
 // =====================================================
 // Extended DashboardWidget with drill-down
