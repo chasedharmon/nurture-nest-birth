@@ -83,7 +83,7 @@ export function MessageThread({
   })
 
   // Read receipts
-  const { getMessageStatus, seenBy } = useReadReceipts({
+  const { getMessageStatus, getSeenByForMessage } = useReadReceipts({
     conversationId,
     currentUserId,
     isClient: false,
@@ -155,6 +155,11 @@ export function MessageThread({
   const lastOwnMessage = [...messages]
     .reverse()
     .find(m => m.sender_user_id === currentUserId)
+
+  // Get who has seen the last message (only show if they read AFTER the message was sent)
+  const seenBy = lastOwnMessage
+    ? getSeenByForMessage(new Date(lastOwnMessage.created_at))
+    : []
   const seenByText = formatSeenBy(seenBy)
 
   return (

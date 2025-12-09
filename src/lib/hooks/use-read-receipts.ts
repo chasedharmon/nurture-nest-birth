@@ -41,10 +41,12 @@ interface UseReadReceiptsOptions {
 interface UseReadReceiptsReturn {
   /** Get the read status of a specific message */
   getMessageStatus: (message: Message, isPending?: boolean) => MessageStatus
-  /** List of participants who have read the latest messages */
+  /** List of participants who have read the latest messages (deprecated - use getSeenByForMessage) */
   seenBy: SeenByInfo[]
   /** Get participants who have read a specific message */
   getSeenBy: (message: Message) => SeenByInfo[]
+  /** Get participants who have read since a specific time (for checking if last message was seen) */
+  getSeenByForMessage: (messageCreatedAt: Date) => SeenByInfo[]
   /** Mark the conversation as read */
   markAsRead: () => Promise<void>
 }
@@ -166,7 +168,35 @@ export function useReadReceipts({
     [participants, currentUserId, isClient]
   )
 
-  // Get the "Seen by" info for the most recent message
+  // Get the "Seen by" info for a specific message
+  // This should be called with the last message to check who has read it
+  const getSeenByForMessage = useCallback(
+    (messageCreatedAt: Date): SeenByInfo[] => {
+      // Get the most recent last_read_at for each participant (except self)
+      const otherParticipants = participants.filter(p => {
+        if (isClient) {
+          return p.client_id !== currentUserId
+        }
+        return p.user_id !== currentUserId
+      })
+
+      return otherParticipants
+        .filter(p => {
+          if (!p.last_read_at) return false
+          // Only show as "seen" if they read AFTER the message was created
+          return new Date(p.last_read_at) >= messageCreatedAt
+        })
+        .map(p => ({
+          name: p.display_name,
+          readAt: new Date(p.last_read_at!),
+        }))
+        .sort((a, b) => b.readAt.getTime() - a.readAt.getTime())
+    },
+    [participants, currentUserId, isClient]
+  )
+
+  // Legacy seenBy - returns all participants who have read anything
+  // Kept for backwards compatibility but should use getSeenByForMessage instead
   const seenBy = useCallback((): SeenByInfo[] => {
     // Get the most recent last_read_at for each participant (except self)
     const otherParticipants = participants.filter(p => {
@@ -228,6 +258,7 @@ export function useReadReceipts({
     getMessageStatus,
     seenBy: seenBy(),
     getSeenBy,
+    getSeenByForMessage,
     markAsRead,
   }
 }
