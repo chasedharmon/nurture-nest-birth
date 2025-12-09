@@ -2120,3 +2120,240 @@ export async function reorderWelcomePacketItems(
     }
   }
 }
+
+// ============================================================================
+// SMS TEMPLATES
+// ============================================================================
+
+export interface SmsTemplate {
+  id: string
+  name: string
+  description: string | null
+  category: string
+  content: string
+  available_variables: string[]
+  is_active: boolean
+  is_default: boolean
+  created_at: string
+  updated_at: string
+  org_id: string | null
+}
+
+export async function getSmsTemplates(): Promise<{
+  success: boolean
+  templates?: SmsTemplate[]
+  error?: string
+}> {
+  try {
+    const supabase = await createClient()
+
+    const { data: templates, error } = await supabase
+      .from('sms_templates')
+      .select('*')
+      .order('category')
+      .order('name')
+
+    if (error) throw error
+
+    return { success: true, templates: templates || [] }
+  } catch (error) {
+    console.error('[Setup] Failed to get SMS templates:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to get SMS templates',
+    }
+  }
+}
+
+export async function getSmsTemplate(templateId: string): Promise<{
+  success: boolean
+  template?: SmsTemplate
+  error?: string
+}> {
+  try {
+    const supabase = await createClient()
+
+    const { data: template, error } = await supabase
+      .from('sms_templates')
+      .select('*')
+      .eq('id', templateId)
+      .single()
+
+    if (error) throw error
+
+    return { success: true, template }
+  } catch (error) {
+    console.error('[Setup] Failed to get SMS template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to get SMS template',
+    }
+  }
+}
+
+export async function createSmsTemplate(data: {
+  name: string
+  description?: string
+  category: string
+  content: string
+  available_variables?: string[]
+  is_active?: boolean
+}): Promise<{ success: boolean; template?: SmsTemplate; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { data: template, error } = await supabase
+      .from('sms_templates')
+      .insert({
+        name: data.name,
+        description: data.description || null,
+        category: data.category,
+        content: data.content,
+        available_variables: data.available_variables || [],
+        is_active: data.is_active ?? true,
+        is_default: false,
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/sms-templates')
+    return { success: true, template }
+  } catch (error) {
+    console.error('[Setup] Failed to create SMS template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to create SMS template',
+    }
+  }
+}
+
+export async function updateSmsTemplate(
+  templateId: string,
+  data: {
+    name?: string
+    description?: string
+    category?: string
+    content?: string
+    available_variables?: string[]
+    is_active?: boolean
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('sms_templates')
+      .update({
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.description !== undefined && {
+          description: data.description || null,
+        }),
+        ...(data.category !== undefined && { category: data.category }),
+        ...(data.content !== undefined && { content: data.content }),
+        ...(data.available_variables !== undefined && {
+          available_variables: data.available_variables,
+        }),
+        ...(data.is_active !== undefined && { is_active: data.is_active }),
+      })
+      .eq('id', templateId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/sms-templates')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to update SMS template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update SMS template',
+    }
+  }
+}
+
+export async function deleteSmsTemplate(
+  templateId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    // Check if template is a default (can't delete defaults)
+    const { data: template, error: fetchError } = await supabase
+      .from('sms_templates')
+      .select('is_default')
+      .eq('id', templateId)
+      .single()
+
+    if (fetchError) throw fetchError
+
+    if (template?.is_default) {
+      // Deactivate instead of delete for defaults
+      const { error } = await supabase
+        .from('sms_templates')
+        .update({ is_active: false })
+        .eq('id', templateId)
+
+      if (error) throw error
+
+      revalidatePath('/admin/setup/sms-templates')
+      return { success: true }
+    }
+
+    // Hard delete for non-defaults
+    const { error } = await supabase
+      .from('sms_templates')
+      .delete()
+      .eq('id', templateId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/sms-templates')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to delete SMS template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete SMS template',
+    }
+  }
+}
+
+export async function toggleSmsTemplateActive(
+  templateId: string,
+  isActive: boolean
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('sms_templates')
+      .update({ is_active: isActive })
+      .eq('id', templateId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/sms-templates')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to toggle SMS template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to toggle SMS template',
+    }
+  }
+}

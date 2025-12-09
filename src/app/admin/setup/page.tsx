@@ -26,6 +26,7 @@ import {
   Package,
   CreditCard,
   Building,
+  MessageSquare,
 } from 'lucide-react'
 
 interface SetupCategory {
@@ -115,6 +116,12 @@ const setupCategories: SetupCategory[] = [
         description: 'Automated onboarding bundles for new clients',
         href: '/admin/setup/welcome-packets',
         icon: <Package className="h-5 w-5" />,
+      },
+      {
+        title: 'SMS Templates',
+        description: 'Text message templates for reminders and notifications',
+        href: '/admin/setup/sms-templates',
+        icon: <MessageSquare className="h-5 w-5" />,
       },
     ],
   },

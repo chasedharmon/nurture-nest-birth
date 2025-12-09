@@ -9,6 +9,7 @@ import type {
   InvoiceStatus,
 } from '@/lib/supabase/types'
 import { sendInvoiceEmail, sendPaymentReceivedEmail } from './notifications'
+import { createInvoiceCheckout } from '@/lib/stripe/payments'
 
 // ============================================================================
 // INVOICE CRUD
@@ -521,6 +522,176 @@ export async function markInvoiceOverdue(
         error instanceof Error
           ? error.message
           : 'Failed to mark invoice overdue',
+    }
+  }
+}
+
+// ============================================================================
+// STRIPE PAYMENT RAILS
+// ============================================================================
+
+export async function generatePaymentLink(invoiceId: string): Promise<{
+  success: boolean
+  checkoutUrl?: string
+  expiresAt?: string
+  error?: string
+}> {
+  try {
+    const supabase = createAdminClient()
+
+    // Get invoice with client info
+    const { data: invoice, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*, client:leads(id, name, email)')
+      .eq('id', invoiceId)
+      .single()
+
+    if (fetchError) throw fetchError
+
+    // Validate invoice can be paid
+    if (invoice.status === 'paid') {
+      return { success: false, error: 'Invoice has already been paid' }
+    }
+    if (invoice.status === 'cancelled') {
+      return { success: false, error: 'Cannot pay a cancelled invoice' }
+    }
+    if (invoice.status === 'draft') {
+      return { success: false, error: 'Invoice must be sent before payment' }
+    }
+
+    // Check if there's an existing valid checkout session
+    if (invoice.checkout_url && invoice.checkout_expires_at) {
+      const expiresAt = new Date(invoice.checkout_expires_at)
+      if (expiresAt > new Date()) {
+        // Return existing checkout URL if not expired
+        return {
+          success: true,
+          checkoutUrl: invoice.checkout_url,
+          expiresAt: invoice.checkout_expires_at,
+        }
+      }
+    }
+
+    // Calculate amount due (total - amount_paid for partial payments)
+    const amountDue = Number(invoice.total) - Number(invoice.amount_paid)
+
+    if (amountDue <= 0) {
+      return { success: false, error: 'No amount due on this invoice' }
+    }
+
+    // Build line items from invoice
+    const lineItems = (
+      invoice.line_items as Array<{
+        description: string
+        total: number
+        quantity?: number
+      }>
+    ).map(item => ({
+      description: item.description,
+      amount: Math.round(item.total * 100), // Convert to cents
+      quantity: item.quantity || 1,
+    }))
+
+    // If there's a partial payment, adjust line items to show remaining balance
+    if (Number(invoice.amount_paid) > 0) {
+      const paidAmount = Number(invoice.amount_paid)
+      lineItems.push({
+        description: `Less: Previous Payment(s)`,
+        amount: -Math.round(paidAmount * 100), // Negative amount in cents
+        quantity: 1,
+      })
+    }
+
+    // Get base URL for success/cancel pages
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+    // Create checkout session
+    const result = await createInvoiceCheckout({
+      invoiceId: invoice.id,
+      clientEmail: invoice.client?.email || '',
+      clientName: invoice.client?.name || 'Client',
+      invoiceNumber: invoice.invoice_number,
+      lineItems,
+      successUrl: `${baseUrl}/checkout/success?invoice_id=${invoice.id}`,
+      cancelUrl: `${baseUrl}/checkout/cancel?invoice_id=${invoice.id}`,
+      metadata: {
+        client_id: invoice.client?.id || '',
+        invoice_status: invoice.status,
+      },
+    })
+
+    if (!result.success) {
+      return { success: false, error: result.error }
+    }
+
+    // Update invoice with checkout session info
+    const { error: updateError } = await supabase
+      .from('invoices')
+      .update({
+        stripe_checkout_session_id: result.sessionId,
+        checkout_url: result.checkoutUrl,
+        checkout_expires_at: result.expiresAt,
+      })
+      .eq('id', invoiceId)
+
+    if (updateError) {
+      console.error(
+        '[Invoices] Failed to update checkout session:',
+        updateError
+      )
+      // Still return the checkout URL even if we failed to save it
+    }
+
+    revalidatePath(`/admin/leads/${invoice.client_id}`)
+
+    return {
+      success: true,
+      checkoutUrl: result.checkoutUrl,
+      expiresAt: result.expiresAt,
+    }
+  } catch (error) {
+    console.error('[Invoices] Failed to generate payment link:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to generate payment link',
+    }
+  }
+}
+
+export async function expirePaymentLink(invoiceId: string): Promise<{
+  success: boolean
+  error?: string
+}> {
+  try {
+    const supabase = createAdminClient()
+
+    // Clear the checkout session from the invoice
+    const { data: invoice, error: updateError } = await supabase
+      .from('invoices')
+      .update({
+        stripe_checkout_session_id: null,
+        checkout_url: null,
+        checkout_expires_at: null,
+      })
+      .eq('id', invoiceId)
+      .select('client_id')
+      .single()
+
+    if (updateError) throw updateError
+
+    revalidatePath(`/admin/leads/${invoice.client_id}`)
+    return { success: true }
+  } catch (error) {
+    console.error('[Invoices] Failed to expire payment link:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to expire payment link',
     }
   }
 }

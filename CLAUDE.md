@@ -62,12 +62,29 @@ See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full pl
 - `src/app/admin/setup/billing/page.tsx` - Billing page with plans, usage, invoices, payment methods
 - `src/app/admin/setup/organization/page.tsx` - Organization settings page
 
-#### Phase D: Communication Rails (Week 4-5)
+#### Phase D: Communication Rails (Week 4-5) ✅ COMPLETE
 
-| Task                     | Status     | Notes                     |
-| ------------------------ | ---------- | ------------------------- |
-| D.1 SMS Infrastructure   | 🔲 PENDING | Templates, stubbed Twilio |
-| D.2 Stripe Payment Rails | 🔲 PENDING | Invoice payment links     |
+| Task                     | Status      | Notes                                            |
+| ------------------------ | ----------- | ------------------------------------------------ |
+| D.1 SMS Infrastructure   | ✅ COMPLETE | Client lib, templates, UI, workflow engine wired |
+| D.2 Stripe Payment Rails | ✅ COMPLETE | Payment links, checkout pages, webhooks          |
+
+**Phase D Files Created:**
+
+- `src/lib/sms/client.ts` - Stubbed SMS client (sendSms, calculateSegments, formatPhoneNumber, opt-in/out)
+- `src/lib/sms/templates.ts` - SMS template types, categories, variables, preview utilities
+- `src/lib/sms/index.ts` - Re-exports for SMS module
+- `supabase/migrations/20251216000000_sms_templates.sql` - sms_templates, sms_consent, sms_messages tables
+- `src/app/admin/setup/sms-templates/page.tsx` - SMS template management UI with stats
+- `src/components/admin/setup/sms-template-dialog.tsx` - Create/edit dialog with char counter
+- `src/components/admin/setup/sms-template-actions.tsx` - Preview, edit, delete actions
+- `src/lib/stripe/payments.ts` - Stubbed Stripe payment client for invoices
+- `supabase/migrations/20251216010000_stripe_payment_rails.sql` - Checkout session fields, payment_events table
+- `src/app/checkout/success/page.tsx` - Payment success confirmation page
+- `src/app/checkout/cancel/page.tsx` - Payment cancelled page
+- `src/app/api/webhooks/stripe-payments/route.ts` - Webhook handler for payment events
+- `src/app/actions/invoices.ts` - Added generatePaymentLink, expirePaymentLink functions
+- `src/lib/workflows/engine.ts` - Added send_sms step execution with opt-in verification
 
 #### Phase E: Analytics & Attribution (Week 5-6)
 
@@ -461,34 +478,31 @@ We're executing a 6-week refinement and SaaS foundation plan:
 - See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full details
 - Check CLAUDE.md Phase 7+ Execution Progress tables for current status
 
-## Just Completed: Phase C - SaaS Foundation ✅
-All multi-tenancy, subscription tiers, billing UI, and organization settings are complete.
+## Just Completed: Phase D - Communication Rails ✅
+- SMS Infrastructure: Client lib, templates table, management UI, workflow engine integration, opt-in/out
+- Stripe Payment Rails: Payment link generation, checkout pages, webhook handler for invoice payments
 
-## Current Focus: Phase D - Communication Rails
+## Current Focus: Phase E - Analytics & Attribution
 
-### D.1 SMS Infrastructure
-Build the SMS infrastructure (stubbed, no live Twilio integration):
-- Create `src/lib/sms/client.ts` - Stubbed SMS sending functions
-- Create `src/lib/sms/templates.ts` - SMS template types
-- Create `src/app/admin/setup/sms-templates/page.tsx` - Template management UI
-- Create migration for sms_templates table
-- SMS character counter (160 char limit display)
-- Wire SMS step in workflow engine
-- Opt-in/opt-out management
+### E.1 Lead Source Attribution
+Build lead source tracking:
+- UTM parameter capture on lead creation
+- Referral source tracking
+- Source breakdown reports
+- Campaign attribution
 
-### D.2 Stripe Payment Rails (Client Payments)
-Build payment link infrastructure for client invoices:
-- Add stripe_checkout_session_id to invoices table
-- Payment link generation UI (stubbed)
-- Checkout success/cancel pages
-- Webhook handler for payment events
-- Automatic invoice status updates
+### E.2 Client Satisfaction
+Build feedback collection:
+- NPS survey infrastructure (stubbed)
+- Post-service feedback forms
+- Satisfaction metrics dashboard
 
-## Reference: Phase C Files (Just Created)
-- `src/lib/stripe/client.ts` - Use as pattern for SMS client
-- `src/app/api/webhooks/stripe/route.ts` - Reference for webhook patterns
-- `src/lib/features/flags.ts` - Feature checking utilities
-- `src/lib/hooks/use-organization.tsx` - Organization context
+## Reference: Phase D Files (Just Created)
+- `src/lib/sms/client.ts` - SMS sending, character counting, opt-in management
+- `src/lib/sms/templates.ts` - Template types and preview utilities
+- `src/lib/stripe/payments.ts` - Invoice payment checkout sessions
+- `src/app/api/webhooks/stripe-payments/route.ts` - Payment webhook handler
+- `src/app/actions/invoices.ts` - generatePaymentLink function
 
 ## Best Practices
 - Commit frequently with conventional commits

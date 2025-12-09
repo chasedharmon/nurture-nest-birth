@@ -4,6 +4,13 @@ import { WorkflowEmail } from '@/lib/email/templates'
 import { emailConfig } from '@/lib/email/config'
 import type { WorkflowEmailData } from '@/lib/email/types'
 import type { WorkflowStep, StepConfig, WorkflowStepType } from './types'
+import {
+  sendSms,
+  formatPhoneNumber,
+  isValidPhoneNumber,
+  interpolateVariables as interpolateSmsVariables,
+  checkOptInStatus,
+} from '@/lib/sms/client'
 
 // ============================================================================
 // Workflow Execution Engine
@@ -189,6 +196,9 @@ export class WorkflowEngine {
             step.next_step_key
           )
 
+        case 'send_sms':
+          return await this.executeSendSms(config, context, step.next_step_key)
+
         case 'create_task':
           return await this.executeCreateTask(
             config,
@@ -326,6 +336,141 @@ export class WorkflowEngine {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to send email',
+      }
+    }
+  }
+
+  private async executeSendSms(
+    config: StepConfig,
+    context: ExecutionContext,
+    nextStepKey?: string | null
+  ): Promise<StepResult> {
+    const recordData = context.record_data
+
+    // Get recipient phone number
+    let toPhone: string | undefined
+
+    if (config.to_field && recordData[config.to_field]) {
+      toPhone = recordData[config.to_field] as string
+    } else if (recordData.phone) {
+      toPhone = recordData.phone as string
+    } else if (recordData.phone_number) {
+      toPhone = recordData.phone_number as string
+    }
+
+    if (!toPhone) {
+      return {
+        success: false,
+        error: 'No recipient phone number found',
+      }
+    }
+
+    // Validate phone number
+    if (!isValidPhoneNumber(toPhone)) {
+      return {
+        success: false,
+        error: `Invalid phone number format: ${toPhone}`,
+      }
+    }
+
+    const formattedPhone = formatPhoneNumber(toPhone)
+
+    // Check opt-in status (respects SMS consent)
+    const optInStatus = await checkOptInStatus(formattedPhone)
+    if (!optInStatus.optedIn) {
+      console.log(
+        '[WorkflowEngine] SMS skipped - not opted in:',
+        formattedPhone
+      )
+      return {
+        success: true,
+        output: {
+          sms_skipped: true,
+          reason: 'Recipient has not opted in for SMS',
+          phone: formattedPhone,
+        },
+        nextStepKey,
+      }
+    }
+
+    // Get message content
+    let messageContent: string
+
+    if (config.template_name) {
+      // Fetch template from database
+      const { data: template, error: templateError } = await this.supabase
+        .from('sms_templates')
+        .select('content')
+        .eq('name', config.template_name)
+        .eq('is_active', true)
+        .single()
+
+      if (templateError || !template) {
+        return {
+          success: false,
+          error: `SMS template not found: ${config.template_name}`,
+        }
+      }
+
+      messageContent = template.content
+    } else if (config.body || config.content) {
+      messageContent = config.body || config.content || ''
+    } else {
+      return {
+        success: false,
+        error: 'No message content or template specified for SMS',
+      }
+    }
+
+    // Interpolate variables
+    const interpolatedContent = interpolateSmsVariables(
+      messageContent,
+      recordData
+    )
+
+    // Get client ID if available
+    const clientId = (recordData.id as string) || undefined
+
+    console.log('[WorkflowEngine] Sending SMS:', {
+      to: formattedPhone,
+      contentLength: interpolatedContent.length,
+      clientId,
+      template: config.template_name,
+    })
+
+    try {
+      const result = await sendSms({
+        to: formattedPhone,
+        body: interpolatedContent,
+        clientId,
+        templateId: config.template_name,
+      })
+
+      if (!result.success) {
+        console.error('[WorkflowEngine] SMS send failed:', result.error)
+        return {
+          success: false,
+          error: result.error || 'Failed to send SMS',
+        }
+      }
+
+      console.log('[WorkflowEngine] SMS sent successfully:', result.messageId)
+
+      return {
+        success: true,
+        output: {
+          sms_sent_to: formattedPhone,
+          message_id: result.messageId,
+          segment_count: result.segmentCount,
+          template: config.template_name,
+        },
+        nextStepKey,
+      }
+    } catch (error) {
+      console.error('[WorkflowEngine] SMS send error:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to send SMS',
       }
     }
   }
