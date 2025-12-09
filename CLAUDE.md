@@ -5,6 +5,10 @@
 **Current Phase**: Phase 7 - Polish & SaaS Foundation
 **Last Updated**: December 8, 2024
 
+### Next Session: Real-Time Messaging Enhancement
+
+The Unified Messaging feature is complete with basic functionality. Next step is to enhance it with real-time capabilities similar to Facebook Messenger. See "Prompt for Next Chat Session" at the bottom of this file.
+
 ### Phase 7 Progress (Started Dec 8, 2024)
 
 | Feature                | Status      | Notes                                      |
@@ -364,4 +368,64 @@ Also clear Playwright's browser cache if issues persist:
 
 ```bash
 rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
+```
+
+---
+
+## Prompt for Next Chat Session
+
+Copy this entire block to start your next chat session:
+
+```
+I'm continuing work on the Nurture Nest Birth CRM project (Phase 7).
+
+## What's Done
+- Unified Messaging system with basic CRUD (conversations, messages, participants)
+- Database: conversations, conversation_participants, messages tables with RLS
+- Admin UI: /admin/messages (list), /admin/messages/[id] (detail)
+- Client UI: /client/messages (list), /client/messages/[id] (detail)
+- Unread badges in navigation
+- 42 E2E tests passing
+- Supabase Realtime is ENABLED on messages table but NOT YET IMPLEMENTED on frontend
+
+## What's Next: Real-Time Messaging Enhancement
+
+I want to enhance the messaging feature to work more like Facebook Messenger with real-time capabilities:
+
+### Core Requirements:
+1. **Real-time message delivery** - Messages appear instantly without page refresh
+2. **Typing indicators** - Show when the other person is typing
+3. **Read receipts** - Show when messages have been read
+4. **Online presence** - Show who is currently online
+5. **Optimistic updates** - Messages appear immediately while sending
+6. **Auto-scroll** - Scroll to new messages automatically
+7. **Unread count updates** - Badge counts update in real-time
+
+### Technical Considerations:
+- Use Supabase Realtime (already enabled on messages table)
+- Consider Supabase Presence for online status
+- Implement via React hooks (useEffect + supabase.channel())
+- Handle reconnection gracefully
+- Mobile-friendly UX
+
+### Files to Modify:
+- `src/components/admin/messages/message-thread.tsx`
+- `src/components/admin/messages/message-composer.tsx`
+- `src/components/client/messages/client-message-thread.tsx`
+- `src/components/client/messages/client-message-composer.tsx`
+- `src/app/admin/page.tsx` (real-time badge update)
+- `src/app/client/(portal)/layout.tsx` (real-time badge update)
+- Possibly new: `src/hooks/useRealtimeMessages.ts`
+- Possibly new: `src/hooks/usePresence.ts`
+
+### Database Schema (already exists):
+- conversations (id, subject, status, last_message_at)
+- conversation_participants (user_id, conversation_id, unread_count, last_read_at)
+- messages (id, conversation_id, sender_id, content, read_at, created_at)
+
+Test credentials:
+- Email: chase.d.harmon@gmail.com
+- Password: TestPassword123!
+
+Please start with a planning session to design the real-time messaging architecture.
 ```
