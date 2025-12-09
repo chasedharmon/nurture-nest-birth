@@ -1128,7 +1128,8 @@ export async function getCompanySettings(): Promise<{
   error?: string
 }> {
   try {
-    const supabase = createAdminClient()
+    // Use authenticated client since RLS allows authenticated users to read
+    const supabase = await createClient()
 
     const { data: settings, error } = await supabase
       .from('company_settings')

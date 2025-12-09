@@ -98,33 +98,35 @@ async function ReportsList() {
 
 export default function ReportsPage() {
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-          <p className="text-muted-foreground">
-            Create and manage custom reports for your data
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/admin/reports/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Report
-          </Link>
-        </Button>
-      </div>
-
-      {/* Reports list */}
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
+            <p className="text-muted-foreground">
+              Create and manage custom reports for your data
+            </p>
           </div>
-        }
-      >
-        <ReportsList />
-      </Suspense>
+          <Button asChild>
+            <Link href="/admin/reports/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Report
+            </Link>
+          </Button>
+        </div>
+
+        {/* Reports list */}
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          }
+        >
+          <ReportsList />
+        </Suspense>
+      </div>
     </div>
   )
 }
