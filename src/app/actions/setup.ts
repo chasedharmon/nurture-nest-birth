@@ -14,6 +14,13 @@ import type {
   ServicePackage,
   ServicePackageInsert,
   ServicePackageUpdate,
+  WelcomePacket,
+  WelcomePacketInsert,
+  WelcomePacketUpdate,
+  WelcomePacketItem,
+  WelcomePacketItemInsert,
+  WelcomePacketItemUpdate,
+  WelcomePacketWithItemCount,
 } from '@/lib/supabase/types'
 import { Resend } from 'resend'
 
@@ -1562,6 +1569,367 @@ export async function toggleEmailTemplateActive(
         error instanceof Error
           ? error.message
           : 'Failed to toggle email template',
+    }
+  }
+}
+
+// ============================================================================
+// WELCOME PACKETS
+// ============================================================================
+
+export async function getWelcomePackets(): Promise<{
+  success: boolean
+  packets?: WelcomePacketWithItemCount[]
+  error?: string
+}> {
+  try {
+    const supabase = await createClient()
+
+    const { data: packets, error } = await supabase
+      .from('welcome_packets')
+      .select(
+        `
+        *,
+        items:welcome_packet_items(count)
+      `
+      )
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    return { success: true, packets: packets || [] }
+  } catch (error) {
+    console.error('[Setup] Failed to get welcome packets:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get welcome packets',
+    }
+  }
+}
+
+export async function getWelcomePacket(packetId: string): Promise<{
+  success: boolean
+  packet?: WelcomePacket
+  error?: string
+}> {
+  try {
+    const supabase = await createClient()
+
+    const { data: packet, error } = await supabase
+      .from('welcome_packets')
+      .select('*')
+      .eq('id', packetId)
+      .single()
+
+    if (error) throw error
+
+    return { success: true, packet }
+  } catch (error) {
+    console.error('[Setup] Failed to get welcome packet:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to get welcome packet',
+    }
+  }
+}
+
+export async function createWelcomePacket(
+  data: WelcomePacketInsert
+): Promise<{ success: boolean; packet?: WelcomePacket; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    const { data: packet, error } = await supabase
+      .from('welcome_packets')
+      .insert({
+        ...data,
+        created_by: user?.id || null,
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/welcome-packets')
+    return { success: true, packet }
+  } catch (error) {
+    console.error('[Setup] Failed to create welcome packet:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to create welcome packet',
+    }
+  }
+}
+
+export async function updateWelcomePacket(
+  packetId: string,
+  data: WelcomePacketUpdate
+): Promise<{ success: boolean; packet?: WelcomePacket; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { data: packet, error } = await supabase
+      .from('welcome_packets')
+      .update(data)
+      .eq('id', packetId)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/welcome-packets')
+    return { success: true, packet }
+  } catch (error) {
+    console.error('[Setup] Failed to update welcome packet:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update welcome packet',
+    }
+  }
+}
+
+export async function deleteWelcomePacket(
+  packetId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    // Check if packet has any deliveries
+    const { data: deliveries, error: checkError } = await supabase
+      .from('welcome_packet_deliveries')
+      .select('id')
+      .eq('packet_id', packetId)
+      .limit(1)
+
+    if (checkError) throw checkError
+
+    if (deliveries && deliveries.length > 0) {
+      // Soft delete by deactivating instead
+      const { error } = await supabase
+        .from('welcome_packets')
+        .update({ is_active: false })
+        .eq('id', packetId)
+
+      if (error) throw error
+
+      revalidatePath('/admin/setup/welcome-packets')
+      return { success: true }
+    }
+
+    // Hard delete if no deliveries
+    const { error } = await supabase
+      .from('welcome_packets')
+      .delete()
+      .eq('id', packetId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/welcome-packets')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to delete welcome packet:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete welcome packet',
+    }
+  }
+}
+
+export async function toggleWelcomePacketActive(
+  packetId: string,
+  isActive: boolean
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('welcome_packets')
+      .update({ is_active: isActive })
+      .eq('id', packetId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/welcome-packets')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to toggle welcome packet:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to toggle welcome packet',
+    }
+  }
+}
+
+// ============================================================================
+// WELCOME PACKET ITEMS
+// ============================================================================
+
+export async function getWelcomePacketItems(packetId: string): Promise<{
+  success: boolean
+  items?: WelcomePacketItem[]
+  error?: string
+}> {
+  try {
+    const supabase = await createClient()
+
+    const { data: items, error } = await supabase
+      .from('welcome_packet_items')
+      .select('*')
+      .eq('packet_id', packetId)
+      .order('sort_order', { ascending: true })
+
+    if (error) throw error
+
+    return { success: true, items: items || [] }
+  } catch (error) {
+    console.error('[Setup] Failed to get welcome packet items:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get welcome packet items',
+    }
+  }
+}
+
+export async function createWelcomePacketItem(
+  data: WelcomePacketItemInsert
+): Promise<{ success: boolean; item?: WelcomePacketItem; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { data: item, error } = await supabase
+      .from('welcome_packet_items')
+      .insert(data)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/welcome-packets')
+    return { success: true, item }
+  } catch (error) {
+    console.error('[Setup] Failed to create welcome packet item:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to create welcome packet item',
+    }
+  }
+}
+
+export async function updateWelcomePacketItem(
+  itemId: string,
+  data: WelcomePacketItemUpdate
+): Promise<{ success: boolean; item?: WelcomePacketItem; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { data: item, error } = await supabase
+      .from('welcome_packet_items')
+      .update(data)
+      .eq('id', itemId)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/welcome-packets')
+    return { success: true, item }
+  } catch (error) {
+    console.error('[Setup] Failed to update welcome packet item:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update welcome packet item',
+    }
+  }
+}
+
+export async function deleteWelcomePacketItem(
+  itemId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('welcome_packet_items')
+      .delete()
+      .eq('id', itemId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/welcome-packets')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to delete welcome packet item:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete welcome packet item',
+    }
+  }
+}
+
+export async function reorderWelcomePacketItems(
+  packetId: string,
+  itemIds: string[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    // Update each item with its new sort order
+    const updates = itemIds.map((id, index) =>
+      supabase
+        .from('welcome_packet_items')
+        .update({ sort_order: index })
+        .eq('id', id)
+        .eq('packet_id', packetId)
+    )
+
+    const results = await Promise.all(updates)
+
+    const failedUpdate = results.find(r => r.error)
+    if (failedUpdate?.error) throw failedUpdate.error
+
+    revalidatePath('/admin/setup/welcome-packets')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to reorder welcome packet items:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to reorder welcome packet items',
     }
   }
 }

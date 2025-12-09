@@ -1072,3 +1072,103 @@ export type ServicePackageUpdate = Partial<ServicePackageInsert>
 export interface DashboardWidgetWithDrillDown extends DashboardWidget {
   drill_down_report_id?: string | null
 }
+
+// =====================================================
+// Welcome Packets Types
+// =====================================================
+
+export type WelcomePacketTrigger =
+  | 'contract_signed'
+  | 'lead_converted'
+  | 'manual'
+
+export type WelcomePacketItemType =
+  | 'document'
+  | 'email'
+  | 'form'
+  | 'custom_message'
+  | 'action_item'
+
+export type WelcomePacketDeliveryStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'completed'
+  | 'failed'
+  | 'cancelled'
+
+export type WelcomePacketItemDeliveryStatus =
+  | 'pending'
+  | 'scheduled'
+  | 'delivered'
+  | 'failed'
+  | 'skipped'
+
+export interface WelcomePacket {
+  id: string
+  name: string
+  description?: string | null
+  service_type?: string | null
+  is_active: boolean
+  trigger_on: WelcomePacketTrigger
+  created_at: string
+  updated_at: string
+  created_by?: string | null
+}
+
+export interface WelcomePacketItem {
+  id: string
+  packet_id: string
+  item_type: WelcomePacketItemType
+  item_id?: string | null
+  custom_title?: string | null
+  custom_content?: string | null
+  sort_order: number
+  delay_hours: number
+  is_required: boolean
+  created_at: string
+}
+
+export interface WelcomePacketDelivery {
+  id: string
+  packet_id: string
+  client_id: string
+  status: WelcomePacketDeliveryStatus
+  triggered_at: string
+  completed_at?: string | null
+  error_message?: string | null
+  metadata?: Record<string, unknown> | null
+  created_at: string
+}
+
+export interface WelcomePacketItemDelivery {
+  id: string
+  delivery_id: string
+  item_id: string
+  status: WelcomePacketItemDeliveryStatus
+  scheduled_at?: string | null
+  delivered_at?: string | null
+  error_message?: string | null
+  created_at: string
+}
+
+// Welcome Packet with items count for list views
+export interface WelcomePacketWithItemCount extends WelcomePacket {
+  items?: { count: number }[]
+}
+
+// Insert types
+export type WelcomePacketInsert = Omit<
+  WelcomePacket,
+  'id' | 'created_at' | 'updated_at'
+>
+
+export type WelcomePacketUpdate = Partial<WelcomePacketInsert>
+
+export type WelcomePacketItemInsert = Omit<
+  WelcomePacketItem,
+  'id' | 'created_at'
+>
+
+export type WelcomePacketItemUpdate = Partial<
+  Omit<WelcomePacketItemInsert, 'packet_id'>
+>
