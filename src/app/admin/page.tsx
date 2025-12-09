@@ -11,7 +11,7 @@ import {
   Settings,
 } from 'lucide-react'
 import { DoulaDashboard } from '@/components/admin/dashboards'
-import { NavMessageBadge } from '@/components/admin/nav-message-badge'
+import { QuickMessagesSheet } from '@/components/admin/quick-messages-sheet'
 import { AdminMessageNotifications } from '@/components/admin/message-notifications'
 import {
   getDashboardKPIs,
@@ -115,7 +115,11 @@ export default async function AdminPage() {
                   Leads
                 </Button>
               </Link>
-              <NavMessageBadge userId={user.id} initialCount={unreadMessages} />
+              <QuickMessagesSheet
+                userId={user.id}
+                userName={profile?.full_name || user.email || 'Team Member'}
+                initialUnreadCount={unreadMessages}
+              />
               <Link href="/admin/team">
                 <Button variant="outline" size="sm">
                   <Users className="mr-2 h-4 w-4" />

@@ -46,11 +46,21 @@ The Unified Messaging feature is complete with basic functionality. Next step is
 - `src/components/admin/messages/message-composer.tsx` - Message input with Enter to send
 - `src/components/admin/messages/new-conversation-dialog.tsx` - New conversation modal
 - `src/components/admin/messages/conversation-actions.tsx` - Archive/close/reopen actions
+- `src/components/admin/quick-messages-sheet.tsx` - Slide-out panel for quick message access from staff nav
 - `src/app/client/(portal)/messages/page.tsx` - Client portal conversations list
 - `src/app/client/(portal)/messages/[id]/page.tsx` - Client conversation detail
 - `src/components/client/messages/client-conversation-list.tsx` - Client conversation list
 - `src/components/client/messages/client-message-thread.tsx` - Client message thread
 - `src/components/client/messages/client-message-composer.tsx` - Client message input
+- `src/components/client/chat-widget/` - Floating chat widget for client portal
+  - `chat-widget.tsx` - Main widget with state management
+  - `chat-widget-bubble.tsx` - Floating bubble button
+  - `chat-widget-panel.tsx` - Expanded panel container
+  - `chat-widget-conversation-list.tsx` - Compact conversation list
+  - `chat-widget-new-message.tsx` - Team member selection dialog
+  - `chat-widget-thread.tsx` - Message thread with real-time
+  - `chat-widget-composer.tsx` - Compact message input
+- `src/components/ui/pulsing-badge.tsx` - Animated badge for unread indicators
 - `src/app/actions/messaging.ts` - Server actions (CRUD, read status, search)
 - `supabase/migrations/20251214000000_unified_messaging.sql` - Database schema
 - `tests/e2e/admin-messages.spec.ts` - E2E tests (21 tests)
@@ -254,15 +264,16 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - In-app messaging system for doula-client communication
 - Real-time updates via Supabase Realtime (messages table)
 - Conversation statuses: active, closed, archived
-- Unread message badges in navigation (admin and client portals)
-- Admin features: Start conversation, search, archive/close/reopen
-- Client portal: View and reply to conversations with doula
+- Unread message badges in navigation (admin and client portals) with pulsing animation
+- Admin features: Start conversation, search, archive/close/reopen, quick access slide-out sheet
+- Client portal: View and reply to conversations with doula, floating chat widget (Intercom-style)
+- Floating chat widget with: bubble button, expandable panel, conversation list, thread view, team member selection for new messages
 - Database tables: conversations, conversation_participants, messages
 - Helper functions: `mark_conversation_read`, `get_user_unread_count`, `get_or_create_client_conversation`
 - RLS policies for secure access (admin sees all, clients see their own)
-- UI components: Avatar, Popover, Command (cmdk) for client search
+- UI components: Avatar, Popover, Command (cmdk) for client search, PulsingBadge for unread indicators
 - E2E tests: 21 tests for admin messaging (requires TEST_ADMIN_PASSWORD env var)
-- Components in `src/components/admin/messages/` and `src/components/client/messages/`
+- Components in `src/components/admin/messages/`, `src/components/client/messages/`, and `src/components/client/chat-widget/`
 - Pages: admin list (`/admin/messages`), admin detail (`/admin/messages/[id]`), client list (`/client/messages`), client detail (`/client/messages/[id]`)
 - Server actions in `src/app/actions/messaging.ts`
 
