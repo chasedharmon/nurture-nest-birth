@@ -186,8 +186,125 @@ export async function deleteWorkflow(id: string) {
   return { success: true, error: null }
 }
 
+export interface WorkflowValidationResult {
+  isValid: boolean
+  errors: string[]
+  warnings: string[]
+}
+
+export async function validateWorkflow(
+  id: string
+): Promise<WorkflowValidationResult> {
+  const { data: workflow, error } = await getWorkflowWithSteps(id)
+
+  if (error || !workflow) {
+    return {
+      isValid: false,
+      errors: ['Workflow not found'],
+      warnings: [],
+    }
+  }
+
+  const errors: string[] = []
+  const warnings: string[] = []
+  const steps = workflow.steps
+
+  // Check 1: Must have a trigger node
+  const triggerNode = steps.find(s => s.step_type === 'trigger')
+  if (!triggerNode) {
+    errors.push('Workflow must have a trigger node')
+  }
+
+  // Check 2: Must have at least one action node after trigger
+  const actionNodes = steps.filter(s => s.step_type !== 'trigger')
+  if (actionNodes.length === 0) {
+    errors.push(
+      'Workflow must have at least one action or step after the trigger'
+    )
+  }
+
+  // Check 3: Check for orphaned nodes (nodes with no incoming connection except trigger)
+  const connectedStepKeys = new Set<string>()
+  connectedStepKeys.add('trigger') // Trigger is always the start
+
+  steps.forEach(step => {
+    if (step.next_step_key) {
+      connectedStepKeys.add(step.next_step_key)
+    }
+    // Check branches for decision nodes
+    if (step.branches) {
+      step.branches.forEach(branch => {
+        if (branch.next_step_key) {
+          connectedStepKeys.add(branch.next_step_key)
+        }
+      })
+    }
+  })
+
+  const orphanedNodes = steps.filter(
+    s => s.step_type !== 'trigger' && !connectedStepKeys.has(s.step_key)
+  )
+
+  if (orphanedNodes.length > 0) {
+    warnings.push(
+      `${orphanedNodes.length} node(s) are not connected and will not be executed`
+    )
+  }
+
+  // Check 4: Trigger must have a next step
+  if (triggerNode && !triggerNode.next_step_key) {
+    errors.push('Trigger must be connected to at least one step')
+  }
+
+  // Check 5: Decision nodes must have branches defined
+  const decisionNodes = steps.filter(s => s.step_type === 'decision')
+  decisionNodes.forEach(node => {
+    if (!node.branches || node.branches.length === 0) {
+      errors.push(`Decision node "${node.step_key}" has no branches defined`)
+    } else {
+      const hasTrueBranch = node.branches.some(b => b.condition === 'true')
+      const hasFalseBranch = node.branches.some(b => b.condition === 'false')
+      if (!hasTrueBranch || !hasFalseBranch) {
+        warnings.push(
+          `Decision node "${node.step_key}" is missing Yes or No branch`
+        )
+      }
+    }
+  })
+
+  // Check 6: Send email nodes should have template or body configured
+  const emailNodes = steps.filter(s => s.step_type === 'send_email')
+  emailNodes.forEach(node => {
+    const config = node.step_config
+    if (!config.template_id && !config.body && !config.content) {
+      warnings.push(
+        `Email node "${node.step_key}" has no template or content configured`
+      )
+    }
+  })
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  }
+}
+
 export async function toggleWorkflowActive(id: string, isActive: boolean) {
   const supabase = await createClient()
+
+  // If activating, validate the workflow first
+  if (isActive) {
+    const validation = await validateWorkflow(id)
+    if (!validation.isValid) {
+      return {
+        data: null,
+        error: `Cannot activate workflow: ${validation.errors.join('. ')}`,
+        validationErrors: validation.errors,
+        validationWarnings: validation.warnings,
+      }
+    }
+  }
 
   const { data, error } = await supabase
     .from('workflows')
