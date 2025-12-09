@@ -39,15 +39,28 @@ See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full pl
 | B.6 Execution Analytics     | 🔲 PENDING | Funnel, success rates                 |
 | B.7 Template Gallery        | 🔲 PENDING | One-click install                     |
 
-#### Phase C: SaaS Foundation (Week 3-5)
+#### Phase C: SaaS Foundation (Week 3-5) ✅ COMPLETE
 
-| Task                      | Status     | Notes                         |
-| ------------------------- | ---------- | ----------------------------- |
-| C.1 Multi-Tenancy Schema  | 🔲 PENDING | organization_id on all tables |
-| C.2 Subscription Tiers    | 🔲 PENDING | Feature flags per plan        |
-| C.3 Usage Metering        | 🔲 PENDING | Track clients, team, storage  |
-| C.4 Stripe Billing Rails  | 🔲 PENDING | UI ready, stubbed backend     |
-| C.5 Organization Settings | 🔲 PENDING | Branding, API keys            |
+| Task                      | Status      | Notes                                                |
+| ------------------------- | ----------- | ---------------------------------------------------- |
+| C.1 Multi-Tenancy Schema  | ✅ COMPLETE | organizations table, org_id on 40+ tables, RLS       |
+| C.2 Subscription Tiers    | ✅ COMPLETE | starter/professional/enterprise plans, feature flags |
+| C.3 Usage Metering        | ✅ COMPLETE | usage_metrics table, UsageBar component              |
+| C.4 Stripe Billing Rails  | ✅ COMPLETE | Client lib, webhook handler, billing page UI         |
+| C.5 Organization Settings | ✅ COMPLETE | Profile, API keys, data export, account deletion     |
+
+**Phase C Files Created:**
+
+- `supabase/migrations/20251215000000_multi_tenancy_foundation.sql` - Organizations, memberships, org_id columns
+- `supabase/migrations/20251215010000_multi_tenancy_rls_policies.sql` - Updated RLS for all tables
+- `supabase/migrations/20251215020000_subscription_plans.sql` - Plans table, usage_metrics, helper functions
+- `src/lib/features/flags.ts` - Feature flag checking, usage metering
+- `src/lib/hooks/use-organization.tsx` - React context for organization state
+- `src/components/admin/feature-gate.tsx` - FeatureGate, LimitGate, UpgradeButton, UsageBar
+- `src/lib/stripe/client.ts` - Stubbed Stripe client (checkout, portal, invoices)
+- `src/app/api/webhooks/stripe/route.ts` - Stripe webhook handler (stubbed)
+- `src/app/admin/setup/billing/page.tsx` - Billing page with plans, usage, invoices, payment methods
+- `src/app/admin/setup/organization/page.tsx` - Organization settings page
 
 #### Phase D: Communication Rails (Week 4-5)
 
@@ -448,29 +461,38 @@ We're executing a 6-week refinement and SaaS foundation plan:
 - See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full details
 - Check CLAUDE.md Phase 7+ Execution Progress tables for current status
 
-## Current Focus: Phase A - Polish & Complete
+## Just Completed: Phase C - SaaS Foundation ✅
+All multi-tenancy, subscription tiers, billing UI, and organization settings are complete.
 
-### A.1 Real-Time Messaging
-- 7 hooks already exist in `src/lib/hooks/` (use-realtime-messages, use-typing-indicator, etc.)
-- Need to integrate into UI components
-- Files: message-thread.tsx, message-composer.tsx, chat-widget components
+## Current Focus: Phase D - Communication Rails
 
-### A.2 Form Validation
-- 5/9 Zod schemas done in `src/lib/validations/setup.ts`
-- Complete remaining 4 schemas
-- Wire to corresponding forms
+### D.1 SMS Infrastructure
+Build the SMS infrastructure (stubbed, no live Twilio integration):
+- Create `src/lib/sms/client.ts` - Stubbed SMS sending functions
+- Create `src/lib/sms/templates.ts` - SMS template types
+- Create `src/app/admin/setup/sms-templates/page.tsx` - Template management UI
+- Create migration for sms_templates table
+- SMS character counter (160 char limit display)
+- Wire SMS step in workflow engine
+- Opt-in/opt-out management
 
-### A.3 Welcome Packet Editor
-- Schema exists, need rich text editor UI
-- Template variables ({{client_name}})
+### D.2 Stripe Payment Rails (Client Payments)
+Build payment link infrastructure for client invoices:
+- Add stripe_checkout_session_id to invoices table
+- Payment link generation UI (stubbed)
+- Checkout success/cancel pages
+- Webhook handler for payment events
+- Automatic invoice status updates
 
-### A.4 Intake Form Builder
-- Currently shows "Coming Soon"
-- Need visual drag-and-drop form builder
+## Reference: Phase C Files (Just Created)
+- `src/lib/stripe/client.ts` - Use as pattern for SMS client
+- `src/app/api/webhooks/stripe/route.ts` - Reference for webhook patterns
+- `src/lib/features/flags.ts` - Feature checking utilities
+- `src/lib/hooks/use-organization.tsx` - Organization context
 
 ## Best Practices
 - Commit frequently with conventional commits
-- Run tests after each significant change
+- Run `pnpm type-check` after changes
 - Update CLAUDE.md progress tables after completing tasks
 - Follow existing patterns in codebase
 
