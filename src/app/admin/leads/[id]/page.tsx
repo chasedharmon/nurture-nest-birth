@@ -10,6 +10,10 @@ import { getClientPayments } from '@/app/actions/payments'
 import { getClientInvoices } from '@/app/actions/invoices'
 import { getClientContractSignatures } from '@/app/actions/contracts'
 import { getClientAssignments, getTeamMembers } from '@/app/actions/team'
+import {
+  getConversationForClient,
+  getRecentMessagesForClient,
+} from '@/app/actions/messaging'
 import { Button } from '@/components/ui/button'
 import { StatusUpdateSelect } from '@/components/admin/status-update-select'
 import { LeadDetailContent } from '@/components/admin/lead-detail-content'
@@ -51,6 +55,8 @@ export default async function LeadDetailPage({
     contractsResult,
     assignmentsResult,
     teamMembersResult,
+    conversationResult,
+    messagesResult,
   ] = await Promise.all([
     getLeadById(id),
     getLeadActivities(id),
@@ -62,6 +68,8 @@ export default async function LeadDetailPage({
     getClientContractSignatures(id),
     getClientAssignments(id),
     getTeamMembers(),
+    getConversationForClient(id),
+    getRecentMessagesForClient(id, 5),
   ])
 
   if (!leadResult.success || !leadResult.lead) {
@@ -87,6 +95,12 @@ export default async function LeadDetailPage({
     : []
   const teamMembers = teamMembersResult.success
     ? teamMembersResult.data || []
+    : []
+  const conversation = conversationResult.success
+    ? conversationResult.conversation
+    : null
+  const recentMessages = messagesResult.success
+    ? messagesResult.messages || []
     : []
 
   return (
@@ -141,6 +155,8 @@ export default async function LeadDetailPage({
           contractSignatures={contractSignatures}
           assignments={assignments}
           teamMembers={teamMembers}
+          conversation={conversation}
+          recentMessages={recentMessages}
         />
       </main>
     </div>

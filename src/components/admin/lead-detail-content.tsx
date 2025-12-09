@@ -13,6 +13,7 @@ import { PaymentsList } from '@/components/admin/payments-list'
 import { InvoicesList } from '@/components/admin/invoices-list'
 import { ContractsList } from '@/components/admin/contracts-list'
 import { ClientTeamAssignments } from '@/components/admin/team'
+import { LeadMessagesCard } from '@/components/admin/leads/lead-messages-card'
 import type {
   Lead,
   LeadActivity,
@@ -25,6 +26,7 @@ import type {
   ClientAssignment,
   TeamMember,
 } from '@/lib/supabase/types'
+import type { Message, ConversationWithDetails } from '@/app/actions/messaging'
 
 interface LeadDetailContentProps {
   lead: Lead
@@ -37,6 +39,10 @@ interface LeadDetailContentProps {
   contractSignatures: ContractSignature[]
   assignments: ClientAssignment[]
   teamMembers: TeamMember[]
+  /** Client's conversation (if exists) */
+  conversation?: ConversationWithDetails | null
+  /** Recent messages from the conversation */
+  recentMessages?: Message[]
 }
 
 export function LeadDetailContent({
@@ -50,6 +56,8 @@ export function LeadDetailContent({
   contractSignatures,
   assignments,
   teamMembers,
+  conversation = null,
+  recentMessages = [],
 }: LeadDetailContentProps) {
   const [currentTab, setCurrentTab] = useState('overview')
 
@@ -57,10 +65,13 @@ export function LeadDetailContent({
     setCurrentTab('team')
   }, [])
 
+  const unreadMessages = conversation?.unread_count || 0
+
   return (
     <ClientDetailTabs
       defaultTab={currentTab}
       onTabChange={setCurrentTab}
+      unreadMessages={unreadMessages}
       overviewTab={
         <ClientOverview
           lead={lead}
@@ -73,6 +84,14 @@ export function LeadDetailContent({
           clientId={lead.id}
           assignments={assignments}
           availableMembers={teamMembers}
+        />
+      }
+      messagesTab={
+        <LeadMessagesCard
+          clientId={lead.id}
+          clientName={lead.name}
+          conversation={conversation}
+          recentMessages={recentMessages}
         />
       }
       servicesTab={

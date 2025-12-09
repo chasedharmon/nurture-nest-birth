@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 
 interface ClientDetailTabsProps {
   overviewTab: React.ReactNode
   teamTab: React.ReactNode
+  messagesTab?: React.ReactNode
   servicesTab: React.ReactNode
   meetingsTab: React.ReactNode
   documentsTab: React.ReactNode
@@ -16,11 +18,14 @@ interface ClientDetailTabsProps {
   notesTab: React.ReactNode
   defaultTab?: string
   onTabChange?: (tab: string) => void
+  /** Number of unread messages to show on badge */
+  unreadMessages?: number
 }
 
 export function ClientDetailTabs({
   overviewTab,
   teamTab,
+  messagesTab,
   servicesTab,
   meetingsTab,
   documentsTab,
@@ -31,6 +36,7 @@ export function ClientDetailTabs({
   notesTab,
   defaultTab = 'overview',
   onTabChange,
+  unreadMessages = 0,
 }: ClientDetailTabsProps) {
   const [activeTab, setActiveTab] = useState(defaultTab)
 
@@ -49,6 +55,14 @@ export function ClientDetailTabs({
       <TabsList className="w-full justify-start overflow-x-auto">
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="team">Team</TabsTrigger>
+        <TabsTrigger value="messages" className="flex items-center gap-1">
+          Messages
+          {unreadMessages > 0 && (
+            <Badge variant="default" className="ml-1 h-5 text-xs">
+              {unreadMessages}
+            </Badge>
+          )}
+        </TabsTrigger>
         <TabsTrigger value="services">Services</TabsTrigger>
         <TabsTrigger value="meetings">Meetings</TabsTrigger>
         <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -65,6 +79,10 @@ export function ClientDetailTabs({
 
       <TabsContent value="team" className="mt-6">
         {teamTab}
+      </TabsContent>
+
+      <TabsContent value="messages" className="mt-6">
+        {messagesTab}
       </TabsContent>
 
       <TabsContent value="services" className="mt-6">

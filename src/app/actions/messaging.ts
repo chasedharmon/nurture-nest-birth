@@ -503,6 +503,115 @@ export async function getUnreadCount() {
   return { success: true, count: data || 0 }
 }
 
+/**
+ * Get conversation for a specific client (admin view)
+ * Used on the lead detail page to show client messages
+ */
+export async function getConversationForClient(clientId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // Get the conversation for this client
+  const { data, error } = await supabase
+    .from('conversations')
+    .select(
+      `
+      *,
+      client:leads(id, name, email),
+      participants:conversation_participants(
+        id, user_id, client_id, display_name, unread_count, last_read_at
+      )
+    `
+    )
+    .eq('client_id', clientId)
+    .in('conversation_type', ['client-direct', 'direct'])
+    .eq('status', 'active')
+    .order('last_message_at', { ascending: false, nullsFirst: false })
+    .limit(1)
+    .single()
+
+  if (error && error.code !== 'PGRST116') {
+    // PGRST116 = no rows returned
+    console.error('Error fetching client conversation:', error)
+    return { success: false, error: error.message }
+  }
+
+  if (!data) {
+    return { success: true, conversation: null }
+  }
+
+  // Get unread count for admin user
+  const adminParticipant = data.participants?.find(
+    (p: { user_id: string | null }) => p.user_id === user.id
+  )
+
+  const conversationWithUnread: ConversationWithDetails = {
+    ...data,
+    unread_count: adminParticipant?.unread_count || 0,
+  }
+
+  return { success: true, conversation: conversationWithUnread }
+}
+
+/**
+ * Get recent messages for a client conversation (admin view)
+ */
+export async function getRecentMessagesForClient(
+  clientId: string,
+  limit: number = 5
+) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: 'Not authenticated', messages: [] }
+  }
+
+  // First find the conversation
+  const { data: conversation } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('client_id', clientId)
+    .in('conversation_type', ['client-direct', 'direct'])
+    .eq('status', 'active')
+    .limit(1)
+    .single()
+
+  if (!conversation) {
+    return { success: true, messages: [] }
+  }
+
+  // Get recent messages
+  const { data: messages, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('conversation_id', conversation.id)
+    .eq('is_deleted', false)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    console.error('Error fetching recent messages:', error)
+    return { success: false, error: error.message, messages: [] }
+  }
+
+  // Return in chronological order
+  return {
+    success: true,
+    messages: (messages || []).reverse() as Message[],
+  }
+}
+
 // ============================================================================
 // CLIENT PORTAL ACTIONS
 // ============================================================================
@@ -661,42 +770,4 @@ export async function searchConversations(query: string) {
   }
 
   return { success: true, conversations: data }
-}
-
-export async function getConversationForClient(clientId: string) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return { success: false, error: 'Not authenticated' }
-  }
-
-  // Check if conversation exists
-  const { data: existing, error: checkError } = await supabase
-    .from('conversations')
-    .select('id')
-    .eq('client_id', clientId)
-    .eq('conversation_type', 'direct')
-    .eq('status', 'active')
-    .single()
-
-  if (checkError && checkError.code !== 'PGRST116') {
-    // PGRST116 = no rows returned, which is fine
-    console.error('Error checking for conversation:', checkError)
-    return { success: false, error: checkError.message }
-  }
-
-  if (existing) {
-    return { success: true, conversationId: existing.id, isNew: false }
-  }
-
-  // Create new conversation
-  const result = await createConversation({ clientId })
-  if (!result.success) {
-    return result
-  }
-
-  return { success: true, conversationId: result.conversationId, isNew: true }
 }
