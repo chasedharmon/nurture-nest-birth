@@ -42,6 +42,16 @@ export default async function MessagesPage({
   const status =
     tab === 'archived' ? 'archived' : tab === 'closed' ? 'closed' : 'active'
 
+  // Get current user's name
+  const { data: userData } = await supabase
+    .from('users')
+    .select('name')
+    .eq('id', user.id)
+    .single()
+
+  const currentUserName =
+    userData?.name || user.email?.split('@')[0] || 'Team Member'
+
   const [conversationsResult, unreadResult] = await Promise.all([
     getConversations({ status: status as 'active' | 'closed' | 'archived' }),
     getUnreadCount(),
@@ -209,7 +219,11 @@ export default async function MessagesPage({
                 </CardContent>
               </Card>
             ) : (
-              <ConversationList conversations={conversations} />
+              <ConversationList
+                conversations={conversations}
+                currentUserId={user.id}
+                currentUserName={currentUserName}
+              />
             )}
           </div>
         </div>

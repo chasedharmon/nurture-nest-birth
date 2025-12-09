@@ -1,15 +1,13 @@
 import { redirect, notFound } from 'next/navigation'
-import Link from 'next/link'
 import { getClientSession } from '@/app/actions/client-auth'
 import {
   getConversationById,
   getMessages,
   markClientConversationAsRead,
 } from '@/app/actions/messaging'
-import { Button } from '@/components/ui/button'
-import { ChevronLeft, MessageSquare } from 'lucide-react'
 import { ClientMessageThread } from '@/components/client/messages/client-message-thread'
 import { ClientMessageComposer } from '@/components/client/messages/client-message-composer'
+import { ClientConversationHeader } from '@/components/client/messages/client-conversation-header'
 
 export async function generateMetadata({
   params,
@@ -63,28 +61,13 @@ export default async function ClientConversationPage({
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
-      {/* Header */}
-      <div className="flex items-center gap-4 pb-4 border-b border-border shrink-0">
-        <Link href="/client/messages">
-          <Button variant="ghost" size="sm">
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Messages
-          </Button>
-        </Link>
-        <div className="flex items-center gap-3">
-          <div className="rounded-full bg-primary/10 p-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="font-semibold text-foreground">
-              {conversation.subject || 'Conversation'}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              With your Nurture Nest team
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Header with online presence */}
+      <ClientConversationHeader
+        conversationId={id}
+        clientId={session.clientId}
+        clientName={session.name}
+        subject={conversation.subject}
+      />
 
       {/* Message Thread */}
       <div className="flex-1 overflow-hidden flex flex-col">

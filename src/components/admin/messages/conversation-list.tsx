@@ -5,24 +5,44 @@ import { formatDistanceToNow } from 'date-fns'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { OnlineDot } from '@/components/ui/online-indicator'
+import { usePresence } from '@/lib/hooks/use-presence'
 import type { ConversationWithDetails } from '@/app/actions/messaging'
 
 interface ConversationListProps {
   conversations: ConversationWithDetails[]
+  currentUserId: string
+  currentUserName: string
 }
 
-export function ConversationList({ conversations }: ConversationListProps) {
+export function ConversationList({
+  conversations,
+  currentUserId,
+  currentUserName,
+}: ConversationListProps) {
+  // Track presence in a global messaging room to see all online clients
+  const { isUserOnline } = usePresence({
+    userId: currentUserId,
+    userName: currentUserName,
+    isClient: false,
+    room: 'messaging', // Global room for presence across all conversations
+  })
+
   return (
     <div className="space-y-2">
       {conversations.map(conversation => {
         const hasUnread = (conversation.unread_count || 0) > 0
         const clientName = conversation.client?.name || 'Unknown Client'
+        const clientId = conversation.client?.id
         const initials = clientName
           .split(' ')
           .map(n => n[0])
           .join('')
           .toUpperCase()
           .slice(0, 2)
+
+        // Check if the client is online
+        const clientIsOnline = clientId ? isUserOnline(clientId) : false
 
         return (
           <Link
@@ -36,17 +56,27 @@ export function ConversationList({ conversations }: ConversationListProps) {
             >
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback
-                      className={
-                        hasUnread
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
-                      }
-                    >
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback
+                        className={
+                          hasUnread
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        }
+                      >
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    {/* Online dot */}
+                    {clientIsOnline && (
+                      <OnlineDot
+                        isOnline={true}
+                        size="md"
+                        className="absolute -bottom-0.5 -right-0.5 border-2 border-background"
+                      />
+                    )}
+                  </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">

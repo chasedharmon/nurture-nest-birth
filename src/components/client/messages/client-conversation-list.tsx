@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { ChevronRight, MessageSquare } from 'lucide-react'
+import { usePresence } from '@/lib/hooks/use-presence'
 
 interface Conversation {
   id: string
@@ -16,13 +17,35 @@ interface Conversation {
 interface ClientConversationListProps {
   conversations: Conversation[]
   clientId: string
+  clientName: string
 }
 
 export function ClientConversationList({
   conversations,
+  clientId,
+  clientName,
 }: ClientConversationListProps) {
+  // Track presence to see if team members are online
+  const { onlineCount } = usePresence({
+    userId: clientId,
+    userName: clientName,
+    isClient: true,
+    room: 'messaging',
+  })
+
   return (
     <div className="divide-y divide-border">
+      {/* Team availability indicator */}
+      {onlineCount > 0 && (
+        <div className="px-4 py-2 bg-green-50 dark:bg-green-900/20 border-b border-green-100 dark:border-green-800">
+          <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
+            <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            {onlineCount === 1
+              ? '1 team member is available'
+              : `${onlineCount} team members are available`}
+          </div>
+        </div>
+      )}
       {conversations.map(conversation => {
         const hasUnread = (conversation.unread_count || 0) > 0
 

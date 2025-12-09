@@ -87,6 +87,7 @@ export default async function ClientMessagesPage() {
             <ClientConversationList
               conversations={conversations}
               clientId={session.clientId}
+              clientName={session.name}
             />
           </CardContent>
         </Card>
