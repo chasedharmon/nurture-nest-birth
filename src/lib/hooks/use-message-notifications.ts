@@ -31,7 +31,7 @@ interface UseMessageNotificationsOptions {
   clientId?: string
   /** Maximum number of notifications to show at once */
   maxNotifications?: number
-  /** Auto-dismiss timeout in ms (default: 5000) */
+  /** Auto-dismiss timeout in ms (default: 10000) */
   dismissTimeout?: number
   /** Whether notifications are enabled (for muting) */
   enabled?: boolean
@@ -52,7 +52,7 @@ export function useMessageNotifications({
   userId,
   clientId,
   maxNotifications = 3,
-  dismissTimeout = 5000,
+  dismissTimeout = 10000,
   enabled = true,
 }: UseMessageNotificationsOptions): UseMessageNotificationsReturn {
   const [notifications, setNotifications] = useState<NotificationMessage[]>([])

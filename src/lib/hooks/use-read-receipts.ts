@@ -77,7 +77,6 @@ export function useReadReceipts({
         },
         payload => {
           const updated = payload.new as Participant
-
           setParticipants(prev =>
             prev.map(p => (p.id === updated.id ? { ...p, ...updated } : p))
           )
@@ -88,7 +87,7 @@ export function useReadReceipts({
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [conversationId])
+  }, [conversationId, initialParticipants])
 
   // Get the read status of a message
   const getMessageStatus = useCallback(
@@ -124,12 +123,7 @@ export function useReadReceipts({
         return new Date(p.last_read_at) >= messageTime
       })
 
-      if (isRead) {
-        return 'read'
-      }
-
-      // Message was sent but not yet read
-      return 'sent'
+      return isRead ? 'read' : 'sent'
     },
     [participants, currentUserId, isClient]
   )

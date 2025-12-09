@@ -13,6 +13,7 @@
 import { useRouter } from 'next/navigation'
 import { X, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { PulsingBadge } from '@/components/ui/pulsing-badge'
 import { cn } from '@/lib/utils'
 
 interface MessageToastProps {
@@ -45,13 +46,17 @@ export function MessageToast({
   return (
     <div
       className={cn(
-        'bg-card border border-border rounded-lg shadow-lg p-4 max-w-sm animate-in slide-in-from-right-full fade-in duration-300',
+        'bg-card border-2 border-red-200 rounded-lg shadow-xl p-4 max-w-sm animate-in slide-in-from-right-full fade-in duration-300',
+        // Add a subtle glow effect to draw attention
+        'ring-2 ring-red-100',
         className
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="shrink-0 rounded-full bg-primary/10 p-2">
-          <MessageSquare className="h-4 w-4 text-primary" />
+        {/* Pulsing indicator to draw attention */}
+        <div className="relative shrink-0 rounded-full bg-red-50 p-2">
+          <MessageSquare className="h-4 w-4 text-red-500" />
+          <PulsingBadge size="sm" className="absolute -top-1 -right-1" />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -119,7 +124,8 @@ export function MessageToastContainer({
   return (
     <div
       className={cn(
-        'fixed bottom-4 right-4 z-50 flex flex-col gap-2',
+        // Position above the chat widget bubble (56px bubble + 16px gap + 16px bottom)
+        'fixed bottom-24 right-4 z-50 flex flex-col gap-2',
         className
       )}
     >
