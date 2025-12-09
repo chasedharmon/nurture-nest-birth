@@ -1,4 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { sendTrackedEmail } from '@/lib/email/send'
+import { WorkflowEmail } from '@/lib/email/templates'
+import { emailConfig } from '@/lib/email/config'
+import type { WorkflowEmailData } from '@/lib/email/types'
 import type { WorkflowStep, StepConfig, WorkflowStepType } from './types'
 
 // ============================================================================
@@ -254,23 +258,114 @@ export class WorkflowEngine {
       }
     }
 
-    // For now, log the email (actual sending would use the notification system)
-    console.log('[WorkflowEngine] Would send email:', {
+    // Get recipient name for personalization
+    const recipientName = this.getRecipientName(recordData)
+
+    // Interpolate variables in subject and body
+    const subject = this.interpolateVariables(
+      config.subject || 'Message from your doula',
+      recordData
+    )
+    const body = this.interpolateVariables(
+      config.body || config.content || '',
+      recordData
+    )
+
+    // Prepare email data
+    const emailData: WorkflowEmailData = {
+      recipientName,
+      subject,
+      body,
+      ctaText: config.cta_text,
+      ctaUrl: config.cta_url
+        ? this.interpolateVariables(config.cta_url, recordData)
+        : undefined,
+      doulaName: emailConfig.doula?.name,
+    }
+
+    // Get client ID if available
+    const clientId = (recordData.id as string) || undefined
+
+    console.log('[WorkflowEngine] Sending email:', {
       to: toEmail,
-      template: config.template_name,
-      subject: config.subject,
+      subject: emailData.subject,
+      clientId,
     })
 
-    // TODO: Integrate with actual email sending via notifications.ts
+    try {
+      // Actually send the email
+      const result = await sendTrackedEmail({
+        to: toEmail,
+        subject: emailData.subject,
+        template: WorkflowEmail({ data: emailData }),
+        clientId,
+        notificationType: 'workflow',
+      })
 
-    return {
-      success: true,
-      output: {
-        email_sent_to: toEmail,
-        template: config.template_name,
-      },
-      nextStepKey,
+      if (!result.success) {
+        console.error('[WorkflowEngine] Email send failed:', result.error)
+        return {
+          success: false,
+          error: result.error || 'Failed to send email',
+        }
+      }
+
+      console.log('[WorkflowEngine] Email sent successfully:', result.messageId)
+
+      return {
+        success: true,
+        output: {
+          email_sent_to: toEmail,
+          message_id: result.messageId,
+          template: config.template_name,
+        },
+        nextStepKey,
+      }
+    } catch (error) {
+      console.error('[WorkflowEngine] Email send error:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to send email',
+      }
     }
+  }
+
+  /**
+   * Get recipient name from record data for personalization
+   */
+  private getRecipientName(
+    recordData: Record<string, unknown>
+  ): string | undefined {
+    // Try common name fields
+    if (recordData.name && typeof recordData.name === 'string') {
+      return recordData.name.split(' ')[0] // First name
+    }
+    if (recordData.first_name && typeof recordData.first_name === 'string') {
+      return recordData.first_name
+    }
+    if (recordData.full_name && typeof recordData.full_name === 'string') {
+      return recordData.full_name.split(' ')[0]
+    }
+    return undefined
+  }
+
+  /**
+   * Interpolate template variables in a string
+   * Supports {{variable_name}} syntax
+   */
+  private interpolateVariables(
+    template: string,
+    data: Record<string, unknown>
+  ): string {
+    if (!template) return template
+
+    return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+      const value = data[key]
+      if (value === undefined || value === null) {
+        return match // Keep the placeholder if no value
+      }
+      return String(value)
+    })
   }
 
   private async executeCreateTask(

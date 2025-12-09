@@ -15,6 +15,7 @@ export type EmailTemplate =
   | 'payment-received'
   | 'payment-reminder'
   | 'invoice-sent'
+  | 'workflow'
 
 export type NotificationChannel = 'email' | 'sms' // SMS for future
 
@@ -125,6 +126,15 @@ export interface InvoiceSentEmailData {
   lineItems: Array<{ description: string; amount: number }>
   paymentUrl?: string
   doulaName: string
+}
+
+export interface WorkflowEmailData {
+  recipientName?: string
+  subject: string
+  body: string
+  ctaText?: string
+  ctaUrl?: string
+  doulaName?: string
 }
 
 // Notification log record

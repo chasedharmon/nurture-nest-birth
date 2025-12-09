@@ -159,6 +159,10 @@ export interface StepConfig {
   to_type?: 'client' | 'admin' | 'custom'
   to_email?: string
   subject?: string
+  body?: string // Email body content with variable support
+  content?: string // Alias for body
+  cta_text?: string // Call-to-action button text
+  cta_url?: string // Call-to-action button URL
 
   // Create Task
   tasks?: TaskConfig[]
