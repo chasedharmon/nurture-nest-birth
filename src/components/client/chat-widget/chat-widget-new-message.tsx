@@ -139,111 +139,121 @@ export function ChatWidgetNewMessage({
       </div>
 
       {/* Content */}
-      <form onSubmit={handleSubmit} className="flex-1 flex flex-col p-4 gap-4">
-        {/* Recipient selection */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Message your care team</Label>
-          <RadioGroup
-            value={recipientType}
-            onValueChange={val => setRecipientType(val as 'team' | 'specific')}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="team" id="team" />
-              <Label
-                htmlFor="team"
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span>General question</span>
-                <span className="text-xs text-muted-foreground">
-                  (Notifies entire team)
-                </span>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="specific" id="specific" />
-              <Label
-                htmlFor="specific"
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span>Specific team member</span>
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
-
-        {/* Team member selection (when specific is chosen) */}
-        {recipientType === 'specific' && (
-          <div className="space-y-2 border rounded-lg p-3 bg-muted/30">
-            {isLoadingTeam ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      <form
+        onSubmit={handleSubmit}
+        className="flex-1 flex flex-col overflow-hidden"
+      >
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Recipient selection */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">
+              Message your care team
+            </Label>
+            <RadioGroup
+              value={recipientType}
+              onValueChange={val =>
+                setRecipientType(val as 'team' | 'specific')
+              }
+              className="space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="team" id="team" />
+                <Label
+                  htmlFor="team"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span>General question</span>
+                  <span className="text-xs text-muted-foreground">
+                    (Notifies entire team)
+                  </span>
+                </Label>
               </div>
-            ) : teamMembers.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-2">
-                No team members available
-              </p>
-            ) : (
-              <div className="space-y-2 max-h-32 overflow-y-auto">
-                {teamMembers.map(member => {
-                  const isOnline = member.user_id
-                    ? isUserOnline(member.user_id)
-                    : false
-
-                  return (
-                    <div
-                      key={member.id}
-                      className="flex items-center space-x-2"
-                    >
-                      <Checkbox
-                        id={member.id}
-                        checked={selectedMembers.includes(member.id)}
-                        onCheckedChange={() => handleToggleMember(member.id)}
-                      />
-                      <Label
-                        htmlFor={member.id}
-                        className="flex items-center gap-2 cursor-pointer text-sm"
-                      >
-                        <span
-                          className={cn(
-                            'h-2 w-2 rounded-full',
-                            isOnline ? 'bg-green-500' : 'bg-gray-300'
-                          )}
-                        />
-                        <span>{member.display_name}</span>
-                        {member.title && (
-                          <span className="text-xs text-muted-foreground">
-                            ({member.title})
-                          </span>
-                        )}
-                      </Label>
-                    </div>
-                  )
-                })}
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="specific" id="specific" />
+                <Label
+                  htmlFor="specific"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span>Specific team member</span>
+                </Label>
               </div>
-            )}
+            </RadioGroup>
           </div>
-        )}
 
-        {/* Message input */}
-        <div className="flex-1 space-y-2">
-          <Label htmlFor="message" className="text-sm font-medium">
-            Your message
-          </Label>
-          <Textarea
-            id="message"
-            value={message}
-            onChange={e => setMessage(e.target.value)}
-            placeholder="Hi! I have a question about..."
-            className="resize-none flex-1 min-h-[100px]"
-            disabled={isPending}
-          />
+          {/* Team member selection (when specific is chosen) */}
+          {recipientType === 'specific' && (
+            <div className="space-y-2 border rounded-lg p-3 bg-muted/30">
+              {isLoadingTeam ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : teamMembers.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-2">
+                  No team members available
+                </p>
+              ) : (
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {teamMembers.map(member => {
+                    const isOnline = member.user_id
+                      ? isUserOnline(member.user_id)
+                      : false
+
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          id={member.id}
+                          checked={selectedMembers.includes(member.id)}
+                          onCheckedChange={() => handleToggleMember(member.id)}
+                        />
+                        <Label
+                          htmlFor={member.id}
+                          className="flex items-center gap-2 cursor-pointer text-sm"
+                        >
+                          <span
+                            className={cn(
+                              'h-2 w-2 rounded-full',
+                              isOnline ? 'bg-green-500' : 'bg-gray-300'
+                            )}
+                          />
+                          <span>{member.display_name}</span>
+                          {member.title && (
+                            <span className="text-xs text-muted-foreground">
+                              ({member.title})
+                            </span>
+                          )}
+                        </Label>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Message input */}
+          <div className="space-y-2">
+            <Label htmlFor="message" className="text-sm font-medium">
+              Your message
+            </Label>
+            <Textarea
+              id="message"
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              placeholder="Hi! I have a question about..."
+              className="resize-none min-h-[80px]"
+              disabled={isPending}
+            />
+          </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-2 pt-2">
+        {/* Actions - Fixed at bottom */}
+        <div className="flex gap-2 p-4 pt-2 border-t border-border bg-card">
           <Button
             type="button"
             variant="outline"

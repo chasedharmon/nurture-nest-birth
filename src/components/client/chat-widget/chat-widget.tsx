@@ -108,37 +108,44 @@ export function ChatWidget({
   }, [isExpanded, view, handleBackToList, handleMinimize])
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      {isExpanded ? (
-        <ChatWidgetPanel
-          title={
-            view === 'thread'
-              ? activeConversationSubject || 'Conversation'
-              : 'Messages'
-          }
-          showBackButton={view === 'thread'}
-          onBack={handleBackToList}
-          onMinimize={handleMinimize}
-        >
-          {view === 'list' ? (
-            <ChatWidgetConversationList
-              clientId={clientId}
-              clientName={clientName}
-              onSelectConversation={handleSelectConversation}
-            />
-          ) : (
-            activeConversationId && (
-              <ChatWidgetThread
-                conversationId={activeConversationId}
+    <>
+      {/* Panel positioned to grow upward from bottom-right */}
+      {isExpanded && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <ChatWidgetPanel
+            title={
+              view === 'thread'
+                ? activeConversationSubject || 'Conversation'
+                : 'Messages'
+            }
+            showBackButton={view === 'thread'}
+            onBack={handleBackToList}
+            onMinimize={handleMinimize}
+          >
+            {view === 'list' ? (
+              <ChatWidgetConversationList
                 clientId={clientId}
                 clientName={clientName}
+                onSelectConversation={handleSelectConversation}
               />
-            )
-          )}
-        </ChatWidgetPanel>
-      ) : (
-        <ChatWidgetBubble unreadCount={unreadCount} onClick={handleExpand} />
+            ) : (
+              activeConversationId && (
+                <ChatWidgetThread
+                  conversationId={activeConversationId}
+                  clientId={clientId}
+                  clientName={clientName}
+                />
+              )
+            )}
+          </ChatWidgetPanel>
+        </div>
       )}
-    </div>
+      {/* Bubble always at bottom-right */}
+      {!isExpanded && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <ChatWidgetBubble unreadCount={unreadCount} onClick={handleExpand} />
+        </div>
+      )}
+    </>
   )
 }

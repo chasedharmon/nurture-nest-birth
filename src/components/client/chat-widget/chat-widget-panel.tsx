@@ -42,10 +42,13 @@ export function ChatWidgetPanel({
   return (
     <div
       className={cn(
-        // Size and shape
-        'w-[380px] h-[500px] rounded-xl',
+        // Size and shape - use explicit height and constrain to viewport
+        'w-[380px] rounded-xl',
         // Responsive - smaller on mobile
-        'max-w-[calc(100vw-2rem)] max-h-[calc(100vh-6rem)]',
+        'max-w-[calc(100vw-2rem)]',
+        'h-[min(500px,calc(100vh-6rem))]',
+        // Position from bottom-right corner (panel expands upward)
+        'origin-bottom-right',
         // Background and border
         'bg-card border border-border',
         // Elevation
@@ -99,8 +102,10 @@ export function ChatWidgetPanel({
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-hidden flex flex-col">{children}</div>
+      {/* Content - relative for absolute positioned overlays like NewMessage dialog */}
+      <div className="flex-1 overflow-hidden flex flex-col relative">
+        {children}
+      </div>
     </div>
   )
 }
