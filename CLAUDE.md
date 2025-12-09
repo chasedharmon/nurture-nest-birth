@@ -15,11 +15,25 @@
 | Form Validation (Zod)  | 🔄 PARTIAL  | 5/9 forms done, schemas ready for rest     |
 | Canned Email Templates | ✅ COMPLETE | Database, UI, CRUD actions                 |
 | Welcome Packets        | ✅ COMPLETE | Database schema, UI (full editor later)    |
-| Workflow Automation    | 🔲 PENDING  | Visual canvas builder (like SF Flow)       |
+| Workflow Automation    | ✅ COMPLETE | Visual canvas builder with ReactFlow       |
 | Unified Messaging      | 🔲 PENDING  | In-app messaging system                    |
 | Scheduling Rails       | 🔲 PENDING  | Availability/booking type tables           |
 
-**New Files Added:**
+**Workflow Automation Files:**
+
+- `src/app/admin/workflows/page.tsx` - Workflows list with stats
+- `src/app/admin/workflows/new/` - New workflow form (object type, trigger config)
+- `src/app/admin/workflows/[id]/` - Workflow builder with ReactFlow canvas
+- `src/components/admin/workflows/` - Canvas, nodes, panels components
+- `src/lib/workflows/engine.ts` - Workflow execution engine
+- `src/lib/workflows/types.ts` - TypeScript types for workflows
+- `src/app/actions/workflows.ts` - Server actions for CRUD operations
+- `src/app/api/workflows/process/route.ts` - API for processing executions
+- `src/app/api/cron/workflow-scheduler/route.ts` - Scheduled workflow cron
+- `supabase/migrations/20251213000000_workflow_automation.sql` - Database schema
+- `tests/e2e/admin-workflows.spec.ts` - E2E tests (38 passing)
+
+**Phase 7 Other Files:**
 
 - `src/components/ui/skeleton.tsx` - Skeleton loading component
 - `src/components/admin/dashboards/dashboard-skeleton.tsx` - Dashboard loading skeleton
@@ -71,9 +85,8 @@ All admin pages tested with Playwright:
 
 ### Future Features (Not Started)
 
-- Email Templates System (WYSIWYG editor, variables)
 - Advanced Scheduling (calendar sync, availability)
-- Automation Rules Engine (trigger-based workflows)
+- Stripe integration for payments
 
 ## Project Overview
 
@@ -197,6 +210,22 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - Components in `src/components/admin/dashboards/`
 - Pages: list (`/admin/dashboards`), new (`/admin/dashboards/new`), view (`/admin/dashboards/[id]`), edit (`/admin/dashboards/[id]/edit`)
 - Server actions in `src/app/actions/dashboards.ts`
+
+**Workflow Automation** (COMPLETE):
+
+- Visual drag-and-drop canvas builder using @xyflow/react v12
+- Object types: Lead, Meeting, Payment, Invoice, Service, Document, Contract, Intake Form
+- Trigger types: Record Create, Record Update, Field Change, Scheduled, Manual, Form Submit, Payment Received
+- Action nodes: Send Email (with template selection), Create Task, Update Field, Wait (delay), Decision (branching)
+- Node palette with categorized drag-and-drop nodes
+- Properties panel for configuring selected nodes
+- Workflow execution engine in `src/lib/workflows/engine.ts`
+- Pre-built templates: New Lead Welcome, Consultation Follow-up, Payment Confirmation, Contract Reminder
+- Database tables: workflows, workflow_steps, workflow_executions, workflow_step_executions, workflow_templates
+- E2E tests: 38 passing (desktop), 12 skipped (mobile - canvas not mobile-optimized)
+- Components in `src/components/admin/workflows/`
+- Pages: list (`/admin/workflows`), new (`/admin/workflows/new`), builder (`/admin/workflows/[id]`)
+- Server actions in `src/app/actions/workflows.ts`
 
 **Admin Setup Hub** (COMPLETE):
 
