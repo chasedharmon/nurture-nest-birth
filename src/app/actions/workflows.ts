@@ -763,3 +763,63 @@ export async function triggerWorkflowManually(
 
   return { data: execution as WorkflowExecution, error: null }
 }
+
+export async function getRecordsForTrigger(objectType: string): Promise<{
+  data: Array<{ id: string; name: string; email?: string }> | null
+  error: string | null
+}> {
+  const supabase = await createClient()
+
+  // Map object types to their table names and fields
+  const tableConfig: Record<
+    string,
+    { table: string; nameField: string; emailField?: string }
+  > = {
+    lead: { table: 'leads', nameField: 'full_name', emailField: 'email' },
+    meeting: { table: 'meetings', nameField: 'title' },
+    payment: { table: 'payments', nameField: 'description' },
+    invoice: { table: 'invoices', nameField: 'invoice_number' },
+    service: { table: 'services', nameField: 'name' },
+    document: { table: 'documents', nameField: 'title' },
+    contract: { table: 'contracts', nameField: 'title' },
+    intake_form: { table: 'intake_form_submissions', nameField: 'id' },
+  }
+
+  const config = tableConfig[objectType]
+  if (!config) {
+    return { data: null, error: `Unknown object type: ${objectType}` }
+  }
+
+  // Build select fields
+  const selectFields = config.emailField
+    ? `id, ${config.nameField}, ${config.emailField}`
+    : `id, ${config.nameField}`
+
+  const { data, error } = await supabase
+    .from(config.table)
+    .select(selectFields)
+    .order('created_at', { ascending: false })
+    .limit(100)
+
+  if (error) {
+    console.error(`[Workflows] Failed to fetch ${objectType} records:`, error)
+    return { data: null, error: error.message }
+  }
+
+  if (!data) {
+    return { data: [], error: null }
+  }
+
+  // Transform the data to have consistent name/email fields
+  const records = data.map(row => {
+    const record = row as unknown as Record<string, unknown>
+    const id = record.id as string
+    const name = (record[config.nameField] as string) || id
+    const email = config.emailField
+      ? (record[config.emailField] as string | undefined)
+      : undefined
+    return { id, name, email }
+  })
+
+  return { data: records, error: null }
+}

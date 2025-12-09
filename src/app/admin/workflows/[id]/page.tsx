@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, Workflow, Settings, History } from 'lucide-react'
 import { WorkflowBuilderClient } from './workflow-builder-client'
 import { WorkflowToggleButton } from './workflow-toggle-button'
+import { WorkflowManualTrigger } from './workflow-manual-trigger'
 import type {
   WorkflowObjectType,
   WorkflowTriggerType,
@@ -128,6 +129,11 @@ export default async function WorkflowBuilderPage({
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <WorkflowManualTrigger
+                workflowId={workflow.id}
+                objectType={workflow.object_type as WorkflowObjectType}
+                isActive={workflow.is_active}
+              />
               <Link href={`/admin/workflows/${id}/history`}>
                 <Button variant="outline" size="sm">
                   <History className="mr-2 h-4 w-4" />
