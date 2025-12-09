@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Trash2 } from 'lucide-react'
 import { VariablePicker } from '../variable-picker'
+import { EnhancedDecisionConfig } from '../enhanced-decision-config'
 import type {
   WorkflowNode,
   StepConfig,
@@ -118,7 +119,15 @@ export function PropertiesPanel({
           )}
 
           {stepType === 'decision' && (
-            <DecisionConfig form={form} onBlur={handleBlur} />
+            <EnhancedDecisionConfig
+              config={selectedNode.data.config}
+              onChange={config => {
+                if (selectedNode) {
+                  onUpdateNode(selectedNode.id, config)
+                }
+              }}
+              objectType={objectType}
+            />
           )}
 
           {stepType === 'webhook' && (
@@ -505,74 +514,6 @@ function WaitConfig({ form, onBlur }: ConfigProps) {
         />
         <p className="text-xs text-muted-foreground">
           Wait until the specified date field on the record
-        </p>
-      </div>
-    </div>
-  )
-}
-
-function DecisionConfig({ form, onBlur }: ConfigProps) {
-  return (
-    <div className="space-y-3">
-      <div className="space-y-1.5">
-        <Label htmlFor="condition_field" className="text-xs">
-          Field to Check
-        </Label>
-        <Input
-          id="condition_field"
-          placeholder="status"
-          {...form.register('condition_field')}
-          onBlur={onBlur}
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="condition_operator" className="text-xs">
-          Operator
-        </Label>
-        <Select
-          value={form.watch('condition_operator') || 'equals'}
-          onValueChange={value => {
-            form.setValue(
-              'condition_operator',
-              value as StepConfig['condition_operator']
-            )
-            onBlur()
-          }}
-        >
-          <SelectTrigger id="condition_operator">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="equals">Equals</SelectItem>
-            <SelectItem value="not_equals">Not Equals</SelectItem>
-            <SelectItem value="contains">Contains</SelectItem>
-            <SelectItem value="greater_than">Greater Than</SelectItem>
-            <SelectItem value="less_than">Less Than</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="condition_value" className="text-xs">
-          Value
-        </Label>
-        <Input
-          id="condition_value"
-          placeholder="client"
-          {...form.register('condition_value')}
-          onBlur={onBlur}
-        />
-      </div>
-
-      <div className="rounded-md bg-muted p-2 text-xs text-muted-foreground">
-        <p>
-          <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-1" />
-          Green handle = condition is true
-        </p>
-        <p className="mt-1">
-          <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1" />
-          Red handle = condition is false
         </p>
       </div>
     </div>

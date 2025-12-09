@@ -503,6 +503,52 @@ export class WorkflowEngine {
     context: ExecutionContext,
     step: WorkflowStep
   ): Promise<StepResult> {
+    const isAdvancedMode = config.decision_mode === 'advanced'
+    const decisionBranches = config.decision_branches || []
+
+    // Find the appropriate branch from step.branches
+    const branches = step.branches as Array<{
+      condition: string
+      next_step_key: string
+    }> | null
+
+    if (isAdvancedMode && decisionBranches.length > 0) {
+      // Advanced mode: evaluate each branch's conditions
+      for (const branch of decisionBranches) {
+        const branchMatches = this.evaluateBranchConditions(
+          branch,
+          context.record_data
+        )
+
+        if (branchMatches) {
+          // Find the corresponding edge
+          const matchingBranch = branches?.find(b => b.condition === branch.id)
+          return {
+            success: true,
+            output: {
+              mode: 'advanced',
+              branch_matched: branch.label,
+              branch_id: branch.id,
+            },
+            nextStepKey: matchingBranch?.next_step_key || null,
+          }
+        }
+      }
+
+      // No branch matched, use default
+      const defaultBranch = branches?.find(b => b.condition === 'default')
+      return {
+        success: true,
+        output: {
+          mode: 'advanced',
+          branch_matched: config.default_branch_label || 'Default',
+          branch_id: 'default',
+        },
+        nextStepKey: defaultBranch?.next_step_key || null,
+      }
+    }
+
+    // Simple mode: single condition evaluation
     if (!config.condition_field) {
       return {
         success: false,
@@ -535,13 +581,7 @@ export class WorkflowEngine {
         conditionMet = Boolean(fieldValue)
     }
 
-    // Find the appropriate branch
-    const branches = step.branches as Array<{
-      condition: string
-      next_step_key: string
-    }> | null
     let nextStepKey: string | null = null
-
     if (branches) {
       const matchingBranch = branches.find(
         b => b.condition === (conditionMet ? 'true' : 'false')
@@ -552,12 +592,107 @@ export class WorkflowEngine {
     return {
       success: true,
       output: {
+        mode: 'simple',
         condition_field: config.condition_field,
         field_value: fieldValue,
         condition_met: conditionMet,
         branch_taken: conditionMet ? 'true' : 'false',
       },
       nextStepKey,
+    }
+  }
+
+  /**
+   * Evaluate all condition groups for a decision branch
+   */
+  private evaluateBranchConditions(
+    branch: NonNullable<StepConfig['decision_branches']>[number],
+    recordData: Record<string, unknown>
+  ): boolean {
+    if (branch.condition_groups.length === 0) {
+      return false
+    }
+
+    // Evaluate each group
+    const groupResults = branch.condition_groups.map(group =>
+      this.evaluateConditionGroup(group, recordData)
+    )
+
+    // Combine results based on branch.match_type
+    if (branch.match_type === 'all') {
+      return groupResults.every(r => r)
+    } else {
+      return groupResults.some(r => r)
+    }
+  }
+
+  /**
+   * Evaluate a single condition group
+   */
+  private evaluateConditionGroup(
+    group: NonNullable<
+      StepConfig['decision_branches']
+    >[number]['condition_groups'][number],
+    recordData: Record<string, unknown>
+  ): boolean {
+    if (group.conditions.length === 0) {
+      return false
+    }
+
+    const conditionResults = group.conditions.map(condition =>
+      this.evaluateSingleCondition(condition, recordData)
+    )
+
+    if (group.match_type === 'all') {
+      return conditionResults.every(r => r)
+    } else {
+      return conditionResults.some(r => r)
+    }
+  }
+
+  /**
+   * Evaluate a single condition
+   */
+  private evaluateSingleCondition(
+    condition: NonNullable<
+      StepConfig['decision_branches']
+    >[number]['condition_groups'][number]['conditions'][number],
+    recordData: Record<string, unknown>
+  ): boolean {
+    const fieldValue = recordData[condition.field]
+    const conditionValue = condition.value
+
+    switch (condition.operator) {
+      case 'equals':
+        return String(fieldValue) === String(conditionValue)
+      case 'not_equals':
+        return String(fieldValue) !== String(conditionValue)
+      case 'contains':
+        return String(fieldValue).includes(String(conditionValue))
+      case 'not_contains':
+        return !String(fieldValue).includes(String(conditionValue))
+      case 'starts_with':
+        return String(fieldValue).startsWith(String(conditionValue))
+      case 'ends_with':
+        return String(fieldValue).endsWith(String(conditionValue))
+      case 'is_empty':
+        return (
+          fieldValue === null || fieldValue === undefined || fieldValue === ''
+        )
+      case 'is_not_empty':
+        return (
+          fieldValue !== null && fieldValue !== undefined && fieldValue !== ''
+        )
+      case 'greater_than':
+        return Number(fieldValue) > Number(conditionValue)
+      case 'less_than':
+        return Number(fieldValue) < Number(conditionValue)
+      case 'greater_than_or_equal':
+        return Number(fieldValue) >= Number(conditionValue)
+      case 'less_than_or_equal':
+        return Number(fieldValue) <= Number(conditionValue)
+      default:
+        return Boolean(fieldValue)
     }
   }
 

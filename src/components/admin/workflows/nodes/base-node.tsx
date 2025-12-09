@@ -4,6 +4,7 @@ import { memo } from 'react'
 import { Handle, Position } from '@xyflow/react'
 import { cn } from '@/lib/utils'
 import type { WorkflowNodeData, WorkflowStepType } from '@/lib/workflows/types'
+import { getBranchColor } from '../enhanced-decision-config'
 
 interface BaseNodeProps {
   data: WorkflowNodeData
@@ -180,24 +181,7 @@ function BaseNodeComponent({ data, selected }: BaseNodeProps) {
       {!isEnd && (
         <>
           {isDecision ? (
-            <>
-              {/* Yes branch - left */}
-              <Handle
-                type="source"
-                position={Position.Bottom}
-                id="yes"
-                className="!w-3 !h-3 !bg-green-500 !border-2 !border-background"
-                style={{ left: '30%' }}
-              />
-              {/* No branch - right */}
-              <Handle
-                type="source"
-                position={Position.Bottom}
-                id="no"
-                className="!w-3 !h-3 !bg-red-500 !border-2 !border-background"
-                style={{ left: '70%' }}
-              />
-            </>
+            <DecisionHandles config={data.config} />
           ) : (
             <Handle
               type="source"
@@ -208,6 +192,70 @@ function BaseNodeComponent({ data, selected }: BaseNodeProps) {
         </>
       )}
     </div>
+  )
+}
+
+// Separate component for decision handles
+function DecisionHandles({ config }: { config: WorkflowNodeData['config'] }) {
+  const isAdvancedMode = config?.decision_mode === 'advanced'
+  const branches = config?.decision_branches || []
+
+  if (isAdvancedMode && branches.length > 0) {
+    // Advanced mode: dynamic number of branch handles + default
+    const totalHandles = branches.length + 1 // +1 for default
+    const handleSpacing = 100 / (totalHandles + 1)
+
+    return (
+      <>
+        {branches.map((branch, index) => (
+          <Handle
+            key={branch.id}
+            type="source"
+            position={Position.Bottom}
+            id={branch.id}
+            className="!w-3 !h-3 !border-2 !border-background"
+            style={{
+              left: `${handleSpacing * (index + 1)}%`,
+              backgroundColor: getBranchColor(index),
+            }}
+            title={branch.label}
+          />
+        ))}
+        {/* Default branch handle */}
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          id="default"
+          className="!w-3 !h-3 !bg-gray-400 !border-2 !border-background"
+          style={{ left: `${handleSpacing * (branches.length + 1)}%` }}
+          title={config?.default_branch_label || 'Default'}
+        />
+      </>
+    )
+  }
+
+  // Simple mode: yes/no handles
+  return (
+    <>
+      {/* Yes branch - left */}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="yes"
+        className="!w-3 !h-3 !bg-green-500 !border-2 !border-background"
+        style={{ left: '30%' }}
+        title="Yes"
+      />
+      {/* No branch - right */}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="no"
+        className="!w-3 !h-3 !bg-red-500 !border-2 !border-background"
+        style={{ left: '70%' }}
+        title="No"
+      />
+    </>
   )
 }
 

@@ -191,6 +191,42 @@ export type ReentryMode =
   | 'reentry_after_exit' // Only after previous execution completed/failed
   | 'reentry_after_days' // Only after X days since last execution
 
+// ============================================================================
+// Enhanced Decision Node Types
+// ============================================================================
+
+export type DecisionConditionOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'contains'
+  | 'not_contains'
+  | 'starts_with'
+  | 'ends_with'
+  | 'is_empty'
+  | 'is_not_empty'
+  | 'greater_than'
+  | 'less_than'
+  | 'greater_than_or_equal'
+  | 'less_than_or_equal'
+
+export interface DecisionCondition {
+  field: string
+  operator: DecisionConditionOperator
+  value?: string
+}
+
+export interface DecisionConditionGroup {
+  match_type: 'all' | 'any' // AND / OR
+  conditions: DecisionCondition[]
+}
+
+export interface DecisionBranch {
+  id: string
+  label: string
+  condition_groups: DecisionConditionGroup[]
+  match_type: 'all' | 'any' // How to combine multiple groups
+}
+
 export interface StepConfig {
   // Send Email
   template_id?: string
@@ -219,7 +255,7 @@ export interface StepConfig {
   wait_hours?: number
   wait_until_field?: string
 
-  // Decision
+  // Decision (Legacy simple mode - still supported)
   condition_field?: string
   condition_operator?:
     | 'equals'
@@ -228,6 +264,11 @@ export interface StepConfig {
     | 'greater_than'
     | 'less_than'
   condition_value?: string
+
+  // Decision (Enhanced multi-branch mode)
+  decision_mode?: 'simple' | 'advanced'
+  decision_branches?: DecisionBranch[]
+  default_branch_label?: string
 
   // Create Record
   record_type?: string
@@ -562,6 +603,34 @@ export const REENTRY_MODE_OPTIONS: {
     value: 'reentry_after_days',
     label: 'After waiting period',
     description: 'Only after a specified number of days',
+  },
+]
+
+// Decision condition operator options for UI
+export const DECISION_CONDITION_OPERATORS: {
+  value: DecisionConditionOperator
+  label: string
+  requiresValue: boolean
+}[] = [
+  { value: 'equals', label: 'Equals', requiresValue: true },
+  { value: 'not_equals', label: 'Does not equal', requiresValue: true },
+  { value: 'contains', label: 'Contains', requiresValue: true },
+  { value: 'not_contains', label: 'Does not contain', requiresValue: true },
+  { value: 'starts_with', label: 'Starts with', requiresValue: true },
+  { value: 'ends_with', label: 'Ends with', requiresValue: true },
+  { value: 'is_empty', label: 'Is empty', requiresValue: false },
+  { value: 'is_not_empty', label: 'Is not empty', requiresValue: false },
+  { value: 'greater_than', label: 'Greater than', requiresValue: true },
+  { value: 'less_than', label: 'Less than', requiresValue: true },
+  {
+    value: 'greater_than_or_equal',
+    label: 'Greater than or equal',
+    requiresValue: true,
+  },
+  {
+    value: 'less_than_or_equal',
+    label: 'Less than or equal',
+    requiresValue: true,
   },
 ]
 

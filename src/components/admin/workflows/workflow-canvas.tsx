@@ -259,6 +259,27 @@ function WorkflowCanvasInner({
         next_step_key = outgoingEdges[0]?.target ?? null
       }
 
+      // Build branches for decision nodes
+      let branches: Array<{ condition: string; next_step_key: string }> = []
+      if (node.data.stepType === 'decision') {
+        const isAdvancedMode = node.data.config?.decision_mode === 'advanced'
+        const configBranches = node.data.config?.decision_branches || []
+
+        if (isAdvancedMode && configBranches.length > 0) {
+          // Advanced mode: use branch IDs from config
+          branches = outgoingEdges.map(edge => ({
+            condition: edge.sourceHandle || 'default',
+            next_step_key: edge.target,
+          }))
+        } else {
+          // Simple mode: yes/no branches
+          branches = outgoingEdges.map(edge => ({
+            condition: edge.sourceHandle === 'yes' ? 'true' : 'false',
+            next_step_key: edge.target,
+          }))
+        }
+      }
+
       return {
         step_key: node.data.stepKey,
         step_type: node.data.stepType,
@@ -268,12 +289,7 @@ function WorkflowCanvasInner({
         position_y: Math.round(node.position.y),
         next_step_key,
         // For decision nodes, include branches
-        ...(node.data.stepType === 'decision' && {
-          branches: outgoingEdges.map(edge => ({
-            condition: edge.sourceHandle === 'yes' ? 'true' : 'false',
-            next_step_key: edge.target,
-          })),
-        }),
+        ...(node.data.stepType === 'decision' && { branches }),
       }
     })
 
