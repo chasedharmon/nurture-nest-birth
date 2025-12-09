@@ -24,6 +24,8 @@ import {
   Heart,
   Mail,
   Package,
+  CreditCard,
+  Building,
 } from 'lucide-react'
 
 interface SetupCategory {
@@ -126,6 +128,25 @@ const setupCategories: SetupCategory[] = [
         description: 'Stripe, Resend, and other services',
         href: '/admin/setup/integrations',
         icon: <Plug className="h-5 w-5" />,
+      },
+    ],
+  },
+  {
+    title: 'Account & Billing',
+    description: 'Manage your subscription and organization',
+    icon: <CreditCard className="h-6 w-6" />,
+    items: [
+      {
+        title: 'Organization',
+        description: 'Manage your organization profile and settings',
+        href: '/admin/setup/organization',
+        icon: <Building className="h-5 w-5" />,
+      },
+      {
+        title: 'Billing & Subscription',
+        description: 'Manage your plan, usage, and invoices',
+        href: '/admin/setup/billing',
+        icon: <CreditCard className="h-5 w-5" />,
       },
     ],
   },

@@ -1172,3 +1172,278 @@ export type WelcomePacketItemInsert = Omit<
 export type WelcomePacketItemUpdate = Partial<
   Omit<WelcomePacketItemInsert, 'packet_id'>
 >
+
+// =====================================================
+// Multi-Tenancy Types (Phase C.1: SaaS Foundation)
+// =====================================================
+
+export type SubscriptionStatus =
+  | 'trialing'
+  | 'active'
+  | 'past_due'
+  | 'cancelled'
+  | 'paused'
+
+export type SubscriptionTier =
+  | 'starter'
+  | 'professional'
+  | 'enterprise'
+  | 'custom'
+
+export type OrganizationRole = 'owner' | 'admin' | 'member' | 'viewer'
+
+export interface Organization {
+  id: string
+  name: string
+  slug: string
+
+  // Branding
+  logo_url?: string | null
+  primary_color: string
+  secondary_color: string
+
+  // Settings (JSONB)
+  settings: Record<string, unknown>
+
+  // Stripe billing (rails only)
+  stripe_customer_id?: string | null
+  stripe_subscription_id?: string | null
+
+  // Subscription
+  subscription_status: SubscriptionStatus
+  subscription_tier: SubscriptionTier
+  trial_ends_at?: string | null
+  subscription_ends_at?: string | null
+
+  // Usage limits
+  max_team_members: number
+  max_clients: number
+  max_storage_mb: number
+  max_workflows: number
+
+  // Contact info
+  billing_email?: string | null
+  billing_name?: string | null
+
+  // Owner
+  owner_user_id?: string | null
+
+  // Metadata
+  created_at: string
+  updated_at: string
+  deleted_at?: string | null
+}
+
+export interface OrganizationMembership {
+  id: string
+  organization_id: string
+  user_id: string
+  role: OrganizationRole
+
+  // Invitation tracking
+  invited_by?: string | null
+  invited_at?: string | null
+  accepted_at?: string | null
+
+  is_active: boolean
+  created_at: string
+  updated_at: string
+
+  // Joined data
+  organization?: Organization
+  user?: User
+}
+
+// Organization with usage stats
+export interface OrganizationWithUsage extends Organization {
+  current_team_members?: number
+  current_clients?: number
+  current_storage_mb?: number
+  current_workflows?: number
+}
+
+// Insert/Update types
+export type OrganizationInsert = Omit<
+  Organization,
+  'id' | 'created_at' | 'updated_at'
+>
+
+export type OrganizationUpdate = Partial<
+  Omit<OrganizationInsert, 'slug'> // slug should be immutable
+>
+
+export type OrganizationMembershipInsert = Omit<
+  OrganizationMembership,
+  'id' | 'created_at' | 'updated_at' | 'organization' | 'user'
+>
+
+// =====================================================
+// Feature Flags & Subscription Plans Types
+// =====================================================
+
+export interface FeatureFlags {
+  // Team features
+  max_team_members: number
+  custom_roles: boolean
+
+  // Client features
+  max_clients: number
+  client_portal: boolean
+
+  // Workflow features
+  max_workflows: number
+  workflow_templates: boolean
+  advanced_conditions: boolean
+
+  // Communication features
+  email_enabled: boolean
+  sms_enabled: boolean
+  max_emails_per_month: number
+  max_sms_per_month: number
+
+  // Storage features
+  max_storage_mb: number
+  document_uploads: boolean
+
+  // Branding features
+  custom_branding: boolean
+  white_label: boolean
+  custom_domain: boolean
+
+  // Analytics features
+  basic_reports: boolean
+  advanced_reports: boolean
+  custom_dashboards: boolean
+
+  // Integration features
+  api_access: boolean
+  webhook_access: boolean
+  calendar_sync: boolean
+
+  // Support features
+  priority_support: boolean
+  dedicated_account_manager: boolean
+}
+
+export interface SubscriptionPlan {
+  id: string // 'starter', 'professional', 'enterprise'
+  name: string
+  description?: string | null
+  price_monthly: number // cents
+  price_yearly: number // cents
+  features: FeatureFlags
+  is_active: boolean
+  is_default: boolean
+  display_order: number
+  created_at: string
+  updated_at: string
+}
+
+// Default feature flags per tier
+export const DEFAULT_FEATURE_FLAGS: Record<SubscriptionTier, FeatureFlags> = {
+  starter: {
+    max_team_members: 3,
+    custom_roles: false,
+    max_clients: 50,
+    client_portal: true,
+    max_workflows: 5,
+    workflow_templates: true,
+    advanced_conditions: false,
+    email_enabled: true,
+    sms_enabled: false,
+    max_emails_per_month: 500,
+    max_sms_per_month: 0,
+    max_storage_mb: 500,
+    document_uploads: true,
+    custom_branding: false,
+    white_label: false,
+    custom_domain: false,
+    basic_reports: true,
+    advanced_reports: false,
+    custom_dashboards: false,
+    api_access: false,
+    webhook_access: false,
+    calendar_sync: false,
+    priority_support: false,
+    dedicated_account_manager: false,
+  },
+  professional: {
+    max_team_members: 10,
+    custom_roles: true,
+    max_clients: 500,
+    client_portal: true,
+    max_workflows: 50,
+    workflow_templates: true,
+    advanced_conditions: true,
+    email_enabled: true,
+    sms_enabled: true,
+    max_emails_per_month: 5000,
+    max_sms_per_month: 500,
+    max_storage_mb: 5000,
+    document_uploads: true,
+    custom_branding: true,
+    white_label: false,
+    custom_domain: false,
+    basic_reports: true,
+    advanced_reports: true,
+    custom_dashboards: true,
+    api_access: true,
+    webhook_access: true,
+    calendar_sync: true,
+    priority_support: true,
+    dedicated_account_manager: false,
+  },
+  enterprise: {
+    max_team_members: -1, // Unlimited
+    custom_roles: true,
+    max_clients: -1, // Unlimited
+    client_portal: true,
+    max_workflows: -1, // Unlimited
+    workflow_templates: true,
+    advanced_conditions: true,
+    email_enabled: true,
+    sms_enabled: true,
+    max_emails_per_month: -1, // Unlimited
+    max_sms_per_month: -1, // Unlimited
+    max_storage_mb: -1, // Unlimited
+    document_uploads: true,
+    custom_branding: true,
+    white_label: true,
+    custom_domain: true,
+    basic_reports: true,
+    advanced_reports: true,
+    custom_dashboards: true,
+    api_access: true,
+    webhook_access: true,
+    calendar_sync: true,
+    priority_support: true,
+    dedicated_account_manager: true,
+  },
+  custom: {
+    // Custom plans - features set per organization
+    max_team_members: -1,
+    custom_roles: true,
+    max_clients: -1,
+    client_portal: true,
+    max_workflows: -1,
+    workflow_templates: true,
+    advanced_conditions: true,
+    email_enabled: true,
+    sms_enabled: true,
+    max_emails_per_month: -1,
+    max_sms_per_month: -1,
+    max_storage_mb: -1,
+    document_uploads: true,
+    custom_branding: true,
+    white_label: true,
+    custom_domain: true,
+    basic_reports: true,
+    advanced_reports: true,
+    custom_dashboards: true,
+    api_access: true,
+    webhook_access: true,
+    calendar_sync: true,
+    priority_support: true,
+    dedicated_account_manager: true,
+  },
+}
