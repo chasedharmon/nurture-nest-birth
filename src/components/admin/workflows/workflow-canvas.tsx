@@ -30,6 +30,7 @@ import type {
   StepConfig,
   WorkflowWithSteps,
   CanvasData,
+  WorkflowObjectType,
 } from '@/lib/workflows/types'
 
 const nodeTypes = {
@@ -335,6 +336,7 @@ function WorkflowCanvasInner({
         onUpdateNode={handleUpdateNode}
         onDeleteNode={handleDeleteNode}
         emailTemplates={emailTemplates}
+        objectType={workflow.object_type as WorkflowObjectType}
       />
     </div>
   )

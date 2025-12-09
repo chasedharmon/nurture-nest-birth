@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -15,13 +16,19 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Trash2 } from 'lucide-react'
-import type { WorkflowNode, StepConfig } from '@/lib/workflows/types'
+import { VariablePicker } from '../variable-picker'
+import type {
+  WorkflowNode,
+  StepConfig,
+  WorkflowObjectType,
+} from '@/lib/workflows/types'
 
 interface PropertiesPanelProps {
   selectedNode: WorkflowNode | null
   onUpdateNode: (nodeId: string, config: StepConfig) => void
   onDeleteNode: (nodeId: string) => void
   emailTemplates?: { id: string; name: string }[]
+  objectType?: WorkflowObjectType
 }
 
 export function PropertiesPanel({
@@ -29,6 +36,7 @@ export function PropertiesPanel({
   onUpdateNode,
   onDeleteNode,
   emailTemplates = [],
+  objectType,
 }: PropertiesPanelProps) {
   const form = useForm<StepConfig>({
     defaultValues: selectedNode?.data.config || {},
@@ -89,6 +97,7 @@ export function PropertiesPanel({
               form={form}
               onBlur={handleBlur}
               emailTemplates={emailTemplates}
+              objectType={objectType}
             />
           )}
 
@@ -156,9 +165,22 @@ interface ConfigProps {
   form: ReturnType<typeof useForm<StepConfig>>
   onBlur: () => void
   emailTemplates?: { id: string; name: string }[]
+  objectType?: WorkflowObjectType
 }
 
-function SendEmailConfig({ form, onBlur, emailTemplates = [] }: ConfigProps) {
+function SendEmailConfig({
+  form,
+  onBlur,
+  emailTemplates = [],
+  objectType,
+}: ConfigProps) {
+  // Append variable to the end of a field value
+  const insertVariable = (variable: string, field: 'subject' | 'body') => {
+    const currentValue = form.getValues(field) || ''
+    form.setValue(field, currentValue + variable)
+    onBlur()
+  }
+
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
@@ -173,9 +195,10 @@ function SendEmailConfig({ form, onBlur, emailTemplates = [] }: ConfigProps) {
           }}
         >
           <SelectTrigger id="template_name">
-            <SelectValue placeholder="Select template" />
+            <SelectValue placeholder="Select template (optional)" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="">No template (custom content)</SelectItem>
             {emailTemplates.map(template => (
               <SelectItem key={template.id} value={template.name}>
                 {template.name}
@@ -238,14 +261,69 @@ function SendEmailConfig({ form, onBlur, emailTemplates = [] }: ConfigProps) {
         </div>
       )}
 
+      <Separator />
+
       <div className="space-y-1.5">
-        <Label htmlFor="subject" className="text-xs">
-          Custom Subject (optional)
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="subject" className="text-xs">
+            Subject
+          </Label>
+          <VariablePicker
+            objectType={objectType}
+            onSelect={v => insertVariable(v, 'subject')}
+          />
+        </div>
         <Input
           id="subject"
-          placeholder="Override template subject"
+          placeholder="Welcome to {{doula_name}}!"
           {...form.register('subject')}
+          onBlur={onBlur}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="body" className="text-xs">
+            Email Body
+          </Label>
+          <VariablePicker
+            objectType={objectType}
+            onSelect={v => insertVariable(v, 'body')}
+          />
+        </div>
+        <Textarea
+          id="body"
+          placeholder="Hi {{first_name}},\n\nWelcome to our practice!"
+          rows={5}
+          className="text-xs resize-none"
+          {...form.register('body')}
+          onBlur={onBlur}
+        />
+        <p className="text-xs text-muted-foreground">
+          Use {'{{variable}}'} syntax for dynamic content
+        </p>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="cta_text" className="text-xs">
+          Button Text (optional)
+        </Label>
+        <Input
+          id="cta_text"
+          placeholder="View Portal"
+          {...form.register('cta_text')}
+          onBlur={onBlur}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="cta_url" className="text-xs">
+          Button URL (optional)
+        </Label>
+        <Input
+          id="cta_url"
+          placeholder="{{portal_url}}"
+          {...form.register('cta_url')}
           onBlur={onBlur}
         />
       </div>
