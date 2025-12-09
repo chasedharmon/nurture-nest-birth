@@ -34,8 +34,13 @@ const footerNavigation = {
 export function Footer() {
   const pathname = usePathname()
 
-  // Don't render on admin or client portal routes
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/client')) {
+  // Don't render on admin, client portal, or login routes
+  const isHiddenRoute =
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/client') ||
+    pathname?.startsWith('/login')
+
+  if (isHiddenRoute) {
     return null
   }
 

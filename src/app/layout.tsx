@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Lora } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
-import { Header } from '@/components/layout/header'
-import { Footer } from '@/components/layout/footer'
 import { SkipToContent } from '@/components/ui/skip-to-content'
 import { PersonalizationProvider } from '@/components/personalization'
+import {
+  ConditionalHeader,
+  ConditionalFooter,
+} from '@/components/layout/conditional-layout'
 import {
   JSONLDScript,
   getOrganizationSchema,
@@ -118,11 +120,11 @@ export default function RootLayout({
       <body className={`${inter.variable} ${lora.variable} antialiased`}>
         <PersonalizationProvider>
           <SkipToContent />
-          <Header />
+          <ConditionalHeader />
           <main id="main-content" className="min-h-screen">
             {children}
           </main>
-          <Footer />
+          <ConditionalFooter />
         </PersonalizationProvider>
         <Analytics />
       </body>

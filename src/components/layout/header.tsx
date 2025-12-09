@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { siteConfig } from '@/config/site'
@@ -28,8 +28,13 @@ export function Header() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Don't render on admin or client portal routes
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/client')) {
+  // Don't render on admin, client portal, or login routes
+  const isHiddenRoute =
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/client') ||
+    pathname?.startsWith('/login')
+
+  if (isHiddenRoute) {
     return null
   }
 
