@@ -22,6 +22,8 @@ import {
   Building2,
   Briefcase,
   Heart,
+  Mail,
+  Package,
 } from 'lucide-react'
 
 interface SetupCategory {
@@ -99,6 +101,18 @@ const setupCategories: SetupCategory[] = [
         description: 'Configure client intake questionnaires',
         href: '/admin/setup/intake-forms',
         icon: <ClipboardList className="h-5 w-5" />,
+      },
+      {
+        title: 'Email Templates',
+        description: 'Reusable email templates with variables',
+        href: '/admin/setup/email-templates',
+        icon: <Mail className="h-5 w-5" />,
+      },
+      {
+        title: 'Welcome Packets',
+        description: 'Automated onboarding bundles for new clients',
+        href: '/admin/setup/welcome-packets',
+        icon: <Package className="h-5 w-5" />,
       },
     ],
   },

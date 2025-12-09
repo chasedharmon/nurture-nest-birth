@@ -1335,3 +1335,233 @@ export async function toggleServicePackageActive(
     }
   }
 }
+
+// ============================================================================
+// EMAIL TEMPLATES
+// ============================================================================
+
+export interface EmailTemplate {
+  id: string
+  name: string
+  description: string | null
+  category: string
+  subject: string
+  body: string
+  available_variables: string[]
+  is_active: boolean
+  is_default: boolean
+  created_at: string
+  updated_at: string
+  created_by: string | null
+}
+
+export async function getEmailTemplates(): Promise<{
+  success: boolean
+  templates?: EmailTemplate[]
+  error?: string
+}> {
+  try {
+    const supabase = await createClient()
+
+    const { data: templates, error } = await supabase
+      .from('email_templates')
+      .select('*')
+      .order('category')
+      .order('name')
+
+    if (error) throw error
+
+    return { success: true, templates: templates || [] }
+  } catch (error) {
+    console.error('[Setup] Failed to get email templates:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get email templates',
+    }
+  }
+}
+
+export async function getEmailTemplate(templateId: string): Promise<{
+  success: boolean
+  template?: EmailTemplate
+  error?: string
+}> {
+  try {
+    const supabase = await createClient()
+
+    const { data: template, error } = await supabase
+      .from('email_templates')
+      .select('*')
+      .eq('id', templateId)
+      .single()
+
+    if (error) throw error
+
+    return { success: true, template }
+  } catch (error) {
+    console.error('[Setup] Failed to get email template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to get email template',
+    }
+  }
+}
+
+export async function createEmailTemplate(data: {
+  name: string
+  description?: string
+  category: string
+  subject: string
+  body: string
+  available_variables?: string[]
+  is_active?: boolean
+  is_default?: boolean
+}): Promise<{ success: boolean; template?: EmailTemplate; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    // Get current user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    const { data: template, error } = await supabase
+      .from('email_templates')
+      .insert({
+        name: data.name,
+        description: data.description || null,
+        category: data.category,
+        subject: data.subject,
+        body: data.body,
+        available_variables: data.available_variables || [],
+        is_active: data.is_active ?? true,
+        is_default: data.is_default ?? false,
+        created_by: user?.id || null,
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/email-templates')
+    return { success: true, template }
+  } catch (error) {
+    console.error('[Setup] Failed to create email template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to create email template',
+    }
+  }
+}
+
+export async function updateEmailTemplate(
+  templateId: string,
+  data: {
+    name?: string
+    description?: string
+    category?: string
+    subject?: string
+    body?: string
+    available_variables?: string[]
+    is_active?: boolean
+    is_default?: boolean
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('email_templates')
+      .update({
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.description !== undefined && {
+          description: data.description || null,
+        }),
+        ...(data.category !== undefined && { category: data.category }),
+        ...(data.subject !== undefined && { subject: data.subject }),
+        ...(data.body !== undefined && { body: data.body }),
+        ...(data.available_variables !== undefined && {
+          available_variables: data.available_variables,
+        }),
+        ...(data.is_active !== undefined && { is_active: data.is_active }),
+        ...(data.is_default !== undefined && { is_default: data.is_default }),
+      })
+      .eq('id', templateId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/email-templates')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to update email template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update email template',
+    }
+  }
+}
+
+export async function deleteEmailTemplate(
+  templateId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('email_templates')
+      .delete()
+      .eq('id', templateId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/email-templates')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to delete email template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete email template',
+    }
+  }
+}
+
+export async function toggleEmailTemplateActive(
+  templateId: string,
+  isActive: boolean
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+      .from('email_templates')
+      .update({ is_active: isActive })
+      .eq('id', templateId)
+
+    if (error) throw error
+
+    revalidatePath('/admin/setup/email-templates')
+    return { success: true }
+  } catch (error) {
+    console.error('[Setup] Failed to toggle email template:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to toggle email template',
+    }
+  }
+}

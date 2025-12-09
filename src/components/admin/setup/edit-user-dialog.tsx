@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Dialog,
   DialogContent,
@@ -20,7 +22,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { updateUser } from '@/app/actions/setup'
+import { editUserSchema, type EditUserFormData } from '@/lib/validations/setup'
 import type { UserWithRole, Role } from '@/lib/supabase/types'
 import { Loader2 } from 'lucide-react'
 
@@ -39,31 +50,45 @@ export function EditUserDialog({
 }: EditUserDialogProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
-    full_name: user.full_name || '',
-    role_id: user.role_id || '',
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  const form = useForm<EditUserFormData>({
+    resolver: zodResolver(editUserSchema),
+    defaultValues: {
+      fullName: user.full_name || '',
+      roleId: user.role_id || '',
+    },
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Reset form when user changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        fullName: user.full_name || '',
+        roleId: user.role_id || '',
+      })
+      setServerError(null)
+    }
+  }, [open, user, form])
+
+  const onSubmit = async (data: EditUserFormData) => {
     setIsLoading(true)
-    setError(null)
+    setServerError(null)
 
     try {
       const result = await updateUser(user.id, {
-        full_name: formData.full_name || undefined,
-        role_id: formData.role_id || undefined,
+        full_name: data.fullName || undefined,
+        role_id: data.roleId || undefined,
       })
 
       if (result.success) {
         onOpenChange(false)
         router.refresh()
       } else {
-        setError(result.error || 'Failed to update user')
+        setServerError(result.error || 'Failed to update user')
       }
     } catch {
-      setError('An unexpected error occurred')
+      setServerError('An unexpected error occurred')
     } finally {
       setIsLoading(false)
     }
@@ -79,75 +104,83 @@ export function EditUserDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {serverError && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {serverError}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Email Address</Label>
+              <Input value={user.email} disabled className="bg-muted" />
+              <p className="text-xs text-muted-foreground">
+                Email cannot be changed.
+              </p>
             </div>
-          )}
 
-          <div className="space-y-2">
-            <Label>Email Address</Label>
-            <Input value={user.email} disabled className="bg-muted" />
-            <p className="text-xs text-muted-foreground">
-              Email cannot be changed.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="full_name">Full Name</Label>
-            <Input
-              id="full_name"
-              type="text"
-              placeholder="John Doe"
-              value={formData.full_name}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, full_name: e.target.value }))
-              }
+            <FormField
+              control={form.control}
+              name="fullName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="John Doe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select
-              value={formData.role_id}
-              onValueChange={value =>
-                setFormData(prev => ({ ...prev, role_id: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                {roles.map(role => (
-                  <SelectItem key={role.id} value={role.id}>
-                    {role.name.charAt(0).toUpperCase() + role.name.slice(1)}
-                    {role.is_system && (
-                      <span className="ml-2 text-muted-foreground">
-                        (System)
-                      </span>
-                    )}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <FormField
+              control={form.control}
+              name="roleId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {roles.map(role => (
+                        <SelectItem key={role.id} value={role.id}>
+                          {role.name.charAt(0).toUpperCase() +
+                            role.name.slice(1)}
+                          {role.is_system && (
+                            <span className="ml-2 text-muted-foreground">
+                              (System)
+                            </span>
+                          )}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

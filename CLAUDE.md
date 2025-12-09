@@ -11,10 +11,10 @@
 | ---------------------- | ----------- | ------------------------------------------ |
 | Loading Skeletons      | ✅ COMPLETE | Dashboard, leads, setup pages              |
 | Error Boundaries       | ✅ COMPLETE | Admin-specific error page with dev details |
-| Mobile Navigation      | 🔲 PENDING  | Marketing header hamburger menu            |
-| Form Validation (Zod)  | 🔲 PENDING  | Admin setup forms                          |
-| Canned Email Templates | 🔲 PENDING  | Reusable email content library             |
-| Welcome Packets        | 🔲 PENDING  | Auto-trigger onboarding bundles            |
+| Mobile Navigation      | ✅ COMPLETE | Sheet component + slide-out drawer         |
+| Form Validation (Zod)  | 🔄 PARTIAL  | 5/9 forms done, schemas ready for rest     |
+| Canned Email Templates | ✅ COMPLETE | Database, UI, CRUD actions                 |
+| Welcome Packets        | ✅ COMPLETE | Database schema, UI (full editor later)    |
 | Workflow Automation    | 🔲 PENDING  | Visual canvas builder (like SF Flow)       |
 | Unified Messaging      | 🔲 PENDING  | In-app messaging system                    |
 | Scheduling Rails       | 🔲 PENDING  | Availability/booking type tables           |
@@ -27,6 +27,15 @@
 - `src/app/admin/error.tsx` - Admin error boundary
 - `src/app/admin/leads/loading.tsx` - Leads page loading state
 - `src/app/admin/setup/loading.tsx` - Setup hub loading state
+- `src/components/ui/sheet.tsx` - Sheet/drawer component for mobile nav
+- `src/lib/validations/setup.ts` - Zod schemas for admin setup forms
+- `src/app/admin/setup/email-templates/page.tsx` - Email templates management
+- `src/components/admin/setup/email-template-dialog.tsx` - Template create/edit dialog
+- `src/components/admin/setup/email-template-actions.tsx` - Template actions (preview, delete)
+- `supabase/migrations/20251211000000_email_templates.sql` - Email templates table + defaults
+- `src/app/admin/setup/welcome-packets/page.tsx` - Welcome packets management UI
+- `supabase/migrations/20251212000000_welcome_packets.sql` - Welcome packets tables + defaults
+- `tests/e2e/admin-setup-polish.spec.ts` - E2E tests for Phase 7 polish features
 
 ### Phase 6+ Progress (COMPLETE)
 
