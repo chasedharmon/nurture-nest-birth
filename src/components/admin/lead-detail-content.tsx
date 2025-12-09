@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ClientDetailTabs } from '@/components/admin/client-detail-tabs'
 import { ClientOverview } from '@/components/admin/client-overview'
@@ -14,6 +15,7 @@ import { InvoicesList } from '@/components/admin/invoices-list'
 import { ContractsList } from '@/components/admin/contracts-list'
 import { ClientTeamAssignments } from '@/components/admin/team'
 import { LeadMessagesCard } from '@/components/admin/leads/lead-messages-card'
+import { createConversation } from '@/app/actions/messaging'
 import type {
   Lead,
   LeadActivity,
@@ -59,11 +61,26 @@ export function LeadDetailContent({
   conversation = null,
   recentMessages = [],
 }: LeadDetailContentProps) {
+  const router = useRouter()
   const [currentTab, setCurrentTab] = useState('overview')
+  const [, startTransition] = useTransition()
 
   const handleAssignClick = useCallback(() => {
     setCurrentTab('team')
   }, [])
+
+  const handleStartConversation = useCallback(() => {
+    startTransition(async () => {
+      const result = await createConversation({
+        clientId: lead.id,
+        initialMessage: `Hello ${lead.name}! How can we help you today?`,
+      })
+
+      if (result.success && result.conversationId) {
+        router.push(`/admin/messages/${result.conversationId}`)
+      }
+    })
+  }, [lead.id, lead.name, router])
 
   const unreadMessages = conversation?.unread_count || 0
 
@@ -92,6 +109,7 @@ export function LeadDetailContent({
           clientName={lead.name}
           conversation={conversation}
           recentMessages={recentMessages}
+          onStartConversation={handleStartConversation}
         />
       }
       servicesTab={

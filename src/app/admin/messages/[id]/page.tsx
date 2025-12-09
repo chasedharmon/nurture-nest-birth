@@ -1,10 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import {
-  getConversationById,
-  getMessages,
-  markConversationAsRead,
-} from '@/app/actions/messaging'
+import { getConversationById, getMessages } from '@/app/actions/messaging'
 import { MessageThread } from '@/components/admin/messages/message-thread'
 import { MessageComposer } from '@/components/admin/messages/message-composer'
 import { ConversationHeader } from '@/components/admin/messages/conversation-header'
@@ -72,8 +68,8 @@ export default async function ConversationPage({
   const messages = messagesResult.messages || []
   const participants = participantsResult.data || []
 
-  // Mark conversation as read
-  await markConversationAsRead(id)
+  // Note: markConversationAsRead is called in the MessageThread component
+  // via useEffect to avoid calling revalidatePath during render
 
   const client = conversation.client
 

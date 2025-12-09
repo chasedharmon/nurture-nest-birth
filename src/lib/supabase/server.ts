@@ -31,14 +31,13 @@ export async function createClient() {
 
 // Admin client with service role key - bypasses RLS
 // Use this for server-side operations that need full database access
+// Note: Falls back to anon key if service role key not set (for dev environments)
 export function createAdminClient() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!serviceRoleKey) {
-    console.warn(
-      '[Supabase] No service role key found, falling back to anon key'
-    )
-    // Fall back to anon key if no service role key (dev mode)
+    // Fall back to anon key if no service role key
+    // This works for client portal because we added RLS policies for anon role
     return createSupabaseClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

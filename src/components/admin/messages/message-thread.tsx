@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea'
 import type { Message } from '@/app/actions/messaging'
+import { markConversationAsRead } from '@/app/actions/messaging'
 import {
   useRealtimeMessages,
   type MessageWithStatus,
@@ -93,6 +94,11 @@ export function MessageThread({
   const [editContent, setEditContent] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  // Mark conversation as read on mount (moved from server component to avoid revalidatePath during render)
+  useEffect(() => {
+    markConversationAsRead(conversationId)
+  }, [conversationId])
 
   // Scroll to bottom on initial load and new messages
   useEffect(() => {

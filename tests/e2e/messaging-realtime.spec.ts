@@ -755,15 +755,8 @@ test.describe('Connection Status', () => {
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(3000)
 
-    // Filter for connection-related errors (allow some in test env)
-    const _connectionErrors = errors.filter(
-      e =>
-        e.includes('WebSocket') ||
-        e.includes('connection') ||
-        e.includes('realtime')
-    )
-
     // Some connection errors may occur in test environment, but page should still work
+    // Note: WebSocket/connection/realtime errors are expected in test env
     const pageLoaded = await page.locator('body').isVisible()
     expect(pageLoaded).toBeTruthy()
   })

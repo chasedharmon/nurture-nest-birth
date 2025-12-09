@@ -617,6 +617,16 @@ export async function getRecentMessagesForClient(
 // ============================================================================
 
 export async function getClientConversations(clientId: string) {
+  // SECURITY: Validate client session server-side
+  const { getClientSession } = await import('./client-auth')
+  const session = await getClientSession()
+
+  if (!session || session.clientId !== clientId) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  // Use regular client - RLS policies allow anon access for client portal
+  // Security is enforced above via session validation
   const supabase = await createClient()
 
   // Clients can only see client-direct conversations
@@ -660,7 +670,23 @@ export async function sendClientMessage(data: {
   clientName: string
   content: string
 }) {
-  const supabase = await createClient()
+  // SECURITY: Validate client session server-side
+  // Import dynamically to avoid circular dependencies
+  const { getClientSession } = await import('./client-auth')
+  const session = await getClientSession()
+
+  if (!session) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // SECURITY: Verify the session's clientId matches the provided clientId
+  if (session.clientId !== data.clientId) {
+    console.error('[Security] Client ID mismatch:', {
+      sessionClientId: session.clientId,
+      providedClientId: data.clientId,
+    })
+    return { success: false, error: 'Unauthorized' }
+  }
 
   // Permission check: Can this client send to this conversation?
   const canSend = await canSendMessage(
@@ -675,6 +701,10 @@ export async function sendClientMessage(data: {
       error: 'You do not have permission to send messages to this conversation',
     }
   }
+
+  // Use regular client - RLS policies allow anon access for client portal
+  // Security is enforced above via session validation
+  const supabase = await createClient()
 
   const { data: message, error } = await supabase
     .from('messages')
@@ -700,6 +730,15 @@ export async function markClientConversationAsRead(
   conversationId: string,
   clientId: string
 ) {
+  // SECURITY: Validate client session server-side
+  const { getClientSession } = await import('./client-auth')
+  const session = await getClientSession()
+
+  if (!session || session.clientId !== clientId) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  // Use regular client - RLS policies allow anon access for client portal
   const supabase = await createClient()
 
   const { error } = await supabase.rpc('mark_conversation_read', {
@@ -717,6 +756,15 @@ export async function markClientConversationAsRead(
 }
 
 export async function getClientUnreadCount(clientId: string) {
+  // SECURITY: Validate client session server-side
+  const { getClientSession } = await import('./client-auth')
+  const session = await getClientSession()
+
+  if (!session || session.clientId !== clientId) {
+    return { success: false, error: 'Unauthorized', count: 0 }
+  }
+
+  // Use regular client - RLS policies allow anon access for client portal
   const supabase = await createClient()
 
   const { data, error } = await supabase

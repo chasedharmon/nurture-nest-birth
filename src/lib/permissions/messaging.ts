@@ -125,8 +125,13 @@ export async function canViewConversation(
   // Client check
   if (clientSession) {
     // Clients can only see client-direct conversations they're part of
+    // Support both new 'client-direct' and legacy 'direct' types
+    const isClientConversation =
+      conversation.conversation_type === 'client-direct' ||
+      conversation.conversation_type === 'direct'
+
     if (
-      conversation.conversation_type === 'client-direct' &&
+      isClientConversation &&
       conversation.client_id === clientSession.clientId
     ) {
       return true
@@ -206,8 +211,13 @@ export async function canSendMessage(
   // Client check
   if (clientSession) {
     // Clients can only send to their client-direct conversations
+    // Support both new 'client-direct' and legacy 'direct' types
+    const isClientConversation =
+      conversation.conversation_type === 'client-direct' ||
+      conversation.conversation_type === 'direct'
+
     if (
-      conversation.conversation_type === 'client-direct' &&
+      isClientConversation &&
       conversation.client_id === clientSession.clientId
     ) {
       return true
