@@ -1,6 +1,15 @@
 export { DoulaDashboard } from './doula-dashboard'
 export * from './widgets'
 
+// Skeleton Components
+export {
+  DashboardSkeleton,
+  MetricSkeleton,
+  ChartSkeleton,
+  ListSkeleton,
+  FunnelSkeleton,
+} from './dashboard-skeleton'
+
 // Dashboard Builder Components
 export { DashboardEditor } from './dashboard-editor'
 export type { EditorWidget, DashboardConfig } from './dashboard-editor'
