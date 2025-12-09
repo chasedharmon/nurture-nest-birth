@@ -15,6 +15,8 @@ import type {
   StepCondition,
   StepBranch,
   CanvasData,
+  EntryCriteria,
+  ReentryMode,
 } from '@/lib/workflows/types'
 
 // ============================================================================
@@ -90,7 +92,10 @@ export async function getWorkflowWithSteps(id: string) {
   }
 }
 
-export async function createWorkflow(formData: WorkflowFormData) {
+export async function createWorkflow(
+  formData: Partial<WorkflowFormData> &
+    Pick<WorkflowFormData, 'name' | 'object_type' | 'trigger_type'>
+) {
   const supabase = await createClient()
 
   const {
@@ -105,7 +110,13 @@ export async function createWorkflow(formData: WorkflowFormData) {
       object_type: formData.object_type,
       trigger_type: formData.trigger_type,
       trigger_config: formData.trigger_config || {},
-      is_active: formData.is_active,
+      is_active: formData.is_active ?? false,
+      entry_criteria: formData.entry_criteria || {
+        conditions: [],
+        match_type: 'all',
+      },
+      reentry_mode: formData.reentry_mode || 'allow_all',
+      reentry_wait_days: formData.reentry_wait_days || null,
       created_by: user?.id,
     })
     .select()
@@ -879,6 +890,62 @@ export async function triggerWorkflowManually(
     .eq('id', workflowId)
 
   return { data: execution as WorkflowExecution, error: null }
+}
+
+// ============================================================================
+// Workflow Settings (Entry Criteria & Re-entry Rules)
+// ============================================================================
+
+export async function updateWorkflowSettings(
+  id: string,
+  settings: {
+    entry_criteria?: EntryCriteria
+    reentry_mode?: ReentryMode
+    reentry_wait_days?: number | null
+    name?: string
+    description?: string | null
+    trigger_config?: TriggerConfig
+  }
+) {
+  const supabase = await createClient()
+
+  const updateData: Record<string, unknown> = {}
+
+  if (settings.entry_criteria !== undefined) {
+    updateData.entry_criteria = settings.entry_criteria
+  }
+  if (settings.reentry_mode !== undefined) {
+    updateData.reentry_mode = settings.reentry_mode
+  }
+  if (settings.reentry_wait_days !== undefined) {
+    updateData.reentry_wait_days = settings.reentry_wait_days
+  }
+  if (settings.name !== undefined) {
+    updateData.name = settings.name
+  }
+  if (settings.description !== undefined) {
+    updateData.description = settings.description
+  }
+  if (settings.trigger_config !== undefined) {
+    updateData.trigger_config = settings.trigger_config
+  }
+
+  const { data, error } = await supabase
+    .from('workflows')
+    .update(updateData)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('[Workflows] Failed to update workflow settings:', error)
+    return { data: null, error: error.message }
+  }
+
+  revalidatePath('/admin/workflows')
+  revalidatePath(`/admin/workflows/${id}`)
+  revalidatePath(`/admin/workflows/${id}/settings`)
+  return { data: data as Workflow, error: null }
 }
 
 export async function getRecordsForTrigger(objectType: string): Promise<{

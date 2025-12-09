@@ -76,6 +76,11 @@ export interface Workflow {
   canvas_data: CanvasData
   execution_count: number
   last_executed_at: string | null
+  // Entry criteria for filtering which records enter workflow
+  entry_criteria: EntryCriteria
+  // Re-entry rules to prevent duplicate executions
+  reentry_mode: ReentryMode
+  reentry_wait_days: number | null
   created_at: string
   updated_at: string
 }
@@ -150,6 +155,41 @@ export interface TriggerConfig {
     relative_field?: string
   }
 }
+
+// ============================================================================
+// Entry Criteria Types
+// ============================================================================
+
+export type EntryConditionOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'contains'
+  | 'not_contains'
+  | 'starts_with'
+  | 'ends_with'
+  | 'is_empty'
+  | 'is_not_empty'
+  | 'greater_than'
+  | 'less_than'
+  | 'in_list'
+  | 'not_in_list'
+
+export interface EntryCondition {
+  field: string
+  operator: EntryConditionOperator
+  value?: string
+}
+
+export interface EntryCriteria {
+  conditions: EntryCondition[]
+  match_type: 'all' | 'any' // 'all' = AND, 'any' = OR
+}
+
+export type ReentryMode =
+  | 'allow_all' // Always allow re-entry
+  | 'no_reentry' // Never allow re-entry
+  | 'reentry_after_exit' // Only after previous execution completed/failed
+  | 'reentry_after_days' // Only after X days since last execution
 
 export interface StepConfig {
   // Send Email
@@ -472,7 +512,58 @@ export interface WorkflowFormData {
   trigger_type: WorkflowTriggerType
   trigger_config: TriggerConfig
   is_active: boolean
+  entry_criteria: EntryCriteria
+  reentry_mode: ReentryMode
+  reentry_wait_days: number | null
 }
+
+// Entry condition operator options for UI
+export const ENTRY_CONDITION_OPERATORS: {
+  value: EntryConditionOperator
+  label: string
+  requiresValue: boolean
+}[] = [
+  { value: 'equals', label: 'Equals', requiresValue: true },
+  { value: 'not_equals', label: 'Does not equal', requiresValue: true },
+  { value: 'contains', label: 'Contains', requiresValue: true },
+  { value: 'not_contains', label: 'Does not contain', requiresValue: true },
+  { value: 'starts_with', label: 'Starts with', requiresValue: true },
+  { value: 'ends_with', label: 'Ends with', requiresValue: true },
+  { value: 'is_empty', label: 'Is empty', requiresValue: false },
+  { value: 'is_not_empty', label: 'Is not empty', requiresValue: false },
+  { value: 'greater_than', label: 'Greater than', requiresValue: true },
+  { value: 'less_than', label: 'Less than', requiresValue: true },
+  { value: 'in_list', label: 'Is one of', requiresValue: true },
+  { value: 'not_in_list', label: 'Is not one of', requiresValue: true },
+]
+
+// Re-entry mode options for UI
+export const REENTRY_MODE_OPTIONS: {
+  value: ReentryMode
+  label: string
+  description: string
+}[] = [
+  {
+    value: 'allow_all',
+    label: 'Always allow',
+    description: 'Records can re-enter this workflow anytime',
+  },
+  {
+    value: 'no_reentry',
+    label: 'Never allow',
+    description: 'Once a record enters, it can never re-enter',
+  },
+  {
+    value: 'reentry_after_exit',
+    label: 'After completion',
+    description: 'Only after the previous execution finishes',
+  },
+  {
+    value: 'reentry_after_days',
+    label: 'After waiting period',
+    description: 'Only after a specified number of days',
+  },
+]
 
 export interface WorkflowWithSteps extends Workflow {
   steps: WorkflowStep[]
