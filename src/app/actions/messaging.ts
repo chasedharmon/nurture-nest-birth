@@ -828,6 +828,129 @@ export async function getClientUnreadCount(clientId: string) {
   return { success: true, count: total }
 }
 
+/**
+ * Create a new conversation from the client portal
+ * Clients can initiate contact with their doula team
+ */
+export async function createClientConversation(data: {
+  clientId: string
+  clientName: string
+  subject?: string
+  initialMessage: string
+}) {
+  // SECURITY: Validate client session server-side
+  const { getClientSession } = await import('./client-auth')
+  const session = await getClientSession()
+
+  if (!session) {
+    return { success: false, error: 'Not authenticated' }
+  }
+
+  // SECURITY: Verify the session's clientId matches the provided clientId
+  if (session.clientId !== data.clientId) {
+    console.error('[Security] Client ID mismatch:', {
+      sessionClientId: session.clientId,
+      providedClientId: data.clientId,
+    })
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  // Use regular client - RLS policies allow anon access for client portal
+  const supabase = await createClient()
+
+  // Check if client already has an active conversation
+  const { data: existingConv } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('client_id', data.clientId)
+    .in('conversation_type', ['client-direct', 'direct'])
+    .eq('status', 'active')
+    .limit(1)
+    .single()
+
+  let conversationId: string
+
+  if (existingConv) {
+    // Use existing conversation
+    conversationId = existingConv.id
+  } else {
+    // Create new conversation
+    const { data: newConv, error: convError } = await supabase
+      .from('conversations')
+      .insert({
+        client_id: data.clientId,
+        subject: data.subject || 'New Message',
+        conversation_type: 'client-direct',
+        status: 'active',
+      })
+      .select()
+      .single()
+
+    if (convError) {
+      console.error('Error creating client conversation:', convError)
+      return { success: false, error: convError.message }
+    }
+
+    conversationId = newConv.id
+
+    // Add client as participant
+    const { error: partError } = await supabase
+      .from('conversation_participants')
+      .insert({
+        conversation_id: conversationId,
+        client_id: data.clientId,
+        display_name: data.clientName,
+        role: 'participant',
+      })
+
+    if (partError) {
+      console.error('Error adding client as participant:', partError)
+      // Clean up conversation on failure
+      await supabase.from('conversations').delete().eq('id', conversationId)
+      return { success: false, error: partError.message }
+    }
+
+    // Get team members to add as participants (all active team members)
+    const { data: teamMembers } = await supabase
+      .from('team_members')
+      .select('user_id, display_name')
+      .eq('status', 'active')
+      .not('user_id', 'is', null)
+
+    if (teamMembers && teamMembers.length > 0) {
+      const teamParticipants = teamMembers.map(member => ({
+        conversation_id: conversationId,
+        user_id: member.user_id,
+        display_name: member.display_name,
+        role: 'participant' as const,
+        unread_count: 1, // New conversation has 1 unread for team
+      }))
+
+      await supabase.from('conversation_participants').insert(teamParticipants)
+    }
+  }
+
+  // Send the initial message
+  const { data: message, error: msgError } = await supabase
+    .from('messages')
+    .insert({
+      conversation_id: conversationId,
+      sender_client_id: data.clientId,
+      sender_name: data.clientName,
+      content: data.initialMessage,
+      content_type: 'text',
+    })
+    .select()
+    .single()
+
+  if (msgError) {
+    console.error('Error sending initial message:', msgError)
+    return { success: false, error: msgError.message }
+  }
+
+  return { success: true, conversationId, message }
+}
+
 // ============================================================================
 // SEARCH & UTILITIES
 // ============================================================================

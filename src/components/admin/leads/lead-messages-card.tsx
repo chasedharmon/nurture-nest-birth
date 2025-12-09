@@ -5,15 +5,29 @@
  *
  * Displays recent messages with a client on their lead detail page.
  * Part of the unified client view (Salesforce-style 360 view).
+ * Includes Quick Compose for sending messages without leaving the page.
  */
 
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { MessageSquare, ExternalLink, ChevronRight, Plus } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  MessageSquare,
+  ExternalLink,
+  ChevronRight,
+  Plus,
+  Send,
+  Loader2,
+  X,
+} from 'lucide-react'
+import { sendMessage, createConversation } from '@/app/actions/messaging'
+import { toast } from 'sonner'
 import type { Message, ConversationWithDetails } from '@/app/actions/messaging'
 
 interface LeadMessagesCardProps {
@@ -31,8 +45,55 @@ export function LeadMessagesCard({
   recentMessages,
   onStartConversation,
 }: LeadMessagesCardProps) {
+  const router = useRouter()
+  const [showComposer, setShowComposer] = useState(false)
+  const [message, setMessage] = useState('')
+  const [isPending, startTransition] = useTransition()
+
   const hasConversation = conversation !== null
   const unreadCount = conversation?.unread_count || 0
+
+  const handleQuickSend = () => {
+    if (!message.trim()) return
+
+    startTransition(async () => {
+      try {
+        if (hasConversation) {
+          // Send to existing conversation
+          const result = await sendMessage({
+            conversationId: conversation.id,
+            content: message.trim(),
+          })
+
+          if (result.success) {
+            toast.success('Message sent')
+            setMessage('')
+            setShowComposer(false)
+            router.refresh()
+          } else {
+            toast.error(result.error || 'Failed to send message')
+          }
+        } else {
+          // Create new conversation with message
+          const result = await createConversation({
+            clientId,
+            initialMessage: message.trim(),
+          })
+
+          if (result.success) {
+            toast.success('Message sent')
+            setMessage('')
+            setShowComposer(false)
+            router.refresh()
+          } else {
+            toast.error(result.error || 'Failed to send message')
+          }
+        }
+      } catch {
+        toast.error('Failed to send message')
+      }
+    })
+  }
 
   return (
     <Card>
@@ -137,6 +198,79 @@ export function LeadMessagesCard({
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </Link>
+            )}
+          </div>
+        )}
+
+        {/* Quick Compose Section */}
+        {hasConversation && (
+          <div className="mt-4 pt-4 border-t">
+            {showComposer ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Quick Message</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => {
+                      setShowComposer(false)
+                      setMessage('')
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Textarea
+                  value={message}
+                  onChange={e => setMessage(e.target.value)}
+                  placeholder={`Send a quick message to ${clientName}...`}
+                  rows={2}
+                  className="resize-none text-sm"
+                  disabled={isPending}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleQuickSend()
+                    }
+                  }}
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowComposer(false)
+                      setMessage('')
+                    }}
+                    disabled={isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleQuickSend}
+                    disabled={isPending || !message.trim()}
+                  >
+                    {isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                    <span className="ml-1">Send</span>
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => setShowComposer(true)}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Quick Reply
+              </Button>
             )}
           </div>
         )}

@@ -7,6 +7,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MessageSquare, Inbox } from 'lucide-react'
 import { ClientConversationList } from '@/components/client/messages/client-conversation-list'
+import { NewMessageButton } from '@/components/client/messages/new-message-button'
 
 export const metadata = {
   title: 'Messages | Client Portal',
@@ -31,11 +32,18 @@ export default async function ClientMessagesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Messages</h1>
-        <p className="text-muted-foreground mt-1">
-          Communicate with your doula team
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Messages</h1>
+          <p className="text-muted-foreground mt-1">
+            Communicate with your doula team
+          </p>
+        </div>
+        <NewMessageButton
+          clientId={session.clientId}
+          clientName={session.name}
+          hasExistingConversation={conversations.length > 0}
+        />
       </div>
 
       {/* Stats */}
@@ -73,8 +81,8 @@ export default async function ClientMessagesPage() {
             </div>
             <h3 className="text-lg font-semibold">No messages yet</h3>
             <p className="text-muted-foreground text-center mt-1 max-w-sm">
-              Your doula will reach out when they have updates or information to
-              share with you.
+              Have a question or need to get in touch? Use the &quot;Contact
+              Team&quot; button above to start a conversation with your doula.
             </p>
           </CardContent>
         </Card>
