@@ -5,7 +5,13 @@ import { getWorkflowWithSteps } from '@/app/actions/workflows'
 import { getEmailTemplates } from '@/app/actions/setup'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, Workflow, Settings, History } from 'lucide-react'
+import {
+  ChevronLeft,
+  Workflow,
+  Settings,
+  History,
+  BarChart3,
+} from 'lucide-react'
 import { WorkflowBuilderClient } from './workflow-builder-client'
 import { WorkflowToggleButton } from './workflow-toggle-button'
 import { WorkflowManualTrigger } from './workflow-manual-trigger'
@@ -134,6 +140,12 @@ export default async function WorkflowBuilderPage({
                 objectType={workflow.object_type as WorkflowObjectType}
                 isActive={workflow.is_active}
               />
+              <Link href={`/admin/workflows/${id}/analytics`}>
+                <Button variant="outline" size="sm">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Analytics
+                </Button>
+              </Link>
               <Link href={`/admin/workflows/${id}/history`}>
                 <Button variant="outline" size="sm">
                   <History className="mr-2 h-4 w-4" />
