@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
-import { Badge } from '@/components/ui/badge'
 import { ChevronRight, MessageSquare } from 'lucide-react'
+import { PulsingBadge } from '@/components/ui/pulsing-badge'
 import { usePresence } from '@/lib/hooks/use-presence'
 
 interface Conversation {
@@ -77,9 +77,7 @@ export function ClientConversationList({
                     {conversation.subject || 'Conversation'}
                   </span>
                   {hasUnread && (
-                    <Badge variant="default" className="h-5 text-xs">
-                      {conversation.unread_count} new
-                    </Badge>
+                    <PulsingBadge count={conversation.unread_count} size="sm" />
                   )}
                 </div>
                 {conversation.last_message_preview ? (

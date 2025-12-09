@@ -9,6 +9,7 @@
 
 import Link from 'next/link'
 import { useUnreadCount } from '@/lib/hooks/use-unread-count'
+import { PulsingBadge } from '@/components/ui/pulsing-badge'
 import { cn } from '@/lib/utils'
 
 interface ClientNavMessageBadgeProps {
@@ -37,9 +38,7 @@ export function ClientNavMessageBadge({
     >
       Messages
       {unreadCount > 0 && (
-        <span className="ml-1.5 inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 text-xs font-semibold rounded-full bg-primary text-primary-foreground">
-          {unreadCount > 9 ? '9+' : unreadCount}
-        </span>
+        <PulsingBadge count={unreadCount} size="sm" className="ml-1.5" />
       )}
     </Link>
   )
