@@ -15,7 +15,7 @@ import { test, expect, Page } from '@playwright/test'
 
 // Test credentials
 const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'your-password-here'
+const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'TestPassword123!'
 
 // Helper to login as admin - returns true if login succeeded
 async function loginAsAdmin(page: Page): Promise<boolean> {
@@ -324,9 +324,7 @@ test.describe('Real-Time Messaging - Unread Badges', () => {
     await page.waitForLoadState('networkidle')
 
     // Look for badge elements (usually a span with count)
-    const badges = page.locator(
-      '[class*="badge"], [class*="rounded-full"]:has-text(/[0-9]+/)'
-    )
+    const badges = page.locator('[class*="badge"]')
     const badgeCount = await badges.count()
 
     // Badge may or may not be visible depending on unread count
@@ -420,17 +418,26 @@ test.describe('Unified Client View - Messages Tab', () => {
     await page.goto('/admin/leads')
     await page.waitForLoadState('networkidle')
 
-    // Find a lead link
-    const leadLinks = page.locator('a[href^="/admin/leads/"]')
-    const count = await leadLinks.count()
+    // Find a clickable lead row in the table (rows use onClick, not href)
+    const leadRows = page.locator(
+      'tbody tr[class*="cursor-pointer"], tbody tr:has(td)'
+    )
+    const count = await leadRows.count()
 
     if (count > 0) {
-      await leadLinks.first().click()
+      // Click first row that has actual data (skip header rows)
+      await leadRows.first().click()
       await page.waitForLoadState('networkidle')
+
+      // Wait for navigation to complete
+      await page.waitForURL(/\/admin\/leads\/[a-f0-9-]+/, { timeout: 10000 })
 
       // Check for tabs
       const tabs = page.locator('[role="tablist"], [class*="tabs"]')
       await expect(tabs.first()).toBeVisible({ timeout: 10000 })
+    } else {
+      // No leads exist in the database - skip test gracefully
+      test.skip()
     }
   })
 
@@ -438,18 +445,26 @@ test.describe('Unified Client View - Messages Tab', () => {
     await page.goto('/admin/leads')
     await page.waitForLoadState('networkidle')
 
-    const leadLinks = page.locator('a[href^="/admin/leads/"]')
-    const count = await leadLinks.count()
+    // Find a clickable lead row in the table
+    const leadRows = page.locator(
+      'tbody tr[class*="cursor-pointer"], tbody tr:has(td)'
+    )
+    const count = await leadRows.count()
 
     if (count > 0) {
-      await leadLinks.first().click()
+      await leadRows.first().click()
       await page.waitForLoadState('networkidle')
+
+      // Wait for navigation
+      await page.waitForURL(/\/admin\/leads\/[a-f0-9-]+/, { timeout: 10000 })
 
       // Check for Messages tab
       const messagesTab = page.locator(
         '[role="tab"]:has-text("Messages"), button:has-text("Messages")'
       )
       await expect(messagesTab.first()).toBeVisible({ timeout: 10000 })
+    } else {
+      test.skip()
     }
   })
 
@@ -457,12 +472,18 @@ test.describe('Unified Client View - Messages Tab', () => {
     await page.goto('/admin/leads')
     await page.waitForLoadState('networkidle')
 
-    const leadLinks = page.locator('a[href^="/admin/leads/"]')
-    const count = await leadLinks.count()
+    // Find a clickable lead row in the table
+    const leadRows = page.locator(
+      'tbody tr[class*="cursor-pointer"], tbody tr:has(td)'
+    )
+    const count = await leadRows.count()
 
     if (count > 0) {
-      await leadLinks.first().click()
+      await leadRows.first().click()
       await page.waitForLoadState('networkidle')
+
+      // Wait for navigation
+      await page.waitForURL(/\/admin\/leads\/[a-f0-9-]+/, { timeout: 10000 })
 
       // Messages tab may have a badge
       const messagesTab = page.locator('[role="tab"]:has-text("Messages")')
@@ -472,6 +493,8 @@ test.describe('Unified Client View - Messages Tab', () => {
         const badgeCount = await badge.count()
         expect(badgeCount).toBeGreaterThanOrEqual(0)
       }
+    } else {
+      test.skip()
     }
   })
 
@@ -479,12 +502,18 @@ test.describe('Unified Client View - Messages Tab', () => {
     await page.goto('/admin/leads')
     await page.waitForLoadState('networkidle')
 
-    const leadLinks = page.locator('a[href^="/admin/leads/"]')
-    const count = await leadLinks.count()
+    // Find a clickable lead row in the table
+    const leadRows = page.locator(
+      'tbody tr[class*="cursor-pointer"], tbody tr:has(td)'
+    )
+    const count = await leadRows.count()
 
     if (count > 0) {
-      await leadLinks.first().click()
+      await leadRows.first().click()
       await page.waitForLoadState('networkidle')
+
+      // Wait for navigation
+      await page.waitForURL(/\/admin\/leads\/[a-f0-9-]+/, { timeout: 10000 })
 
       // Click Messages tab
       const messagesTab = page.locator(
@@ -500,6 +529,8 @@ test.describe('Unified Client View - Messages Tab', () => {
         )
         await expect(messagesContent.first()).toBeVisible({ timeout: 10000 })
       }
+    } else {
+      test.skip()
     }
   })
 
@@ -509,12 +540,18 @@ test.describe('Unified Client View - Messages Tab', () => {
     await page.goto('/admin/leads')
     await page.waitForLoadState('networkidle')
 
-    const leadLinks = page.locator('a[href^="/admin/leads/"]')
-    const count = await leadLinks.count()
+    // Find a clickable lead row in the table
+    const leadRows = page.locator(
+      'tbody tr[class*="cursor-pointer"], tbody tr:has(td)'
+    )
+    const count = await leadRows.count()
 
     if (count > 0) {
-      await leadLinks.first().click()
+      await leadRows.first().click()
       await page.waitForLoadState('networkidle')
+
+      // Wait for navigation
+      await page.waitForURL(/\/admin\/leads\/[a-f0-9-]+/, { timeout: 10000 })
 
       // Click Messages tab
       const messagesTab = page.locator(
@@ -538,6 +575,8 @@ test.describe('Unified Client View - Messages Tab', () => {
 
         expect(hasContent).toBeTruthy()
       }
+    } else {
+      test.skip()
     }
   })
 })
