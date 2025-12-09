@@ -177,80 +177,60 @@ export const companySettingsSchema = z.object({
     .max(100, 'Company name must be less than 100 characters'),
   legal_name: z
     .string()
-    .max(100, 'Legal name must be less than 100 characters')
-    .optional(),
-  tagline: z
-    .string()
-    .max(200, 'Tagline must be less than 200 characters')
-    .optional(),
+    .max(100, 'Legal name must be less than 100 characters'),
+  tagline: z.string().max(200, 'Tagline must be less than 200 characters'),
 
   // Contact Info
-  contact_email: z
-    .string()
-    .email('Invalid email address')
-    .optional()
-    .or(z.literal('')),
-  contact_phone: z
-    .string()
-    .max(20, 'Phone number must be less than 20 characters')
-    .optional(),
-  website: z.string().url('Invalid website URL').optional().or(z.literal('')),
+  email: z.union([z.string().email('Invalid email address'), z.literal('')]),
+  phone: z.string().max(20, 'Phone number must be less than 20 characters'),
+  website: z.union([z.string().url('Invalid website URL'), z.literal('')]),
 
   // Address
   address_line1: z
     .string()
-    .max(100, 'Address must be less than 100 characters')
-    .optional(),
+    .max(100, 'Address must be less than 100 characters'),
   address_line2: z
     .string()
-    .max(100, 'Address must be less than 100 characters')
-    .optional(),
-  city: z.string().max(50, 'City must be less than 50 characters').optional(),
-  state: z.string().max(50, 'State must be less than 50 characters').optional(),
-  zip_code: z
+    .max(100, 'Address must be less than 100 characters'),
+  city: z.string().max(50, 'City must be less than 50 characters'),
+  state: z.string().max(50, 'State must be less than 50 characters'),
+  postal_code: z
     .string()
-    .max(20, 'ZIP code must be less than 20 characters')
-    .optional(),
+    .max(20, 'Postal code must be less than 20 characters'),
+  country: z.string(),
 
   // Branding
   primary_color: z
     .string()
-    .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color')
-    .optional()
-    .or(z.literal('')),
+    .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color'),
   secondary_color: z
     .string()
-    .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color')
-    .optional()
-    .or(z.literal('')),
+    .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color'),
 
   // Preferences
-  timezone: z.string().optional(),
-  currency: z.string().default('USD'),
+  timezone: z.string().min(1, 'Timezone is required'),
+  currency: z.string().min(1, 'Currency is required'),
 
   // Invoice Settings
   invoice_prefix: z
     .string()
-    .max(10, 'Invoice prefix must be less than 10 characters')
-    .optional(),
+    .max(10, 'Invoice prefix must be less than 10 characters'),
   invoice_footer: z
     .string()
-    .max(500, 'Invoice footer must be less than 500 characters')
-    .optional(),
-  tax_rate: z.coerce.number().min(0).max(100).optional(),
-  tax_id: z
+    .max(500, 'Invoice footer must be less than 500 characters'),
+  tax_rate: z
+    .number()
+    .min(0, 'Tax rate must be 0 or greater')
+    .max(100, 'Tax rate must be 100 or less'),
+  tax_id: z.string().max(50, 'Tax ID must be less than 50 characters'),
+  payment_terms: z
     .string()
-    .max(50, 'Tax ID must be less than 50 characters')
-    .optional(),
-
-  // Payment Terms
-  payment_terms_days: z.coerce.number().min(0).max(365).optional(),
+    .max(50, 'Payment terms must be less than 50 characters'),
 
   // Portal Settings
   portal_welcome_message: z
     .string()
-    .max(2000, 'Welcome message must be less than 2000 characters')
-    .optional(),
+    .max(2000, 'Welcome message must be less than 2000 characters'),
 })
 
 export type CompanySettingsFormData = z.infer<typeof companySettingsSchema>

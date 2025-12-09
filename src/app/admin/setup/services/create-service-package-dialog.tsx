@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import {
   Dialog,
   DialogContent,
@@ -13,7 +16,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
@@ -23,9 +25,50 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { createServicePackage } from '@/app/actions/setup'
 import type { ContractTemplate, ServiceType } from '@/lib/supabase/types'
 import { Plus, Loader2, X } from 'lucide-react'
+
+// Validation schema
+const servicePackageSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Package name is required')
+    .min(2, 'Package name must be at least 2 characters')
+    .max(100, 'Package name must be less than 100 characters'),
+  description: z
+    .string()
+    .max(1000, 'Description must be less than 1000 characters')
+    .optional()
+    .or(z.literal('')),
+  service_type: z.enum([
+    'birth_doula',
+    'postpartum_doula',
+    'lactation_consulting',
+    'childbirth_education',
+    'other',
+  ]),
+  price_type: z.enum(['fixed', 'hourly', 'custom']),
+  base_price: z
+    .number()
+    .min(0, 'Price must be 0 or greater')
+    .max(99999, 'Price must be less than $100,000'),
+  contract_template_id: z.string(),
+  requires_contract: z.boolean(),
+  is_active: z.boolean(),
+  is_featured: z.boolean(),
+})
+
+type ServicePackageFormData = z.infer<typeof servicePackageSchema>
 
 interface CreateServicePackageDialogProps {
   contractTemplates: ContractTemplate[]
@@ -44,25 +87,24 @@ export function CreateServicePackageDialog({
 }: CreateServicePackageDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    service_type: 'birth_doula' as ServiceType,
-    base_price: '',
-    price_type: 'fixed' as 'fixed' | 'hourly' | 'custom',
-    contract_template_id: '',
-    requires_contract: true,
-    requires_deposit: false,
-    deposit_amount: '',
-    is_active: true,
-    is_featured: false,
-  })
-
   const [features, setFeatures] = useState<string[]>([])
   const [newFeature, setNewFeature] = useState('')
+
+  const form = useForm<ServicePackageFormData>({
+    resolver: zodResolver(servicePackageSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      service_type: 'birth_doula',
+      base_price: 0,
+      price_type: 'fixed',
+      contract_template_id: '',
+      requires_contract: true,
+      is_active: true,
+      is_featured: false,
+    },
+  })
 
   const handleAddFeature = () => {
     if (newFeature.trim()) {
@@ -75,47 +117,31 @@ export function CreateServicePackageDialog({
     setFeatures(features.filter((_, i) => i !== index))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+  const onSubmit = async (data: ServicePackageFormData) => {
     setError(null)
 
     try {
       const result = await createServicePackage({
-        name: formData.name,
-        description: formData.description || null,
-        service_type: formData.service_type,
-        base_price: parseFloat(formData.base_price) || 0,
-        price_type: formData.price_type,
+        name: data.name,
+        description: data.description || null,
+        service_type: data.service_type,
+        base_price: data.base_price,
+        price_type: data.price_type,
         included_features: features,
-        contract_template_id: formData.contract_template_id || null,
-        requires_contract: formData.requires_contract,
-        requires_deposit: formData.requires_deposit,
-        deposit_amount: formData.deposit_amount
-          ? parseFloat(formData.deposit_amount)
-          : null,
+        contract_template_id: data.contract_template_id || null,
+        requires_contract: data.requires_contract,
+        requires_deposit: false,
+        deposit_amount: null,
         deposit_percent: null,
-        is_active: formData.is_active,
-        is_featured: formData.is_featured,
+        is_active: data.is_active,
+        is_featured: data.is_featured,
         display_order: 0,
         intake_form_template_id: null,
       })
 
       if (result.success) {
         setOpen(false)
-        setFormData({
-          name: '',
-          description: '',
-          service_type: 'birth_doula',
-          base_price: '',
-          price_type: 'fixed',
-          contract_template_id: '',
-          requires_contract: true,
-          requires_deposit: false,
-          deposit_amount: '',
-          is_active: true,
-          is_featured: false,
-        })
+        form.reset()
         setFeatures([])
         router.refresh()
       } else {
@@ -123,13 +149,20 @@ export function CreateServicePackageDialog({
       }
     } catch {
       setError('An unexpected error occurred')
-    } finally {
-      setIsLoading(false)
+    }
+  }
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen)
+    if (!isOpen) {
+      form.reset()
+      setFeatures([])
+      setError(null)
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -144,245 +177,293 @@ export function CreateServicePackageDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {error && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
 
-          <div className="space-y-2">
-            <Label htmlFor="name">Package Name *</Label>
-            <Input
-              id="name"
-              placeholder="e.g., Birth Doula Package"
-              value={formData.name}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, name: e.target.value }))
-              }
-              required
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Package Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Birth Doula Package" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              placeholder="Describe what this package includes..."
-              value={formData.description}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, description: e.target.value }))
-              }
-              rows={2}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe what this package includes..."
+                      rows={2}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="service_type">Service Type *</Label>
-              <Select
-                value={formData.service_type}
-                onValueChange={value =>
-                  setFormData(prev => ({
-                    ...prev,
-                    service_type: value as ServiceType,
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SERVICE_TYPES.map(type => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="price_type">Price Type</Label>
-              <Select
-                value={formData.price_type}
-                onValueChange={value =>
-                  setFormData(prev => ({
-                    ...prev,
-                    price_type: value as 'fixed' | 'hourly' | 'custom',
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fixed">Fixed Price</SelectItem>
-                  <SelectItem value="hourly">Hourly Rate</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="base_price">
-              {formData.price_type === 'hourly' ? 'Hourly Rate' : 'Base Price'}{' '}
-              ($)
-            </Label>
-            <Input
-              id="base_price"
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              value={formData.base_price}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, base_price: e.target.value }))
-              }
-            />
-          </div>
-
-          {/* Features */}
-          <div className="space-y-2">
-            <Label>Included Features</Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="e.g., 2 prenatal visits"
-                value={newFeature}
-                onChange={e => setNewFeature(e.target.value)}
-                onKeyPress={e => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    handleAddFeature()
-                  }
-                }}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="service_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Service Type *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {SERVICE_TYPES.map(type => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
+
+              <FormField
+                control={form.control}
+                name="price_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price Type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="fixed">Fixed Price</SelectItem>
+                        <SelectItem value="hourly">Hourly Rate</SelectItem>
+                        <SelectItem value="custom">Custom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="base_price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {form.watch('price_type') === 'hourly'
+                      ? 'Hourly Rate'
+                      : 'Base Price'}{' '}
+                    ($)
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      {...field}
+                      value={field.value ?? ''}
+                      onChange={e =>
+                        field.onChange(
+                          e.target.value === '' ? 0 : parseFloat(e.target.value)
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Features - not part of form validation */}
+            <div className="space-y-2">
+              <FormLabel>Included Features</FormLabel>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="e.g., 2 prenatal visits"
+                  value={newFeature}
+                  onChange={e => setNewFeature(e.target.value)}
+                  onKeyPress={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleAddFeature()
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddFeature}
+                >
+                  Add
+                </Button>
+              </div>
+              {features.length > 0 && (
+                <ul className="mt-2 space-y-1">
+                  {features.map((feature, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center justify-between rounded bg-muted px-3 py-1.5 text-sm"
+                    >
+                      <span>{feature}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFeature(index)}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Contract Template */}
+            {contractTemplates.length > 0 && (
+              <FormField
+                control={form.control}
+                name="contract_template_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contract Template</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a template (optional)" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        {contractTemplates
+                          .filter(t => t.is_active)
+                          .map(template => (
+                            <SelectItem key={template.id} value={template.id}>
+                              {template.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {/* Options */}
+            <div className="space-y-4 rounded-lg border border-border p-4">
+              <FormField
+                control={form.control}
+                name="requires_contract"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between">
+                    <div>
+                      <FormLabel>Requires Contract</FormLabel>
+                      <FormDescription>
+                        Clients must sign a contract
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="is_active"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between">
+                    <div>
+                      <FormLabel>Active</FormLabel>
+                      <FormDescription>
+                        Package is available to clients
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="is_featured"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between">
+                    <div>
+                      <FormLabel>Featured</FormLabel>
+                      <FormDescription>Highlight this package</FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button
                 type="button"
                 variant="outline"
-                onClick={handleAddFeature}
+                onClick={() => setOpen(false)}
+                disabled={form.formState.isSubmitting}
               >
-                Add
+                Cancel
               </Button>
-            </div>
-            {features.length > 0 && (
-              <ul className="mt-2 space-y-1">
-                {features.map((feature, index) => (
-                  <li
-                    key={index}
-                    className="flex items-center justify-between rounded bg-muted px-3 py-1.5 text-sm"
-                  >
-                    <span>{feature}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFeature(index)}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Contract Template */}
-          {contractTemplates.length > 0 && (
-            <div className="space-y-2">
-              <Label htmlFor="contract_template">Contract Template</Label>
-              <Select
-                value={formData.contract_template_id}
-                onValueChange={value =>
-                  setFormData(prev => ({
-                    ...prev,
-                    contract_template_id: value,
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a template (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  {contractTemplates
-                    .filter(t => t.is_active)
-                    .map(template => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Options */}
-          <div className="space-y-4 rounded-lg border border-border p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="requires_contract">Requires Contract</Label>
-                <p className="text-xs text-muted-foreground">
-                  Clients must sign a contract
-                </p>
-              </div>
-              <Switch
-                id="requires_contract"
-                checked={formData.requires_contract}
-                onCheckedChange={checked =>
-                  setFormData(prev => ({ ...prev, requires_contract: checked }))
-                }
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="is_active">Active</Label>
-                <p className="text-xs text-muted-foreground">
-                  Package is available to clients
-                </p>
-              </div>
-              <Switch
-                id="is_active"
-                checked={formData.is_active}
-                onCheckedChange={checked =>
-                  setFormData(prev => ({ ...prev, is_active: checked }))
-                }
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="is_featured">Featured</Label>
-                <p className="text-xs text-muted-foreground">
-                  Highlight this package
-                </p>
-              </div>
-              <Switch
-                id="is_featured"
-                checked={formData.is_featured}
-                onCheckedChange={checked =>
-                  setFormData(prev => ({ ...prev, is_featured: checked }))
-                }
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Package
-            </Button>
-          </DialogFooter>
-        </form>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Create Package
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

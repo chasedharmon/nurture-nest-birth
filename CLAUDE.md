@@ -2,14 +2,68 @@
 
 ## Project Status
 
-**Current Phase**: Phase 7 - Polish & SaaS Foundation
-**Last Updated**: December 8, 2024
+**Current Phase**: Phase 7+ - CRM Refinement & SaaS Foundation
+**Last Updated**: December 9, 2024
 
-### Next Session: Real-Time Messaging Enhancement
+### Active Development Plan (6-Week Roadmap)
 
-The Unified Messaging feature is complete with basic functionality. Next step is to enhance it with real-time capabilities similar to Facebook Messenger. See "Prompt for Next Chat Session" at the bottom of this file.
+We are executing a comprehensive refinement and SaaS preparation plan. Goals:
 
-### Phase 7 Progress (Started Dec 8, 2024)
+1. **Polish existing features** before adding new ones
+2. **Enhance workflow builder** to Marketing Cloud quality
+3. **Build foundation rails** for Stripe, SMS, multi-tenancy (without live integration)
+4. **Prepare for SaaS launch** with organizations, tiers, and metering
+
+See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full plan details.
+
+### Phase 7+ Execution Progress
+
+#### Phase A: Polish & Complete (Week 1-2)
+
+| Task                      | Status     | Notes                              |
+| ------------------------- | ---------- | ---------------------------------- |
+| A.1 Real-Time Messaging   | 🔲 PENDING | 7 hooks exist, need UI integration |
+| A.2 Form Validation       | 🔲 PENDING | 4/9 Zod schemas remaining          |
+| A.3 Welcome Packet Editor | 🔲 PENDING | Rich text editor, variables        |
+| A.4 Intake Form Builder   | 🔲 PENDING | Currently "Coming Soon"            |
+
+#### Phase B: Workflow Enhancement (Week 2-4)
+
+| Task                        | Status     | Notes                                 |
+| --------------------------- | ---------- | ------------------------------------- |
+| B.1 Fix Critical Gaps       | 🔲 PENDING | Email integration, cron, history page |
+| B.2 Entry Criteria/Filters  | 🔲 PENDING | Segment who enters workflow           |
+| B.3 Re-entry Rules          | 🔲 PENDING | Prevent duplicate executions          |
+| B.4 Variable Interpolation  | 🔲 PENDING | {{first_name}} support                |
+| B.5 Enhanced Decision Nodes | 🔲 PENDING | Multi-branch, AND/OR logic            |
+| B.6 Execution Analytics     | 🔲 PENDING | Funnel, success rates                 |
+| B.7 Template Gallery        | 🔲 PENDING | One-click install                     |
+
+#### Phase C: SaaS Foundation (Week 3-5)
+
+| Task                      | Status     | Notes                         |
+| ------------------------- | ---------- | ----------------------------- |
+| C.1 Multi-Tenancy Schema  | 🔲 PENDING | organization_id on all tables |
+| C.2 Subscription Tiers    | 🔲 PENDING | Feature flags per plan        |
+| C.3 Usage Metering        | 🔲 PENDING | Track clients, team, storage  |
+| C.4 Stripe Billing Rails  | 🔲 PENDING | UI ready, stubbed backend     |
+| C.5 Organization Settings | 🔲 PENDING | Branding, API keys            |
+
+#### Phase D: Communication Rails (Week 4-5)
+
+| Task                     | Status     | Notes                     |
+| ------------------------ | ---------- | ------------------------- |
+| D.1 SMS Infrastructure   | 🔲 PENDING | Templates, stubbed Twilio |
+| D.2 Stripe Payment Rails | 🔲 PENDING | Invoice payment links     |
+
+#### Phase E: Analytics & Attribution (Week 5-6)
+
+| Task                        | Status     | Notes                   |
+| --------------------------- | ---------- | ----------------------- |
+| E.1 Lead Source Attribution | 🔲 PENDING | UTM tracking, referrals |
+| E.2 Client Satisfaction     | 🔲 PENDING | NPS surveys             |
+
+### Prior Phase 7 Completed Items
 
 | Feature                | Status      | Notes                                      |
 | ---------------------- | ----------- | ------------------------------------------ |
@@ -21,7 +75,6 @@ The Unified Messaging feature is complete with basic functionality. Next step is
 | Welcome Packets        | ✅ COMPLETE | Database schema, UI (full editor later)    |
 | Workflow Automation    | ✅ COMPLETE | Visual canvas builder with ReactFlow       |
 | Unified Messaging      | ✅ COMPLETE | In-app messaging with realtime             |
-| Scheduling Rails       | 🔲 PENDING  | Availability/booking type tables           |
 
 **Workflow Automation Files:**
 
@@ -388,55 +441,40 @@ rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
 Copy this entire block to start your next chat session:
 
 ```
-I'm continuing work on the Nurture Nest Birth CRM project (Phase 7).
+I'm continuing work on the Nurture Nest Birth CRM project.
 
-## What's Done
-- Unified Messaging system with basic CRUD (conversations, messages, participants)
-- Database: conversations, conversation_participants, messages tables with RLS
-- Admin UI: /admin/messages (list), /admin/messages/[id] (detail)
-- Client UI: /client/messages (list), /client/messages/[id] (detail)
-- Unread badges in navigation
-- 42 E2E tests passing
-- Supabase Realtime is ENABLED on messages table but NOT YET IMPLEMENTED on frontend
+## Active Plan
+We're executing a 6-week refinement and SaaS foundation plan:
+- See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full details
+- Check CLAUDE.md Phase 7+ Execution Progress tables for current status
 
-## What's Next: Real-Time Messaging Enhancement
+## Current Focus: Phase A - Polish & Complete
 
-I want to enhance the messaging feature to work more like Facebook Messenger with real-time capabilities:
+### A.1 Real-Time Messaging
+- 7 hooks already exist in `src/lib/hooks/` (use-realtime-messages, use-typing-indicator, etc.)
+- Need to integrate into UI components
+- Files: message-thread.tsx, message-composer.tsx, chat-widget components
 
-### Core Requirements:
-1. **Real-time message delivery** - Messages appear instantly without page refresh
-2. **Typing indicators** - Show when the other person is typing
-3. **Read receipts** - Show when messages have been read
-4. **Online presence** - Show who is currently online
-5. **Optimistic updates** - Messages appear immediately while sending
-6. **Auto-scroll** - Scroll to new messages automatically
-7. **Unread count updates** - Badge counts update in real-time
+### A.2 Form Validation
+- 5/9 Zod schemas done in `src/lib/validations/setup.ts`
+- Complete remaining 4 schemas
+- Wire to corresponding forms
 
-### Technical Considerations:
-- Use Supabase Realtime (already enabled on messages table)
-- Consider Supabase Presence for online status
-- Implement via React hooks (useEffect + supabase.channel())
-- Handle reconnection gracefully
-- Mobile-friendly UX
+### A.3 Welcome Packet Editor
+- Schema exists, need rich text editor UI
+- Template variables ({{client_name}})
 
-### Files to Modify:
-- `src/components/admin/messages/message-thread.tsx`
-- `src/components/admin/messages/message-composer.tsx`
-- `src/components/client/messages/client-message-thread.tsx`
-- `src/components/client/messages/client-message-composer.tsx`
-- `src/app/admin/page.tsx` (real-time badge update)
-- `src/app/client/(portal)/layout.tsx` (real-time badge update)
-- Possibly new: `src/hooks/useRealtimeMessages.ts`
-- Possibly new: `src/hooks/usePresence.ts`
+### A.4 Intake Form Builder
+- Currently shows "Coming Soon"
+- Need visual drag-and-drop form builder
 
-### Database Schema (already exists):
-- conversations (id, subject, status, last_message_at)
-- conversation_participants (user_id, conversation_id, unread_count, last_read_at)
-- messages (id, conversation_id, sender_id, content, read_at, created_at)
+## Best Practices
+- Commit frequently with conventional commits
+- Run tests after each significant change
+- Update CLAUDE.md progress tables after completing tasks
+- Follow existing patterns in codebase
 
 Test credentials:
 - Email: chase.d.harmon@gmail.com
 - Password: TestPassword123!
-
-Please start with a planning session to design the real-time messaging architecture.
 ```
