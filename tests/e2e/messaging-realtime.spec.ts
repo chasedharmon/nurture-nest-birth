@@ -13,48 +13,10 @@ import { test, expect, Page } from '@playwright/test'
  * - Unified client view (Messages tab on lead detail)
  */
 
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'TestPassword123!'
-
-// Helper to login as admin - returns true if login succeeded
-async function loginAsAdmin(page: Page): Promise<boolean> {
-  await page.goto('/login')
-  await page.waitForLoadState('networkidle')
-  await page.waitForSelector('input[name="email"]', { state: 'visible' })
-
-  // Use fill instead of pressSequentially for faster input
-  await page.locator('input[name="email"]').fill(ADMIN_EMAIL)
-  await page.locator('input[name="password"]').fill(ADMIN_PASSWORD)
-
-  await page.waitForTimeout(200)
-  await page.locator('button[type="submit"]').click()
-
-  // Wait for navigation or error
-  try {
-    await expect(page).toHaveURL('/admin', { timeout: 15000 })
-    return true
-  } catch {
-    // Check if we got an error message
-    const errorVisible = await page
-      .locator('text=Invalid login credentials')
-      .isVisible()
-      .catch(() => false)
-    if (errorVisible) {
-      console.log(
-        'Login failed: Invalid credentials. Set TEST_ADMIN_PASSWORD env var.'
-      )
-    }
-    return false
-  }
-}
-
-// Helper to skip test if login fails
-function skipIfLoginFailed(loggedIn: boolean) {
-  if (!loggedIn) {
-    test.skip()
-  }
-}
+/**
+ * Authentication is handled by Playwright setup project via storageState
+ * Each test starts with a pre-authenticated session
+ */
 
 // Helper to get an existing conversation ID
 async function getFirstConversationId(page: Page): Promise<string | null> {
@@ -72,12 +34,7 @@ async function getFirstConversationId(page: Page): Promise<string | null> {
 }
 
 test.describe('Real-Time Messaging - Message Delivery', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should display message composer on conversation page', async ({
     page,
@@ -136,12 +93,7 @@ test.describe('Real-Time Messaging - Message Delivery', () => {
 })
 
 test.describe('Real-Time Messaging - Typing Indicators', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should have typing indicator component structure', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
@@ -188,12 +140,7 @@ test.describe('Real-Time Messaging - Typing Indicators', () => {
 })
 
 test.describe('Real-Time Messaging - Read Receipts', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should display message status indicators', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
@@ -237,12 +184,7 @@ test.describe('Real-Time Messaging - Read Receipts', () => {
 })
 
 test.describe('Real-Time Messaging - Online Presence', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should display conversation header with client info', async ({
     page,
@@ -307,12 +249,7 @@ test.describe('Real-Time Messaging - Online Presence', () => {
 })
 
 test.describe('Real-Time Messaging - Unread Badges', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should display message badge in admin navigation', async ({ page }) => {
     await page.goto('/admin')
@@ -360,12 +297,7 @@ test.describe('Real-Time Messaging - Unread Badges', () => {
 })
 
 test.describe('Real-Time Messaging - Notifications', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should have notification container in layout', async ({ page }) => {
     await page.goto('/admin')
@@ -402,12 +334,7 @@ test.describe('Real-Time Messaging - Notifications', () => {
 })
 
 test.describe('Unified Client View - Messages Tab', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should navigate to lead detail page', async ({ page }) => {
     await page.goto('/admin')
@@ -606,12 +533,7 @@ test.describe('Client Portal Messaging', () => {
 })
 
 test.describe('Message Composer Functionality', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should enable send button when message is typed', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
@@ -666,12 +588,7 @@ test.describe('Message Composer Functionality', () => {
 })
 
 test.describe('Conversation List Functionality', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should display conversation list items', async ({ page }) => {
     await page.goto('/admin/messages')
@@ -736,12 +653,7 @@ test.describe('Conversation List Functionality', () => {
 })
 
 test.describe('Connection Status', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should render conversation page without connection errors', async ({
     page,
@@ -771,12 +683,7 @@ test.describe('Connection Status', () => {
 })
 
 test.describe('Responsive Design', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should display messages page on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 })
@@ -809,12 +716,7 @@ test.describe('Responsive Design', () => {
 })
 
 test.describe('Search Functionality', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should have search input on messages page', async ({ page }) => {
     await page.goto('/admin/messages')

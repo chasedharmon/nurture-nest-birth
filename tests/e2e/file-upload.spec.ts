@@ -1,24 +1,14 @@
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'test-password'
-
-// Helper to login as admin
-async function loginAsAdmin(page: Page) {
-  await page.goto('/login')
-  await page.fill('input[name="email"]', ADMIN_EMAIL)
-  await page.fill('input[name="password"]', ADMIN_PASSWORD)
-  await page.click('button[type="submit"]')
-  await page.waitForURL('/admin', { timeout: 10000 })
-}
+/**
+ * File Upload Functionality Tests
+ *
+ * Authentication is handled by Playwright setup project via storageState
+ * Each test starts with a pre-authenticated session
+ */
 
 test.describe('File Upload Functionality', () => {
   test.describe('Admin Document Upload', () => {
-    test.beforeEach(async ({ page }) => {
-      await loginAsAdmin(page)
-    })
-
     test('should show upload document form when clicked', async ({ page }) => {
       // Navigate to a client's documents
       await page.goto('/admin')
@@ -112,10 +102,6 @@ test.describe('File Upload Functionality', () => {
   })
 
   test.describe('Drag and Drop Upload', () => {
-    test.beforeEach(async ({ page }) => {
-      await loginAsAdmin(page)
-    })
-
     test('should have drag-and-drop area', async ({ page }) => {
       await page.goto('/admin')
 
@@ -147,10 +133,6 @@ test.describe('File Upload Functionality', () => {
   })
 
   test.describe('File Type Validation', () => {
-    test.beforeEach(async ({ page }) => {
-      await loginAsAdmin(page)
-    })
-
     test('should restrict file types based on document category', async ({
       page,
     }) => {
@@ -191,10 +173,6 @@ test.describe('File Upload Functionality', () => {
 })
 
 test.describe('Document List Display', () => {
-  test.beforeEach(async ({ page }) => {
-    await loginAsAdmin(page)
-  })
-
   test('should display uploaded documents', async ({ page }) => {
     await page.goto('/admin')
 

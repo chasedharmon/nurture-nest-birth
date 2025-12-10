@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
 /**
  * Team Internal Messaging Tests
@@ -7,39 +7,13 @@ import { test, expect, Page } from '@playwright/test'
  * Team conversations are private and not visible to clients.
  */
 
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'TestPassword123!'
-
-// Helper to login as admin
-async function loginAsAdmin(page: Page): Promise<boolean> {
-  await page.goto('/login')
-  await page.waitForLoadState('networkidle')
-  await page.waitForSelector('input[name="email"]', { state: 'visible' })
-
-  await page.locator('input[name="email"]').fill(ADMIN_EMAIL)
-  await page.locator('input[name="password"]').fill(ADMIN_PASSWORD)
-
-  await page.waitForTimeout(200)
-  await page.locator('button[type="submit"]').click()
-
-  try {
-    await expect(page).toHaveURL('/admin', { timeout: 15000 })
-    return true
-  } catch {
-    return false
-  }
-}
+/**
+ * Authentication is handled by Playwright setup project via storageState
+ * Each test starts with a pre-authenticated session
+ */
 
 test.describe('Team Internal Messaging', () => {
   test('can open new conversation dialog with team tab', async ({ page }) => {
-    const loggedIn = await loginAsAdmin(page)
-    if (!loggedIn) {
-      console.log('Login failed - skipping test')
-      test.skip()
-      return
-    }
-
     // Navigate to messages
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
@@ -87,12 +61,6 @@ test.describe('Team Internal Messaging', () => {
   test('can switch between client and team conversation modes', async ({
     page,
   }) => {
-    const loggedIn = await loginAsAdmin(page)
-    if (!loggedIn) {
-      test.skip()
-      return
-    }
-
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
@@ -127,12 +95,6 @@ test.describe('Team Internal Messaging', () => {
   })
 
   test('displays team member search popover', async ({ page }) => {
-    const loggedIn = await loginAsAdmin(page)
-    if (!loggedIn) {
-      test.skip()
-      return
-    }
-
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
@@ -165,12 +127,6 @@ test.describe('Team Internal Messaging', () => {
   })
 
   test('shows correct UI for team conversations in list', async ({ page }) => {
-    const loggedIn = await loginAsAdmin(page)
-    if (!loggedIn) {
-      test.skip()
-      return
-    }
-
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
@@ -195,12 +151,6 @@ test.describe('Team Internal Messaging', () => {
   test('submit button disabled until team member selected', async ({
     page,
   }) => {
-    const loggedIn = await loginAsAdmin(page)
-    if (!loggedIn) {
-      test.skip()
-      return
-    }
-
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
@@ -229,12 +179,6 @@ test.describe('Team Conversation Access Control', () => {
   test('team conversations show Team Only badge in header', async ({
     page,
   }) => {
-    const loggedIn = await loginAsAdmin(page)
-    if (!loggedIn) {
-      test.skip()
-      return
-    }
-
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 

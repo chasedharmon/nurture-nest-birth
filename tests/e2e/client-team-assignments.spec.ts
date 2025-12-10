@@ -1,37 +1,11 @@
 import { test, expect, type Page } from '@playwright/test'
 
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'TestPassword123!'
-
-// Helper to login as admin
-async function loginAsAdmin(page: Page): Promise<boolean> {
-  await page.goto('/login')
-  await page.fill('input[name="email"]', ADMIN_EMAIL)
-  await page.fill('input[name="password"]', ADMIN_PASSWORD)
-  await page.click('button[type="submit"]')
-
-  try {
-    await page.waitForURL('/admin', { timeout: 10000 })
-    return true
-  } catch {
-    return false
-  }
-}
-
-// Helper to skip test if not authenticated
-async function requireAuth(
-  page: Page
-): Promise<{ skip: boolean; reason?: string }> {
-  const loggedIn = await loginAsAdmin(page)
-  if (!loggedIn) {
-    return {
-      skip: true,
-      reason: 'Could not authenticate - set TEST_ADMIN_PASSWORD env var',
-    }
-  }
-  return { skip: false }
-}
+/**
+ * Client Team Assignments Tests
+ *
+ * Authentication is handled by Playwright setup project via storageState
+ * Each test starts with a pre-authenticated session
+ */
 
 // Helper to navigate to a client with 'client' status
 async function navigateToClientLead(page: Page): Promise<boolean> {
@@ -74,12 +48,6 @@ async function navigateToClientLead(page: Page): Promise<boolean> {
 test.describe('Client Team Assignments', () => {
   test.describe('Team Tab Navigation', () => {
     test('should display Team tab on client detail page', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -94,12 +62,6 @@ test.describe('Client Team Assignments', () => {
     test('should navigate to Team tab and show Care Team section', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -118,12 +80,6 @@ test.describe('Client Team Assignments', () => {
     test('should display assigned provider with name and role badge', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -162,12 +118,6 @@ test.describe('Client Team Assignments', () => {
     })
 
     test('should display provider initials avatar', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -187,12 +137,6 @@ test.describe('Client Team Assignments', () => {
     })
 
     test('should display assignment notes when present', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -215,12 +159,6 @@ test.describe('Client Team Assignments', () => {
     test('should show role change dropdown menu on provider card', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -249,12 +187,6 @@ test.describe('Client Team Assignments', () => {
     })
 
     test('should change role from Primary to Backup', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -289,12 +221,6 @@ test.describe('Client Team Assignments', () => {
     })
 
     test('should change role from Backup to Primary', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -329,12 +255,6 @@ test.describe('Client Team Assignments', () => {
     })
 
     test('should change role to Support', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -376,12 +296,6 @@ test.describe('Client Team Assignments', () => {
 
   test.describe('Assign Provider Dialog', () => {
     test('should display Assign Provider button', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -398,12 +312,6 @@ test.describe('Client Team Assignments', () => {
     test('should open assign dialog when clicking Assign Provider', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -435,12 +343,6 @@ test.describe('Client Team Assignments', () => {
     test('should show Team Member select in assign dialog', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -465,12 +367,6 @@ test.describe('Client Team Assignments', () => {
     })
 
     test('should show Role select in assign dialog', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -492,12 +388,6 @@ test.describe('Client Team Assignments', () => {
     })
 
     test('should show Notes textarea in assign dialog', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -524,12 +414,6 @@ test.describe('Client Team Assignments', () => {
     test('should disable Assign Provider button when no member selected', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -554,12 +438,6 @@ test.describe('Client Team Assignments', () => {
     })
 
     test('should close dialog with Cancel button', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -587,12 +465,6 @@ test.describe('Client Team Assignments', () => {
 
   test.describe('Remove Assignment', () => {
     test('should show Remove option in dropdown menu', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -624,12 +496,6 @@ test.describe('Client Team Assignments', () => {
     test('should show team assignment in activity timeline', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')
@@ -652,12 +518,6 @@ test.describe('Client Team Assignments', () => {
     test('should show empty state when no providers assigned', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       // Navigate to a lead that might not have assignments
       await page.goto('/admin')
 
@@ -683,12 +543,6 @@ test.describe('Client Team Assignments', () => {
     })
 
     test('should show helpful message in empty state', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin')
 
       const newLeadRow = page.locator('tr').filter({ hasText: 'new' }).first()
@@ -714,12 +568,6 @@ test.describe('Client Team Assignments', () => {
     test('should disable Assign Provider button when no available members', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       const hasClient = await navigateToClientLead(page)
       if (!hasClient) {
         test.skip(true, 'No leads available to test')

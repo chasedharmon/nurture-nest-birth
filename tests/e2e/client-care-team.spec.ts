@@ -1,38 +1,12 @@
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'test-password'
-
-// Helper to login as admin - returns true if login successful
-async function loginAsAdmin(page: Page): Promise<boolean> {
-  await page.goto('/login')
-  await page.fill('input[name="email"]', ADMIN_EMAIL)
-  await page.fill('input[name="password"]', ADMIN_PASSWORD)
-  await page.click('button[type="submit"]')
-
-  try {
-    await page.waitForURL('/admin', { timeout: 10000 })
-    return true
-  } catch {
-    // Login failed - likely invalid credentials
-    return false
-  }
-}
-
-// Helper to skip test if not authenticated
-async function requireAuth(
-  page: Page
-): Promise<{ skip: boolean; reason?: string }> {
-  const loggedIn = await loginAsAdmin(page)
-  if (!loggedIn) {
-    return {
-      skip: true,
-      reason: 'Could not authenticate - set TEST_ADMIN_PASSWORD env var',
-    }
-  }
-  return { skip: false }
-}
+/**
+ * Client Portal Care Team Display Tests
+ *
+ * Tests for care team visibility in client portal and admin team management.
+ * Authentication is handled by Playwright setup project via storageState
+ * for admin tests. Client portal tests check for redirects to login.
+ */
 
 test.describe('Client Portal Care Team Display', () => {
   test.describe('Dashboard Care Team Section', () => {
@@ -197,13 +171,8 @@ test.describe('Client Portal Care Team Display', () => {
   })
 
   test.describe('Care Team Visibility Controls', () => {
+    // These tests use admin auth via storageState
     test('should respect email visibility setting', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       // Go to team page and edit a member
       await page.goto('/admin/team')
 
@@ -229,12 +198,6 @@ test.describe('Client Portal Care Team Display', () => {
     })
 
     test('should respect phone visibility setting', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const editButton = page.locator(
@@ -294,15 +257,10 @@ test.describe('Client Portal Care Team Display', () => {
   })
 
   test.describe('Care Team Assignment Flow', () => {
+    // These tests use admin auth via storageState
     test('should show assign provider option on client page', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin')
 
       // Navigate to a client
@@ -322,12 +280,6 @@ test.describe('Client Portal Care Team Display', () => {
     })
 
     test('should display assignment role options', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin')
 
       const clientLink = page.locator('[data-testid="lead-row"] a').first()

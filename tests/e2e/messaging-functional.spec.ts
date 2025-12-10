@@ -11,43 +11,10 @@ import { test, expect, Page } from '@playwright/test'
  * - Messages persist after page refresh
  */
 
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'TestPassword123!'
-
-// Helper to login as admin
-async function loginAsAdmin(page: Page): Promise<boolean> {
-  await page.goto('/login')
-  await page.waitForLoadState('networkidle')
-  await page.waitForSelector('input[name="email"]', { state: 'visible' })
-
-  await page.locator('input[name="email"]').fill(ADMIN_EMAIL)
-  await page.locator('input[name="password"]').fill(ADMIN_PASSWORD)
-
-  await page.waitForTimeout(200)
-  await page.locator('button[type="submit"]').click()
-
-  try {
-    await expect(page).toHaveURL('/admin', { timeout: 15000 })
-    return true
-  } catch {
-    const errorVisible = await page
-      .locator('text=Invalid login credentials')
-      .isVisible()
-      .catch(() => false)
-    if (errorVisible) {
-      console.log('Login failed: Invalid credentials')
-    }
-    return false
-  }
-}
-
-// Helper to skip test if login fails
-function skipIfLoginFailed(loggedIn: boolean) {
-  if (!loggedIn) {
-    test.skip()
-  }
-}
+/**
+ * Authentication is handled by Playwright setup project via storageState
+ * Each test starts with a pre-authenticated session
+ */
 
 // Helper to get first conversation ID
 async function getFirstConversationId(page: Page): Promise<string | null> {
@@ -124,12 +91,7 @@ async function typeAndSendMessage(
 }
 
 test.describe('Functional Messaging - Send and Receive', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should send a message and see it appear in the thread', async ({
     page,
@@ -274,12 +236,7 @@ test.describe('Functional Messaging - Send and Receive', () => {
 })
 
 test.describe('Functional Messaging - Message Thread UI', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should display messages with sender information', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
@@ -352,12 +309,7 @@ test.describe('Functional Messaging - Message Thread UI', () => {
 })
 
 test.describe('Functional Messaging - Conversation Navigation', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should navigate between conversations', async ({ page }) => {
     await page.goto('/admin/messages')
@@ -415,12 +367,7 @@ test.describe('Functional Messaging - Conversation Navigation', () => {
 })
 
 test.describe('Functional Messaging - Lead Detail Integration', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should access messages from lead detail page', async ({ page }) => {
     await page.goto('/admin/leads')
@@ -511,12 +458,7 @@ test.describe('Functional Messaging - Lead Detail Integration', () => {
 })
 
 test.describe('Functional Messaging - Error Handling', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should handle empty message gracefully', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
@@ -616,12 +558,7 @@ test.describe('Functional Messaging - Error Handling', () => {
 })
 
 test.describe('Functional Messaging - Real-Time Updates', () => {
-  let loggedIn = false
-
-  test.beforeEach(async ({ page }) => {
-    loggedIn = await loginAsAdmin(page)
-    skipIfLoginFailed(loggedIn)
-  })
+  // Authentication handled by Playwright storageState
 
   test('should update unread count in navigation after sending message', async ({
     page,

@@ -1,45 +1,17 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
 /**
  * Setup Tests - Create a conversation for testing
  *
  * This test file sets up test data (conversations) via the UI
  * so that the functional messaging tests can run.
+ *
+ * Authentication is handled by Playwright setup project via storageState
+ * Each test starts with a pre-authenticated session
  */
-
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'TestPassword123!'
-
-// Helper to login as admin
-async function loginAsAdmin(page: Page): Promise<boolean> {
-  await page.goto('/login')
-  await page.waitForLoadState('networkidle')
-  await page.waitForSelector('input[name="email"]', { state: 'visible' })
-
-  await page.locator('input[name="email"]').fill(ADMIN_EMAIL)
-  await page.locator('input[name="password"]').fill(ADMIN_PASSWORD)
-
-  await page.waitForTimeout(200)
-  await page.locator('button[type="submit"]').click()
-
-  try {
-    await expect(page).toHaveURL('/admin', { timeout: 15000 })
-    return true
-  } catch {
-    return false
-  }
-}
 
 test.describe('Setup - Create Test Conversation', () => {
   test('create conversation with first lead via UI', async ({ page }) => {
-    const loggedIn = await loginAsAdmin(page)
-    if (!loggedIn) {
-      console.log('Login failed - skipping setup')
-      test.skip()
-      return
-    }
-
     // First check if there are any existing conversations
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
@@ -212,12 +184,6 @@ test.describe('Verify Conversation Exists', () => {
   test('should have at least one conversation after setup', async ({
     page,
   }) => {
-    const loggedIn = await loginAsAdmin(page)
-    if (!loggedIn) {
-      test.skip()
-      return
-    }
-
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
