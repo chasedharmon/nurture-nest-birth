@@ -529,51 +529,73 @@ I'm continuing work on the Nurture Nest Birth CRM project.
 
 ## 6-Week Refinement Plan: ✅ ALL PHASES COMPLETE
 
-All 5 phases of the refinement and SaaS foundation plan are now complete:
+All 5 phases (A, B, C, D, E) of the refinement and SaaS foundation plan are complete.
 
-### Phase A: Polish & Complete ✅
-- Real-time messaging with optimistic updates (useRealtimeMessages hook)
-- Zod form validation schemas for all admin forms
-- Welcome packet editor with items management
-- Intake form builder with JSON schema
+## Current Focus: Comprehensive E2E Testing
 
-### Phase B: Workflow Enhancement ✅
-- Execution history page with step-by-step details
-- Entry criteria/filters (EntryCriteria types, UI builder)
-- Re-entry rules (ReentryMode: allow_all, no_reentry, reentry_after_exit, reentry_after_days)
-- Variable interpolation ({{first_name}} support with VariablePicker)
-- Enhanced decision nodes (multi-branch with AND/OR logic)
-- Execution analytics dashboard (funnel, success rates, charts)
-- Template gallery with one-click install
+We need to create Playwright E2E tests for all newly implemented features from Phases A-E. Many features were built but lack test coverage.
 
-### Phase C: SaaS Foundation ✅
-- Multi-tenancy schema (organizations, org_id on 40+ tables, RLS)
-- Subscription tiers (starter/professional/enterprise, feature flags)
-- Usage metering (usage_metrics table, UsageBar component)
-- Stripe billing rails (stubbed client, webhook handler, billing UI)
+### Existing Test Files (29 total in tests/e2e/):
+- admin-crm.spec.ts, admin-messages.spec.ts, admin-phase4.spec.ts
+- admin-reports.spec.ts, admin-setup-polish.spec.ts, admin-team.spec.ts
+- admin-workflows.spec.ts (partial - 38 tests, mostly canvas interaction)
+- client-portal.spec.ts, client-care-team.spec.ts, client-team-assignments.spec.ts
+- Various messaging tests (realtime, bidirectional, functional)
 
-### Phase D: Communication Rails ✅
-- SMS infrastructure (client lib, templates, opt-in/out)
-- Stripe payment rails (payment links, checkout pages, webhooks)
-- Workflow engine integration for send_sms step
+### Features Needing E2E Test Coverage:
 
-### Phase E: Analytics & Attribution ✅
-- Lead source attribution (UTM capture, referral partners)
-- Client satisfaction surveys (NPS, workflow integration)
-- Manual lead entry form with full attribution support
+**Phase A - Polish Features:**
+- [ ] Welcome packets management (create, edit, delete, items management)
+- [ ] Intake form builder (create form, add fields, edit, preview)
+- [ ] Form validation edge cases
 
-## Next Steps
-The 6-week plan is complete. Possible next work:
-1. **Live Integration**: Connect stubbed Stripe/SMS clients to real APIs
-2. **E2E Testing**: Comprehensive test coverage for new features
-3. **Performance**: Optimize database queries, add caching
-4. **Launch Prep**: Final polish, documentation, deployment
+**Phase B - Workflow Enhancement:**
+- [ ] Workflow history page (view executions, step details dialog)
+- [ ] Workflow analytics dashboard (date range filters, stats, funnel)
+- [ ] Workflow templates gallery (browse, install template)
+- [ ] Workflow settings (entry criteria builder, re-entry rules)
+- [ ] Variable picker in email/SMS steps
 
-## Key References
-- CLAUDE.md: Full project documentation with file locations
-- Plan file: `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md`
+**Phase C - SaaS Foundation:**
+- [ ] Organization settings page (profile, data export, deletion)
+- [ ] Billing page UI (plans display, usage meters, invoices tab)
+- [ ] Feature gates (test tier restrictions display)
 
-Test credentials:
-- Email: chase.d.harmon@gmail.com
-- Password: TestPassword123!
+**Phase D - Communication Rails:**
+- [ ] SMS templates page (create, edit, preview, toggle active)
+- [ ] Checkout success/cancel pages
+
+**Phase E - Analytics & Attribution:**
+- [ ] Manual lead entry form (/admin/leads/new)
+- [ ] Referral partners management (create, edit, toggle, delete)
+- [ ] Survey management (create NPS survey, view responses)
+- [ ] Public survey response page (/client/survey/[token])
+- [ ] Lead detail attribution section display
+
+### Testing Approach:
+1. Create new spec files for each feature area
+2. Test happy path first, then edge cases
+3. Verify UI elements render correctly
+4. Test form submissions and data persistence
+5. Test navigation and routing
+6. Handle async operations (loading states, API calls)
+
+### Key Commands:
+- `pnpm test:e2e` - Run all tests
+- `pnpm test:e2e tests/e2e/[filename].spec.ts` - Run specific test
+- `pnpm test:e2e --ui` - Interactive UI mode
+- `pnpm test:e2e --debug` - Debug mode
+
+### Test Environment:
+- Uses Chromium browser
+- Requires TEST_ADMIN_PASSWORD env var
+- Admin email: chase.d.harmon@gmail.com
+- Tests should clean up after themselves
+
+### File Naming Convention:
+- `admin-[feature].spec.ts` - Admin-side features
+- `client-[feature].spec.ts` - Client portal features
+- Use describe/test blocks with clear naming
+
+Start by identifying which features have the least coverage and create comprehensive tests for them.
 ```
