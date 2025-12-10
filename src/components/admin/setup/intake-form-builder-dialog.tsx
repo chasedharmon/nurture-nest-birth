@@ -199,8 +199,8 @@ export function IntakeFormBuilderDialog({
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fields, setFields] = useState<IntakeFormField[]>(() => {
-    if (template?.schema && typeof template.schema === 'object') {
-      const schema = template.schema as unknown as IntakeFormSchema
+    if (template?.form_schema && typeof template.form_schema === 'object') {
+      const schema = template.form_schema as unknown as IntakeFormSchema
       return Array.isArray(schema.fields) ? schema.fields : []
     }
     return []
@@ -315,7 +315,7 @@ export function IntakeFormBuilderDialog({
           name: data.name,
           description: data.description || null,
           service_type: data.service_type || null,
-          schema,
+          form_schema: schema,
           is_active: data.is_active,
         })
 
@@ -331,7 +331,7 @@ export function IntakeFormBuilderDialog({
           name: data.name,
           description: data.description || null,
           service_type: data.service_type || null,
-          schema,
+          form_schema: schema,
           is_active: data.is_active,
         })
 

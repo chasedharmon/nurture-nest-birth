@@ -1061,7 +1061,7 @@ export interface IntakeFormTemplate {
   name: string
   description?: string | null
   service_type?: string | null
-  schema: Record<string, unknown>
+  form_schema: Record<string, unknown>
   is_active: boolean
   created_at: string
   updated_at: string
@@ -1165,7 +1165,7 @@ export type IntakeFormTemplateInsert = {
   name: string
   description?: string | null
   service_type?: string | null
-  schema: IntakeFormSchema
+  form_schema: IntakeFormSchema
   is_active?: boolean
 }
 
@@ -1216,7 +1216,7 @@ export async function createIntakeFormTemplate(
         name: data.name,
         description: data.description || null,
         service_type: data.service_type || null,
-        schema: data.schema,
+        form_schema: data.form_schema,
         is_active: data.is_active ?? true,
       })
       .select()
@@ -1259,7 +1259,9 @@ export async function updateIntakeFormTemplate(
         ...(data.service_type !== undefined && {
           service_type: data.service_type,
         }),
-        ...(data.schema !== undefined && { schema: data.schema }),
+        ...(data.form_schema !== undefined && {
+          form_schema: data.form_schema,
+        }),
         ...(data.is_active !== undefined && { is_active: data.is_active }),
         updated_at: new Date().toISOString(),
       })

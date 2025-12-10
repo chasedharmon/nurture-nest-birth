@@ -174,8 +174,8 @@ export function IntakeFormsTable({ templates }: IntakeFormsTableProps) {
                   )}
                 </td>
                 <td className="px-4 py-4 text-muted-foreground">
-                  {countFields(template.schema)} field
-                  {countFields(template.schema) !== 1 ? 's' : ''}
+                  {countFields(template.form_schema)} field
+                  {countFields(template.form_schema) !== 1 ? 's' : ''}
                 </td>
                 <td className="px-4 py-4">
                   {template.is_active ? (
