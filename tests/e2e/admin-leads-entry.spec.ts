@@ -59,20 +59,22 @@ test.describe('Admin - Manual Lead Entry', () => {
       await page.goto('/admin/leads/new')
       await page.waitForLoadState('networkidle')
 
-      // Name and Email should be marked as required
-      await expect(page.locator('label:has-text("Name *")')).toBeVisible()
-      await expect(page.locator('label:has-text("Email *")')).toBeVisible()
+      // Name and Email should be marked as required (using text selector for generic div labels)
+      await expect(page.getByText('Name *')).toBeVisible()
+      await expect(page.getByText('Email *')).toBeVisible()
     })
 
     test('should have all contact information fields', async ({ page }) => {
       await page.goto('/admin/leads/new')
       await page.waitForLoadState('networkidle')
 
-      // Check for all contact fields
-      await expect(page.locator('#name')).toBeVisible()
-      await expect(page.locator('#email')).toBeVisible()
-      await expect(page.locator('#phone')).toBeVisible()
-      await expect(page.locator('#dueDate')).toBeVisible()
+      // Check for all contact fields (using role-based selectors for headless components)
+      await expect(page.getByRole('textbox', { name: 'Name *' })).toBeVisible()
+      await expect(page.getByRole('textbox', { name: 'Email *' })).toBeVisible()
+      await expect(page.getByRole('textbox', { name: 'Phone' })).toBeVisible()
+      await expect(
+        page.getByRole('textbox', { name: 'Expected Due Date' })
+      ).toBeVisible()
     })
 
     test('should have service interest dropdown', async ({ page }) => {
@@ -225,7 +227,7 @@ test.describe('Admin - Manual Lead Entry', () => {
       // Set due date (3 months from now)
       const futureDate = new Date()
       futureDate.setMonth(futureDate.getMonth() + 3)
-      const formattedDate = futureDate.toISOString().split('T')[0] as string
+      const formattedDate = futureDate.toISOString().split('T')[0]
       await page.locator('#dueDate').fill(formattedDate)
 
       // Select service interest
