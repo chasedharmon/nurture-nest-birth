@@ -86,7 +86,7 @@ See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full pl
 - `src/app/actions/invoices.ts` - Added generatePaymentLink, expirePaymentLink functions
 - `src/lib/workflows/engine.ts` - Added send_sms step execution with opt-in verification
 
-#### Phase E: Analytics & Attribution (Week 5-6) 🔄 IN PROGRESS
+#### Phase E: Analytics & Attribution (Week 5-6) ✅ COMPLETE
 
 | Task                        | Status      | Notes                                              |
 | --------------------------- | ----------- | -------------------------------------------------- |
@@ -101,8 +101,10 @@ See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full pl
 - `src/lib/attribution/index.ts` - Re-exports for attribution module
 - `src/components/forms/contact-form.tsx` - Updated with "How did you hear about us?" and UTM fields
 - `src/app/actions/contact.ts` - Updated to save attribution data
+- `src/app/actions/leads.ts` - Added createLead action for manual lead entry with attribution
 - `src/app/actions/referral-partners.ts` - Referral partner CRUD actions
 - `src/app/actions/surveys.ts` - Survey CRUD, invitations, responses actions
+- `src/app/admin/leads/new/page.tsx` - Manual lead entry form with full attribution support
 - `src/app/admin/setup/referral-partners/page.tsx` - Referral partners management UI
 - `src/components/admin/setup/referral-partner-dialog.tsx` - Create/edit partner dialog
 - `src/components/admin/setup/referral-partner-actions.tsx` - Partner actions dropdown
@@ -112,6 +114,7 @@ See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full pl
 - `src/app/client/survey/[token]/page.tsx` - Public survey response page (token-based)
 - `src/app/client/survey/[token]/survey-response-form.tsx` - Survey response form component
 - `src/components/ui/nps-scale.tsx` - NPS scale input (0-10) with color coding
+- `src/components/admin/client-overview.tsx` - Added Lead Source & Attribution section
 - `src/lib/workflows/types.ts` - Added send_survey step type
 - `src/lib/workflows/engine.ts` - Added executeSendSurvey method for workflow integration
 - `src/components/admin/workflows/nodes/base-node.tsx` - Added send_survey node styling
@@ -501,29 +504,36 @@ We're executing a 6-week refinement and SaaS foundation plan:
 - See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full details
 - Check CLAUDE.md Phase 7+ Execution Progress tables for current status
 
-## Just Completed: Phase E - Analytics & Attribution ✅
-- Lead Source Attribution: UTM capture, referral partners, "How did you hear about us?" on contact form
-- Client Satisfaction: NPS surveys with workflow integration, admin UI, public response pages
+## Completed Infrastructure Phases (C, D, E) ✅
+All infrastructure rails are now complete:
+- **Phase C**: Multi-tenancy, subscription tiers, usage metering, Stripe billing rails
+- **Phase D**: SMS infrastructure (templates, opt-in/out), Stripe payment rails (invoices)
+- **Phase E**: Lead source attribution (UTM, referral partners), NPS surveys with workflow integration
 
-## Remaining Tasks from Phase E
-- Admin lead entry form (`/admin/leads/new`) for manual lead creation with attribution
-- Lead detail page attribution section (show UTM, referral source, partner)
+## Next Phase: A & B - Polish & Workflow Enhancement
+Time to circle back and polish existing features before launch:
 
-## Phase E Files (Just Created)
-- `src/lib/attribution/utm.ts` - UTM capture utilities (sessionStorage-based)
-- `src/app/actions/referral-partners.ts` - Referral partner CRUD
-- `src/app/actions/surveys.ts` - Survey CRUD, invitations, responses
-- `src/app/admin/setup/referral-partners/page.tsx` - Partner management UI
-- `src/app/admin/setup/surveys/page.tsx` - Survey management with NPS stats
-- `src/app/client/survey/[token]/page.tsx` - Public survey response (token-based)
-- `src/components/ui/nps-scale.tsx` - NPS scale (0-10) component
-- `src/lib/workflows/types.ts` - Added send_survey step type
-- `src/lib/workflows/engine.ts` - Added executeSendSurvey method
+### Phase A: Polish & Complete (Pending)
+- A.1 Real-Time Messaging - Integrate existing hooks into UI (typing indicators, online presence, optimistic updates)
+- A.2 Form Validation - Complete remaining 4 Zod schemas
+- A.3 Welcome Packet Editor - Rich text editor with template variables
+- A.4 Intake Form Builder - Visual drag-and-drop form builder (currently "Coming Soon")
 
-## Next Steps
-1. Create admin lead entry form for manual leads with source attribution
-2. Add attribution section to lead detail page
-3. Consider Phase A/B polish tasks (messaging UI, validation, workflow enhancements)
+### Phase B: Workflow Enhancement (Pending)
+- B.1 Fix Critical Gaps - Connect email to notifications.ts, enable cron, execution history page
+- B.2 Entry Criteria/Filters - Segment who enters workflow
+- B.3 Re-entry Rules - Prevent duplicate executions
+- B.4 Variable Interpolation - {{first_name}} support in emails/messages
+- B.5 Enhanced Decision Nodes - Multi-branch, AND/OR logic
+- B.6 Execution Analytics - Funnel visualization, success rates
+- B.7 Template Gallery - Pre-built workflows with one-click install
+
+## Key Files for Phase A/B
+- Real-time hooks: `src/lib/hooks/use-realtime-*.ts` (7 hooks ready)
+- Messaging UI: `src/components/admin/messages/`, `src/components/client/chat-widget/`
+- Form validation: `src/lib/validations/setup.ts`
+- Workflow engine: `src/lib/workflows/engine.ts`, `src/lib/workflows/types.ts`
+- Workflow UI: `src/components/admin/workflows/`, `src/app/admin/workflows/`
 
 ## Best Practices
 - Commit frequently with conventional commits
