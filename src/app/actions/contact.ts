@@ -29,9 +29,21 @@ export async function submitContactForm(formData: FormData) {
       message: formData.get('message') as string,
     }
 
+    // Extract attribution data (optional fields)
+    const attributionData = {
+      referral_source: (formData.get('referralSource') as string) || null,
+      utm_source: (formData.get('utm_source') as string) || null,
+      utm_medium: (formData.get('utm_medium') as string) || null,
+      utm_campaign: (formData.get('utm_campaign') as string) || null,
+      utm_term: (formData.get('utm_term') as string) || null,
+      utm_content: (formData.get('utm_content') as string) || null,
+      referrer_url: (formData.get('referrer_url') as string) || null,
+      landing_page: (formData.get('landing_page') as string) || null,
+    }
+
     const validatedData = contactFormSchema.parse(rawData)
 
-    // Save to Supabase database
+    // Save to Supabase database with attribution data
     const supabase = await createClient()
     const { data: lead, error: dbError } = await supabase
       .from('leads')
@@ -44,6 +56,8 @@ export async function submitContactForm(formData: FormData) {
         due_date: validatedData.dueDate || null,
         service_interest: validatedData.service || null,
         message: validatedData.message,
+        // Attribution tracking
+        ...attributionData,
       })
       .select()
       .single()

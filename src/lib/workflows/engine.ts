@@ -219,6 +219,13 @@ export class WorkflowEngine {
         case 'decision':
           return await this.executeDecision(config, context, step)
 
+        case 'send_survey':
+          return await this.executeSendSurvey(
+            config,
+            context,
+            step.next_step_key
+          )
+
         case 'end':
           return { success: true }
 
@@ -511,6 +518,134 @@ export class WorkflowEngine {
       }
       return String(value)
     })
+  }
+
+  /**
+   * Execute a send_survey step
+   * Creates a survey invitation and sends it via the configured channel
+   */
+  private async executeSendSurvey(
+    config: StepConfig,
+    context: ExecutionContext,
+    nextStepKey?: string | null
+  ): Promise<StepResult> {
+    const recordData = context.record_data
+    const clientId = recordData.id as string
+    const serviceId = (recordData.service_id as string) || null
+
+    if (!clientId) {
+      return {
+        success: false,
+        error: 'No client ID found in record data',
+      }
+    }
+
+    if (!config.survey_id) {
+      return {
+        success: false,
+        error: 'No survey ID configured for this step',
+      }
+    }
+
+    try {
+      // Get client information
+      const { data: client, error: clientError } = await this.supabase
+        .from('leads')
+        .select('name, email, organization_id')
+        .eq('id', clientId)
+        .single()
+
+      if (clientError || !client) {
+        return {
+          success: false,
+          error: 'Client not found',
+        }
+      }
+
+      // Get survey details
+      const { data: survey, error: surveyError } = await this.supabase
+        .from('surveys')
+        .select('id, name, is_active')
+        .eq('id', config.survey_id)
+        .single()
+
+      if (surveyError || !survey) {
+        return {
+          success: false,
+          error: 'Survey not found',
+        }
+      }
+
+      if (!survey.is_active) {
+        console.log(
+          `[WorkflowEngine] Survey ${survey.name} is inactive, skipping`
+        )
+        return {
+          success: true,
+          output: { skipped: true, reason: 'Survey is inactive' },
+          nextStepKey,
+        }
+      }
+
+      // Create survey invitation
+      const sendVia = config.send_via || 'email'
+      const { data: invitation, error: invError } = await this.supabase
+        .from('survey_invitations')
+        .insert({
+          survey_id: config.survey_id,
+          client_id: clientId,
+          service_id: serviceId,
+          organization_id: client.organization_id,
+          sent_via: sendVia,
+        })
+        .select('id, token')
+        .single()
+
+      if (invError || !invitation) {
+        return {
+          success: false,
+          error: 'Failed to create survey invitation',
+        }
+      }
+
+      // TODO: Send via email/SMS/portal based on send_via config
+      // For now, just log the invitation
+      console.log(
+        `[WorkflowEngine] Survey invitation created for ${client.email}`,
+        `Token: ${invitation.token}`,
+        `Send via: ${sendVia}`
+      )
+
+      // Log to lead activities
+      await this.supabase.from('lead_activities').insert({
+        lead_id: clientId,
+        activity_type: 'system',
+        content: `Survey invitation sent: ${survey.name}`,
+        activity_category: 'communication',
+        metadata: {
+          survey_id: config.survey_id,
+          invitation_id: invitation.id,
+          send_via: sendVia,
+        },
+      })
+
+      return {
+        success: true,
+        output: {
+          invitation_id: invitation.id,
+          token: invitation.token,
+          survey_name: survey.name,
+          sent_via: sendVia,
+        },
+        nextStepKey,
+      }
+    } catch (error) {
+      console.error('[WorkflowEngine] Error sending survey:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to send survey',
+      }
+    }
   }
 
   private async executeCreateTask(

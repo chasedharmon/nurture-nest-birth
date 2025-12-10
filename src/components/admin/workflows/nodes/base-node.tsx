@@ -22,6 +22,7 @@ import {
   MessageCircle,
   Globe,
   Square,
+  ClipboardCheck,
 } from 'lucide-react'
 
 const iconMap: Record<WorkflowStepType, React.ElementType> = {
@@ -34,6 +35,7 @@ const iconMap: Record<WorkflowStepType, React.ElementType> = {
   wait: Clock,
   decision: GitBranch,
   send_message: MessageCircle,
+  send_survey: ClipboardCheck,
   webhook: Globe,
   end: Square,
 }
@@ -86,6 +88,11 @@ const colorMap: Record<
     bg: 'bg-cyan-50 dark:bg-cyan-950/30',
     border: 'border-cyan-500',
     icon: 'text-cyan-600 dark:text-cyan-400',
+  },
+  send_survey: {
+    bg: 'bg-pink-50 dark:bg-pink-950/30',
+    border: 'border-pink-500',
+    icon: 'text-pink-600 dark:text-pink-400',
   },
   webhook: {
     bg: 'bg-slate-50 dark:bg-slate-800/50',

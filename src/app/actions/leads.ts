@@ -130,3 +130,83 @@ export async function getAllLeads() {
 
   return { success: true, leads }
 }
+
+// ============================================================================
+// Create Lead (Manual Entry)
+// ============================================================================
+
+export interface CreateLeadData {
+  // Required fields
+  name: string
+  email: string
+  // Optional contact info
+  phone?: string
+  // Service info
+  service_interest?: string
+  due_date?: string
+  message?: string
+  // Attribution
+  referral_source?: string
+  referral_partner_id?: string
+  source_detail?: string
+  // UTM tracking (for marketing campaigns)
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
+  utm_term?: string
+  utm_content?: string
+}
+
+export async function createLead(data: CreateLeadData) {
+  const supabase = await createClient()
+
+  // Validate required fields
+  if (!data.name?.trim()) {
+    return { success: false, error: 'Name is required' }
+  }
+  if (!data.email?.trim()) {
+    return { success: false, error: 'Email is required' }
+  }
+
+  // Extract email domain
+  const emailDomain = data.email.split('@')[1] || null
+
+  const leadData = {
+    name: data.name.trim(),
+    email: data.email.trim().toLowerCase(),
+    phone: data.phone?.trim() || null,
+    service_interest: data.service_interest?.trim() || null,
+    due_date: data.due_date || null,
+    message: data.message?.trim() || null,
+    // Manual entry = 'manual' source
+    source: 'manual' as const,
+    status: 'new' as const,
+    email_domain: emailDomain,
+    // Attribution fields
+    referral_source: data.referral_source || null,
+    referral_partner_id: data.referral_partner_id || null,
+    source_detail: data.source_detail?.trim() || null,
+    // UTM fields
+    utm_source: data.utm_source?.trim() || null,
+    utm_medium: data.utm_medium?.trim() || null,
+    utm_campaign: data.utm_campaign?.trim() || null,
+    utm_term: data.utm_term?.trim() || null,
+    utm_content: data.utm_content?.trim() || null,
+  }
+
+  const { data: lead, error } = await supabase
+    .from('leads')
+    .insert(leadData)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error creating lead:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  revalidatePath('/admin/leads')
+
+  return { success: true, lead }
+}

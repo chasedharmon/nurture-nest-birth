@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -14,6 +14,12 @@ import {
   trackContactFormError,
 } from '@/lib/analytics'
 import { useOptionalPersonalization } from '@/components/personalization'
+import {
+  captureAttribution,
+  getAttributionForSubmission,
+  mergeAttributionWithFormData,
+  REFERRAL_SOURCE_OPTIONS,
+} from '@/lib/attribution'
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -23,6 +29,11 @@ export function ContactForm() {
   } | null>(null)
   const personalization = useOptionalPersonalization()
 
+  // Capture UTM parameters on mount
+  useEffect(() => {
+    captureAttribution()
+  }, [])
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setIsSubmitting(true)
@@ -31,6 +42,10 @@ export function ContactForm() {
     const form = event.currentTarget
     const formData = new FormData(form)
     const service = formData.get('service') as string
+
+    // Add attribution data to form submission
+    const attribution = getAttributionForSubmission()
+    mergeAttributionWithFormData(formData, attribution)
 
     // Track form submission
     trackContactFormSubmit({ service })
@@ -175,6 +190,22 @@ export function ContactForm() {
               <option value="sibling-prep">Sibling Preparation</option>
               <option value="multiple">Multiple Services</option>
               <option value="not-sure">Not Sure Yet</option>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="referralSource">How did you hear about us?</Label>
+            <Select
+              id="referralSource"
+              name="referralSource"
+              disabled={isSubmitting}
+            >
+              <option value="">Select an option...</option>
+              {REFERRAL_SOURCE_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </Select>
           </div>
 

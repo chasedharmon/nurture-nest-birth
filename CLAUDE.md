@@ -86,12 +86,35 @@ See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full pl
 - `src/app/actions/invoices.ts` - Added generatePaymentLink, expirePaymentLink functions
 - `src/lib/workflows/engine.ts` - Added send_sms step execution with opt-in verification
 
-#### Phase E: Analytics & Attribution (Week 5-6)
+#### Phase E: Analytics & Attribution (Week 5-6) 🔄 IN PROGRESS
 
-| Task                        | Status     | Notes                   |
-| --------------------------- | ---------- | ----------------------- |
-| E.1 Lead Source Attribution | 🔲 PENDING | UTM tracking, referrals |
-| E.2 Client Satisfaction     | 🔲 PENDING | NPS surveys             |
+| Task                        | Status      | Notes                                              |
+| --------------------------- | ----------- | -------------------------------------------------- |
+| E.1 Lead Source Attribution | ✅ COMPLETE | UTM capture, referral partners, attribution fields |
+| E.2 Client Satisfaction     | ✅ COMPLETE | NPS surveys, workflow integration, admin UI        |
+
+**Phase E Files Created:**
+
+- `supabase/migrations/20251217000000_lead_source_attribution.sql` - Attribution columns on leads, referral_partners table
+- `supabase/migrations/20251217010000_client_satisfaction.sql` - surveys, survey_responses, survey_invitations tables
+- `src/lib/attribution/utm.ts` - UTM capture utilities (sessionStorage-based)
+- `src/lib/attribution/index.ts` - Re-exports for attribution module
+- `src/components/forms/contact-form.tsx` - Updated with "How did you hear about us?" and UTM fields
+- `src/app/actions/contact.ts` - Updated to save attribution data
+- `src/app/actions/referral-partners.ts` - Referral partner CRUD actions
+- `src/app/actions/surveys.ts` - Survey CRUD, invitations, responses actions
+- `src/app/admin/setup/referral-partners/page.tsx` - Referral partners management UI
+- `src/components/admin/setup/referral-partner-dialog.tsx` - Create/edit partner dialog
+- `src/components/admin/setup/referral-partner-actions.tsx` - Partner actions dropdown
+- `src/app/admin/setup/surveys/page.tsx` - Survey management UI with NPS stats
+- `src/components/admin/setup/survey-dialog.tsx` - Create/edit survey with question builder
+- `src/components/admin/setup/survey-actions.tsx` - Survey actions dropdown
+- `src/app/client/survey/[token]/page.tsx` - Public survey response page (token-based)
+- `src/app/client/survey/[token]/survey-response-form.tsx` - Survey response form component
+- `src/components/ui/nps-scale.tsx` - NPS scale input (0-10) with color coding
+- `src/lib/workflows/types.ts` - Added send_survey step type
+- `src/lib/workflows/engine.ts` - Added executeSendSurvey method for workflow integration
+- `src/components/admin/workflows/nodes/base-node.tsx` - Added send_survey node styling
 
 ### Prior Phase 7 Completed Items
 
@@ -478,31 +501,29 @@ We're executing a 6-week refinement and SaaS foundation plan:
 - See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full details
 - Check CLAUDE.md Phase 7+ Execution Progress tables for current status
 
-## Just Completed: Phase D - Communication Rails ✅
-- SMS Infrastructure: Client lib, templates table, management UI, workflow engine integration, opt-in/out
-- Stripe Payment Rails: Payment link generation, checkout pages, webhook handler for invoice payments
+## Just Completed: Phase E - Analytics & Attribution ✅
+- Lead Source Attribution: UTM capture, referral partners, "How did you hear about us?" on contact form
+- Client Satisfaction: NPS surveys with workflow integration, admin UI, public response pages
 
-## Current Focus: Phase E - Analytics & Attribution
+## Remaining Tasks from Phase E
+- Admin lead entry form (`/admin/leads/new`) for manual lead creation with attribution
+- Lead detail page attribution section (show UTM, referral source, partner)
 
-### E.1 Lead Source Attribution
-Build lead source tracking:
-- UTM parameter capture on lead creation
-- Referral source tracking
-- Source breakdown reports
-- Campaign attribution
+## Phase E Files (Just Created)
+- `src/lib/attribution/utm.ts` - UTM capture utilities (sessionStorage-based)
+- `src/app/actions/referral-partners.ts` - Referral partner CRUD
+- `src/app/actions/surveys.ts` - Survey CRUD, invitations, responses
+- `src/app/admin/setup/referral-partners/page.tsx` - Partner management UI
+- `src/app/admin/setup/surveys/page.tsx` - Survey management with NPS stats
+- `src/app/client/survey/[token]/page.tsx` - Public survey response (token-based)
+- `src/components/ui/nps-scale.tsx` - NPS scale (0-10) component
+- `src/lib/workflows/types.ts` - Added send_survey step type
+- `src/lib/workflows/engine.ts` - Added executeSendSurvey method
 
-### E.2 Client Satisfaction
-Build feedback collection:
-- NPS survey infrastructure (stubbed)
-- Post-service feedback forms
-- Satisfaction metrics dashboard
-
-## Reference: Phase D Files (Just Created)
-- `src/lib/sms/client.ts` - SMS sending, character counting, opt-in management
-- `src/lib/sms/templates.ts` - Template types and preview utilities
-- `src/lib/stripe/payments.ts` - Invoice payment checkout sessions
-- `src/app/api/webhooks/stripe-payments/route.ts` - Payment webhook handler
-- `src/app/actions/invoices.ts` - generatePaymentLink function
+## Next Steps
+1. Create admin lead entry form for manual leads with source attribution
+2. Add attribution section to lead detail page
+3. Consider Phase A/B polish tasks (messaging UI, validation, workflow enhancements)
 
 ## Best Practices
 - Commit frequently with conventional commits

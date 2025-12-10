@@ -33,6 +33,7 @@ export type WorkflowStepType =
   | 'wait'
   | 'decision'
   | 'send_message'
+  | 'send_survey'
   | 'webhook'
   | 'end'
 
@@ -279,6 +280,10 @@ export interface StepConfig {
   webhook_method?: 'GET' | 'POST' | 'PUT'
   webhook_headers?: Record<string, string>
   webhook_body?: Record<string, unknown>
+
+  // Send Survey
+  survey_id?: string
+  send_via?: 'email' | 'portal' | 'both'
 }
 
 export interface TaskConfig {
@@ -419,6 +424,13 @@ export const NODE_PALETTE: NodePaletteItem[] = [
     label: 'Portal Message',
     description: 'Send an in-app message',
     icon: 'MessageCircle',
+    category: 'action',
+  },
+  {
+    type: 'send_survey',
+    label: 'Send Survey',
+    description: 'Send a feedback survey to the client',
+    icon: 'ClipboardCheck',
     category: 'action',
   },
   // Logic

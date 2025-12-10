@@ -119,6 +119,17 @@ export interface Lead {
   client_type?: ClientType
   tags?: string[]
   lifecycle_stage?: LifecycleStage
+  // Phase E attribution tracking
+  source_detail?: string | null
+  referral_source?: string | null
+  referral_partner_id?: string | null
+  utm_source?: string | null
+  utm_medium?: string | null
+  utm_campaign?: string | null
+  utm_term?: string | null
+  utm_content?: string | null
+  referrer_url?: string | null
+  landing_page?: string | null
 }
 
 export interface LeadActivity {
@@ -1446,4 +1457,135 @@ export const DEFAULT_FEATURE_FLAGS: Record<SubscriptionTier, FeatureFlags> = {
     priority_support: true,
     dedicated_account_manager: true,
   },
+}
+
+// ============================================================================
+// Phase E: Lead Attribution Types
+// ============================================================================
+
+export type ReferralPartnerType =
+  | 'healthcare'
+  | 'business'
+  | 'individual'
+  | 'organization'
+  | 'other'
+
+export interface ReferralPartner {
+  id: string
+  organization_id: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  business_name?: string | null
+  partner_type: ReferralPartnerType
+  referral_code?: string | null
+  referral_url?: string | null
+  commission_percent?: number | null
+  commission_flat_fee?: number | null
+  notes?: string | null
+  address?: string | null
+  specialization?: string | null
+  lead_count: number
+  converted_count: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+// ============================================================================
+// Phase E: Client Satisfaction Types
+// ============================================================================
+
+export type SurveyType = 'nps' | 'csat' | 'custom'
+
+export type SurveyTriggerType =
+  | 'manual'
+  | 'after_service'
+  | 'after_meeting'
+  | 'workflow'
+
+export type SurveyQuestionType =
+  | 'nps'
+  | 'rating'
+  | 'text'
+  | 'multiple_choice'
+  | 'single_choice'
+
+export type NPSSentiment = 'promoter' | 'passive' | 'detractor'
+
+export interface SurveyQuestion {
+  id: string
+  type: SurveyQuestionType
+  question: string
+  required: boolean
+  options?: string[]
+}
+
+export interface Survey {
+  id: string
+  organization_id: string
+  name: string
+  description?: string | null
+  survey_type: SurveyType
+  questions: SurveyQuestion[]
+  thank_you_message?: string | null
+  trigger_type: SurveyTriggerType
+  is_active: boolean
+  response_count: number
+  average_score?: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SurveyResponse {
+  id: string
+  survey_id: string
+  client_id: string
+  service_id?: string | null
+  organization_id: string
+  responses: Record<string, string | number>
+  nps_score?: number | null
+  feedback_text?: string | null
+  sentiment?: NPSSentiment | null
+  submitted_at: string
+  ip_address?: string | null
+  user_agent?: string | null
+}
+
+export interface SurveyInvitation {
+  id: string
+  survey_id: string
+  client_id: string
+  service_id?: string | null
+  sent_at: string
+  sent_via: 'email' | 'portal' | 'sms'
+  opened_at?: string | null
+  completed_at?: string | null
+  token: string
+  expires_at: string
+}
+
+/**
+ * Calculate NPS sentiment from a score
+ */
+export function getNPSSentiment(score: number): NPSSentiment {
+  if (score >= 9) return 'promoter'
+  if (score >= 7) return 'passive'
+  return 'detractor'
+}
+
+/**
+ * Calculate NPS from an array of scores
+ * NPS = %Promoters - %Detractors
+ */
+export function calculateNPS(scores: number[]): number {
+  if (scores.length === 0) return 0
+
+  const promoters = scores.filter(s => s >= 9).length
+  const detractors = scores.filter(s => s <= 6).length
+
+  const promoterPercent = (promoters / scores.length) * 100
+  const detractorPercent = (detractors / scores.length) * 100
+
+  return Math.round(promoterPercent - detractorPercent)
 }

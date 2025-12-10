@@ -6,7 +6,7 @@ import type { Lead, ClientAssignment } from '@/lib/supabase/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { UserPlus, Users, AlertCircle } from 'lucide-react'
+import { UserPlus, Users, AlertCircle, Megaphone } from 'lucide-react'
 
 interface ClientOverviewProps {
   lead: Lead
@@ -290,6 +290,96 @@ export function ClientOverview({
           )}
         </CardContent>
       </Card>
+
+      {/* Lead Source & Attribution */}
+      {(lead.referral_source ||
+        lead.source_detail ||
+        lead.referral_partner_id ||
+        lead.utm_source ||
+        lead.utm_campaign) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Megaphone className="h-5 w-5" />
+              Lead Source & Attribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {lead.referral_source && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Referral Source
+                </p>
+                <p className="text-sm capitalize">
+                  {lead.referral_source.replace(/_/g, ' ')}
+                </p>
+              </div>
+            )}
+
+            {lead.source_detail && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Source Details
+                </p>
+                <p className="text-sm">{lead.source_detail}</p>
+              </div>
+            )}
+
+            {/* UTM Parameters */}
+            {(lead.utm_source ||
+              lead.utm_medium ||
+              lead.utm_campaign ||
+              lead.utm_term ||
+              lead.utm_content) && (
+              <div className="border-t pt-4">
+                <p className="text-sm font-medium text-muted-foreground mb-2">
+                  Campaign Tracking (UTM)
+                </p>
+                <div className="grid gap-2 text-sm">
+                  {lead.utm_source && (
+                    <div className="flex">
+                      <span className="w-24 text-muted-foreground">
+                        Source:
+                      </span>
+                      <span>{lead.utm_source}</span>
+                    </div>
+                  )}
+                  {lead.utm_medium && (
+                    <div className="flex">
+                      <span className="w-24 text-muted-foreground">
+                        Medium:
+                      </span>
+                      <span>{lead.utm_medium}</span>
+                    </div>
+                  )}
+                  {lead.utm_campaign && (
+                    <div className="flex">
+                      <span className="w-24 text-muted-foreground">
+                        Campaign:
+                      </span>
+                      <span>{lead.utm_campaign}</span>
+                    </div>
+                  )}
+                  {lead.utm_term && (
+                    <div className="flex">
+                      <span className="w-24 text-muted-foreground">Term:</span>
+                      <span>{lead.utm_term}</span>
+                    </div>
+                  )}
+                  {lead.utm_content && (
+                    <div className="flex">
+                      <span className="w-24 text-muted-foreground">
+                        Content:
+                      </span>
+                      <span>{lead.utm_content}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Birth Preferences */}
       {lead.birth_preferences &&
