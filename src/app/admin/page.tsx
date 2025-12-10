@@ -9,6 +9,7 @@ import {
   BarChart3,
   LayoutDashboard,
   Settings,
+  Workflow,
 } from 'lucide-react'
 import { DoulaDashboard } from '@/components/admin/dashboards'
 import { QuickMessagesSheet } from '@/components/admin/quick-messages-sheet'
@@ -40,12 +41,19 @@ export default async function AdminPage() {
     redirect('/login')
   }
 
-  // Fetch user profile
-  const { data: profile } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  // Fetch user profile and team member role in parallel
+  const [{ data: profile }, { data: teamMember }] = await Promise.all([
+    supabase.from('users').select('*').eq('id', user.id).single(),
+    supabase
+      .from('team_members')
+      .select('role')
+      .eq('user_id', user.id)
+      .single(),
+  ])
+
+  // Check if user has permission to access workflows (owner or admin role)
+  const canAccessWorkflows =
+    teamMember?.role === 'owner' || teamMember?.role === 'admin'
 
   // Fetch all dashboard data in parallel
   const [
@@ -138,6 +146,14 @@ export default async function AdminPage() {
                   Dashboards
                 </Button>
               </Link>
+              {canAccessWorkflows && (
+                <Link href="/admin/workflows">
+                  <Button variant="outline" size="sm">
+                    <Workflow className="mr-2 h-4 w-4" />
+                    Workflows
+                  </Button>
+                </Link>
+              )}
               <Link href="/admin/setup">
                 <Button variant="outline" size="sm">
                   <Settings className="mr-2 h-4 w-4" />

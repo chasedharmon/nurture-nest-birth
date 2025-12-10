@@ -13,6 +13,7 @@ export const PERMISSION_OBJECTS = [
   'team',
   'services',
   'contracts',
+  'workflows',
 ] as const
 
 export const PERMISSION_ACTIONS = [
@@ -38,6 +39,7 @@ export const PERMISSION_OBJECT_LABELS: Record<PermissionObject, string> = {
   team: 'Team',
   services: 'Services',
   contracts: 'Contracts',
+  workflows: 'Workflows',
 }
 
 export const PERMISSION_ACTION_LABELS: Record<PermissionActionType, string> = {

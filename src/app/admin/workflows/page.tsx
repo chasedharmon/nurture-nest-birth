@@ -77,6 +77,20 @@ export default async function WorkflowsPage() {
     redirect('/login')
   }
 
+  // Check if user has permission to access workflows (owner or admin role)
+  const { data: teamMember } = await supabase
+    .from('team_members')
+    .select('role')
+    .eq('user_id', user.id)
+    .single()
+
+  const canAccessWorkflows =
+    teamMember?.role === 'owner' || teamMember?.role === 'admin'
+
+  if (!canAccessWorkflows) {
+    redirect('/admin')
+  }
+
   const [workflowsResult, templatesResult] = await Promise.all([
     getWorkflows(),
     getWorkflowTemplates(),
