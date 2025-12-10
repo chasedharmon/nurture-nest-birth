@@ -8,8 +8,11 @@ test.describe('Admin - Intake Forms Management', () => {
   test.beforeEach(async ({ page }) => {
     // Login before each test
     await page.goto('/login')
+    // Wait for hydration to complete
+    await page.waitForLoadState('networkidle')
     await page.waitForSelector('input[name="email"]', { state: 'visible' })
 
+    // Type credentials character by character to ensure React captures all input events
     const emailInput = page.locator('input[name="email"]')
     await emailInput.click()
     await emailInput.pressSequentially(ADMIN_EMAIL, { delay: 50 })
@@ -18,7 +21,13 @@ test.describe('Admin - Intake Forms Management', () => {
     await passwordInput.click()
     await passwordInput.pressSequentially(ADMIN_PASSWORD, { delay: 50 })
 
-    await page.click('button[type="submit"]')
+    // Wait a moment for React state to update
+    await page.waitForTimeout(300)
+
+    // Submit form
+    await page.locator('button[type="submit"]').click()
+
+    // Wait for redirect
     await expect(page).toHaveURL('/admin', { timeout: 15000 })
   })
 

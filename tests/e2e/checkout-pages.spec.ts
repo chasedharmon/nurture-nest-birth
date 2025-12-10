@@ -39,7 +39,7 @@ test.describe('Checkout Pages', () => {
 
       // Should show Paid status
       await expect(page.locator('text=Status')).toBeVisible()
-      await expect(page.locator('text=Paid')).toBeVisible()
+      await expect(page.getByText('Paid', { exact: true })).toBeVisible()
     })
 
     test('should have View My Portal button', async ({ page }) => {
