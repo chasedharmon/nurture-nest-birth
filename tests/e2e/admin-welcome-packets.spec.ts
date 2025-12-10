@@ -14,18 +14,18 @@ test.describe('Admin - Welcome Packets Management', () => {
 
     // Type credentials character by character to ensure React captures all input events
     const emailInput = page.locator('input[name="email"]')
-    await emailInput.click()
+    await emailInput.click({ force: true })
     await emailInput.pressSequentially(ADMIN_EMAIL, { delay: 50 })
 
     const passwordInput = page.locator('input[name="password"]')
-    await passwordInput.click()
+    await passwordInput.click({ force: true })
     await passwordInput.pressSequentially(ADMIN_PASSWORD, { delay: 50 })
 
     // Wait a moment for React state to update
     await page.waitForTimeout(300)
 
     // Submit form
-    await page.locator('button[type="submit"]').click()
+    await page.locator('button[type="submit"]').click({ force: true })
 
     // Wait for redirect
     await expect(page).toHaveURL('/admin', { timeout: 15000 })

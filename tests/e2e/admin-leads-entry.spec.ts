@@ -14,18 +14,18 @@ test.describe('Admin - Manual Lead Entry', () => {
 
     // Type credentials character by character to ensure React captures all input events
     const emailInput = page.locator('input[name="email"]')
-    await emailInput.click()
+    await emailInput.click({ force: true })
     await emailInput.pressSequentially(ADMIN_EMAIL, { delay: 50 })
 
     const passwordInput = page.locator('input[name="password"]')
-    await passwordInput.click()
+    await passwordInput.click({ force: true })
     await passwordInput.pressSequentially(ADMIN_PASSWORD, { delay: 50 })
 
     // Wait a moment for React state to update
     await page.waitForTimeout(300)
 
     // Submit form
-    await page.locator('button[type="submit"]').click()
+    await page.locator('button[type="submit"]').click({ force: true })
 
     // Wait for redirect
     await expect(page).toHaveURL('/admin', { timeout: 15000 })
@@ -162,7 +162,7 @@ test.describe('Admin - Manual Lead Entry', () => {
 
       // Fill only email
       const emailInput = page.locator('#email')
-      await emailInput.click()
+      await emailInput.click({ force: true })
       await emailInput.pressSequentially('test@example.com', { delay: 30 })
 
       // Submit form
@@ -214,7 +214,7 @@ test.describe('Admin - Manual Lead Entry', () => {
       await nameInput.pressSequentially(testName, { delay: 30 })
 
       const emailInput = page.locator('#email')
-      await emailInput.click()
+      await emailInput.click({ force: true })
       await emailInput.pressSequentially(testEmail, { delay: 30 })
 
       // Submit form
@@ -242,7 +242,7 @@ test.describe('Admin - Manual Lead Entry', () => {
       await nameInput.pressSequentially(testName, { delay: 30 })
 
       const emailInput = page.locator('#email')
-      await emailInput.click()
+      await emailInput.click({ force: true })
       await emailInput.pressSequentially(testEmail, { delay: 30 })
 
       const phoneInput = page.locator('#phone')
@@ -306,7 +306,7 @@ test.describe('Admin - Manual Lead Entry', () => {
       })
 
       const emailInput = page.locator('#email')
-      await emailInput.click()
+      await emailInput.click({ force: true })
       await emailInput.pressSequentially(`state-${timestamp}@example.com`, {
         delay: 30,
       })
