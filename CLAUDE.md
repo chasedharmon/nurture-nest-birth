@@ -405,6 +405,8 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - Components in `src/components/admin/workflows/`
 - Pages: list (`/admin/workflows`), new (`/admin/workflows/new`), builder (`/admin/workflows/[id]`)
 - Server actions in `src/app/actions/workflows.ts`
+- **Role-based access**: Only `owner` or `admin` team_members can access workflows (dashboard link conditional, page-level redirect)
+- `workflows` added to PERMISSION_OBJECTS in `src/lib/permissions.ts` for granular permission control
 
 **Unified Messaging** (COMPLETE):
 
