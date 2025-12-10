@@ -1,5 +1,15 @@
 # Nurture Nest Birth - Doula CRM
 
+## Key Documentation
+
+| Document                                                 | Description                                                                                 |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **[docs/CRM-ARCHITECTURE.md](docs/CRM-ARCHITECTURE.md)** | CRM feature docs: 12 features with architecture diagrams, data models, APIs, and next steps |
+| **[docs/FRONTEND-WEBSITE.md](docs/FRONTEND-WEBSITE.md)** | Marketing website docs: 13 pages, design system, components, SEO, personalization           |
+| **[docs/TESTING.md](docs/TESTING.md)**                   | E2E testing guide and patterns                                                              |
+| **[docs/PERFORMANCE.md](docs/PERFORMANCE.md)**           | Performance optimization notes                                                              |
+| **[docs/QUICK_START.md](docs/QUICK_START.md)**           | Quick start guide                                                                           |
+
 ## Project Status
 
 **Current Phase**: Phase 7+ - CRM Refinement & SaaS Foundation
