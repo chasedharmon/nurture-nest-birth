@@ -19,14 +19,32 @@ export default defineConfig({
   },
 
   projects: [
+    // Setup project - authenticates once before other tests
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
     },
 
+    // Chromium with authenticated state for admin tests
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'tests/e2e/.auth/admin.json',
+      },
+      dependencies: ['setup'],
+      testIgnore: /auth\.setup\.ts/,
+    },
+
+    // Mobile with authenticated state
     {
       name: 'mobile',
-      use: { ...devices['iPhone 13'] },
+      use: {
+        ...devices['iPhone 13'],
+        storageState: 'tests/e2e/.auth/admin.json',
+      },
+      dependencies: ['setup'],
+      testIgnore: /auth\.setup\.ts/,
     },
   ],
 

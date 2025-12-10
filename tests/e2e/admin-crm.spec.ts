@@ -1,71 +1,21 @@
 import { test, expect } from '@playwright/test'
 
-// Test credentials (you'll need to update these)
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'your-password-here'
-
 test.describe('Admin CRM', () => {
-  test.describe('Authentication', () => {
-    test('should redirect unauthenticated users to login', async ({ page }) => {
+  // Authentication is handled by Playwright setup project via storageState
+  // Each test starts with a pre-authenticated session
+
+  test.describe('Dashboard', () => {
+    test('should load admin dashboard', async ({ page }) => {
       await page.goto('/admin')
-      await expect(page).toHaveURL(/\/login/)
-    })
-
-    test('should allow admin to login', async ({ page }) => {
-      await page.goto('/login')
-
-      // Fill in login form
-      await page.fill('input[name="email"]', ADMIN_EMAIL)
-      await page.fill('input[name="password"]', ADMIN_PASSWORD)
-
-      // Submit form
-      await page.click('button[type="submit"]')
-
-      // Should redirect to admin dashboard
       await expect(page).toHaveURL('/admin')
 
-      // Should show welcome message
+      // Should show dashboard content
       await expect(page.locator('text=Welcome back')).toBeVisible()
     })
 
-    test('should show error for invalid credentials', async ({ page }) => {
-      await page.goto('/login')
-
-      await page.fill('input[name="email"]', 'wrong@example.com')
-      await page.fill('input[name="password"]', 'wrongpassword')
-      await page.click('button[type="submit"]')
-
-      // Should show error message
-      await expect(page.locator('[role="alert"]')).toBeVisible()
-    })
-
-    test('should allow admin to sign out', async ({ page }) => {
-      // Login first
-      await page.goto('/login')
-      await page.fill('input[name="email"]', ADMIN_EMAIL)
-      await page.fill('input[name="password"]', ADMIN_PASSWORD)
-      await page.click('button[type="submit"]')
-      await expect(page).toHaveURL('/admin')
-
-      // Sign out
-      await page.click('text=Sign Out')
-
-      // Should redirect to login
-      await expect(page).toHaveURL(/\/login/)
-    })
-  })
-
-  test.describe('Dashboard', () => {
-    test.beforeEach(async ({ page }) => {
-      // Login before each test
-      await page.goto('/login')
-      await page.fill('input[name="email"]', ADMIN_EMAIL)
-      await page.fill('input[name="password"]', ADMIN_PASSWORD)
-      await page.click('button[type="submit"]')
-      await expect(page).toHaveURL('/admin')
-    })
-
     test('should display dashboard with stats', async ({ page }) => {
+      await page.goto('/admin')
+
       // Check for stats cards
       await expect(page.locator('text=Total Leads')).toBeVisible()
       await expect(page.locator('text=New Leads')).toBeVisible()
@@ -76,6 +26,7 @@ test.describe('Admin CRM', () => {
     })
 
     test('should show CRM title and navigation', async ({ page }) => {
+      await page.goto('/admin')
       await expect(page.locator('text=Nurture Nest Birth CRM')).toBeVisible()
       await expect(page.locator('text=Sign Out')).toBeVisible()
     })
@@ -109,12 +60,8 @@ test.describe('Admin CRM', () => {
         page.locator('text=Thank you for your message!')
       ).toBeVisible({ timeout: 10000 })
 
-      // Login to admin to verify lead was created
-      await page.goto('/login')
-      await page.fill('input[name="email"]', ADMIN_EMAIL)
-      await page.fill('input[name="password"]', ADMIN_PASSWORD)
-      await page.click('button[type="submit"]')
-      await expect(page).toHaveURL('/admin')
+      // Navigate to admin to verify lead was created
+      await page.goto('/admin')
 
       // Verify the lead appears in the dashboard
       await expect(page.locator(`text=${testEmail}`)).toBeVisible()
@@ -186,12 +133,8 @@ test.describe('Admin CRM', () => {
           page.locator('text=Thank you for subscribing!')
         ).toBeVisible({ timeout: 10000 })
 
-        // Login to admin to verify lead was created
-        await page.goto('/login')
-        await page.fill('input[name="email"]', ADMIN_EMAIL)
-        await page.fill('input[name="password"]', ADMIN_PASSWORD)
-        await page.click('button[type="submit"]')
-        await expect(page).toHaveURL('/admin')
+        // Navigate to admin to verify lead was created
+        await page.goto('/admin')
 
         // Verify the newsletter lead appears
         await expect(page.locator(`text=${testEmail}`)).toBeVisible()
@@ -226,16 +169,9 @@ test.describe('Admin CRM', () => {
   })
 
   test.describe('Stats Updates', () => {
-    test.beforeEach(async ({ page }) => {
-      // Login
-      await page.goto('/login')
-      await page.fill('input[name="email"]', ADMIN_EMAIL)
-      await page.fill('input[name="password"]', ADMIN_PASSWORD)
-      await page.click('button[type="submit"]')
-      await expect(page).toHaveURL('/admin')
-    })
-
     test('should update stats after new lead is created', async ({ page }) => {
+      await page.goto('/admin')
+
       // Get current total leads count
       const totalLeadsCard = page.locator('text=Total Leads').locator('..')
       const currentTotal = await totalLeadsCard

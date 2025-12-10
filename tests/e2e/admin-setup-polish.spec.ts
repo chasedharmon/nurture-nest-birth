@@ -1,18 +1,8 @@
 import { test, expect } from '@playwright/test'
 
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'your-password-here'
-
 test.describe('Admin Setup - Phase 7 Polish', () => {
-  test.beforeEach(async ({ page }) => {
-    // Login before each test
-    await page.goto('/login')
-    await page.fill('input[name="email"]', ADMIN_EMAIL)
-    await page.fill('input[name="password"]', ADMIN_PASSWORD)
-    await page.click('button[type="submit"]')
-    await expect(page).toHaveURL('/admin')
-  })
+  // Authentication is handled by Playwright setup project via storageState
+  // Each test starts with a pre-authenticated session
 
   test.describe('Setup Hub Navigation', () => {
     test('should display all setup categories', async ({ page }) => {

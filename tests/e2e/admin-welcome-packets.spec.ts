@@ -1,35 +1,8 @@
 import { test, expect } from '@playwright/test'
 
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'your-password-here'
-
 test.describe('Admin - Welcome Packets Management', () => {
-  test.beforeEach(async ({ page }) => {
-    // Login before each test
-    await page.goto('/login')
-    // Wait for hydration to complete
-    await page.waitForLoadState('networkidle')
-    await page.waitForSelector('input[name="email"]', { state: 'visible' })
-
-    // Type credentials character by character to ensure React captures all input events
-    const emailInput = page.locator('input[name="email"]')
-    await emailInput.click({ force: true })
-    await emailInput.pressSequentially(ADMIN_EMAIL, { delay: 50 })
-
-    const passwordInput = page.locator('input[name="password"]')
-    await passwordInput.click({ force: true })
-    await passwordInput.pressSequentially(ADMIN_PASSWORD, { delay: 50 })
-
-    // Wait a moment for React state to update
-    await page.waitForTimeout(300)
-
-    // Submit form
-    await page.locator('button[type="submit"]').click({ force: true })
-
-    // Wait for redirect
-    await expect(page).toHaveURL('/admin', { timeout: 15000 })
-  })
+  // Authentication is handled by Playwright setup project via storageState
+  // Each test starts with a pre-authenticated session
 
   test.describe('Navigation & Page Load', () => {
     test('should navigate to welcome packets from setup hub', async ({

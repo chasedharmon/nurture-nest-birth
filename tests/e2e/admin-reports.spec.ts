@@ -1,18 +1,8 @@
 import { test, expect } from '@playwright/test'
 
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'your-password-here'
-
 test.describe('Admin Reports', () => {
-  // Login before each test
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/login')
-    await page.fill('input[name="email"]', ADMIN_EMAIL)
-    await page.fill('input[name="password"]', ADMIN_PASSWORD)
-    await page.click('button[type="submit"]')
-    await expect(page).toHaveURL('/admin')
-  })
+  // Authentication is handled by Playwright setup project via storageState
+  // Each test starts with a pre-authenticated session
 
   test.describe('Reports List Page', () => {
     test('should navigate to reports page from admin dashboard', async ({
@@ -50,6 +40,8 @@ test.describe('Admin Reports', () => {
 
   test.describe('Report Builder Wizard - UI/UX', () => {
     test.beforeEach(async ({ page }) => {
+      // Session is pre-authenticated via storageState
+      // Navigate to admin to verify auth is working
       await page.goto('/admin/reports/new')
     })
 
@@ -101,6 +93,8 @@ test.describe('Admin Reports', () => {
 
   test.describe('Report Builder - Step 1: Data Source', () => {
     test.beforeEach(async ({ page }) => {
+      // Session is pre-authenticated via storageState
+      // Navigate to admin to verify auth is working
       await page.goto('/admin/reports/new')
     })
 
@@ -129,6 +123,8 @@ test.describe('Admin Reports', () => {
 
   test.describe('Report Builder - Step 2: Fields', () => {
     test.beforeEach(async ({ page }) => {
+      // Session is pre-authenticated via storageState
+      // Navigate to admin to verify auth is working
       await page.goto('/admin/reports/new')
       // Select data source and proceed
       await page
@@ -180,6 +176,8 @@ test.describe('Admin Reports', () => {
 
   test.describe('Report Builder - Step 3: Filters with Picklists', () => {
     test.beforeEach(async ({ page }) => {
+      // Session is pre-authenticated via storageState
+      // Navigate to admin to verify auth is working
       await page.goto('/admin/reports/new')
       // Navigate to filters step
       await page
@@ -482,6 +480,8 @@ test.describe('Admin Reports', () => {
 
   test.describe('Report Builder - Navigation', () => {
     test.beforeEach(async ({ page }) => {
+      // Session is pre-authenticated via storageState
+      // Navigate to admin to verify auth is working
       await page.goto('/admin/reports/new')
     })
 

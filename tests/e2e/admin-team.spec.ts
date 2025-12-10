@@ -1,48 +1,11 @@
-import { test, expect, type Page } from '@playwright/test'
-
-// Test credentials
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'test-password'
-
-// Helper to login as admin - returns true if login successful
-async function loginAsAdmin(page: Page): Promise<boolean> {
-  await page.goto('/login')
-  await page.fill('input[name="email"]', ADMIN_EMAIL)
-  await page.fill('input[name="password"]', ADMIN_PASSWORD)
-  await page.click('button[type="submit"]')
-
-  try {
-    await page.waitForURL('/admin', { timeout: 10000 })
-    return true
-  } catch {
-    // Login failed - likely invalid credentials
-    return false
-  }
-}
-
-// Helper to skip test if not authenticated
-async function requireAuth(
-  page: Page
-): Promise<{ skip: boolean; reason?: string }> {
-  const loggedIn = await loginAsAdmin(page)
-  if (!loggedIn) {
-    return {
-      skip: true,
-      reason: 'Could not authenticate - set TEST_ADMIN_PASSWORD env var',
-    }
-  }
-  return { skip: false }
-}
+import { test, expect } from '@playwright/test'
 
 test.describe('Admin Team Management', () => {
+  // Authentication is handled by Playwright setup project via storageState
+  // Each test starts with a pre-authenticated session
+
   test.describe('Team Page Navigation', () => {
     test('should display team page with tabs', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       // Check for the main tabs
@@ -52,12 +15,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should have Add Team Member button', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const addButton = page.locator(
@@ -71,12 +28,6 @@ test.describe('Admin Team Management', () => {
     test('should display team members list or empty state', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       // Either shows team members or empty state
@@ -92,12 +43,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should open add team member dialog', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const addButton = page.locator(
@@ -123,12 +68,6 @@ test.describe('Admin Team Management', () => {
     test('should validate required fields in add member form', async ({
       page,
     }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const addButton = page.locator(
@@ -160,12 +99,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should create a new team member', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const addButton = page.locator(
@@ -213,12 +146,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should show team member details', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       // Look for existing team members
@@ -233,12 +160,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should toggle team member active status', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       // Find deactivate/activate button
@@ -277,12 +198,6 @@ test.describe('Admin Team Management', () => {
 
   test.describe('Time Tracking Tab', () => {
     test('should display time tracking tab content', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       // Click on Time Tracking tab
@@ -302,12 +217,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should display time entry form', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const timeTab = page.locator('button:has-text("Time Tracking")')
@@ -332,12 +241,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should log time entry', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const timeTab = page.locator('button:has-text("Time Tracking")')
@@ -399,12 +302,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should display total hours summary', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const timeTab = page.locator('button:has-text("Time Tracking")')
@@ -423,12 +320,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should validate hours field', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const timeTab = page.locator('button:has-text("Time Tracking")')
@@ -463,12 +354,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should delete time entry', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const timeTab = page.locator('button:has-text("Time Tracking")')
@@ -499,12 +384,6 @@ test.describe('Admin Team Management', () => {
 
   test.describe('On-Call Schedule Tab', () => {
     test('should display on-call schedule tab content', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       // Click on On-Call Schedule tab
@@ -525,12 +404,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should have Add Schedule button', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const onCallTab = page.locator('button:has-text("On-Call Schedule")')
@@ -549,12 +422,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should open add schedule dialog', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const onCallTab = page.locator('button:has-text("On-Call Schedule")')
@@ -582,12 +449,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should create on-call schedule', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const onCallTab = page.locator('button:has-text("On-Call Schedule")')
@@ -644,12 +505,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should validate end date after start date', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const onCallTab = page.locator('button:has-text("On-Call Schedule")')
@@ -709,12 +564,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should display currently on-call providers', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const onCallTab = page.locator('button:has-text("On-Call Schedule")')
@@ -733,12 +582,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should show schedule table', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const onCallTab = page.locator('button:has-text("On-Call Schedule")')
@@ -763,12 +606,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should delete on-call schedule', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const onCallTab = page.locator('button:has-text("On-Call Schedule")')
@@ -799,12 +636,6 @@ test.describe('Admin Team Management', () => {
 
   test.describe('Team Role Permissions', () => {
     test('should display role badges', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       // Look for role badges
@@ -820,12 +651,6 @@ test.describe('Admin Team Management', () => {
 
   test.describe('Team Member Settings', () => {
     test('should show visibility settings in edit form', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       // Click edit on a team member if exists
@@ -850,12 +675,6 @@ test.describe('Admin Team Management', () => {
     })
 
     test('should show on-call availability toggle', async ({ page }) => {
-      const auth = await requireAuth(page)
-      if (auth.skip) {
-        test.skip(true, auth.reason)
-        return
-      }
-
       await page.goto('/admin/team')
 
       const editButton = page.locator(
@@ -881,15 +700,12 @@ test.describe('Admin Team Management', () => {
 })
 
 test.describe('Team Integration with Clients', () => {
+  // Authentication is handled by Playwright setup project via storageState
+  // Each test starts with a pre-authenticated session
+
   test('should show provider assignment on client detail page', async ({
     page,
   }) => {
-    const auth = await requireAuth(page)
-    if (auth.skip) {
-      test.skip(true, auth.reason)
-      return
-    }
-
     await page.goto('/admin')
 
     // Navigate to a client
@@ -909,12 +725,6 @@ test.describe('Team Integration with Clients', () => {
   })
 
   test('should allow assigning providers to client', async ({ page }) => {
-    const auth = await requireAuth(page)
-    if (auth.skip) {
-      test.skip(true, auth.reason)
-      return
-    }
-
     await page.goto('/admin')
 
     const clientLink = page.locator('[data-testid="lead-row"] a').first()
