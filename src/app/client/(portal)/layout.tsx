@@ -35,7 +35,7 @@ export default async function ClientPortalLayout({
 
               <Link
                 href="/client/dashboard"
-                className="text-lg md:text-xl font-semibold text-primary"
+                className="text-lg md:text-xl font-semibold text-primary whitespace-nowrap shrink-0"
               >
                 Nurture Nest Birth
               </Link>
