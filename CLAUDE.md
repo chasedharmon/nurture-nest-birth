@@ -520,82 +520,105 @@ rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
 
 ---
 
+## E2E Testing Status (Last Updated: Dec 9, 2024)
+
+### Recent Test Run Results:
+
+- **359 passed**
+- **139 failed**
+- **8 skipped**
+
+### Authentication Pattern (IMPORTANT):
+
+- Tests use Playwright's `storageState` pattern for admin authentication
+- Auth is handled by `tests/e2e/auth.setup.ts` which saves session to `tests/e2e/.auth/admin.json`
+- Individual tests should NOT have their own login logic - they inherit the session
+- Password: `TestPassword123!` (set via `TEST_ADMIN_PASSWORD` env var)
+
+### Key Issues Fixed:
+
+1. Build error: `getReferralUrl` was non-async in Server Actions file - moved to `src/lib/utils.ts`
+2. Redundant login patterns removed from 9+ test files
+
+### Remaining Failures (139 tests):
+
+The failing tests fall into several categories:
+
+1. **Selector Issues** - Tests looking for elements with outdated selectors
+2. **Missing Environment Variables** - e.g., `RESEND_API_KEY` not set
+3. **Public Page Tests** - Contact form, services pages have different expectations
+4. **Timing/State Issues** - Tests depending on specific data states
+
+### Test Files Overview:
+
+- **Working well**: admin-setup-polish.spec.ts, admin-saas-foundation.spec.ts (after build fix)
+- **Need selector updates**: admin-intake-forms.spec.ts, admin-leads-entry.spec.ts, admin-crm.spec.ts
+- **Need env vars**: Contact form tests (RESEND_API_KEY)
+- **Client auth not set up**: login-as-client.spec.ts, unread-badge tests
+
+---
+
 ## Prompt for Next Chat Session
 
 Copy this entire block to start your next chat session:
 
+````
+I'm continuing work on the Nurture Nest Birth CRM project - specifically fixing E2E test failures.
+
+## Current Status:
+- **359 E2E tests passing**, **139 failing**, **8 skipped**
+- All code builds successfully (fixed Server Action async issue)
+- Authentication uses Playwright's storageState pattern (session reuse)
+
+## What Was Fixed:
+1. Moved `getReferralUrl` from Server Actions file to `src/lib/utils.ts` (was blocking build)
+2. Removed redundant login patterns from 9+ test files (commit cd81e1f)
+3. Fixed TypeScript error in admin-leads-entry.spec.ts
+
+## Categories of Remaining Failures:
+
+### Category 1: Selector Mismatches (Highest Priority)
+Tests with outdated selectors that don't match current UI. Files needing updates:
+- `admin-intake-forms.spec.ts` - Stats cards, form builder selectors
+- `admin-leads-entry.spec.ts` - Referral source dropdown, form validation selectors
+- `admin-crm.spec.ts` - Lead capture, contact form selectors
+- `admin-reports.spec.ts` - Report builder wizard selectors
+- `admin-workflows.spec.ts` - Node palette, canvas selectors
+- `client-team-assignments.spec.ts` - Team tab, provider card selectors
+
+### Category 2: Missing Environment Variables
+- `RESEND_API_KEY` - Needed for contact form email tests
+- These tests should either be skipped when env var is missing OR mock the email service
+
+### Category 3: Client Authentication Not Set Up
+- `login-as-client.spec.ts` - Tests client login flow
+- `unread-badge*.spec.ts` - Tests require client session
+- Need to add client auth setup similar to admin auth
+
+### Category 4: Timing/State Issues
+- Some tests assume specific database state (existing conversations, leads)
+- Need to either create test fixtures or make tests more resilient
+
+## Recommended Approach:
+
+1. **Start with selector fixes** - Read error-context.md files in test-results/ to see actual page snapshots
+2. **Update locators** to match current UI structure
+3. **Add conditional skips** for tests requiring missing env vars
+4. **Consider test data fixtures** for tests needing specific state
+
+## Key Commands:
+```bash
+pnpm test:e2e                    # Run all tests
+pnpm test:e2e tests/e2e/admin-intake-forms.spec.ts  # Run specific file
+TEST_ADMIN_PASSWORD='TestPassword123!' pnpm test:e2e --project=chromium
+````
+
+## Error Context Files:
+
+Failed tests create `error-context.md` files in `test-results/` with page snapshots showing actual DOM structure.
+
+Start by examining a few error-context.md files to understand the selector mismatches, then systematically update the test files.
+
 ```
-I'm continuing work on the Nurture Nest Birth CRM project.
 
-## 6-Week Refinement Plan: ✅ ALL PHASES COMPLETE
-
-All 5 phases (A, B, C, D, E) of the refinement and SaaS foundation plan are complete.
-
-## Current Focus: Comprehensive E2E Testing
-
-We need to create Playwright E2E tests for all newly implemented features from Phases A-E. Many features were built but lack test coverage.
-
-### Existing Test Files (29 total in tests/e2e/):
-- admin-crm.spec.ts, admin-messages.spec.ts, admin-phase4.spec.ts
-- admin-reports.spec.ts, admin-setup-polish.spec.ts, admin-team.spec.ts
-- admin-workflows.spec.ts (partial - 38 tests, mostly canvas interaction)
-- client-portal.spec.ts, client-care-team.spec.ts, client-team-assignments.spec.ts
-- Various messaging tests (realtime, bidirectional, functional)
-
-### Features Needing E2E Test Coverage:
-
-**Phase A - Polish Features:**
-- [ ] Welcome packets management (create, edit, delete, items management)
-- [ ] Intake form builder (create form, add fields, edit, preview)
-- [ ] Form validation edge cases
-
-**Phase B - Workflow Enhancement:**
-- [ ] Workflow history page (view executions, step details dialog)
-- [ ] Workflow analytics dashboard (date range filters, stats, funnel)
-- [ ] Workflow templates gallery (browse, install template)
-- [ ] Workflow settings (entry criteria builder, re-entry rules)
-- [ ] Variable picker in email/SMS steps
-
-**Phase C - SaaS Foundation:**
-- [ ] Organization settings page (profile, data export, deletion)
-- [ ] Billing page UI (plans display, usage meters, invoices tab)
-- [ ] Feature gates (test tier restrictions display)
-
-**Phase D - Communication Rails:**
-- [ ] SMS templates page (create, edit, preview, toggle active)
-- [ ] Checkout success/cancel pages
-
-**Phase E - Analytics & Attribution:**
-- [ ] Manual lead entry form (/admin/leads/new)
-- [ ] Referral partners management (create, edit, toggle, delete)
-- [ ] Survey management (create NPS survey, view responses)
-- [ ] Public survey response page (/client/survey/[token])
-- [ ] Lead detail attribution section display
-
-### Testing Approach:
-1. Create new spec files for each feature area
-2. Test happy path first, then edge cases
-3. Verify UI elements render correctly
-4. Test form submissions and data persistence
-5. Test navigation and routing
-6. Handle async operations (loading states, API calls)
-
-### Key Commands:
-- `pnpm test:e2e` - Run all tests
-- `pnpm test:e2e tests/e2e/[filename].spec.ts` - Run specific test
-- `pnpm test:e2e --ui` - Interactive UI mode
-- `pnpm test:e2e --debug` - Debug mode
-
-### Test Environment:
-- Uses Chromium browser
-- Requires TEST_ADMIN_PASSWORD env var
-- Admin email: chase.d.harmon@gmail.com
-- Tests should clean up after themselves
-
-### File Naming Convention:
-- `admin-[feature].spec.ts` - Admin-side features
-- `client-[feature].spec.ts` - Client portal features
-- Use describe/test blocks with clear naming
-
-Start by identifying which features have the least coverage and create comprehensive tests for them.
 ```
