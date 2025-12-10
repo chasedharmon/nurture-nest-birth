@@ -225,7 +225,7 @@ test.describe('Admin - Manual Lead Entry', () => {
       // Set due date (3 months from now)
       const futureDate = new Date()
       futureDate.setMonth(futureDate.getMonth() + 3)
-      const formattedDate = futureDate.toISOString().split('T')[0]
+      const formattedDate = futureDate.toISOString().split('T')[0] as string
       await page.locator('#dueDate').fill(formattedDate)
 
       // Select service interest

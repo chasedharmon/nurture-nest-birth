@@ -237,10 +237,3 @@ function generateReferralCode(name: string): string {
   const random = Math.random().toString(36).substring(2, 6).toUpperCase()
   return `${base}${random}`
 }
-
-/**
- * Get the referral URL for a partner
- */
-export function getReferralUrl(baseUrl: string, referralCode: string): string {
-  return `${baseUrl}?ref=${referralCode}`
-}
