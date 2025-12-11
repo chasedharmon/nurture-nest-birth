@@ -203,13 +203,7 @@ test.describe('Timestamp Debug', () => {
   test('send two messages and verify read status for each', async ({
     page,
   }) => {
-    // Login as admin
-    await page.goto('/login')
-    await page.fill('input[type="email"]', ADMIN_EMAIL)
-    await page.fill('input[type="password"]', ADMIN_PASSWORD)
-    await page.click('button[type="submit"]')
-    await page.waitForURL('/admin')
-
+    // Uses pre-authenticated session from storageState (no manual login needed)
     // Go to messages
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')

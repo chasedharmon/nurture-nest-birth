@@ -7,6 +7,7 @@
  * - Conversation between admin and client
  * - Conversation participants
  * - Seed messages
+ * - Workflow with steps (for workflow enhancement tests)
  *
  * Uses Supabase service role key to bypass RLS.
  * All operations are idempotent (safe to run multiple times).
@@ -25,6 +26,10 @@ const E2E_ASSIGNMENT_ID = 'e2e00000-0000-0000-0000-000000000002'
 const E2E_CONVERSATION_ID = 'e2e00000-0000-0000-0000-000000000003'
 const E2E_MESSAGE_ADMIN_ID = 'e2e00000-0000-0000-0000-000000000004'
 const E2E_MESSAGE_CLIENT_ID = 'e2e00000-0000-0000-0000-000000000005'
+const E2E_WORKFLOW_ID = 'e2e00000-0000-0000-0000-000000000010'
+const E2E_WORKFLOW_STEP_TRIGGER_ID = 'e2e00000-0000-0000-0000-000000000011'
+const E2E_WORKFLOW_STEP_ACTION_ID = 'e2e00000-0000-0000-0000-000000000012'
+const E2E_WORKFLOW_STEP_END_ID = 'e2e00000-0000-0000-0000-000000000013'
 
 setup('seed test data', async () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -295,6 +300,111 @@ setup('seed test data', async () => {
     console.log('   Added message from client')
   }
 
+  // Step 8: Create workflow for workflow enhancement tests
+  console.log('8. Creating E2E test workflow...')
+
+  const { data: workflow, error: workflowError } = await supabase
+    .from('workflows')
+    .upsert(
+      {
+        id: E2E_WORKFLOW_ID,
+        name: 'E2E Test Workflow',
+        description: 'Test workflow for E2E automation tests',
+        object_type: 'lead',
+        trigger_type: 'record_create',
+        is_active: true,
+        is_template: false,
+        evaluation_order: 0,
+        canvas_data: {
+          viewport: { x: 0, y: 0, zoom: 1 },
+        },
+        created_by: adminUser.id,
+      },
+      { onConflict: 'id' }
+    )
+    .select()
+    .single()
+
+  if (workflowError) {
+    console.error('Failed to create workflow:', workflowError.message)
+  } else {
+    console.log(`   Workflow: ${workflow.name} (${workflow.id})`)
+
+    // Step 9: Create workflow steps
+    console.log('9. Creating workflow steps...')
+
+    // Trigger step
+    const { error: triggerError } = await supabase
+      .from('workflow_steps')
+      .upsert(
+        {
+          id: E2E_WORKFLOW_STEP_TRIGGER_ID,
+          workflow_id: E2E_WORKFLOW_ID,
+          step_order: 1,
+          step_key: 'trigger',
+          step_type: 'trigger',
+          step_config: {},
+          position_x: 250,
+          position_y: 50,
+          next_step_key: 'send_email',
+        },
+        { onConflict: 'id' }
+      )
+
+    if (triggerError) {
+      console.error('Failed to create trigger step:', triggerError.message)
+    } else {
+      console.log('   Added trigger step')
+    }
+
+    // Action step (send_email)
+    const { error: actionError } = await supabase.from('workflow_steps').upsert(
+      {
+        id: E2E_WORKFLOW_STEP_ACTION_ID,
+        workflow_id: E2E_WORKFLOW_ID,
+        step_order: 2,
+        step_key: 'send_email',
+        step_type: 'send_email',
+        step_config: {
+          template_name: 'Welcome Email',
+          to_field: 'email',
+          subject: 'Welcome to our practice!',
+        },
+        position_x: 250,
+        position_y: 200,
+        next_step_key: 'end',
+      },
+      { onConflict: 'id' }
+    )
+
+    if (actionError) {
+      console.error('Failed to create action step:', actionError.message)
+    } else {
+      console.log('   Added send_email action step')
+    }
+
+    // End step
+    const { error: endError } = await supabase.from('workflow_steps').upsert(
+      {
+        id: E2E_WORKFLOW_STEP_END_ID,
+        workflow_id: E2E_WORKFLOW_ID,
+        step_order: 3,
+        step_key: 'end',
+        step_type: 'end',
+        step_config: {},
+        position_x: 250,
+        position_y: 350,
+      },
+      { onConflict: 'id' }
+    )
+
+    if (endError) {
+      console.error('Failed to create end step:', endError.message)
+    } else {
+      console.log('   Added end step')
+    }
+  }
+
   console.log('\n=== DATA SEEDING COMPLETE ===\n')
   console.log('Seeded data summary:')
   console.log(`  - Team member: ${teamMember.display_name}`)
@@ -302,4 +412,5 @@ setup('seed test data', async () => {
   console.log(`  - Assignment: primary provider`)
   console.log(`  - Conversation: ${conversation.subject}`)
   console.log(`  - Messages: 2 (1 from admin, 1 from client)`)
+  console.log(`  - Workflow: E2E Test Workflow (with 3 steps)`)
 })
