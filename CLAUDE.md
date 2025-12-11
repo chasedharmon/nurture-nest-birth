@@ -328,6 +328,20 @@ team_member:team_members!client_assignments_team_member_id_fkey(...)
 - Email: chase.d.harmon@gmail.com
 - Password: TestPassword123!
 
+## Admin User Seeding
+
+The user `chase.d.harmon@gmail.com` is automatically seeded as an **admin** with full permissions. This is handled by:
+
+- **Migration**: `supabase/migrations/20251210100000_seed_admin_user.sql`
+- **Function**: `setup_admin_user_chase_harmon()` - Sets up admin role in both `users` and `team_members` tables
+- **Trigger**: `on_admin_user_signup` - Automatically assigns admin role when this email signs up on a fresh database
+
+This ensures that on any database reset or fresh deployment, this user will have:
+
+- `role = 'admin'` in `team_members` table (grants access to Workflows and other admin features)
+- `role = 'admin'` and linked `role_id` in `users` table
+- Full permissions for all CRM features
+
 ## Completed Features
 
 ### Phase 1-2: Foundation & Lead Management
