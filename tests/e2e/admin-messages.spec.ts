@@ -53,11 +53,12 @@ test.describe('Admin Messages - Unified Messaging', () => {
 
     test('should display new conversation button', async ({ page }) => {
       await page.goto('/admin/messages')
+      await page.waitForLoadState('networkidle')
 
-      // Check new conversation button in header
+      // Check new conversation button (rendered via NewConversationDialog component)
       await expect(
-        page.locator('header').locator('button:has-text("New Conversation")')
-      ).toBeVisible()
+        page.getByRole('button', { name: /New Conversation/i })
+      ).toBeVisible({ timeout: 10000 })
     })
 
     test('should display back to dashboard link', async ({ page }) => {

@@ -40,10 +40,10 @@ test.describe('Real-Time Messaging - Message Delivery', () => {
     page,
   }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -61,10 +61,10 @@ test.describe('Real-Time Messaging - Message Delivery', () => {
     page,
   }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -78,10 +78,10 @@ test.describe('Real-Time Messaging - Message Delivery', () => {
 
   test('should display message thread with proper layout', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -97,10 +97,10 @@ test.describe('Real-Time Messaging - Typing Indicators', () => {
 
   test('should have typing indicator component structure', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -115,10 +115,10 @@ test.describe('Real-Time Messaging - Typing Indicators', () => {
 
   test('should show typing indicator area when typing', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -144,10 +144,10 @@ test.describe('Real-Time Messaging - Read Receipts', () => {
 
   test('should display message status indicators', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -165,10 +165,10 @@ test.describe('Real-Time Messaging - Read Receipts', () => {
 
   test('should show read status on own messages', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -190,10 +190,10 @@ test.describe('Real-Time Messaging - Online Presence', () => {
     page,
   }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -205,10 +205,10 @@ test.describe('Real-Time Messaging - Online Presence', () => {
 
   test('should show online status indicator in header', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -371,8 +371,8 @@ test.describe('Unified Client View - Messages Tab', () => {
       const tabs = page.locator('[role="tablist"], [class*="tabs"]')
       await expect(tabs.first()).toBeVisible({ timeout: 10000 })
     } else {
-      // No leads exist in the database - skip test gracefully
-      test.skip()
+      // No leads exist in the database - fail test
+      expect(count, 'No leads found - check data seeding').toBeGreaterThan(0)
     }
   })
 
@@ -399,7 +399,7 @@ test.describe('Unified Client View - Messages Tab', () => {
       )
       await expect(messagesTab.first()).toBeVisible({ timeout: 10000 })
     } else {
-      test.skip()
+      expect(count, 'No leads found - check data seeding').toBeGreaterThan(0)
     }
   })
 
@@ -429,7 +429,7 @@ test.describe('Unified Client View - Messages Tab', () => {
         expect(badgeCount).toBeGreaterThanOrEqual(0)
       }
     } else {
-      test.skip()
+      expect(count, 'No leads found - check data seeding').toBeGreaterThan(0)
     }
   })
 
@@ -465,7 +465,7 @@ test.describe('Unified Client View - Messages Tab', () => {
         await expect(messagesContent.first()).toBeVisible({ timeout: 10000 })
       }
     } else {
-      test.skip()
+      expect(count, 'No leads found - check data seeding').toBeGreaterThan(0)
     }
   })
 
@@ -511,7 +511,7 @@ test.describe('Unified Client View - Messages Tab', () => {
         expect(hasContent).toBeTruthy()
       }
     } else {
-      test.skip()
+      expect(count, 'No leads found - check data seeding').toBeGreaterThan(0)
     }
   })
 })
@@ -537,10 +537,10 @@ test.describe('Message Composer Functionality', () => {
 
   test('should enable send button when message is typed', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     // Use domcontentloaded instead of networkidle to avoid timeout on mobile
@@ -565,10 +565,10 @@ test.describe('Message Composer Functionality', () => {
 
   test('should clear input after message is sent', async ({ page }) => {
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -671,10 +671,10 @@ test.describe('Connection Status', () => {
     })
 
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')
@@ -704,10 +704,10 @@ test.describe('Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 })
 
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')

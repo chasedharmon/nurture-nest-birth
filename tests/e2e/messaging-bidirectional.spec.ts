@@ -99,11 +99,10 @@ test.describe('Bidirectional Messaging', () => {
       // Find or navigate to a conversation from admin view
       const conversationData = await findAdminConversation(page)
 
-      if (!conversationData) {
-        console.log('No conversation found - skipping test')
-        test.skip()
-        return
-      }
+      expect(
+        conversationData,
+        'No conversation found - check data seeding'
+      ).toBeTruthy()
 
       // Wait for the message composer to be visible
       const messageInput = page.locator(
@@ -186,9 +185,11 @@ test.describe('Bidirectional Messaging', () => {
           .locator('a[href^="/client/messages/"]')
           .first()
 
+        expect(
+          await conversationLink.count(),
+          'No conversation found for client - check data seeding'
+        ).toBeGreaterThan(0)
         if ((await conversationLink.count()) === 0) {
-          console.log('No conversation found for client - skipping test')
-          test.skip()
           return
         }
 
@@ -245,9 +246,11 @@ test.describe('Bidirectional Messaging', () => {
           .locator('a[href^="/client/messages/"]')
           .first()
 
+        expect(
+          await conversationLink.count(),
+          'No conversation found for client - check data seeding'
+        ).toBeGreaterThan(0)
         if ((await conversationLink.count()) === 0) {
-          console.log('No conversation found for client - skipping test')
-          test.skip()
           return
         }
 
@@ -301,9 +304,11 @@ test.describe('Bidirectional Messaging', () => {
         // Step 1: Find conversation from client side (client has conversations)
         const conversationData = await findClientConversation(clientPage)
 
+        expect(
+          conversationData,
+          'No conversation found for client - check data seeding'
+        ).toBeTruthy()
         if (!conversationData) {
-          console.log('No conversation found for client - skipping test')
-          test.skip()
           return
         }
 
@@ -365,9 +370,11 @@ test.describe('Bidirectional Messaging', () => {
         // Step 1: Find a conversation from client side
         const conversationData = await findClientConversation(clientPage)
 
+        expect(
+          conversationData,
+          'No conversation found for client - check data seeding'
+        ).toBeTruthy()
         if (!conversationData) {
-          console.log('No conversation found for client - skipping test')
-          test.skip()
           return
         }
 
@@ -428,9 +435,11 @@ test.describe('Error Handling', () => {
         .locator('a[href^="/client/messages/"]')
         .first()
 
+      expect(
+        await conversationLink.count(),
+        'No conversation found - check data seeding'
+      ).toBeGreaterThan(0)
       if ((await conversationLink.count()) === 0) {
-        console.log('No conversation found - skipping test')
-        test.skip()
         return
       }
 

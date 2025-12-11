@@ -56,7 +56,10 @@ test.describe('Unread Badge Behavior', () => {
   test('verify mark_conversation_read RPC is delayed on page load', async ({
     page,
   }) => {
-    test.skip(!conversationId, 'No conversation available for testing')
+    expect(
+      conversationId,
+      'No conversation found - check data seeding'
+    ).toBeTruthy()
 
     // Intercept all RPC and API calls related to marking messages as read
     const markReadCalls: { timestamp: number; url: string; method: string }[] =
@@ -117,7 +120,10 @@ test.describe('Unread Badge Behavior', () => {
   })
 
   test('check all conversation_participants updates', async ({ page }) => {
-    test.skip(!conversationId, 'No conversation available for testing')
+    expect(
+      conversationId,
+      'No conversation found - check data seeding'
+    ).toBeTruthy()
 
     // Intercept ALL update calls to conversation_participants
     const updateCalls: { timestamp: number; method: string; url: string }[] = []
@@ -173,7 +179,10 @@ test.describe('Unread Badge Behavior', () => {
   test('admin sends message and checks that client participant has unread', async ({
     page,
   }) => {
-    test.skip(!conversationId, 'No conversation available for testing')
+    expect(
+      conversationId,
+      'No conversation found - check data seeding'
+    ).toBeTruthy()
 
     // Go to the conversation
     await page.goto(`/admin/messages/${conversationId}`)
@@ -218,7 +227,10 @@ test.describe('Unread Badge Behavior', () => {
   test('verify client last_read_at is not updated when admin views conversation', async ({
     page,
   }) => {
-    test.skip(!conversationId, 'No conversation available for testing')
+    expect(
+      conversationId,
+      'No conversation found - check data seeding'
+    ).toBeTruthy()
 
     // Intercept the participants fetch to see the data
     let participantsData: unknown[] = []

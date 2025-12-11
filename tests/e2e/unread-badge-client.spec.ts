@@ -3,45 +3,31 @@
  *
  * Tests that the pulsing red badge appears on the client's chat widget
  * when an admin sends them a message.
+ *
+ * Prerequisites:
+ * - Data seeding must have created a conversation between admin and test client
+ * - Auth setup must have created storage states for admin and client
  */
 
 import { test, expect } from '@playwright/test'
 
-const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'TestPassword123!'
-
-// Skip this test suite - requires seeded conversations and client auth
-// These tests verify client-side unread badge behavior
-test.describe.skip('Client Unread Badge', () => {
+test.describe('Client Unread Badge', () => {
   test('verify chat widget bubble has pulsing badge when unread > 0', async ({
     page,
   }) => {
-    // First login as admin to send a message
-    console.log('\n=== STEP 1: LOGIN AS ADMIN ===')
-    await page.goto('/login')
-    await page.fill('input[type="email"]', ADMIN_EMAIL)
-    await page.fill('input[type="password"]', ADMIN_PASSWORD)
-    await page.click('button[type="submit"]')
-
-    try {
-      await page.waitForURL('/admin', { timeout: 10000 })
-      console.log('Admin logged in')
-    } catch {
-      console.log('Admin login failed')
-      return
-    }
-
-    // Navigate to messages
+    // Navigate directly to messages (already authenticated via storageState)
+    console.log('\n=== STEP 1: NAVIGATE TO MESSAGES AS ADMIN ===')
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
     const conversationLinks = page.locator('a[href^="/admin/messages/"]')
     const count = await conversationLinks.count()
 
-    if (count === 0) {
-      console.log('No conversations found - cannot test')
-      return
-    }
+    // Fail test properly if no conversations exist (seeding may have failed)
+    expect(
+      count,
+      'Expected at least one conversation (check data seeding)'
+    ).toBeGreaterThan(0)
 
     const href = await conversationLinks.first().getAttribute('href')
     const conversationId = href?.split('/').pop() || ''
@@ -149,19 +135,18 @@ test.describe.skip('Client Unread Badge', () => {
   })
 
   test('check client chat bubble positioning and badge', async ({ page }) => {
-    // Login as admin
-    await page.goto('/login')
-    await page.fill('input[type="email"]', ADMIN_EMAIL)
-    await page.fill('input[type="password"]', ADMIN_PASSWORD)
-    await page.click('button[type="submit"]')
-    await page.waitForURL('/admin')
-
-    // Go to messages and send a message
+    // Navigate directly to messages (already authenticated via storageState)
     await page.goto('/admin/messages')
     await page.waitForLoadState('networkidle')
 
     const conversationLinks = page.locator('a[href^="/admin/messages/"]')
-    if ((await conversationLinks.count()) === 0) return
+    const count = await conversationLinks.count()
+
+    // Fail test properly if no conversations exist
+    expect(
+      count,
+      'Expected at least one conversation (check data seeding)'
+    ).toBeGreaterThan(0)
 
     const href = await conversationLinks.first().getAttribute('href')
     const conversationId = href?.split('/').pop() || ''

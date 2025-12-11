@@ -30,6 +30,13 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
     },
 
+    // Data seed project - seeds test data after auth
+    {
+      name: 'data-seed',
+      testMatch: /data-seed\.setup\.ts/,
+      dependencies: ['setup'],
+    },
+
     // Chromium with authenticated state for admin tests
     {
       name: 'chromium',
@@ -37,8 +44,12 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         storageState: 'tests/e2e/.auth/admin.json',
       },
-      dependencies: ['setup'],
-      testIgnore: [/auth\.setup\.ts/, /client-portal\.spec\.ts/],
+      dependencies: ['data-seed'],
+      testIgnore: [
+        /auth\.setup\.ts/,
+        /data-seed\.setup\.ts/,
+        /client-portal\.spec\.ts/,
+      ],
     },
 
     // Mobile with authenticated state
@@ -48,8 +59,12 @@ export default defineConfig({
         ...devices['iPhone 13'],
         storageState: 'tests/e2e/.auth/admin.json',
       },
-      dependencies: ['setup'],
-      testIgnore: [/auth\.setup\.ts/, /client-portal\.spec\.ts/],
+      dependencies: ['data-seed'],
+      testIgnore: [
+        /auth\.setup\.ts/,
+        /data-seed\.setup\.ts/,
+        /client-portal\.spec\.ts/,
+      ],
     },
 
     // Chromium with client authenticated state
@@ -61,7 +76,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         storageState: 'tests/e2e/.auth/client.json',
       },
-      dependencies: ['setup'],
+      dependencies: ['data-seed'],
       testMatch: /client-portal\.spec\.ts/,
     },
 
@@ -72,7 +87,7 @@ export default defineConfig({
         ...devices['iPhone 13'],
         storageState: 'tests/e2e/.auth/client.json',
       },
-      dependencies: ['setup'],
+      dependencies: ['data-seed'],
       testMatch: /client-portal\.spec\.ts/,
     },
   ],

@@ -51,10 +51,7 @@ test.describe('Client Team Assignments', () => {
   test.describe('Team Tab Navigation', () => {
     test('should display Team tab on client detail page', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       // Check for Team tab
       const teamTab = page.getByRole('tab', { name: 'Team' })
@@ -65,10 +62,7 @@ test.describe('Client Team Assignments', () => {
       page,
     }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       // Click Team tab
       await page.getByRole('tab', { name: 'Team' }).click()
@@ -83,10 +77,7 @@ test.describe('Client Team Assignments', () => {
       page,
     }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -121,10 +112,7 @@ test.describe('Client Team Assignments', () => {
 
     test('should display provider initials avatar', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -140,10 +128,7 @@ test.describe('Client Team Assignments', () => {
 
     test('should display assignment notes when present', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -162,19 +147,16 @@ test.describe('Client Team Assignments', () => {
       page,
     }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
       // Check if there are providers assigned
       const providerCard = page.locator('[class*="rounded-lg border"]').first()
-      if ((await providerCard.count()) === 0) {
-        test.skip(true, 'No provider assigned to test menu')
-        return
-      }
+      expect(
+        await providerCard.count(),
+        'No provider assigned - check data seeding'
+      ).toBeGreaterThan(0)
 
       // Find the menu button (MoreHorizontal icon button) within the card
       const menuButton = providerCard.locator('button').last()
@@ -190,12 +172,10 @@ test.describe('Client Team Assignments', () => {
 
     test('should change role from Primary to Backup', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
+      await page.waitForTimeout(500) // Wait for tab content to load
 
       // Check if there's an assigned provider with Primary role
       const primaryBadge = page.getByText('Primary', { exact: true })
@@ -210,24 +190,31 @@ test.describe('Client Team Assignments', () => {
       await menuButton.click()
 
       // Wait for menu
-      await page.waitForTimeout(300)
+      await page.waitForTimeout(500)
 
       // Click "Make Backup"
       await page.getByRole('menuitem', { name: 'Make Backup' }).click()
 
-      // Wait for update
-      await page.waitForTimeout(1500)
+      // Wait for server action to complete and page to revalidate
+      await page.waitForTimeout(2000)
+
+      // Reload the page to ensure we get fresh data
+      await page.reload()
+      await page.waitForLoadState('networkidle')
+
+      // Navigate back to Team tab
+      await page.getByRole('tab', { name: 'Team' }).click()
+      await page.waitForTimeout(500)
 
       // Should now show Backup badge
-      await expect(page.getByText('Backup', { exact: true })).toBeVisible()
+      await expect(page.getByText('Backup', { exact: true })).toBeVisible({
+        timeout: 5000,
+      })
     })
 
     test('should change role from Backup to Primary', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -258,19 +245,16 @@ test.describe('Client Team Assignments', () => {
 
     test('should change role to Support', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
       // Check if there are providers assigned
       const providerCard = page.locator('[class*="rounded-lg border"]').first()
-      if ((await providerCard.count()) === 0) {
-        test.skip(true, 'No provider assigned to test role change')
-        return
-      }
+      expect(
+        await providerCard.count(),
+        'No provider assigned - check data seeding'
+      ).toBeGreaterThan(0)
 
       // Find the menu button within the card
       const menuButton = providerCard.locator('button').last()
@@ -298,10 +282,7 @@ test.describe('Client Team Assignments', () => {
   test.describe('Assign Provider Dialog', () => {
     test('should display Assign Provider button', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -314,10 +295,7 @@ test.describe('Client Team Assignments', () => {
       page,
     }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -345,10 +323,7 @@ test.describe('Client Team Assignments', () => {
       page,
     }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -369,10 +344,7 @@ test.describe('Client Team Assignments', () => {
 
     test('should show Role select in assign dialog', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -390,10 +362,7 @@ test.describe('Client Team Assignments', () => {
 
     test('should show Notes textarea in assign dialog', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -416,10 +385,7 @@ test.describe('Client Team Assignments', () => {
       page,
     }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -440,10 +406,7 @@ test.describe('Client Team Assignments', () => {
 
     test('should close dialog with Cancel button', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
@@ -467,19 +430,16 @@ test.describe('Client Team Assignments', () => {
   test.describe('Remove Assignment', () => {
     test('should show Remove option in dropdown menu', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 
       // Check if there are providers assigned
       const providerCard = page.locator('[class*="rounded-lg border"]').first()
-      if ((await providerCard.count()) === 0) {
-        test.skip(true, 'No provider assigned')
-        return
-      }
+      expect(
+        await providerCard.count(),
+        'No provider assigned - check data seeding'
+      ).toBeGreaterThan(0)
 
       // Find the menu button within the card
       const menuButton = providerCard.locator('button').last()
@@ -498,10 +458,7 @@ test.describe('Client Team Assignments', () => {
       page,
     }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       // Click Activity tab
       await page.getByRole('tab', { name: 'Activity' }).click()
@@ -582,10 +539,7 @@ test.describe('Client Team Assignments', () => {
       page,
     }) => {
       const hasClient = await navigateToClientLead(page)
-      if (!hasClient) {
-        test.skip(true, 'No leads available to test')
-        return
-      }
+      expect(hasClient, 'No leads found - check data seeding').toBe(true)
 
       await page.getByRole('tab', { name: 'Team' }).click()
 

@@ -98,11 +98,10 @@ test.describe('Functional Messaging - Send and Receive', () => {
   }, testInfo) => {
     testInfo.setTimeout(60000) // Allow more time for this test
     const conversationId = await getFirstConversationId(page)
-    if (!conversationId) {
-      console.log('No conversations found - skipping test')
-      test.skip()
-      return
-    }
+    expect(
+      conversationId,
+      'No conversations found - check data seeding'
+    ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
     await page.waitForLoadState('networkidle')

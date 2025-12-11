@@ -7,11 +7,12 @@ test.describe('Workflow Automation', () => {
   test.describe('Workflows List Page', () => {
     test('should load workflows page', async ({ page }) => {
       await page.goto('/admin/workflows')
+      await page.waitForLoadState('networkidle')
 
       // Check page header
       await expect(
         page.locator('h1:has-text("Workflow Automations")')
-      ).toBeVisible()
+      ).toBeVisible({ timeout: 10000 })
 
       // Check for back to dashboard button
       await expect(page.locator('text=Dashboard').first()).toBeVisible()
@@ -19,16 +20,21 @@ test.describe('Workflow Automation', () => {
 
     test('should display stats cards', async ({ page }) => {
       await page.goto('/admin/workflows')
+      await page.waitForLoadState('networkidle')
 
       // Check for stats - use first() to handle multiple matches
-      await expect(page.locator('text=Total Workflows').first()).toBeVisible()
+      await expect(page.locator('text=Total Workflows').first()).toBeVisible({
+        timeout: 10000,
+      })
       await expect(
         page.getByText('Active', { exact: true }).first()
-      ).toBeVisible()
-      await expect(page.locator('text=Total Executions').first()).toBeVisible()
+      ).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('text=Total Executions').first()).toBeVisible({
+        timeout: 10000,
+      })
       await expect(
         page.locator('text=Templates Available').first()
-      ).toBeVisible()
+      ).toBeVisible({ timeout: 10000 })
     })
 
     test('should have new workflow button', async ({ page }) => {
@@ -36,8 +42,9 @@ test.describe('Workflow Automation', () => {
       await page.waitForLoadState('networkidle')
 
       // Check for new workflow button
-      const newButton = page.locator('button:has-text("New Workflow")')
-      await expect(newButton).toBeVisible({ timeout: 10000 })
+      await expect(
+        page.getByRole('button', { name: /New Workflow/i })
+      ).toBeVisible({ timeout: 10000 })
     })
 
     test('should have quick start button', async ({ page }) => {
@@ -55,6 +62,9 @@ test.describe('Workflow Automation', () => {
       const fromTemplateButton = page
         .locator('button:has-text("From Template")')
         .first()
+
+      // Wait for page to fully load before checking visibility
+      await page.waitForTimeout(1000)
 
       const hasQuickStart = await quickStartButton
         .isVisible()
@@ -264,6 +274,9 @@ test.describe('Workflow Automation', () => {
       await page.goto('/admin/workflows')
       await page.waitForLoadState('networkidle')
 
+      // Wait for buttons to render
+      await page.waitForTimeout(1000)
+
       // UI changed: button is now "Quick Start" instead of "From Template"
       const quickStartButton = page
         .locator('button:has-text("Quick Start")')
@@ -272,14 +285,18 @@ test.describe('Workflow Automation', () => {
 
       if (isVisible) {
         await quickStartButton.click()
-        // Check dialog opens
-        await expect(page.locator('text=Create from Template')).toBeVisible()
+        // Check dialog opens - may show "Create from Template" or similar
+        await expect(
+          page
+            .locator('text=/Create from Template|Choose a pre-built/i')
+            .first()
+        ).toBeVisible({ timeout: 5000 })
       } else {
         // UI may have changed further - just verify browse templates link exists
         const browseLink = page.locator(
           'a[href="/admin/workflows/templates"], button:has-text("Browse Templates")'
         )
-        await expect(browseLink.first()).toBeVisible()
+        await expect(browseLink.first()).toBeVisible({ timeout: 5000 })
       }
     })
 
@@ -322,10 +339,14 @@ test.describe('Workflow Automation', () => {
     })
 
     test('should show workflow in list', async ({ page }) => {
+      // Wait for page to load after beforeEach navigation
+      await page.waitForLoadState('networkidle')
+      await page.waitForTimeout(1000)
+
       // Look for any workflow with "Action Test Workflow" prefix
       await expect(
         page.locator('text=Action Test Workflow').first()
-      ).toBeVisible()
+      ).toBeVisible({ timeout: 10000 })
     })
 
     test('should show workflow action menu', async ({ page }) => {

@@ -38,8 +38,8 @@ test.describe('Admin Setup - Phase 7 Polish', () => {
     }) => {
       await page.goto('/admin/setup')
 
-      // Check welcome packets link exists
-      await expect(page.locator('text=Welcome Packets')).toBeVisible()
+      // Check welcome packets link exists (use first() to handle multiple matches)
+      await expect(page.locator('text=Welcome Packets').first()).toBeVisible()
       await expect(
         page.locator('text=Automated onboarding bundles for new clients')
       ).toBeVisible()
@@ -74,10 +74,12 @@ test.describe('Admin Setup - Phase 7 Polish', () => {
 
     test('should have new template button', async ({ page }) => {
       await page.goto('/admin/setup/email-templates')
+      await page.waitForLoadState('networkidle')
 
-      // Check for new template button
-      const newTemplateButton = page.locator('button:has-text("New Template")')
-      await expect(newTemplateButton).toBeVisible()
+      // Check for new template button (inside Link component)
+      await expect(
+        page.getByRole('button', { name: /New Template/i })
+      ).toBeVisible({ timeout: 10000 })
     })
 
     test('should navigate back to setup hub', async ({ page }) => {
