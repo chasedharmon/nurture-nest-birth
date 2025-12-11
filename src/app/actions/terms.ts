@@ -26,10 +26,9 @@ export async function acceptTerms(): Promise<{
       return { success: false, error: 'Not authenticated' }
     }
 
-    const adminSupabase = createAdminClient()
-
-    // Update user's terms acceptance
-    const { error } = await adminSupabase
+    // Use the authenticated client - RLS policy allows users to update their own record
+    // This works because the RLS policy is: auth.uid() = id
+    const { error } = await supabase
       .from('users')
       .update({
         terms_accepted_at: new Date().toISOString(),
@@ -75,9 +74,8 @@ export async function hasAcceptedCurrentTerms(): Promise<{
       }
     }
 
-    const adminSupabase = createAdminClient()
-
-    const { data: userData, error } = await adminSupabase
+    // Use authenticated client - RLS policy allows users to read their own record
+    const { data: userData, error } = await supabase
       .from('users')
       .select(
         'terms_accepted_at, terms_version, privacy_accepted_at, privacy_version'

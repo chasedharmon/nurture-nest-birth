@@ -32,8 +32,73 @@ setup('authenticate as admin', async ({ page }) => {
   // Submit form
   await page.locator('button[type="submit"]').click({ force: true })
 
-  // Wait for successful redirect with extended timeout
-  await expect(page).toHaveURL('/admin', { timeout: 30000 })
+  // Wait for redirect - might be /admin or /accept-terms
+  await page.waitForURL(/\/(admin|accept-terms)/, { timeout: 30000 })
+
+  // If redirected to accept-terms, accept them
+  if (page.url().includes('accept-terms')) {
+    console.log('[Auth Setup] User needs to accept terms')
+
+    // Wait for the accept terms page to load
+    await page.waitForLoadState('networkidle')
+
+    // Check if terms checkbox needs to be checked (only click if not already checked)
+    const termsCheckbox = page.locator('#terms')
+    const privacyCheckbox = page.locator('#privacy')
+
+    // Check current state and only click if needed
+    const isTermsChecked = await termsCheckbox.isChecked()
+    const isPrivacyChecked = await privacyCheckbox.isChecked()
+
+    console.log(
+      `[Auth Setup] Terms checked: ${isTermsChecked}, Privacy checked: ${isPrivacyChecked}`
+    )
+
+    if (!isTermsChecked) {
+      await page.locator('label[for="terms"]').click()
+    }
+    if (!isPrivacyChecked) {
+      await page.locator('label[for="privacy"]').click()
+    }
+
+    // Wait for button to be enabled
+    await page.waitForTimeout(300)
+
+    // Verify checkboxes are now checked
+    await expect(termsCheckbox).toBeChecked()
+    await expect(privacyCheckbox).toBeChecked()
+
+    // Click the Continue button in the main content area (not the Subscribe button in footer)
+    // The Continue button is within the main content area, Subscribe is in the footer newsletter
+    const acceptButton = page.locator('main button:has-text("Continue")')
+    await expect(acceptButton).toBeEnabled()
+    await acceptButton.click()
+
+    // Wait for navigation - could go to admin or stay on page with error
+    // The server action calls router.push and router.refresh on success
+    try {
+      await expect(page).toHaveURL('/admin', { timeout: 30000 })
+    } catch {
+      // If we're still on accept-terms, check for error message
+      if (page.url().includes('accept-terms')) {
+        const errorAlert = page.locator('[role="alert"]')
+        if ((await errorAlert.count()) > 0) {
+          const errorText = await errorAlert.textContent()
+          console.error('[Auth Setup] Terms acceptance error:', errorText)
+        }
+        // Check if button is still showing "Saving..."
+        const savingButton = page.locator('button:has-text("Saving...")')
+        if ((await savingButton.count()) > 0) {
+          console.error('[Auth Setup] Form submission appears to be stuck')
+        }
+        throw new Error('Failed to accept terms - still on accept-terms page')
+      }
+      throw new Error('Unexpected URL after terms acceptance')
+    }
+  }
+
+  // Verify we're on admin
+  await expect(page).toHaveURL('/admin', { timeout: 10000 })
 
   // Save storage state (cookies, localStorage) for reuse
   await page.context().storageState({ path: AUTH_FILE })
