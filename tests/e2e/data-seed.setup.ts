@@ -21,11 +21,13 @@ const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
 const CLIENT_EMAIL = 'makharmon@kearneycats.com'
 
 // Fixed UUIDs for idempotent seeding
+const E2E_ORGANIZATION_ID = 'e2e00000-0000-0000-0000-000000000000'
 const E2E_TEAM_MEMBER_ID = 'e2e00000-0000-0000-0000-000000000001'
 const E2E_ASSIGNMENT_ID = 'e2e00000-0000-0000-0000-000000000002'
 const E2E_CONVERSATION_ID = 'e2e00000-0000-0000-0000-000000000003'
 const E2E_MESSAGE_ADMIN_ID = 'e2e00000-0000-0000-0000-000000000004'
 const E2E_MESSAGE_CLIENT_ID = 'e2e00000-0000-0000-0000-000000000005'
+const E2E_BACKUP_ASSIGNMENT_ID = 'e2e00000-0000-0000-0000-000000000006'
 const E2E_WORKFLOW_ID = 'e2e00000-0000-0000-0000-000000000010'
 const E2E_WORKFLOW_STEP_TRIGGER_ID = 'e2e00000-0000-0000-0000-000000000011'
 const E2E_WORKFLOW_STEP_ACTION_ID = 'e2e00000-0000-0000-0000-000000000012'
@@ -85,8 +87,100 @@ setup('seed test data', async () => {
     `   Found admin: ${adminUser.full_name || adminUser.email} (${adminUser.id})`
   )
 
-  // Step 2: Get test client lead
-  console.log('2. Looking up test client lead...')
+  // Step 2: Create/update organization for multi-tenancy (if table exists)
+  console.log(
+    '2. Creating organization (if multi-tenancy migration applied)...'
+  )
+  let organization: { id: string; name: string } | null = null
+  let organizationId: string | null = null
+
+  const { data: orgData, error: orgError } = await supabase
+    .from('organizations')
+    .upsert(
+      {
+        id: E2E_ORGANIZATION_ID,
+        name: 'E2E Test Organization',
+        slug: 'e2e-test-org',
+        subscription_status: 'active',
+        subscription_tier: 'professional',
+        max_team_members: 10,
+        max_clients: 500,
+        max_storage_mb: 5000,
+        max_workflows: 50,
+        primary_color: '#E8A87C',
+        secondary_color: '#85CDCA',
+        billing_email: ADMIN_EMAIL,
+        billing_name: 'E2E Test Billing',
+        owner_user_id: adminUser.id,
+        trial_ends_at: new Date(
+          Date.now() + 30 * 24 * 60 * 60 * 1000
+        ).toISOString(), // 30 days from now
+      },
+      { onConflict: 'id' }
+    )
+    .select()
+    .single()
+
+  if (orgError) {
+    if (orgError.message.includes('Could not find the table')) {
+      console.log(
+        '   ⚠️  Organizations table not found - multi-tenancy migration not applied'
+      )
+      console.log(
+        '      SaaS Foundation tests will be skipped. Run migrations to enable.'
+      )
+    } else {
+      console.error('Failed to create organization:', orgError.message)
+    }
+    // Continue without organization - most tests don't require it
+  } else {
+    organization = orgData
+    organizationId = E2E_ORGANIZATION_ID
+    console.log(`   Organization: ${organization.name} (${organization.id})`)
+
+    // Step 3: Create organization membership for admin
+    console.log('3. Creating organization membership...')
+    const { error: membershipError } = await supabase
+      .from('organization_memberships')
+      .upsert(
+        {
+          organization_id: E2E_ORGANIZATION_ID,
+          user_id: adminUser.id,
+          role: 'owner',
+          accepted_at: new Date().toISOString(),
+          is_active: true,
+        },
+        { onConflict: 'organization_id,user_id' }
+      )
+
+    if (membershipError) {
+      console.error(
+        'Failed to create organization membership:',
+        membershipError.message
+      )
+    } else {
+      console.log('   Admin added as organization owner')
+    }
+
+    // Step 4: Update admin user with organization_id
+    console.log('4. Linking admin user to organization...')
+    const { error: userOrgError } = await supabase
+      .from('users')
+      .update({ organization_id: E2E_ORGANIZATION_ID })
+      .eq('id', adminUser.id)
+
+    if (userOrgError) {
+      console.error(
+        'Failed to link user to organization:',
+        userOrgError.message
+      )
+    } else {
+      console.log('   User linked to organization')
+    }
+  }
+
+  // Step 5: Get test client lead
+  console.log('5. Looking up test client lead...')
   const { data: clientLead, error: clientError } = await supabase
     .from('leads')
     .select('id, name, email, status')
@@ -101,8 +195,8 @@ setup('seed test data', async () => {
   }
   console.log(`   Found client: ${clientLead.name} (${clientLead.id})`)
 
-  // Step 3: Get or create team member (admin role required for workflow tests)
-  console.log('3. Getting/creating team member...')
+  // Step 6: Get or create team member (admin role required for workflow tests)
+  console.log('6. Getting/creating team member...')
 
   // First check if user already has a team member entry
   const { data: existingTeamMember } = await supabase
@@ -143,6 +237,7 @@ setup('seed test data', async () => {
           is_active: true,
           is_accepting_clients: true,
           title: 'Test Doula',
+          ...(organizationId && { organization_id: organizationId }),
         },
         { onConflict: 'id' }
       )
@@ -159,8 +254,10 @@ setup('seed test data', async () => {
     )
   }
 
-  // Step 4: Create client assignment (provider → client)
-  console.log('4. Creating client assignment...')
+  // Step 7: Create client assignments (primary and backup providers)
+  console.log('7. Creating client assignments...')
+
+  // Primary provider assignment
   const { error: assignmentError } = await supabase
     .from('client_assignments')
     .upsert(
@@ -170,22 +267,45 @@ setup('seed test data', async () => {
         team_member_id: teamMember.id,
         assignment_role: 'primary',
         notes: 'E2E test assignment - primary provider',
+        ...(organizationId && { organization_id: organizationId }),
       },
       { onConflict: 'id' }
     )
 
   if (assignmentError) {
     console.error(
-      'Failed to create client assignment:',
+      'Failed to create primary assignment:',
       assignmentError.message
     )
-    // Continue anyway - assignment might already exist with different ID
   } else {
-    console.log('   Assignment created: primary provider → client')
+    console.log('   Primary assignment created')
   }
 
-  // Step 5: Create conversation
-  console.log('5. Creating conversation...')
+  // Backup provider assignment (same team member, different role for testing role changes)
+  const { error: backupError } = await supabase
+    .from('client_assignments')
+    .upsert(
+      {
+        id: E2E_BACKUP_ASSIGNMENT_ID,
+        client_id: clientLead.id,
+        team_member_id: teamMember.id,
+        assignment_role: 'backup',
+        notes: 'E2E test assignment - backup provider',
+        ...(organizationId && { organization_id: organizationId }),
+      },
+      { onConflict: 'id' }
+    )
+
+  if (backupError) {
+    // This might fail due to unique constraint (same team member can't be assigned twice)
+    // That's okay - we'll just use the primary for role change tests
+    console.log('   Backup assignment skipped (may already exist or conflict)')
+  } else {
+    console.log('   Backup assignment created')
+  }
+
+  // Step 8: Create conversation
+  console.log('8. Creating conversation...')
   const { data: conversation, error: convError } = await supabase
     .from('conversations')
     .upsert(
@@ -197,6 +317,7 @@ setup('seed test data', async () => {
         status: 'active',
         last_message_at: new Date().toISOString(),
         last_message_preview: 'Test message for E2E testing',
+        ...(organizationId && { organization_id: organizationId }),
       },
       { onConflict: 'id' }
     )
@@ -209,8 +330,8 @@ setup('seed test data', async () => {
   }
   console.log(`   Conversation: ${conversation.subject} (${conversation.id})`)
 
-  // Step 6: Add conversation participants
-  console.log('6. Adding conversation participants...')
+  // Step 9: Add conversation participants
+  console.log('9. Adding conversation participants...')
 
   // Add admin participant
   const { error: adminPartError } = await supabase
@@ -223,6 +344,7 @@ setup('seed test data', async () => {
         display_name: adminUser.full_name || 'Admin',
         last_read_at: new Date().toISOString(),
         unread_count: 0,
+        ...(organizationId && { organization_id: organizationId }),
       },
       { onConflict: 'conversation_id,user_id', ignoreDuplicates: true }
     )
@@ -243,6 +365,7 @@ setup('seed test data', async () => {
         role: 'participant',
         display_name: clientLead.name,
         unread_count: 1, // Has unread message from admin
+        ...(organizationId && { organization_id: organizationId }),
       },
       { onConflict: 'conversation_id,client_id', ignoreDuplicates: true }
     )
@@ -253,8 +376,8 @@ setup('seed test data', async () => {
     console.log('   Added client as participant')
   }
 
-  // Step 7: Add seed messages
-  console.log('7. Adding seed messages...')
+  // Step 10: Add seed messages
+  console.log('10. Adding seed messages...')
 
   // Message from admin
   const { error: msg1Error } = await supabase.from('messages').upsert(
@@ -268,6 +391,7 @@ setup('seed test data', async () => {
       is_system_message: false,
       is_read: true,
       created_at: new Date(Date.now() - 60000).toISOString(), // 1 minute ago
+      ...(organizationId && { organization_id: organizationId }),
     },
     { onConflict: 'id' }
   )
@@ -290,6 +414,7 @@ setup('seed test data', async () => {
       is_system_message: false,
       is_read: false,
       created_at: new Date().toISOString(), // Now
+      ...(organizationId && { organization_id: organizationId }),
     },
     { onConflict: 'id' }
   )
@@ -300,8 +425,8 @@ setup('seed test data', async () => {
     console.log('   Added message from client')
   }
 
-  // Step 8: Create workflow for workflow enhancement tests
-  console.log('8. Creating E2E test workflow...')
+  // Step 11: Create workflow for workflow enhancement tests
+  console.log('11. Creating E2E test workflow...')
 
   const { data: workflow, error: workflowError } = await supabase
     .from('workflows')
@@ -319,6 +444,7 @@ setup('seed test data', async () => {
           viewport: { x: 0, y: 0, zoom: 1 },
         },
         created_by: adminUser.id,
+        ...(organizationId && { organization_id: organizationId }),
       },
       { onConflict: 'id' }
     )
@@ -330,8 +456,8 @@ setup('seed test data', async () => {
   } else {
     console.log(`   Workflow: ${workflow.name} (${workflow.id})`)
 
-    // Step 9: Create workflow steps
-    console.log('9. Creating workflow steps...')
+    // Step 12: Create workflow steps
+    console.log('12. Creating workflow steps...')
 
     // Trigger step
     const { error: triggerError } = await supabase
@@ -347,6 +473,7 @@ setup('seed test data', async () => {
           position_x: 250,
           position_y: 50,
           next_step_key: 'send_email',
+          ...(organizationId && { organization_id: organizationId }),
         },
         { onConflict: 'id' }
       )
@@ -373,6 +500,7 @@ setup('seed test data', async () => {
         position_x: 250,
         position_y: 200,
         next_step_key: 'end',
+        ...(organizationId && { organization_id: organizationId }),
       },
       { onConflict: 'id' }
     )
@@ -394,6 +522,7 @@ setup('seed test data', async () => {
         step_config: {},
         position_x: 250,
         position_y: 350,
+        ...(organizationId && { organization_id: organizationId }),
       },
       { onConflict: 'id' }
     )
@@ -407,9 +536,14 @@ setup('seed test data', async () => {
 
   console.log('\n=== DATA SEEDING COMPLETE ===\n')
   console.log('Seeded data summary:')
+  if (organization) {
+    console.log(`  - Organization: ${organization.name} (${organization.id})`)
+  } else {
+    console.log(`  - Organization: Not seeded (migration not applied)`)
+  }
   console.log(`  - Team member: ${teamMember.display_name}`)
   console.log(`  - Client: ${clientLead.name}`)
-  console.log(`  - Assignment: primary provider`)
+  console.log(`  - Assignments: primary + backup providers`)
   console.log(`  - Conversation: ${conversation.subject}`)
   console.log(`  - Messages: 2 (1 from admin, 1 from client)`)
   console.log(`  - Workflow: E2E Test Workflow (with 3 steps)`)

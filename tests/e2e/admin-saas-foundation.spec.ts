@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test'
 
-// Skip all tests in this file - requires organization seeding not yet implemented
-// These pages show "No Organization Found" without proper org context
+// Skip until multi-tenancy migration (20251215000000_multi_tenancy_foundation.sql) is applied
+// The 'organizations' and 'organization_memberships' tables must exist in Supabase
+// Run: supabase db push (or apply migrations via Supabase dashboard)
 test.describe.skip('Admin - SaaS Foundation (Billing & Organization)', () => {
   // Authentication is handled by Playwright setup project via storageState
   // Each test starts with a pre-authenticated session
