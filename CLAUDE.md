@@ -550,10 +550,10 @@ rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
 
 ### Recent Test Run Results:
 
-- **420 passed**
-- **8 flaky** (pass on retry)
-- **8 failed** (all in admin-workflow-enhancement.spec.ts - need workflow seeding)
-- **74 skipped**
+- **863 passed** ✅
+- **8 flaky** (pass on retry with `--retries=2`)
+- **0 failed**
+- **162 skipped** (across all test projects)
 
 ### Test Architecture:
 
@@ -579,8 +579,10 @@ playwright.config.ts projects:
 
 - Data seeding is handled by `tests/e2e/data-seed.setup.ts`
 - Requires `SUPABASE_SERVICE_ROLE_KEY` env var (get from Supabase Dashboard → Project Settings → API)
-- Seeds: team member, client assignment, conversation, participants, messages
+- Seeds: organization (if migration applied), team member, client assignments (primary + backup), conversation, participants, messages, workflow with 3 steps
 - Uses fixed UUIDs for idempotent seeding (e2e00000-0000-0000-0000-00000000000X)
+- Organization seeding gracefully skips if multi-tenancy migration not applied
+- Uses conditional spreading `...(organizationId && { organization_id: organizationId })` for optional org_id
 - **Critical**: Checks for existing team_member to avoid duplicates (causes `.single()` query failures)
 - **Critical**: Team member must have role='admin' for workflow tests to pass
 
@@ -589,16 +591,7 @@ playwright.config.ts projects:
 1. **Team member uniqueness**: Only ONE team_member per user_id (workflows page uses `.single()`)
 2. **Team member role**: Must be 'admin' or 'owner' to access /admin/workflows
 3. **Conversation seeding**: Required for messaging tests to pass (not skip)
-
-### Remaining Failures (8 tests):
-
-All failures are in `admin-workflow-enhancement.spec.ts`. These tests require a pre-existing workflow:
-
-- History page tests
-- Analytics dashboard tests
-- Settings page tests
-
-**Fix**: Add workflow seeding to data-seed.setup.ts with a fixed workflow UUID.
+4. **Organization seeding**: Required for SaaS Foundation tests (billing, organization settings)
 
 ### Flaky Tests (8 tests):
 
@@ -607,21 +600,37 @@ These pass on retry but are timing-sensitive:
 - admin-messages.spec.ts navigation tests
 - admin-workflows.spec.ts page load tests
 - messaging-functional.spec.ts persistence tests
+- admin-setup-polish.spec.ts email templates
 
-**Fix options**:
+**Mitigation**: Tests run with `--retries=2` to handle timing issues.
 
-1. Add explicit waits (`page.waitForLoadState('networkidle')`)
-2. Increase timeouts for slow pages
-3. Add retry assertions with `expect.poll()` or `toPass()`
+### Skipped Tests (~162 tests across all projects):
 
-### Skipped Tests (74 tests):
+| Category                 | Approx Count | Blocker                                                                             |
+| ------------------------ | ------------ | ----------------------------------------------------------------------------------- |
+| **SaaS Foundation**      | ~52          | Multi-tenancy migration not applied (`20251215000000_multi_tenancy_foundation.sql`) |
+| **Form/UI Tests**        | ~25          | Explicit `test.skip()` - need UI review                                             |
+| **Messaging Functional** | ~28          | Conditional skip when no conversations exist                                        |
+| **Team Assignments**     | ~20          | Conditional skip based on data state                                                |
+| **Report Builder**       | ~20          | Full workflow tests explicitly skipped                                              |
+| **Other**                | ~17          | Various explicit skips                                                              |
 
-Categories of skipped tests:
+### To Enable More Tests:
 
-1. **Mobile workflow tests** (~12) - Workflow canvas not mobile-optimized (correct behavior)
-2. **Missing test data** (~40) - Need additional seeding (intake forms, welcome packets, etc.)
-3. **UI changed** (~15) - Selectors need updating
-4. **Missing env vars** (~5) - RESEND_API_KEY for email tests
-5. **Organization context** (~2) - SaaS foundation tests need org seeding
+1. **Apply multi-tenancy migration** to Supabase:
+
+   ```bash
+   supabase db push
+   # Or apply via Supabase Dashboard: 20251215000000_multi_tenancy_foundation.sql
+   ```
+
+   This will enable ~52 SaaS Foundation tests.
+
+2. **Review explicitly skipped form/UI tests** - marked `test.skip()` due to:
+   - UI selector changes
+   - Features still in development
+   - Tests need updating for current UI
+
+3. **Messaging functional tests** should work with current seeding (conversation + messages seeded)
 
 ---
