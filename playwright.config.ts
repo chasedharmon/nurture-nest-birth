@@ -51,6 +51,28 @@ export default defineConfig({
       dependencies: ['setup'],
       testIgnore: /auth\.setup\.ts/,
     },
+
+    // Chromium with client authenticated state
+    {
+      name: 'chromium-client',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'tests/e2e/.auth/client.json',
+      },
+      dependencies: ['setup'],
+      testMatch: /client-.*\.spec\.ts/,
+    },
+
+    // Mobile with client authenticated state
+    {
+      name: 'mobile-client',
+      use: {
+        ...devices['iPhone 13'],
+        storageState: 'tests/e2e/.auth/client.json',
+      },
+      dependencies: ['setup'],
+      testMatch: /client-.*\.spec\.ts/,
+    },
   ],
 
   webServer: {
