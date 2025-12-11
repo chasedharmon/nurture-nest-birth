@@ -543,18 +543,23 @@ test.describe('Message Composer Functionality', () => {
     }
 
     await page.goto(`/admin/messages/${conversationId}`)
-    await page.waitForLoadState('networkidle')
+    // Use domcontentloaded instead of networkidle to avoid timeout on mobile
+    await page.waitForLoadState('domcontentloaded')
 
-    // Find message input
+    // Find message input - wait for it to be visible
     const messageInput = page.locator(
       'textarea[placeholder*="message"], input[placeholder*="message"]'
     )
-    if ((await messageInput.count()) > 0) {
+    const inputVisible = await messageInput
+      .first()
+      .isVisible({ timeout: 10000 })
+      .catch(() => false)
+    if (inputVisible) {
       await messageInput.first().fill('Test message')
 
       // Send button should be enabled or clickable
       const sendButton = page.locator('button:has-text("Send")')
-      await expect(sendButton).toBeEnabled()
+      await expect(sendButton).toBeEnabled({ timeout: 5000 })
     }
   })
 

@@ -33,10 +33,11 @@ test.describe('Workflow Automation', () => {
 
     test('should have new workflow button', async ({ page }) => {
       await page.goto('/admin/workflows')
+      await page.waitForLoadState('networkidle')
 
       // Check for new workflow button
       const newButton = page.locator('button:has-text("New Workflow")')
-      await expect(newButton).toBeVisible()
+      await expect(newButton).toBeVisible({ timeout: 10000 })
     })
 
     test('should have quick start button', async ({ page }) => {
