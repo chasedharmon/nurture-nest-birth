@@ -28,7 +28,7 @@ test.describe('Services Navigation', () => {
       .click()
     await expect(page).toHaveURL(/\/services\/birth-doula/)
     await expect(
-      page.getByRole('heading', { name: /Birth Doula/i })
+      page.getByRole('heading', { name: /Birth Doula/i }).first()
     ).toBeVisible()
   })
 

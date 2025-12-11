@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test'
 
-// Skip this entire file - client authentication setup not yet implemented
+// Note: Client authentication setup not yet implemented
 // These tests require a seeded client account with known credentials
-test.describe.configure({ mode: 'skip' })
 
 // Admin credentials
 const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
@@ -44,7 +43,8 @@ async function loginAsClient(page: import('@playwright/test').Page) {
   await expect(page).toHaveURL('/client/dashboard', { timeout: 15000 })
 }
 
-test.describe('Login As Client Feature', () => {
+// Skip: Client authentication setup not yet implemented - these tests require a seeded client account
+test.describe.skip('Login As Client Feature', () => {
   test.describe('Admin Authentication', () => {
     test('should login as admin successfully', async ({ page }) => {
       await page.goto('/login')
@@ -376,7 +376,8 @@ test.describe('Login As Client Feature', () => {
   })
 })
 
-test.describe('Admin Dashboard Features', () => {
+// Skip: This test depends on admin login flow which uses auth.setup.ts
+test.describe.skip('Admin Dashboard Features', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login')
     await page.fill('input[name="email"]', ADMIN_EMAIL)
