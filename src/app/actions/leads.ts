@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { LeadStatus } from '@/lib/supabase/types'
+import { logAudit, getAuditContext, diffChanges } from '@/lib/audit/logger'
 
 export async function getLeadById(id: string) {
   const supabase = await createClient()
@@ -24,11 +25,33 @@ export async function getLeadById(id: string) {
 export async function updateLeadStatus(id: string, status: LeadStatus) {
   const supabase = await createClient()
 
+  // Get current lead data for audit diff
+  const { data: oldLead } = await supabase
+    .from('leads')
+    .select('status')
+    .eq('id', id)
+    .single()
+
   const { error } = await supabase.from('leads').update({ status }).eq('id', id)
 
   if (error) {
     console.error('Error updating lead status:', error)
     return { success: false, error: error.message }
+  }
+
+  // Log audit event
+  const ctx = await getAuditContext()
+  if (ctx) {
+    await logAudit({
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      action: 'update',
+      entityType: 'lead',
+      entityId: id,
+      oldValues: { status: oldLead?.status },
+      newValues: { status },
+      metadata: { field: 'status' },
+    })
   }
 
   // Revalidate admin pages to show updated data
@@ -51,11 +74,38 @@ export async function updateLead(
 ) {
   const supabase = await createClient()
 
+  // Get current lead data for audit diff
+  const { data: oldLead } = await supabase
+    .from('leads')
+    .select('name, email, phone, due_date, service_interest, message')
+    .eq('id', id)
+    .single()
+
   const { error } = await supabase.from('leads').update(data).eq('id', id)
 
   if (error) {
     console.error('Error updating lead:', error)
     return { success: false, error: error.message }
+  }
+
+  // Log audit event with only changed fields
+  const ctx = await getAuditContext()
+  if (ctx && oldLead) {
+    const { oldValues, newValues } = diffChanges(
+      oldLead as Record<string, unknown>,
+      data as Record<string, unknown>
+    )
+    if (Object.keys(newValues).length > 0) {
+      await logAudit({
+        organizationId: ctx.organizationId,
+        userId: ctx.userId,
+        action: 'update',
+        entityType: 'lead',
+        entityId: id,
+        oldValues,
+        newValues,
+      })
+    }
   }
 
   revalidatePath('/admin')
@@ -203,6 +253,25 @@ export async function createLead(data: CreateLeadData) {
   if (error) {
     console.error('Error creating lead:', error)
     return { success: false, error: error.message }
+  }
+
+  // Log audit event
+  const ctx = await getAuditContext()
+  if (ctx && lead) {
+    await logAudit({
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      action: 'create',
+      entityType: 'lead',
+      entityId: lead.id,
+      newValues: {
+        name: leadData.name,
+        email: leadData.email,
+        phone: leadData.phone,
+        service_interest: leadData.service_interest,
+        source: leadData.source,
+      },
+    })
   }
 
   revalidatePath('/admin')

@@ -732,7 +732,8 @@ export async function acceptInvitation(data: {
       }
     }
 
-    // Create user record in our users table
+    // Create user record in our users table with terms acceptance
+    const now = new Date().toISOString()
     const { error: userError } = await supabase.from('users').insert({
       id: authData.user.id,
       email: invitation.email,
@@ -741,6 +742,11 @@ export async function acceptInvitation(data: {
       is_active: true,
       invited_by: invitation.invited_by,
       invited_at: invitation.created_at,
+      // Terms accepted during signup
+      terms_accepted_at: now,
+      terms_version: '1.0',
+      privacy_accepted_at: now,
+      privacy_version: '1.0',
     })
 
     if (userError) {

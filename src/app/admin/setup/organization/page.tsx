@@ -20,11 +20,11 @@ import {
   Copy,
   Eye,
   RefreshCw,
-  Trash2,
   AlertTriangle,
   Key,
-  Download,
 } from 'lucide-react'
+import { DataExportButton } from '@/components/admin/data-export-button'
+import { DeleteOrganizationModal } from '@/components/admin/delete-organization-modal'
 
 async function getOrganizationData(
   supabase: Awaited<ReturnType<typeof createClient>>
@@ -320,13 +320,11 @@ export default async function OrganizationPage() {
                 <div>
                   <p className="font-medium">Export Data</p>
                   <p className="text-sm text-muted-foreground">
-                    Download all your organization data as a ZIP file
+                    Download all your organization data as a ZIP file (JSON +
+                    CSV)
                   </p>
                 </div>
-                <Button variant="outline">
-                  <Download className="mr-2 h-4 w-4" />
-                  Request Export
-                </Button>
+                <DataExportButton />
               </div>
 
               {/* Danger Zone */}
@@ -343,13 +341,9 @@ export default async function OrganizationPage() {
                       caution.
                     </p>
                     <div className="mt-4 flex gap-3">
-                      <Button
-                        variant="outline"
-                        className="border-red-300 text-red-700 hover:bg-red-100"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Organization
-                      </Button>
+                      <DeleteOrganizationModal
+                        organizationName={organization.name}
+                      />
                     </div>
                   </div>
                 </>

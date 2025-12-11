@@ -46,6 +46,7 @@ function AcceptInviteContent() {
     password: '',
     confirmPassword: '',
   })
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   useEffect(() => {
     async function checkInvitation() {
@@ -79,6 +80,11 @@ function AcceptInviteContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    if (!termsAccepted) {
+      setError('You must accept the Terms of Service and Privacy Policy')
+      return
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
@@ -269,7 +275,42 @@ function AcceptInviteContent() {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <div className="flex items-start space-x-3 rounded-lg border border-border bg-muted/30 p-3">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={termsAccepted}
+                onChange={e => setTermsAccepted(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                required
+              />
+              <label htmlFor="terms" className="text-xs text-muted-foreground">
+                I agree to the{' '}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary underline hover:no-underline"
+                >
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary underline hover:no-underline"
+                >
+                  Privacy Policy
+                </a>
+              </label>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || !termsAccepted}
+            >
               {isSubmitting && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}

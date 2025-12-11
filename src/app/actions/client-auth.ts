@@ -5,6 +5,7 @@ import { cookies, headers } from 'next/headers'
 import { randomBytes } from 'crypto'
 import bcrypt from 'bcryptjs'
 import { sendMagicLinkEmail } from './notifications'
+import { logAudit } from '@/lib/audit/logger'
 
 const CLIENT_COOKIE_NAME = 'client_session'
 const SESSION_EXPIRY_DAYS = 30
@@ -199,13 +200,26 @@ export async function signInClient(email: string, password: string) {
     await setSessionCookie(token, expiresAt)
 
     // Update last login
-    await supabase
+    const { data: updatedClient } = await supabase
       .from('leads')
       .update({
         last_login_at: new Date().toISOString(),
         email_verified: true,
       })
       .eq('id', client.id)
+      .select('organization_id')
+      .single()
+
+    // Log audit event for client login
+    if (updatedClient?.organization_id) {
+      await logAudit({
+        organizationId: updatedClient.organization_id,
+        action: 'login',
+        entityType: 'client',
+        entityId: client.id,
+        metadata: { email: client.email, method: 'password' },
+      })
+    }
 
     console.log('[Auth] Login successful for:', client.id)
 
@@ -360,14 +374,16 @@ export async function verifyMagicLink(token: string) {
     })
     .eq('id', authToken.id)
 
-  // Update last login
-  await supabase
+  // Update last login and get organization_id
+  const { data: updatedLead } = await supabase
     .from('leads')
     .update({
       last_login_at: new Date().toISOString(),
       email_verified: true,
     })
     .eq('id', authToken.client_id)
+    .select('organization_id, email')
+    .single()
 
   // Create session
   try {
@@ -375,6 +391,17 @@ export async function verifyMagicLink(token: string) {
       authToken.client_id
     )
     await setSessionCookie(sessionToken, expiresAt)
+
+    // Log audit event for magic link login
+    if (updatedLead?.organization_id) {
+      await logAudit({
+        organizationId: updatedLead.organization_id,
+        action: 'login',
+        entityType: 'client',
+        entityId: authToken.client_id,
+        metadata: { email: updatedLead.email, method: 'magic_link' },
+      })
+    }
 
     console.log('[Auth] Magic link login successful for:', authToken.client_id)
 
@@ -462,7 +489,32 @@ export async function signOutClient() {
   const sessionToken = cookieStore.get(CLIENT_COOKIE_NAME)?.value
 
   if (sessionToken) {
+    // Get client info for audit logging before invalidating
+    const supabase = createAdminClient()
+    const { data: session } = await supabase
+      .from('client_sessions')
+      .select('client_id, client:leads(organization_id)')
+      .eq('session_token', sessionToken)
+      .single()
+
     await invalidateSession(sessionToken)
+
+    // Log audit event for client logout
+    const clientData = session?.client as
+      | { organization_id?: string }
+      | { organization_id?: string }[]
+      | null
+    const organizationId = Array.isArray(clientData)
+      ? clientData[0]?.organization_id
+      : clientData?.organization_id
+    if (organizationId && session?.client_id) {
+      await logAudit({
+        organizationId,
+        action: 'logout',
+        entityType: 'client',
+        entityId: session.client_id,
+      })
+    }
   }
 
   cookieStore.delete(CLIENT_COOKIE_NAME)

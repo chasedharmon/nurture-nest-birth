@@ -10,6 +10,7 @@ import type {
 } from '@/lib/supabase/types'
 import { sendInvoiceEmail, sendPaymentReceivedEmail } from './notifications'
 import { createInvoiceCheckout } from '@/lib/stripe/payments'
+import { logAudit, getAuditContext } from '@/lib/audit/logger'
 
 // ============================================================================
 // INVOICE CRUD
@@ -100,6 +101,24 @@ export async function createInvoice(data: {
       .single()
 
     if (error) throw error
+
+    // Log audit event
+    const ctx = await getAuditContext()
+    if (ctx && invoice) {
+      await logAudit({
+        organizationId: ctx.organizationId,
+        userId: ctx.userId,
+        action: 'create',
+        entityType: 'invoice',
+        entityId: invoice.id,
+        newValues: {
+          invoice_number: invoice.invoice_number,
+          client_id: data.clientId,
+          total,
+          status: 'draft',
+        },
+      })
+    }
 
     revalidatePath(`/admin/leads/${data.clientId}`)
     return { success: true, invoice }
@@ -331,6 +350,21 @@ export async function sendInvoice(
     // Send email notification
     await sendInvoiceEmail(invoiceId)
 
+    // Log audit event
+    const ctx = await getAuditContext()
+    if (ctx) {
+      await logAudit({
+        organizationId: ctx.organizationId,
+        userId: ctx.userId,
+        action: 'send_email',
+        entityType: 'invoice',
+        entityId: invoiceId,
+        oldValues: { status: 'draft' },
+        newValues: { status: 'sent' },
+        metadata: { invoice_number: invoice.invoice_number },
+      })
+    }
+
     revalidatePath(`/admin/leads/${invoice.client_id}`)
     return { success: true }
   } catch (error) {
@@ -405,6 +439,28 @@ export async function recordPayment(data: {
       await sendPaymentReceivedEmail(data.invoiceId)
     }
 
+    // Log audit event
+    const ctx = await getAuditContext()
+    if (ctx && payment) {
+      await logAudit({
+        organizationId: ctx.organizationId,
+        userId: ctx.userId,
+        action: 'payment_received',
+        entityType: 'payment',
+        entityId: payment.id,
+        newValues: {
+          invoice_id: data.invoiceId,
+          amount: data.amount,
+          payment_method: data.paymentMethod,
+          new_status: newStatus,
+        },
+        metadata: {
+          invoice_number: invoice.invoice_number,
+          total_paid: newAmountPaid,
+        },
+      })
+    }
+
     revalidatePath(`/admin/leads/${invoice.client_id}`)
     return { success: true, payment }
   } catch (error) {
@@ -471,6 +527,20 @@ export async function cancelInvoice(
       .eq('id', invoiceId)
 
     if (error) throw error
+
+    // Log audit event
+    const ctx = await getAuditContext()
+    if (ctx) {
+      await logAudit({
+        organizationId: ctx.organizationId,
+        userId: ctx.userId,
+        action: 'update',
+        entityType: 'invoice',
+        entityId: invoiceId,
+        oldValues: { status: invoice.status },
+        newValues: { status: 'cancelled' },
+      })
+    }
 
     revalidatePath(`/admin/leads/${invoice.client_id}`)
     return { success: true }
