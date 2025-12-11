@@ -38,7 +38,7 @@ export default defineConfig({
         storageState: 'tests/e2e/.auth/admin.json',
       },
       dependencies: ['setup'],
-      testIgnore: /auth\.setup\.ts/,
+      testIgnore: [/auth\.setup\.ts/, /client-portal\.spec\.ts/],
     },
 
     // Mobile with authenticated state
@@ -49,10 +49,12 @@ export default defineConfig({
         storageState: 'tests/e2e/.auth/admin.json',
       },
       dependencies: ['setup'],
-      testIgnore: /auth\.setup\.ts/,
+      testIgnore: [/auth\.setup\.ts/, /client-portal\.spec\.ts/],
     },
 
     // Chromium with client authenticated state
+    // Only client-portal.spec.ts needs actual client auth (navigates to /client/* routes)
+    // Other client-*.spec.ts files (like client-team-assignments) test admin features
     {
       name: 'chromium-client',
       use: {
@@ -60,7 +62,7 @@ export default defineConfig({
         storageState: 'tests/e2e/.auth/client.json',
       },
       dependencies: ['setup'],
-      testMatch: /client-.*\.spec\.ts/,
+      testMatch: /client-portal\.spec\.ts/,
     },
 
     // Mobile with client authenticated state
@@ -71,7 +73,7 @@ export default defineConfig({
         storageState: 'tests/e2e/.auth/client.json',
       },
       dependencies: ['setup'],
-      testMatch: /client-.*\.spec\.ts/,
+      testMatch: /client-portal\.spec\.ts/,
     },
   ],
 
