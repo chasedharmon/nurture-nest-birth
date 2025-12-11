@@ -45,7 +45,10 @@ async function navigateToClientLead(page: Page): Promise<boolean> {
   return false
 }
 
-// Skip: These tests depend on having a lead with 'client' status in the database
+// SKIPPED: These tests have selector issues - 'table tbody tr' doesn't match the admin CRM table
+// The admin CRM uses a different table component structure. Need to update selectors to match
+// the actual DOM structure (likely using data-testid or different class patterns).
+// Tests will skip gracefully if no leads are available
 test.describe.skip('Client Team Assignments', () => {
   test.describe('Team Tab Navigation', () => {
     test('should display Team tab on client detail page', async ({ page }) => {
