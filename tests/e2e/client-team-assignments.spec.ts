@@ -9,7 +9,8 @@ import { test, expect, type Page } from '@playwright/test'
 
 // Helper to navigate to a client with 'client' status
 async function navigateToClientLead(page: Page): Promise<boolean> {
-  await page.goto('/admin')
+  // Navigate to the leads list page (not the dashboard)
+  await page.goto('/admin/leads')
 
   // Wait for the table to load
   await page.waitForSelector('table tbody tr', { timeout: 10000 })
@@ -45,11 +46,8 @@ async function navigateToClientLead(page: Page): Promise<boolean> {
   return false
 }
 
-// SKIPPED: These tests have selector issues - 'table tbody tr' doesn't match the admin CRM table
-// The admin CRM uses a different table component structure. Need to update selectors to match
-// the actual DOM structure (likely using data-testid or different class patterns).
 // Tests will skip gracefully if no leads are available
-test.describe.skip('Client Team Assignments', () => {
+test.describe('Client Team Assignments', () => {
   test.describe('Team Tab Navigation', () => {
     test('should display Team tab on client detail page', async ({ page }) => {
       const hasClient = await navigateToClientLead(page)
@@ -286,11 +284,10 @@ test.describe.skip('Client Team Assignments', () => {
       if ((await supportOption.count()) > 0) {
         await supportOption.click()
         await page.waitForTimeout(1500)
-        // Look for Support badge specifically within the card
-        const supportBadge = providerCard
-          .locator('[class*="badge"]')
-          .filter({ hasText: 'Support' })
-        await expect(supportBadge).toBeVisible()
+        // Look for Support text within the provider card (role badge)
+        await expect(
+          providerCard.getByText('Support', { exact: true })
+        ).toBeVisible()
       } else {
         // Already Support role, that's fine
         test.skip(true, 'Already Support role')
@@ -523,10 +520,16 @@ test.describe.skip('Client Team Assignments', () => {
       page,
     }) => {
       // Navigate to a lead that might not have assignments
-      await page.goto('/admin')
+      await page.goto('/admin/leads')
+
+      // Wait for the table to load
+      await page.waitForSelector('table tbody tr', { timeout: 10000 })
 
       // Try to find a lead with 'new' status (less likely to have assignments)
-      const newLeadRow = page.locator('tr').filter({ hasText: 'new' }).first()
+      const newLeadRow = page
+        .locator('table tbody tr')
+        .filter({ hasText: 'new' })
+        .first()
 
       if ((await newLeadRow.count()) > 0) {
         await newLeadRow.click()
@@ -547,9 +550,15 @@ test.describe.skip('Client Team Assignments', () => {
     })
 
     test('should show helpful message in empty state', async ({ page }) => {
-      await page.goto('/admin')
+      await page.goto('/admin/leads')
 
-      const newLeadRow = page.locator('tr').filter({ hasText: 'new' }).first()
+      // Wait for the table to load
+      await page.waitForSelector('table tbody tr', { timeout: 10000 })
+
+      const newLeadRow = page
+        .locator('table tbody tr')
+        .filter({ hasText: 'new' })
+        .first()
 
       if ((await newLeadRow.count()) > 0) {
         await newLeadRow.click()
