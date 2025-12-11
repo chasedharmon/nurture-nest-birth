@@ -546,105 +546,82 @@ rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
 
 ---
 
-## E2E Testing Status (Last Updated: Dec 9, 2024)
+## E2E Testing Status (Last Updated: Dec 11, 2024)
 
 ### Recent Test Run Results:
 
-- **359 passed**
-- **139 failed**
-- **8 skipped**
+- **420 passed**
+- **8 flaky** (pass on retry)
+- **8 failed** (all in admin-workflow-enhancement.spec.ts - need workflow seeding)
+- **74 skipped**
+
+### Test Architecture:
+
+```
+playwright.config.ts projects:
+├── setup              # Auth setup (auth.setup.ts)
+├── data-seed          # Data seeding (data-seed.setup.ts) - depends on setup
+├── chromium           # Main tests with admin auth - depends on data-seed
+├── mobile             # Mobile tests with admin auth - depends on data-seed
+├── chromium-client    # Client portal tests - depends on data-seed
+└── mobile-client      # Mobile client tests - depends on data-seed
+```
 
 ### Authentication Pattern (IMPORTANT):
 
 - Tests use Playwright's `storageState` pattern for admin authentication
 - Auth is handled by `tests/e2e/auth.setup.ts` which saves session to `tests/e2e/.auth/admin.json`
+- Client auth saved to `tests/e2e/.auth/client.json`
 - Individual tests should NOT have their own login logic - they inherit the session
 - Password: `TestPassword123!` (set via `TEST_ADMIN_PASSWORD` env var)
 
-### Key Issues Fixed:
+### Data Seeding Pattern (IMPORTANT):
 
-1. Build error: `getReferralUrl` was non-async in Server Actions file - moved to `src/lib/utils.ts`
-2. Redundant login patterns removed from 9+ test files
+- Data seeding is handled by `tests/e2e/data-seed.setup.ts`
+- Requires `SUPABASE_SERVICE_ROLE_KEY` env var (get from Supabase Dashboard → Project Settings → API)
+- Seeds: team member, client assignment, conversation, participants, messages
+- Uses fixed UUIDs for idempotent seeding (e2e00000-0000-0000-0000-00000000000X)
+- **Critical**: Checks for existing team_member to avoid duplicates (causes `.single()` query failures)
+- **Critical**: Team member must have role='admin' for workflow tests to pass
 
-### Remaining Failures (139 tests):
+### Database Constraints for Tests:
 
-The failing tests fall into several categories:
+1. **Team member uniqueness**: Only ONE team_member per user_id (workflows page uses `.single()`)
+2. **Team member role**: Must be 'admin' or 'owner' to access /admin/workflows
+3. **Conversation seeding**: Required for messaging tests to pass (not skip)
 
-1. **Selector Issues** - Tests looking for elements with outdated selectors
-2. **Missing Environment Variables** - e.g., `RESEND_API_KEY` not set
-3. **Public Page Tests** - Contact form, services pages have different expectations
-4. **Timing/State Issues** - Tests depending on specific data states
+### Remaining Failures (8 tests):
 
-### Test Files Overview:
+All failures are in `admin-workflow-enhancement.spec.ts`. These tests require a pre-existing workflow:
 
-- **Working well**: admin-setup-polish.spec.ts, admin-saas-foundation.spec.ts (after build fix)
-- **Need selector updates**: admin-intake-forms.spec.ts, admin-leads-entry.spec.ts, admin-crm.spec.ts
-- **Need env vars**: Contact form tests (RESEND_API_KEY)
-- **Client auth not set up**: login-as-client.spec.ts, unread-badge tests
+- History page tests
+- Analytics dashboard tests
+- Settings page tests
+
+**Fix**: Add workflow seeding to data-seed.setup.ts with a fixed workflow UUID.
+
+### Flaky Tests (8 tests):
+
+These pass on retry but are timing-sensitive:
+
+- admin-messages.spec.ts navigation tests
+- admin-workflows.spec.ts page load tests
+- messaging-functional.spec.ts persistence tests
+
+**Fix options**:
+
+1. Add explicit waits (`page.waitForLoadState('networkidle')`)
+2. Increase timeouts for slow pages
+3. Add retry assertions with `expect.poll()` or `toPass()`
+
+### Skipped Tests (74 tests):
+
+Categories of skipped tests:
+
+1. **Mobile workflow tests** (~12) - Workflow canvas not mobile-optimized (correct behavior)
+2. **Missing test data** (~40) - Need additional seeding (intake forms, welcome packets, etc.)
+3. **UI changed** (~15) - Selectors need updating
+4. **Missing env vars** (~5) - RESEND_API_KEY for email tests
+5. **Organization context** (~2) - SaaS foundation tests need org seeding
 
 ---
-
-## Prompt for Next Chat Session
-
-Copy this entire block to start your next chat session:
-
-````
-I'm continuing work on the Nurture Nest Birth CRM project - specifically fixing E2E test failures.
-
-## Current Status:
-- **359 E2E tests passing**, **139 failing**, **8 skipped**
-- All code builds successfully (fixed Server Action async issue)
-- Authentication uses Playwright's storageState pattern (session reuse)
-
-## What Was Fixed:
-1. Moved `getReferralUrl` from Server Actions file to `src/lib/utils.ts` (was blocking build)
-2. Removed redundant login patterns from 9+ test files (commit cd81e1f)
-3. Fixed TypeScript error in admin-leads-entry.spec.ts
-
-## Categories of Remaining Failures:
-
-### Category 1: Selector Mismatches (Highest Priority)
-Tests with outdated selectors that don't match current UI. Files needing updates:
-- `admin-intake-forms.spec.ts` - Stats cards, form builder selectors
-- `admin-leads-entry.spec.ts` - Referral source dropdown, form validation selectors
-- `admin-crm.spec.ts` - Lead capture, contact form selectors
-- `admin-reports.spec.ts` - Report builder wizard selectors
-- `admin-workflows.spec.ts` - Node palette, canvas selectors
-- `client-team-assignments.spec.ts` - Team tab, provider card selectors
-
-### Category 2: Missing Environment Variables
-- `RESEND_API_KEY` - Needed for contact form email tests
-- These tests should either be skipped when env var is missing OR mock the email service
-
-### Category 3: Client Authentication Not Set Up
-- `login-as-client.spec.ts` - Tests client login flow
-- `unread-badge*.spec.ts` - Tests require client session
-- Need to add client auth setup similar to admin auth
-
-### Category 4: Timing/State Issues
-- Some tests assume specific database state (existing conversations, leads)
-- Need to either create test fixtures or make tests more resilient
-
-## Recommended Approach:
-
-1. **Start with selector fixes** - Read error-context.md files in test-results/ to see actual page snapshots
-2. **Update locators** to match current UI structure
-3. **Add conditional skips** for tests requiring missing env vars
-4. **Consider test data fixtures** for tests needing specific state
-
-## Key Commands:
-```bash
-pnpm test:e2e                    # Run all tests
-pnpm test:e2e tests/e2e/admin-intake-forms.spec.ts  # Run specific file
-TEST_ADMIN_PASSWORD='TestPassword123!' pnpm test:e2e --project=chromium
-````
-
-## Error Context Files:
-
-Failed tests create `error-context.md` files in `test-results/` with page snapshots showing actual DOM structure.
-
-Start by examining a few error-context.md files to understand the selector mismatches, then systematically update the test files.
-
-```
-
-```
