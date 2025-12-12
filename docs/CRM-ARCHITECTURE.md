@@ -31,7 +31,7 @@
 
 ### 1. CRM Object Model (Salesforce-like Architecture)
 
-**Status**: 🔄 Phase 2 Complete (Core Tables)
+**Status**: 🔄 Phase 3 Complete (Admin Setup UI)
 **Location**: `/admin/contacts`, `/admin/accounts`, `/admin/leads`, `/admin/opportunities`
 
 The CRM has been transformed from a single "leads" table into a robust, Salesforce-like object model with distinct entities, relationships, and a metadata-driven architecture.
@@ -196,6 +196,78 @@ The CRM has been transformed from a single "leads" table into a robust, Salesfor
 - `src/lib/crm/types.ts` - TypeScript types for CRM
 - `src/app/actions/object-definitions.ts` - Object metadata actions
 - `src/app/actions/field-definitions.ts` - Field metadata actions
+- `src/app/actions/page-layouts.ts` - Page layout CRUD actions
+
+#### Admin Setup UI (Phase 3 Complete)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     OBJECT MANAGER UI                                    │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  /admin/setup/objects                                                   │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  Objects List Page                                               │   │
+│  │  ├── Standard Objects (Contact, Account, Lead, Opportunity)     │   │
+│  │  └── Custom Objects (user-created with __c suffix)              │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  /admin/setup/objects/[id]                                              │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  Object Detail Page (Tabbed Interface)                          │   │
+│  │  ├── Settings Tab      - Labels, API name, description          │   │
+│  │  ├── Fields Tab        - Manage standard + custom fields        │   │
+│  │  ├── Page Layouts Tab  - Drag-drop section/field arrangement    │   │
+│  │  └── Relationships Tab - View related objects                    │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  FieldCreationWizard (Multi-Step):                                      │
+│  ┌────────┐   ┌────────┐   ┌────────┐   ┌────────┐                    │
+│  │ Type   │──▶│ Details│──▶│Options │──▶│ Review │                    │
+│  │Selection│   │ (Name, │   │(Picklist│   │& Create│                    │
+│  │(16 types)│  │ API)   │   │ Values)│   │        │                    │
+│  └────────┘   └────────┘   └────────┘   └────────┘                    │
+│                                                                          │
+│  Field Types Supported:                                                  │
+│  ┌────────────┬────────────┬────────────┬────────────┐                 │
+│  │ Basic      │ Numeric    │ Selection  │ Special    │                 │
+│  ├────────────┼────────────┼────────────┼────────────┤                 │
+│  │ text       │ number     │ picklist   │ lookup     │                 │
+│  │ textarea   │ currency   │ multipick  │ formula    │                 │
+│  │ rich_text  │ percent    │ checkbox   │ auto_number│                 │
+│  │ email      │            │            │            │                 │
+│  │ phone      │            │            │            │                 │
+│  │ url        │            │            │            │                 │
+│  │ date       │            │            │            │                 │
+│  │ datetime   │            │            │            │                 │
+│  └────────────┴────────────┴────────────┴────────────┘                 │
+│                                                                          │
+│  PageLayoutEditor:                                                       │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │ Section Management                                               │   │
+│  │ ├── Create/rename/delete sections                               │   │
+│  │ ├── Reorder sections (up/down)                                  │   │
+│  │ ├── Configure columns (1 or 2)                                  │   │
+│  │ └── Set collapsed by default                                    │   │
+│  │                                                                  │   │
+│  │ Field Assignment                                                 │   │
+│  │ ├── Add fields to sections                                      │   │
+│  │ ├── Remove fields from sections                                 │   │
+│  │ ├── Reorder fields within section                               │   │
+│  │ └── Unassigned fields warning                                   │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Phase 3 Key Files**:
+
+- `src/app/admin/setup/objects/page.tsx` - Objects list page
+- `src/app/admin/setup/objects/[id]/page.tsx` - Object detail page with tabs
+- `src/components/admin/setup/field-creation-wizard.tsx` - Multi-step field wizard
+- `src/components/admin/setup/fields-management.tsx` - Fields table + wizard integration
+- `src/components/admin/setup/page-layout-editor.tsx` - Section-based layout editor
+- `src/components/admin/setup/page-layouts-tab.tsx` - Page layouts tab wrapper
 
 **Contact Data Model**:
 
@@ -277,7 +349,7 @@ interface CrmOpportunity {
 
 - [x] Phase 1: Metadata foundation (object_definitions, field_definitions)
 - [x] Phase 2: Core CRM tables (contacts, accounts, leads, opportunities, activities)
-- [ ] Phase 3: Admin Setup UI for Objects & Fields
+- [x] Phase 3: Admin Setup UI for Objects & Fields
 - [ ] Phase 4: Dynamic Record Forms
 - [ ] Phase 5: CRM Object UIs
 - [ ] Phase 6: Lead Conversion Wizard
@@ -1191,4 +1263,4 @@ nurture-nest-birth/
 
 _Documentation generated: December 2024_
 _Last Updated: December 11, 2024_
-_Project Phase: 8 (Salesforce-like CRM Transformation)_
+_Project Phase: 8.3 (CRM Object Manager UI Complete)_
