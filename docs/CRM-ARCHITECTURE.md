@@ -1796,40 +1796,37 @@ The CRM E2E tests are located in `tests/e2e/crm/` and cover:
 
 ## Priority Next Steps
 
-### High Priority (Phase 11 Completion)
+### ✅ Phase 11 Complete (E2E Testing)
 
-1. **Fix Remaining CRM E2E Test Failures** (~15-20 remaining tests):
-   - Form create/edit tests need dynamic form input selector investigation
-   - Mobile viewport flaky tests may need timeout adjustments
-   - Implement `/admin/activities/[id]` route (currently skipped)
+Phase 11 achieved **95.5% pass rate** (381/399 tests passing). See Testing Status section for details.
 
-2. **Lookup Field Display Fix**: Update lookup field components to show record names instead of UUIDs
+### High Priority (Phase 12 - Client Portal Enhancement)
 
-3. **Seed Missing Picklist Values**: Add lead_source and service_interest picklist values to data seed
-
-4. **Create Additional CRM E2E Test Files**:
+1. **Fix Create Form Submission Issue** - Investigate why dynamic form values clear on submit
+2. **Lookup Field Display Fix** - Update lookup field components to show record names instead of UUIDs
+3. **Implement Activity Detail Route** - Create `/admin/activities/[id]` page
+4. **Cross-Portal Messaging Integration** - Seed messaging data for bidirectional tests
+5. **Additional E2E Test Coverage**:
    - `crm-activities.spec.ts` (~12-15 tests)
    - `crm-lead-conversion.spec.ts` (~10-12 tests)
    - `crm-field-permissions.spec.ts` (~12-15 tests)
-   - `crm-sharing-rules.spec.ts` (~12-15 tests)
-   - `crm-bulk-operations.spec.ts` (~8-10 tests)
 
 ### Medium Priority
 
-3. **Complete Stripe Integration** - Enable live payment processing
-4. **SMS Integration (Twilio)** - Activate text messaging
-5. **E-Signature Integration** - DocuSign/HelloSign for contracts
-6. **Report Export** - PDF/CSV export for reports
-7. **Lead Scoring** - Automated qualification scoring
-8. **Calendar Integration** - Google/Outlook sync
+1. **Complete Stripe Integration** - Enable live payment processing
+2. **SMS Integration (Twilio)** - Activate text messaging
+3. **E-Signature Integration** - DocuSign/HelloSign for contracts
+4. **Report Export** - PDF/CSV export for reports
+5. **Lead Scoring** - Automated qualification scoring
+6. **Calendar Integration** - Google/Outlook sync
 
 ### Future Enhancements
 
-9. **Mobile Responsiveness** - Optimize client portal for mobile
-10. **Birth Photo Gallery** - Private photo sharing
-11. **Video Calling** - In-app video consultations
-12. **Public Booking Page** - Self-service scheduling
-13. **Mobile App** - React Native client app
+1. **Mobile Responsiveness** - Optimize client portal for mobile
+2. **Birth Photo Gallery** - Private photo sharing
+3. **Video Calling** - In-app video consultations
+4. **Public Booking Page** - Self-service scheduling
+5. **Mobile App** - React Native client app
 
 ---
 
