@@ -498,7 +498,7 @@ interface CrmOpportunity {
 - [x] Phase 7: Data Migration from legacy leads ✅ **COMPLETE**
 - [x] Phase 8: Field-Level Security ✅ **COMPLETE**
 - [x] Phase 9: Record-Level Security (Sharing Rules) ✅ **COMPLETE**
-- [ ] Phase 10: Integration with existing features
+- [x] Phase 10: Integration with Existing Features ✅ **COMPLETE**
 
 #### Field-Level Security (Phase 8 Complete)
 
@@ -709,6 +709,106 @@ interface CrmOpportunity {
 | `is_null`      | Field is null/undefined   | `partner_id is_null`                   |
 | `is_not_null`  | Field has value           | `due_date is_not_null`                 |
 | `in`           | Value in array            | `stage in ['proposal', 'negotiation']` |
+
+#### Integration with Existing Features (Phase 10 Complete)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                   PHASE 10: SYSTEM INTEGRATION                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  1. SECURE RECORD DETAIL PAGES                                          │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ SecureRecordDetailPage Component                                    │ │
+│  │ ├── Integrates Field-Level Security                                │ │
+│  │ │   └── Filters fields based on user role permissions              │ │
+│  │ ├── Integrates Record-Level Security                               │ │
+│  │ │   └── Checks canEdit/canDelete via sharing evaluation            │ │
+│  │ ├── RecordSharingPanel Tab                                         │ │
+│  │ │   └── View/manage who has access to this record                  │ │
+│  │ └── Read-only banner for restricted users                          │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  2. ENHANCED RLS POLICIES                                               │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ Database-Level Record Security                                      │ │
+│  │ ├── can_access_crm_record() function                               │ │
+│  │ │   ├── Checks organization boundary                               │ │
+│  │ │   ├── Grants admin full access                                   │ │
+│  │ │   ├── Grants owner full access                                   │ │
+│  │ │   ├── Applies OWD (sharing_model)                                │ │
+│  │ │   ├── Evaluates role hierarchy                                   │ │
+│  │ │   ├── Checks manual_shares                                       │ │
+│  │ │   └── Evaluates sharing_rules                                    │ │
+│  │ └── All CRM tables use this for SELECT/UPDATE policies            │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  3. CLIENT PORTAL INTEGRATION                                           │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ CRM Contact ←→ Portal Client Bridge                                 │ │
+│  │ ├── getClientCrmLink() - Find CRM contact for portal user          │ │
+│  │ ├── getPortalContactData() - Filtered contact data for portal      │ │
+│  │ ├── updatePortalContactInfo() - Portal → CRM updates               │ │
+│  │ └── PORTAL_HIDDEN_FIELDS - Excludes sensitive CRM fields           │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  4. OPPORTUNITY → INVOICE INTEGRATION                                   │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ Auto-Invoice on Closed-Won                                          │ │
+│  │ ├── handleOpportunityStageChange() - Trigger on stage change       │ │
+│  │ ├── shouldGenerateInvoice() - Validation checks                    │ │
+│  │ ├── generateInvoiceFromOpportunity() - Create invoice              │ │
+│  │ ├── invoices.opportunity_id FK - Links invoice to opportunity      │ │
+│  │ └── opportunity.custom_fields.invoice_id - Reverse link            │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  5. CRM → WORKFLOW AUTOMATION                                           │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ CRM Triggers for Workflows                                          │ │
+│  │ ├── triggerCrmWorkflows() - Find and execute matching workflows    │ │
+│  │ ├── Supported Events:                                               │ │
+│  │ │   ├── record_create, record_update, field_change                 │ │
+│  │ │   ├── stage_change (leads, opportunities)                        │ │
+│  │ │   └── activity_completed, activity_scheduled                     │ │
+│  │ ├── createActivityFromWorkflow() - Create tasks from workflows     │ │
+│  │ └── Re-entry Rules - prevent duplicate workflow executions         │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Phase 10 Key Files**:
+
+- `src/components/admin/crm/secure-record-detail-page.tsx` - Secure record page wrapper
+  - Integrates field permissions, record access, and sharing panel
+  - Shows read-only banner for users without edit access
+  - Adds "Sharing" tab with RecordSharingPanel
+- `src/lib/crm/record-security-context.ts` - Security context computation
+  - `getRecordSecurityContext()` - Compute full security context server-side
+  - `serializeSecurityContext()` / `deserializeSecurityContext()` - For client components
+  - Returns: isOwner, canEdit, canDelete, canManageSharing, visibleFieldIds, editableFieldIds
+- `supabase/migrations/20251212010000_enhance_crm_rls_with_sharing.sql` - Enhanced RLS
+  - `can_access_crm_record()` - Unified access control function
+  - Updated SELECT/UPDATE policies for all CRM tables
+- `src/app/actions/crm-portal-integration.ts` - Portal integration
+  - `getClientCrmLink()` - Map portal user to CRM contact
+  - `getPortalContactData()` - Filtered CRM data for portal
+  - `updatePortalContactInfo()` - Sync portal updates to CRM
+- `src/app/actions/crm-invoicing-integration.ts` - Invoice integration
+  - `generateInvoiceFromOpportunity()` - Create invoice from closed-won opp
+  - `handleOpportunityStageChange()` - Auto-generate on stage change
+  - `getOpportunityInvoices()` - List invoices for an opportunity
+- `src/app/actions/crm-workflow-integration.ts` - Workflow integration
+  - `triggerCrmWorkflows()` - Find and execute matching workflows
+  - `onActivityCreated()` / `onActivityCompleted()` - Activity triggers
+  - `onOpportunityStageChange()` / `onLeadStatusChange()` - Stage triggers
+  - `createActivityFromWorkflow()` - Workflow action for creating tasks
+
+**Database Migrations**:
+
+- `20251212010000_enhance_crm_rls_with_sharing.sql` - Enhanced RLS with sharing
+- `20251212020000_add_invoice_opportunity_link.sql` - Invoice-Opportunity FK
+- `20251212030000_extend_workflows_for_crm.sql` - CRM workflow support
 
 ---
 

@@ -7,8 +7,13 @@ import { UserPlus, CheckCircle2 } from 'lucide-react'
 
 import { getRecordById, getRelatedRecords } from '@/app/actions/crm-records'
 import { getObjectMetadata } from '@/app/actions/object-metadata'
-import { RecordDetailPage } from '@/components/admin/crm/record-detail-page'
+import { SecureRecordDetailPage } from '@/components/admin/crm/secure-record-detail-page'
 import { RelatedRecordsList } from '@/components/admin/crm/related-records-list'
+import {
+  getRecordSecurityContext,
+  serializeSecurityContext,
+  deserializeSecurityContext,
+} from '@/lib/crm/record-security-context'
 import type { CrmLead, CrmActivity } from '@/lib/crm/types'
 
 export default async function CrmLeadDetailPage({
@@ -56,16 +61,22 @@ export default async function CrmLeadDetailPage({
   const { object: objectDef, fields, page_layout } = metadataResult.data
   const lead = recordResult.data
 
-  // Fetch related activities
-  const activitiesResult = await getRelatedRecords<CrmActivity>(
-    'Activity',
-    'who_id',
-    id,
-    {
+  // Fetch related activities and security context in parallel
+  const [activitiesResult, securityContextResult] = await Promise.all([
+    getRelatedRecords<CrmActivity>('Activity', 'who_id', id, {
       sort: { field: 'created_at', direction: 'desc' },
       pagination: { page: 1, pageSize: 20 },
-    }
-  )
+    }),
+    getRecordSecurityContext({
+      objectApiName: 'Lead',
+      recordId: id,
+      ownerId: lead.owner_id ?? null,
+    }),
+  ])
+
+  // Serialize and deserialize security context for client component
+  const serializedContext = serializeSecurityContext(securityContextResult)
+  const securityContext = deserializeSecurityContext(serializedContext)
 
   // Build record name
   const recordName =
@@ -160,7 +171,7 @@ export default async function CrmLeadDetailPage({
   }
 
   return (
-    <RecordDetailPage
+    <SecureRecordDetailPage
       objectDefinition={objectDef}
       fields={fields}
       layout={page_layout}
@@ -169,6 +180,7 @@ export default async function CrmLeadDetailPage({
       recordName={recordName}
       relatedTabs={relatedTabs}
       quickActions={quickActions}
+      securityContext={securityContext}
     />
   )
 }

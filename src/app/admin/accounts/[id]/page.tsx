@@ -3,8 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 
 import { getRecordById, getRelatedRecords } from '@/app/actions/crm-records'
 import { getObjectMetadata } from '@/app/actions/object-metadata'
-import { RecordDetailPage } from '@/components/admin/crm/record-detail-page'
+import { SecureRecordDetailPage } from '@/components/admin/crm/secure-record-detail-page'
 import { RelatedRecordsList } from '@/components/admin/crm/related-records-list'
+import {
+  getRecordSecurityContext,
+  serializeSecurityContext,
+  deserializeSecurityContext,
+} from '@/lib/crm/record-security-context'
 import type {
   CrmAccount,
   CrmContact,
@@ -57,22 +62,35 @@ export default async function AccountDetailPage({
   const { object: objectDef, fields, page_layout } = metadataResult.data
   const account = recordResult.data
 
-  // Fetch related records
-  const [contactsResult, opportunitiesResult, activitiesResult] =
-    await Promise.all([
-      getRelatedRecords<CrmContact>('Contact', 'account_id', id, {
-        sort: { field: 'created_at', direction: 'desc' },
-        pagination: { page: 1, pageSize: 10 },
-      }),
-      getRelatedRecords<CrmOpportunity>('Opportunity', 'account_id', id, {
-        sort: { field: 'created_at', direction: 'desc' },
-        pagination: { page: 1, pageSize: 10 },
-      }),
-      getRelatedRecords<CrmActivity>('Activity', 'related_to_id', id, {
-        sort: { field: 'created_at', direction: 'desc' },
-        pagination: { page: 1, pageSize: 20 },
-      }),
-    ])
+  // Fetch related records and security context in parallel
+  const [
+    contactsResult,
+    opportunitiesResult,
+    activitiesResult,
+    securityContextResult,
+  ] = await Promise.all([
+    getRelatedRecords<CrmContact>('Contact', 'account_id', id, {
+      sort: { field: 'created_at', direction: 'desc' },
+      pagination: { page: 1, pageSize: 10 },
+    }),
+    getRelatedRecords<CrmOpportunity>('Opportunity', 'account_id', id, {
+      sort: { field: 'created_at', direction: 'desc' },
+      pagination: { page: 1, pageSize: 10 },
+    }),
+    getRelatedRecords<CrmActivity>('Activity', 'related_to_id', id, {
+      sort: { field: 'created_at', direction: 'desc' },
+      pagination: { page: 1, pageSize: 20 },
+    }),
+    getRecordSecurityContext({
+      objectApiName: 'Account',
+      recordId: id,
+      ownerId: account.owner_id ?? null,
+    }),
+  ])
+
+  // Serialize and deserialize security context for client component
+  const serializedContext = serializeSecurityContext(securityContextResult)
+  const securityContext = deserializeSecurityContext(serializedContext)
 
   // Build record name
   const recordName = account.name || 'Unnamed Account'
@@ -142,7 +160,7 @@ export default async function AccountDetailPage({
   ]
 
   return (
-    <RecordDetailPage
+    <SecureRecordDetailPage
       objectDefinition={objectDef}
       fields={fields}
       layout={page_layout}
@@ -150,6 +168,7 @@ export default async function AccountDetailPage({
       backPath="/admin/accounts"
       recordName={recordName}
       relatedTabs={relatedTabs}
+      securityContext={securityContext}
     />
   )
 }

@@ -3,8 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 
 import { getRecordById, getRelatedRecords } from '@/app/actions/crm-records'
 import { getObjectMetadata } from '@/app/actions/object-metadata'
-import { RecordDetailPage } from '@/components/admin/crm/record-detail-page'
+import { SecureRecordDetailPage } from '@/components/admin/crm/secure-record-detail-page'
 import { RelatedRecordsList } from '@/components/admin/crm/related-records-list'
+import {
+  getRecordSecurityContext,
+  serializeSecurityContext,
+  deserializeSecurityContext,
+} from '@/lib/crm/record-security-context'
 import type { CrmContact, CrmOpportunity, CrmActivity } from '@/lib/crm/types'
 
 export default async function ContactDetailPage({
@@ -52,17 +57,32 @@ export default async function ContactDetailPage({
   const { object: objectDef, fields, page_layout } = metadataResult.data
   const contact = recordResult.data
 
-  // Fetch related records
-  const [opportunitiesResult, activitiesResult] = await Promise.all([
-    getRelatedRecords<CrmOpportunity>('Opportunity', 'primary_contact_id', id, {
-      sort: { field: 'created_at', direction: 'desc' },
-      pagination: { page: 1, pageSize: 10 },
-    }),
-    getRelatedRecords<CrmActivity>('Activity', 'who_id', id, {
-      sort: { field: 'created_at', direction: 'desc' },
-      pagination: { page: 1, pageSize: 20 },
-    }),
-  ])
+  // Fetch related records and security context in parallel
+  const [opportunitiesResult, activitiesResult, securityContextResult] =
+    await Promise.all([
+      getRelatedRecords<CrmOpportunity>(
+        'Opportunity',
+        'primary_contact_id',
+        id,
+        {
+          sort: { field: 'created_at', direction: 'desc' },
+          pagination: { page: 1, pageSize: 10 },
+        }
+      ),
+      getRelatedRecords<CrmActivity>('Activity', 'who_id', id, {
+        sort: { field: 'created_at', direction: 'desc' },
+        pagination: { page: 1, pageSize: 20 },
+      }),
+      getRecordSecurityContext({
+        objectApiName: 'Contact',
+        recordId: id,
+        ownerId: contact.owner_id ?? null,
+      }),
+    ])
+
+  // Serialize and deserialize security context for client component
+  const serializedContext = serializeSecurityContext(securityContextResult)
+  const securityContext = deserializeSecurityContext(serializedContext)
 
   // Build record name
   const recordName =
@@ -113,7 +133,7 @@ export default async function ContactDetailPage({
   ]
 
   return (
-    <RecordDetailPage
+    <SecureRecordDetailPage
       objectDefinition={objectDef}
       fields={fields}
       layout={page_layout}
@@ -121,6 +141,7 @@ export default async function ContactDetailPage({
       backPath="/admin/contacts"
       recordName={recordName}
       relatedTabs={relatedTabs}
+      securityContext={securityContext}
     />
   )
 }
