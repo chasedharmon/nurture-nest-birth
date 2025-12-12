@@ -31,7 +31,7 @@
 
 ### 1. CRM Object Model (Salesforce-like Architecture)
 
-**Status**: 🔄 Phase 3 Complete (Admin Setup UI)
+**Status**: 🔄 Phase 4 Complete (Dynamic Record Forms)
 **Location**: `/admin/contacts`, `/admin/accounts`, `/admin/leads`, `/admin/opportunities`
 
 The CRM has been transformed from a single "leads" table into a robust, Salesforce-like object model with distinct entities, relationships, and a metadata-driven architecture.
@@ -269,6 +269,68 @@ The CRM has been transformed from a single "leads" table into a robust, Salesfor
 - `src/components/admin/setup/page-layout-editor.tsx` - Section-based layout editor
 - `src/components/admin/setup/page-layouts-tab.tsx` - Page layouts tab wrapper
 
+#### Dynamic Record Forms (Phase 4 Complete)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     DYNAMIC RECORD FORM                                   │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  DynamicRecordForm Component:                                            │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │ Props:                                                           │   │
+│  │ ├── objectApiName - Which CRM object (Contact, Lead, etc.)      │   │
+│  │ ├── layout        - Page layout configuration                    │   │
+│  │ ├── fields        - Field definitions with picklist values       │   │
+│  │ ├── initialData   - Current record values (for edit mode)        │   │
+│  │ ├── readOnly      - View mode vs edit mode                       │   │
+│  │ └── onSubmit      - Form submission handler                      │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  Field Type Renderers (16 types):                                        │
+│  ┌────────────┬────────────┬────────────┬────────────┐                 │
+│  │ Text-based │ Numeric    │ Selection  │ Special    │                 │
+│  ├────────────┼────────────┼────────────┼────────────┤                 │
+│  │ TextField  │NumberField │PicklistField│LookupField│                 │
+│  │ EmailField │CurrencyField│MultiPicklist│FormulaField│                │
+│  │ PhoneField │PercentField│CheckboxField│AutoNumberField│              │
+│  │ UrlField   │            │            │            │                 │
+│  │ TextAreaField│          │            │            │                 │
+│  │ RichTextField│          │            │            │                 │
+│  │ DateField  │            │            │            │                 │
+│  │ DateTimeField│          │            │            │                 │
+│  └────────────┴────────────┴────────────┴────────────┘                 │
+│                                                                          │
+│  Features:                                                               │
+│  ├── Section-based layout (from page_layouts)                           │
+│  ├── Collapsible sections (Radix Collapsible)                           │
+│  ├── 1 or 2 column layouts per section                                  │
+│  ├── Required field validation                                          │
+│  ├── Custom field support (stored in JSONB custom_fields)               │
+│  ├── Edit mode and read-only view mode                                  │
+│  └── Lookup search modal with debounced search                          │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Phase 4 Key Files**:
+
+- `src/components/admin/crm/dynamic-record-form.tsx` - Main form component
+- `src/components/admin/crm/fields/` - 11 field renderer files (16 types)
+  - `field-types.ts` - Shared types and type guards
+  - `text-field.tsx` - TextField, EmailField, PhoneField, UrlField
+  - `textarea-field.tsx` - TextAreaField
+  - `rich-text-field.tsx` - RichTextField with markdown toolbar
+  - `number-field.tsx` - NumberField, CurrencyField, PercentField
+  - `date-field.tsx` - DateField, DateTimeField
+  - `checkbox-field.tsx` - CheckboxField
+  - `picklist-field.tsx` - PicklistField, MultiPicklistField
+  - `lookup-field.tsx` - LookupField, MasterDetailField
+  - `formula-field.tsx` - FormulaField (read-only)
+  - `auto-number-field.tsx` - AutoNumberField (read-only)
+- `src/app/actions/object-metadata.ts` - Server actions for metadata & lookup
+- `src/components/ui/collapsible.tsx` - Radix Collapsible wrapper
+
 **Contact Data Model**:
 
 ```typescript
@@ -350,8 +412,8 @@ interface CrmOpportunity {
 - [x] Phase 1: Metadata foundation (object_definitions, field_definitions)
 - [x] Phase 2: Core CRM tables (contacts, accounts, leads, opportunities, activities)
 - [x] Phase 3: Admin Setup UI for Objects & Fields
-- [ ] Phase 4: Dynamic Record Forms
-- [ ] Phase 5: CRM Object UIs
+- [x] Phase 4: Dynamic Record Forms
+- [ ] Phase 5: List Views & Record Pages
 - [ ] Phase 6: Lead Conversion Wizard
 - [ ] Phase 7: Data Migration from legacy leads
 - [ ] Phase 8: Field-Level Security
@@ -1262,5 +1324,5 @@ nurture-nest-birth/
 ---
 
 _Documentation generated: December 2024_
-_Last Updated: December 11, 2024_
-_Project Phase: 8.3 (CRM Object Manager UI Complete)_
+_Last Updated: December 12, 2024_
+_Project Phase: 8.4 (CRM Dynamic Record Forms Complete)_
