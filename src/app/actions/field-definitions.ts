@@ -99,7 +99,7 @@ export async function getFieldWithPicklistValues(id: string): Promise<{
       .select(
         `
         *,
-        picklist_values (*)
+        picklist_values!field_definition_id (*)
       `
       )
       .eq('id', id)

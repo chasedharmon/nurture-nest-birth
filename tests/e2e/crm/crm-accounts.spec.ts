@@ -19,10 +19,10 @@ test.describe('CRM Accounts', () => {
     test('should display accounts table with columns', async ({ page }) => {
       await page.goto('/admin/accounts')
 
-      // Check for table headers
-      await expect(page.locator('th:has-text("Name")')).toBeVisible()
-      await expect(page.locator('th:has-text("Type")')).toBeVisible()
-      await expect(page.locator('th:has-text("Status")')).toBeVisible()
+      // Check for table headers (using metadata-driven labels)
+      await expect(page.locator('th:has-text("Account Name")')).toBeVisible()
+      await expect(page.locator('th:has-text("Account Type")')).toBeVisible()
+      await expect(page.locator('th:has-text("Account Status")')).toBeVisible()
     })
 
     test('should show seeded E2E test account', async ({ page }) => {
@@ -80,7 +80,10 @@ test.describe('CRM Accounts', () => {
       await expect(
         page.locator('text=household').or(page.locator('text=Household'))
       ).toBeVisible()
-      await expect(page.locator('text=555-123-4567')).toBeVisible()
+      // Account type should be displayed
+      await expect(
+        page.locator('text=active').or(page.locator('text=Active'))
+      ).toBeVisible()
     })
 
     test('should show billing address', async ({ page }) => {
@@ -203,24 +206,31 @@ test.describe('CRM Accounts', () => {
 
       await page.goto('/admin/accounts/new')
 
-      // Fill out the form
-      await page.fill('input[name="name"]', accountName)
+      // Fill out the form using placeholder selectors (dynamic form doesn't use name attr)
+      const nameInput = page.locator(
+        'input[placeholder*="account name" i], input[placeholder*="Enter account name" i]'
+      )
+      await nameInput.fill(accountName)
 
-      // Select account type
-      const typeSelect = page
-        .locator('select[name="account_type"]')
-        .or(page.locator('[name="account_type"]'))
-      if (await typeSelect.isVisible()) {
-        await typeSelect.selectOption('household')
-      }
+      // Fill billing address fields
+      const cityInput = page.locator(
+        'input[placeholder*="billing city" i], input[placeholder*="Enter billing city" i]'
+      )
+      await cityInput.fill('New Test City')
 
-      await page.fill('input[name="phone"]', '555-999-7777')
-      await page.fill('input[name="billing_city"]', 'New Test City')
+      const stateInput = page.locator(
+        'input[placeholder*="billing state" i], input[placeholder*="Enter billing state" i]'
+      )
+      await stateInput.fill('TX')
 
       // Submit the form
       const saveButton = page
         .locator('button:has-text("Save")')
-        .or(page.locator('button:has-text("Create")'))
+        .or(
+          page
+            .locator('button:has-text("Create")')
+            .or(page.locator('button:has-text("Save Changes")'))
+        )
       await saveButton.click()
 
       // Should redirect to account detail or list
@@ -257,16 +267,14 @@ test.describe('CRM Accounts', () => {
         .or(page.locator('a:has-text("Edit")'))
       await editButton.first().click()
 
-      // Should show edit form or navigate to edit page
+      // Should show edit form - look for the account name textbox
+      // The dynamic form renders textboxes with placeholder text
       await expect(
-        page
-          .locator('button:has-text("Save")')
-          .or(page.locator('button:has-text("Cancel")'))
-          .or(page.locator('input[name="name"]'))
+        page.getByRole('textbox', { name: /account name/i })
       ).toBeVisible({ timeout: 5000 })
     })
 
-    test('should update account phone', async ({ page }) => {
+    test('should update account billing city', async ({ page }) => {
       await page.goto(`/admin/accounts/${E2E_CRM_ACCOUNT_ID}`)
 
       // Click edit button
@@ -275,24 +283,28 @@ test.describe('CRM Accounts', () => {
         .or(page.locator('a:has-text("Edit")'))
       await editButton.first().click()
 
-      // Update phone number
-      const phoneInput = page.locator('input[name="phone"]')
-      await phoneInput.clear()
-      await phoneInput.fill('555-333-4444')
+      // Update billing city using placeholder or label as selector
+      const cityInput = page.locator(
+        'input[placeholder*="billing city" i], input[placeholder*="Enter billing city" i]'
+      )
+      await cityInput.clear()
+      await cityInput.fill('Updated City')
 
       // Save changes
-      const saveButton = page.locator('button:has-text("Save")')
+      const saveButton = page
+        .locator('button:has-text("Save")')
+        .or(page.locator('button:has-text("Save Changes")'))
       await saveButton.click()
 
-      // Should show updated phone
-      await expect(page.locator('text=555-333-4444')).toBeVisible({
+      // Should show updated city
+      await expect(page.locator('text=Updated City')).toBeVisible({
         timeout: 10000,
       })
 
-      // Restore original phone
+      // Restore original city
       await editButton.first().click()
-      await phoneInput.clear()
-      await phoneInput.fill('555-123-4567')
+      await cityInput.clear()
+      await cityInput.fill('Test City')
       await saveButton.click()
     })
 
@@ -305,17 +317,19 @@ test.describe('CRM Accounts', () => {
         .or(page.locator('a:has-text("Edit")'))
       await editButton.first().click()
 
-      // Make a change
-      const phoneInput = page.locator('input[name="phone"]')
-      await phoneInput.clear()
-      await phoneInput.fill('555-000-0000')
+      // Make a change using placeholder as selector
+      const cityInput = page.locator(
+        'input[placeholder*="billing city" i], input[placeholder*="Enter billing city" i]'
+      )
+      await cityInput.clear()
+      await cityInput.fill('Cancelled City')
 
       // Cancel
       const cancelButton = page.locator('button:has-text("Cancel")')
       await cancelButton.click()
 
-      // Should show original phone
-      await expect(page.locator('text=555-123-4567')).toBeVisible()
+      // Should show original city
+      await expect(page.locator('text=Test City')).toBeVisible()
     })
   })
 

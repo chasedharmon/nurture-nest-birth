@@ -21,11 +21,10 @@ test.describe('CRM Contacts', () => {
     test('should display contacts table with columns', async ({ page }) => {
       await page.goto('/admin/contacts')
 
-      // Check for table headers
-      await expect(page.locator('th:has-text("Name")')).toBeVisible()
+      // Check for table headers (using metadata-driven labels)
+      await expect(page.locator('th:has-text("Last Name")')).toBeVisible()
       await expect(page.locator('th:has-text("Email")')).toBeVisible()
       await expect(page.locator('th:has-text("Phone")')).toBeVisible()
-      await expect(page.locator('th:has-text("Status")')).toBeVisible()
     })
 
     test('should show seeded E2E test contact', async ({ page }) => {

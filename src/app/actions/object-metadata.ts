@@ -49,12 +49,14 @@ export async function getObjectMetadata(objectApiName: string): Promise<{
     }
 
     // 2. Get field definitions with picklist values
+    // Note: We use !field_definition_id to specify which FK to use since
+    // picklist_values has two FKs to field_definitions (field_definition_id and controlling_field_id)
     const { data: fields, error: fieldsError } = await supabase
       .from('field_definitions')
       .select(
         `
         *,
-        picklist_values (
+        picklist_values!field_definition_id (
           id,
           field_definition_id,
           value,

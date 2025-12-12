@@ -571,13 +571,10 @@ setup('seed test data', async () => {
         name: 'E2E Test Household',
         account_type: 'household',
         account_status: 'active',
-        lifecycle_stage: 'customer',
         billing_street: '123 E2E Test St',
         billing_city: 'Test City',
         billing_state: 'TX',
         billing_postal_code: '75001',
-        phone: '555-123-4567',
-        email: CRM_CONTACT_EMAIL,
         owner_id: adminUser.id,
         ...(organizationId && { organization_id: organizationId }),
       },
@@ -612,8 +609,7 @@ setup('seed test data', async () => {
         expected_due_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
           .toISOString()
           .split('T')[0], // 90 days from now
-        contact_status: 'active',
-        lifecycle_stage: 'customer',
+        is_active: true,
         account_id: E2E_CRM_ACCOUNT_ID,
         portal_access_enabled: false,
         owner_id: adminUser.id,
@@ -687,7 +683,7 @@ setup('seed test data', async () => {
         actual_close_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
           .toISOString()
           .split('T')[0],
-        probability: 100,
+        stage_probability: 100,
         is_won: true,
         is_closed: true,
         next_step: 'Schedule prenatal visit',
@@ -724,8 +720,10 @@ setup('seed test data', async () => {
       subject: 'E2E Prenatal Visit',
       activity_type: 'event',
       status: 'open',
+      who_type: 'contact',
       who_id: E2E_CRM_CONTACT_ID,
-      what_id: E2E_CRM_OPPORTUNITY_ID,
+      related_to_type: 'opportunity',
+      related_to_id: E2E_CRM_OPPORTUNITY_ID,
       due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split('T')[0], // 14 days from now
@@ -755,6 +753,7 @@ setup('seed test data', async () => {
       activity_type: 'task',
       status: 'open',
       priority: 'high',
+      who_type: 'contact',
       who_id: E2E_CRM_CONTACT_ID,
       due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
         .toISOString()
@@ -779,8 +778,10 @@ setup('seed test data', async () => {
       subject: 'E2E Initial Consultation',
       activity_type: 'call',
       status: 'completed',
+      who_type: 'contact',
       who_id: E2E_CRM_CONTACT_ID,
-      what_id: E2E_CRM_OPPORTUNITY_ID,
+      related_to_type: 'opportunity',
+      related_to_id: E2E_CRM_OPPORTUNITY_ID,
       due_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split('T')[0], // 7 days ago
@@ -816,13 +817,10 @@ setup('seed test data', async () => {
         name: 'Portal Test Household',
         account_type: 'household',
         account_status: 'active',
-        lifecycle_stage: 'customer',
         billing_street: '456 Portal Test Ave',
         billing_city: 'Portal City',
         billing_state: 'CA',
         billing_postal_code: '90210',
-        phone: '555-444-5555',
-        email: PORTAL_CONTACT_EMAIL,
         owner_id: adminUser.id,
         ...(organizationId && { organization_id: organizationId }),
       },
@@ -862,8 +860,7 @@ setup('seed test data', async () => {
         expected_due_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
           .toISOString()
           .split('T')[0], // 60 days from now
-        contact_status: 'active',
-        lifecycle_stage: 'customer',
+        is_active: true,
         account_id: E2E_PORTAL_ACCOUNT_ID,
         portal_access_enabled: true, // Portal access enabled!
         owner_id: adminUser.id,
@@ -941,7 +938,7 @@ setup('seed test data', async () => {
           actual_close_date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
             .toISOString()
             .split('T')[0],
-          probability: 100,
+          stage_probability: 100,
           is_won: true,
           is_closed: true,
           next_step: 'First postpartum visit',
@@ -978,8 +975,10 @@ setup('seed test data', async () => {
         subject: 'Portal Prenatal Consultation',
         activity_type: 'event',
         status: 'open',
+        who_type: 'contact',
         who_id: E2E_PORTAL_CONTACT_ID,
-        what_id: E2E_PORTAL_OPPORTUNITY_ID,
+        related_to_type: 'opportunity',
+        related_to_id: E2E_PORTAL_OPPORTUNITY_ID,
         due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
           .toISOString()
           .split('T')[0], // 7 days from now

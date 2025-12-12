@@ -182,12 +182,14 @@ export async function getObjectMetadata(
     }
 
     // Get fields with picklist values
+    // Note: We use !field_definition_id to specify which FK to use since
+    // picklist_values has two FKs to field_definitions
     const { data: fields, error: fieldsError } = await supabase
       .from('field_definitions')
       .select(
         `
         *,
-        picklist_values (*)
+        picklist_values!field_definition_id (*)
       `
       )
       .eq('object_definition_id', objectDef.id)
