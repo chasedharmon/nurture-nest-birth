@@ -7,7 +7,7 @@
     },
     {
       "path": "/api/cron/workflow-scheduler",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 9 * * *"
     }
   ]
 }
