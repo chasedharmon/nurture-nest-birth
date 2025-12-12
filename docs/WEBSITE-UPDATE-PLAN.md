@@ -236,13 +236,13 @@ All page content reflects accurate information, flexible service delivery, and p
 
 Before implementing, confirm these decisions:
 
-| Question                 | Recommendation                                          | Your Decision  |
-| ------------------------ | ------------------------------------------------------- | -------------- |
-| Show pricing on website? | Show packages without exact prices, or "Starting at $X" | ******\_****** |
-| Retainer vs Deposit?     | **Retainer** (non-refundable) per training              | ******\_****** |
-| Payment plans?           | Optional, but require retainer regardless               | ******\_****** |
-| Birth doula balance due? | By 36 weeks per training                                | ******\_****** |
-| Postpartum payment?      | Pay-as-you-go with retainer for first booking           | ******\_****** |
+| Question                 | Recommendation                                          | Your Decision      |
+| ------------------------ | ------------------------------------------------------- | ------------------ |
+| Show pricing on website? | Show packages without exact prices, or "Starting at $X" | **\*\***\_**\*\*** |
+| Retainer vs Deposit?     | **Retainer** (non-refundable) per training              | **\*\***\_**\*\*** |
+| Payment plans?           | Optional, but require retainer regardless               | **\*\***\_**\*\*** |
+| Birth doula balance due? | By 36 weeks per training                                | **\*\***\_**\*\*** |
+| Postpartum payment?      | Pay-as-you-go with retainer for first booking           | **\*\***\_**\*\*** |
 
 ### 4.2 Recommended Pricing Structure (Based on Training)
 

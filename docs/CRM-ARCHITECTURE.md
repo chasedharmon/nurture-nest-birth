@@ -31,8 +31,8 @@
 
 ### 1. CRM Object Model (Salesforce-like Architecture)
 
-**Status**: 🔄 Phase 4 Complete (Dynamic Record Forms)
-**Location**: `/admin/contacts`, `/admin/accounts`, `/admin/leads`, `/admin/opportunities`
+**Status**: 🔄 Phase 5 Complete (List Views & Record Pages)
+**Location**: `/admin/contacts`, `/admin/accounts`, `/admin/crm-leads`, `/admin/opportunities`
 
 The CRM has been transformed from a single "leads" table into a robust, Salesforce-like object model with distinct entities, relationships, and a metadata-driven architecture.
 
@@ -331,6 +331,86 @@ The CRM has been transformed from a single "leads" table into a robust, Salesfor
 - `src/app/actions/object-metadata.ts` - Server actions for metadata & lookup
 - `src/components/ui/collapsible.tsx` - Radix Collapsible wrapper
 
+#### List Views & Record Pages (Phase 5 Complete)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     LIST VIEWS & RECORD PAGES                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  DynamicListView Component:                                              │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │ Features:                                                        │   │
+│  │ ├── Metadata-driven columns from field_definitions               │   │
+│  │ ├── URL-based sorting (sort/dir search params)                   │   │
+│  │ ├── Text search across searchable fields                         │   │
+│  │ ├── Pagination with page size control                            │   │
+│  │ ├── Row selection with checkbox column                           │   │
+│  │ ├── Bulk actions (delete selected)                               │   │
+│  │ └── Type-specific cell formatters                                │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  Cell Formatters (by field type):                                        │
+│  ┌────────────┬────────────────────────────────────────────────────┐   │
+│  │ Type       │ Formatting                                         │   │
+│  ├────────────┼────────────────────────────────────────────────────┤   │
+│  │ Date       │ Locale-formatted date                              │   │
+│  │ DateTime   │ Locale-formatted date+time                         │   │
+│  │ Currency   │ USD currency format                                │   │
+│  │ Percent    │ Percentage with suffix                             │   │
+│  │ Picklist   │ Badge with value                                   │   │
+│  │ Checkbox   │ Check/X icon                                       │   │
+│  │ Lookup     │ Display linked record name                         │   │
+│  └────────────┴────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  Record Detail Page Wrapper:                                             │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │ ├── Header with record name and quick actions                   │   │
+│  │ ├── View mode (default) with Edit button                        │   │
+│  │ ├── Edit mode with Save/Cancel buttons                          │   │
+│  │ ├── Delete confirmation dialog                                  │   │
+│  │ ├── Related records tabs (configurable per object)              │   │
+│  │ └── Uses DynamicRecordForm for field rendering                  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  Activity Timeline Component:                                            │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │ ├── Chronological display of activities                         │   │
+│  │ ├── Type filtering (task, event, call, email, note)             │   │
+│  │ ├── Type-specific icons and colors                              │   │
+│  │ ├── Inline completion toggle for tasks/events                   │   │
+│  │ ├── Due date and overdue highlighting                           │   │
+│  │ └── Priority badges for high priority items                     │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Phase 5 Key Files**:
+
+- `src/app/actions/crm-records.ts` - Generic CRUD server actions
+  - `getRecords` - Fetch with filters, sort, pagination, search
+  - `getRecordById` - Single record lookup
+  - `createRecord` - Insert new record
+  - `updateRecord` - Update existing record
+  - `deleteRecord` - Delete single record
+  - `bulkDeleteRecords` - Delete multiple records
+  - `getRelatedRecords` - Fetch by relationship field
+- `src/components/admin/crm/dynamic-list-view.tsx` - Metadata-driven list view
+- `src/components/admin/crm/record-detail-page.tsx` - Detail page wrapper
+- `src/components/admin/crm/new-record-page.tsx` - Create record wrapper
+- `src/components/admin/crm/related-records-list.tsx` - Related records table
+- `src/components/admin/crm/activity-timeline.tsx` - Activity timeline display
+
+**CRM Object Pages**:
+
+| Object      | List View              | Detail View                 | New Record                 |
+| ----------- | ---------------------- | --------------------------- | -------------------------- |
+| Contact     | `/admin/contacts`      | `/admin/contacts/[id]`      | `/admin/contacts/new`      |
+| Account     | `/admin/accounts`      | `/admin/accounts/[id]`      | `/admin/accounts/new`      |
+| Lead        | `/admin/crm-leads`     | `/admin/crm-leads/[id]`     | `/admin/crm-leads/new`     |
+| Opportunity | `/admin/opportunities` | `/admin/opportunities/[id]` | `/admin/opportunities/new` |
+
 **Contact Data Model**:
 
 ```typescript
@@ -413,7 +493,7 @@ interface CrmOpportunity {
 - [x] Phase 2: Core CRM tables (contacts, accounts, leads, opportunities, activities)
 - [x] Phase 3: Admin Setup UI for Objects & Fields
 - [x] Phase 4: Dynamic Record Forms
-- [ ] Phase 5: List Views & Record Pages
+- [x] Phase 5: List Views & Record Pages
 - [ ] Phase 6: Lead Conversion Wizard
 - [ ] Phase 7: Data Migration from legacy leads
 - [ ] Phase 8: Field-Level Security
