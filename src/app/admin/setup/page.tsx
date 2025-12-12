@@ -30,6 +30,7 @@ import {
   Database,
   Handshake,
   ArrowRightLeft,
+  KeyRound,
 } from 'lucide-react'
 
 interface SetupCategory {
@@ -88,6 +89,12 @@ const setupCategories: SetupCategory[] = [
         description: 'Configure access control and permissions',
         href: '/admin/setup/roles',
         icon: <Shield className="h-5 w-5" />,
+      },
+      {
+        title: 'Field-Level Security',
+        description: 'Control field visibility by role',
+        href: '/admin/setup/field-permissions',
+        icon: <KeyRound className="h-5 w-5" />,
       },
       {
         title: 'Team Members',

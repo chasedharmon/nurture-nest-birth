@@ -23,7 +23,15 @@ import {
 } from '@/components/ui/alert-dialog'
 import { deleteRole } from '@/app/actions/setup'
 import type { Role } from '@/lib/supabase/types'
-import { MoreHorizontal, Pencil, Trash2, Shield, Lock } from 'lucide-react'
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Shield,
+  Lock,
+  KeyRound,
+} from 'lucide-react'
+import Link from 'next/link'
 import { EditRoleDialog } from './edit-role-dialog'
 import { PermissionsMatrixReadOnly } from './permissions-matrix'
 
@@ -140,6 +148,14 @@ export function RolesTable({ roles }: RolesTableProps) {
                       <DropdownMenuItem onClick={() => setEditingRole(role)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         {role.is_system ? 'View Permissions' : 'Edit Role'}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href={`/admin/setup/field-permissions?role=${role.id}`}
+                        >
+                          <KeyRound className="mr-2 h-4 w-4" />
+                          Field Permissions
+                        </Link>
                       </DropdownMenuItem>
                       {!role.is_system && (
                         <>

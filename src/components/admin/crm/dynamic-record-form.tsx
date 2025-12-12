@@ -78,6 +78,12 @@ interface DynamicRecordFormProps {
   submitLabel?: string
   /** Additional CSS classes */
   className?: string
+  /**
+   * Field-level security: Set of field IDs that the user can edit.
+   * If not provided, all fields are editable (respecting other constraints).
+   * If provided, fields not in this set will be rendered as read-only.
+   */
+  editableFieldIds?: Set<string>
 }
 
 interface FormSection {
@@ -155,6 +161,7 @@ export function DynamicRecordForm({
   onLookupRecordClick,
   submitLabel,
   className,
+  editableFieldIds,
 }: DynamicRecordFormProps) {
   // Form state
   const [formData, setFormData] = useState<Record<string, unknown>>(initialData)
@@ -321,13 +328,18 @@ export function DynamicRecordForm({
   }
 
   // Check if a field should be read-only
-  const isFieldReadOnly = (field: FieldDefinition): boolean => {
-    if (readOnly) return true
-    if (field.is_read_only) return true
-    if (field.data_type === 'formula') return true
-    if (field.data_type === 'auto_number') return true
-    return false
-  }
+  const isFieldReadOnly = useCallback(
+    (field: FieldDefinition): boolean => {
+      if (readOnly) return true
+      if (field.is_read_only) return true
+      if (field.data_type === 'formula') return true
+      if (field.data_type === 'auto_number') return true
+      // Field-level security: check if field is in editable set
+      if (editableFieldIds && !editableFieldIds.has(field.id)) return true
+      return false
+    },
+    [readOnly, editableFieldIds]
+  )
 
   if (isLoading) {
     return (
