@@ -29,6 +29,7 @@ import {
   MessageSquare,
   Database,
   Handshake,
+  ArrowRightLeft,
 } from 'lucide-react'
 
 interface SetupCategory {
@@ -56,6 +57,12 @@ const setupCategories: SetupCategory[] = [
         description: 'Manage CRM objects and custom fields',
         href: '/admin/setup/objects',
         icon: <Database className="h-5 w-5" />,
+      },
+      {
+        title: 'Data Migration',
+        description: 'Migrate legacy leads to new CRM system',
+        href: '/admin/setup/migration',
+        icon: <ArrowRightLeft className="h-5 w-5" />,
       },
       {
         title: 'Referral Partners',
