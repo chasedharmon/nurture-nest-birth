@@ -845,3 +845,180 @@ export interface LeadConversionResult {
   opportunity_id?: string
   error?: string
 }
+
+// =====================================================
+// RECORD-LEVEL SECURITY (SHARING MODEL)
+// =====================================================
+
+/**
+ * Access levels for record sharing
+ */
+export type RecordAccessLevel = 'read' | 'read_write' | 'full_access'
+
+/**
+ * Sources of record access
+ */
+export type AccessSource =
+  | 'owner' // Record owner
+  | 'org_wide_default' // Organization-wide default
+  | 'role_hierarchy' // Access via role hierarchy
+  | 'sharing_rule' // Criteria-based sharing rule
+  | 'manual_share' // Manual share grant
+
+/**
+ * Who can receive shared access
+ */
+export type ShareWithType = 'user' | 'role' | 'public_group'
+
+/**
+ * Sharing rule types
+ */
+export type SharingRuleType = 'criteria' | 'owner_based'
+
+/**
+ * Filter operator for sharing rule criteria
+ */
+export type SharingCriteriaOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'contains'
+  | 'not_contains'
+  | 'starts_with'
+  | 'greater_than'
+  | 'less_than'
+  | 'is_null'
+  | 'is_not_null'
+  | 'in'
+
+/**
+ * Single condition in sharing rule criteria
+ */
+export interface SharingCriteriaCondition {
+  field: string
+  operator: SharingCriteriaOperator
+  value: unknown
+}
+
+/**
+ * Criteria configuration for sharing rules
+ */
+export interface SharingCriteria {
+  conditions: SharingCriteriaCondition[]
+  match_type: 'all' | 'any'
+}
+
+/**
+ * Sharing rule definition
+ */
+export interface SharingRule {
+  id: string
+  organization_id: string
+  object_definition_id: string
+
+  // Identity
+  name: string
+  description: string | null
+
+  // Access
+  access_level: RecordAccessLevel
+
+  // Who gets access
+  share_with_type: ShareWithType
+  share_with_id: string | null
+
+  // Criteria
+  criteria: SharingCriteria
+
+  // Rule type
+  rule_type: SharingRuleType
+  owner_role_id: string | null
+
+  // Status
+  is_active: boolean
+
+  // Metadata
+  created_at: string
+  updated_at: string
+  created_by: string | null
+}
+
+/**
+ * Input type for creating a sharing rule
+ */
+export type SharingRuleInsert = Omit<
+  SharingRule,
+  'id' | 'created_at' | 'updated_at'
+>
+
+/**
+ * Input type for updating a sharing rule
+ */
+export type SharingRuleUpdate = Partial<
+  Omit<
+    SharingRule,
+    'id' | 'created_at' | 'organization_id' | 'object_definition_id'
+  >
+>
+
+/**
+ * Manual share record
+ */
+export interface ManualShare {
+  id: string
+  organization_id: string
+
+  // Record reference
+  object_api_name: string
+  record_id: string
+
+  // Who gets access
+  share_with_type: 'user' | 'role'
+  share_with_id: string
+
+  // Access level
+  access_level: RecordAccessLevel
+
+  // Metadata
+  reason: string | null
+  shared_by: string
+  expires_at: string | null
+  created_at: string
+}
+
+/**
+ * Input type for creating a manual share
+ */
+export type ManualShareInsert = Omit<
+  ManualShare,
+  'id' | 'created_at' | 'shared_by'
+>
+
+/**
+ * Information about who has access to a record
+ */
+export interface RecordSharingInfo {
+  user_id: string
+  user_name: string | null
+  user_email: string
+  access_level: RecordAccessLevel
+  access_source: AccessSource
+  source_name: string
+}
+
+/**
+ * Result of checking record access
+ */
+export interface RecordAccessResult {
+  has_access: boolean
+  access_level: RecordAccessLevel | null
+  access_source: AccessSource | null
+}
+
+/**
+ * Sharing settings for an object
+ */
+export interface ObjectSharingSettings {
+  object_api_name: string
+  sharing_model: SharingModel
+  sharing_rules: SharingRule[]
+}

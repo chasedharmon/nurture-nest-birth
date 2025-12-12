@@ -497,7 +497,7 @@ interface CrmOpportunity {
 - [x] Phase 6: Lead Conversion Wizard
 - [x] Phase 7: Data Migration from legacy leads ✅ **COMPLETE**
 - [x] Phase 8: Field-Level Security ✅ **COMPLETE**
-- [ ] Phase 9: Record-Level Security (Sharing Rules)
+- [x] Phase 9: Record-Level Security (Sharing Rules) ✅ **COMPLETE**
 - [ ] Phase 10: Integration with existing features
 
 #### Field-Level Security (Phase 8 Complete)
@@ -562,6 +562,153 @@ interface CrmOpportunity {
 - `src/app/admin/setup/field-permissions/page.tsx` - Admin UI page
 - `src/app/admin/setup/field-permissions/field-permissions-selector.tsx` - Role/object selection
 - `src/components/admin/setup/field-permissions-matrix.tsx` - Permission matrix UI
+
+#### Record-Level Security (Phase 9 Complete)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                   RECORD-LEVEL SECURITY (SHARING)                        │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Salesforce-Style Sharing Model:                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                                                                    │  │
+│  │  Access Evaluation (Additive - Higher Privilege Wins)             │  │
+│  │                                                                    │  │
+│  │  1. OWNER ACCESS                                                  │  │
+│  │     └── Record owner always has full_access                       │  │
+│  │                                                                    │  │
+│  │  2. ORGANIZATION-WIDE DEFAULTS (OWD)                             │  │
+│  │     ├── private      → Only owner (no default access)            │  │
+│  │     ├── read         → All users can view                        │  │
+│  │     ├── read_write   → All users can view/edit                   │  │
+│  │     └── full_access  → All users have full control               │  │
+│  │                                                                    │  │
+│  │  3. ROLE HIERARCHY                                                │  │
+│  │     └── Managers see subordinates' records via hierarchy_level   │  │
+│  │         (Lower hierarchy_level = more privileged)                │  │
+│  │                                                                    │  │
+│  │  4. SHARING RULES (Automatic)                                    │  │
+│  │     ├── criteria_based → Share when record matches conditions    │  │
+│  │     └── owner_based    → Share records owned by specific role    │  │
+│  │                                                                    │  │
+│  │  5. MANUAL SHARES (Ad-hoc)                                       │  │
+│  │     └── Owner grants access to specific users/roles              │  │
+│  │         (supports expiration dates)                               │  │
+│  │                                                                    │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                          │
+│  Database Tables:                                                        │
+│  ┌────────────────────┬─────────────────────────────────────────────┐  │
+│  │ sharing_rules      │ Automatic criteria/owner-based sharing       │  │
+│  │                    │ - rule_type: criteria | owner_based          │  │
+│  │                    │ - share_with_type: user | role | public_group│  │
+│  │                    │ - access_level: read | read_write            │  │
+│  │                    │ - criteria: JSON condition matching          │  │
+│  ├────────────────────┼─────────────────────────────────────────────┤  │
+│  │ manual_shares      │ Ad-hoc record sharing by owner               │  │
+│  │                    │ - share_with_type: user | role               │  │
+│  │                    │ - access_level: read | read_write            │  │
+│  │                    │ - expires_at: optional expiration            │  │
+│  │                    │ - reason: audit trail for why shared         │  │
+│  ├────────────────────┼─────────────────────────────────────────────┤  │
+│  │ record_share_summary│ Computed effective sharing (performance)    │  │
+│  │                    │ - Materialized view of who can access what   │  │
+│  └────────────────────┴─────────────────────────────────────────────┘  │
+│                                                                          │
+│  Admin UI (/admin/setup/sharing-rules):                                  │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                                                                    │  │
+│  │  Tab 1: Organization-Wide Defaults                                │  │
+│  │  ┌─────────────────┬──────────────────────────────────────────┐  │  │
+│  │  │ Object          │ Sharing Model                             │  │  │
+│  │  ├─────────────────┼──────────────────────────────────────────┤  │  │
+│  │  │ Contact         │ [Private ▼]                               │  │  │
+│  │  │ Account         │ [Private ▼]                               │  │  │
+│  │  │ Lead            │ [Public Read Only ▼]                      │  │  │
+│  │  │ Opportunity     │ [Private ▼]                               │  │  │
+│  │  └─────────────────┴──────────────────────────────────────────┘  │  │
+│  │                                                                    │  │
+│  │  Tab 2: Sharing Rules                                             │  │
+│  │  ┌─────────────────────────────────────────────────────────────┐ │  │
+│  │  │ + New Sharing Rule                                          │ │  │
+│  │  │                                                              │ │  │
+│  │  │ ┌──────────────────────────────────────────────────────┐   │ │  │
+│  │  │ │ "VIP Clients to Admins"                    [Active]  │   │ │  │
+│  │  │ │ Object: Contact                                       │   │ │  │
+│  │  │ │ Share with: admin role → Read/Write                   │   │ │  │
+│  │  │ │ Criteria: lead_source equals "referral"              │   │ │  │
+│  │  │ └──────────────────────────────────────────────────────┘   │ │  │
+│  │  └─────────────────────────────────────────────────────────────┘ │  │
+│  │                                                                    │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                          │
+│  Record Detail Component (RecordSharingPanel):                          │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │ Sharing                                        [+ Share]          │  │
+│  │ 2 people have access                                              │  │
+│  │ ┌─────────────────────────────────────────────────────────────┐  │  │
+│  │ │ 👑 Sarah Johnson (owner)                    [Full Access]   │  │  │
+│  │ │ 👤 Mike Smith                               [Read]          │  │  │
+│  │ │    "Covering while on leave"  Expires: Jan 15, 2025  [🗑️]  │  │  │
+│  │ └─────────────────────────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                          │
+│  Key Database Function (RLS Integration):                                │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │ check_record_access(                                              │  │
+│  │   p_object_api_name,    -- 'Contact', 'Opportunity', etc.         │  │
+│  │   p_record_id,          -- UUID of the record                     │  │
+│  │   p_record_owner_id,    -- Record's owner                         │  │
+│  │   p_record_org_id,      -- Organization                           │  │
+│  │   p_user_id,            -- User requesting access (default auth)  │  │
+│  │   p_access_type         -- 'read' or 'write'                      │  │
+│  │ ) RETURNS BOOLEAN                                                 │  │
+│  │                                                                    │  │
+│  │ Evaluation order: owner → OWD → hierarchy → shares → rules       │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Phase 9 Key Files**:
+
+- `supabase/migrations/20251220000000_record_level_security.sql` - Database migration
+  - Tables: `sharing_rules`, `manual_shares`, `record_share_summary`
+  - Functions: `check_record_access()`, `get_record_sharing_info()`, `grant_record_share()`, `revoke_record_share()`
+  - Triggers for maintaining share summary
+- `src/lib/crm/record-sharing.ts` - Record sharing utility functions
+  - `evaluateRecordAccess()` - Main access evaluation function
+  - `evaluateCriteria()` - JSON criteria condition matching
+  - `compareAccessLevels()` - Determine higher privilege
+  - `satisfiesAccess()` - Check if access level meets requirement
+  - `hasHierarchyAccess()` - Role hierarchy check
+  - `getAccessSourceDescription()` - Human-readable access explanations
+- `src/app/actions/sharing-rules.ts` - Server actions
+  - `getSharingRules()` / `createSharingRule()` / `updateSharingRule()` / `deleteSharingRule()`
+  - `toggleSharingRuleActive()` - Enable/disable rules
+  - `getManualShares()` / `createManualShare()` / `deleteManualShare()`
+  - `checkRecordAccess()` - Runtime access check
+  - `getRecordSharingInfo()` - Get all access grants for a record
+  - `getObjectSharingSettings()` / `updateObjectSharingModel()`
+- `src/app/admin/setup/sharing-rules/page.tsx` - Admin UI page
+- `src/app/admin/setup/sharing-rules/sharing-rules-manager.tsx` - Full CRUD for sharing rules and OWD
+- `src/components/crm/record-sharing-panel.tsx` - Record detail sharing component
+
+**Criteria Condition Operators**:
+
+| Operator       | Description               | Example                                |
+| -------------- | ------------------------- | -------------------------------------- |
+| `equals`       | Exact match               | `status equals 'vip'`                  |
+| `not_equals`   | Not equal                 | `stage not_equals 'closed_lost'`       |
+| `contains`     | String/array contains     | `tags contains 'premium'`              |
+| `not_contains` | Does not contain          | `notes not_contains 'confidential'`    |
+| `starts_with`  | String prefix match       | `email starts_with 'admin@'`           |
+| `greater_than` | Numeric/string comparison | `amount greater_than 5000`             |
+| `less_than`    | Numeric/string comparison | `probability less_than 50`             |
+| `is_null`      | Field is null/undefined   | `partner_id is_null`                   |
+| `is_not_null`  | Field has value           | `due_date is_not_null`                 |
+| `in`           | Value in array            | `stage in ['proposal', 'negotiation']` |
 
 ---
 
@@ -1337,6 +1484,14 @@ supabase/migrations/
 | `record_types`       | Variants of objects (e.g., Lead types) |
 | `field_permissions`  | Field-level security per role          |
 
+#### CRM Security Tables (NEW)
+
+| Table                  | Purpose                                      |
+| ---------------------- | -------------------------------------------- |
+| `sharing_rules`        | Automatic criteria/owner-based sharing       |
+| `manual_shares`        | Ad-hoc record sharing by owner               |
+| `record_share_summary` | Computed effective sharing (for performance) |
+
 #### Legacy/Core Tables
 
 | Table                                 | Purpose                       |
@@ -1360,17 +1515,19 @@ supabase/migrations/
 
 ### Server Actions (27 files, ~400KB)
 
-| File               | Functions                                              |
-| ------------------ | ------------------------------------------------------ |
-| `leads.ts`         | getLeadById, updateLeadStatus, searchLeads, createLead |
-| `invoices.ts`      | generateInvoice, sendInvoice, recordPayment            |
-| `messaging.ts`     | createConversation, sendMessage, markAsRead            |
-| `workflows.ts`     | createWorkflow, executeWorkflow, getExecutionHistory   |
-| `team.ts`          | getTeamMembers, assignClient, trackTime                |
-| `reports.ts`       | getDashboardKPIs, executeReport, getRevenueTrend       |
-| `surveys.ts`       | createSurvey, recordResponse, calculateNPS             |
-| `contracts.ts`     | getTemplate, signContract                              |
-| `notifications.ts` | sendTrackedEmail, getNotificationLog                   |
+| File                | Functions                                              |
+| ------------------- | ------------------------------------------------------ |
+| `leads.ts`          | getLeadById, updateLeadStatus, searchLeads, createLead |
+| `invoices.ts`       | generateInvoice, sendInvoice, recordPayment            |
+| `messaging.ts`      | createConversation, sendMessage, markAsRead            |
+| `workflows.ts`      | createWorkflow, executeWorkflow, getExecutionHistory   |
+| `team.ts`           | getTeamMembers, assignClient, trackTime                |
+| `reports.ts`        | getDashboardKPIs, executeReport, getRevenueTrend       |
+| `surveys.ts`        | createSurvey, recordResponse, calculateNPS             |
+| `contracts.ts`      | getTemplate, signContract                              |
+| `notifications.ts`  | sendTrackedEmail, getNotificationLog                   |
+| `field-security.ts` | getFieldPermissionMatrix, bulkSetFieldPermissions      |
+| `sharing-rules.ts`  | getSharingRules, createManualShare, checkRecordAccess  |
 
 ### HTTP Endpoints
 
@@ -1476,4 +1633,4 @@ nurture-nest-birth/
 
 _Documentation generated: December 2024_
 _Last Updated: December 12, 2024_
-_Project Phase: 8.8 (Field-Level Security Complete)_
+_Project Phase: 9.0 (Record-Level Security Complete)_
