@@ -546,14 +546,14 @@ rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
 
 ---
 
-## E2E Testing Status (Last Updated: Dec 11, 2024)
+## E2E Testing Status (Last Updated: Dec 12, 2024)
 
 ### Recent Test Run Results:
 
-- **863 passed** ✅
-- **8 flaky** (pass on retry with `--retries=2`)
-- **0 failed**
-- **162 skipped** (across all test projects)
+- **856 passed** ✅
+- **15 flaky** (pass on retry with `--retries=2`)
+- **8 failed** (mobile viewport timing issues)
+- **158 skipped** (across all test projects)
 
 ### Test Architecture:
 
@@ -593,27 +593,40 @@ playwright.config.ts projects:
 3. **Conversation seeding**: Required for messaging tests to pass (not skip)
 4. **Organization seeding**: Required for SaaS Foundation tests (billing, organization settings)
 
-### Flaky Tests (8 tests):
+### Known Flaky/Failing Tests:
 
-These pass on retry but are timing-sensitive:
+**Failed Tests (~8)**: All mobile viewport tests with timing/selector issues
+
+- `admin-workflows.spec.ts` - 4 tests (workflow canvas not mobile-optimized)
+- `messaging-*.spec.ts` - 4 tests (realtime timing issues on mobile)
+
+**Flaky Tests (~15)**: Pass on retry but timing-sensitive
 
 - admin-messages.spec.ts navigation tests
-- admin-workflows.spec.ts page load tests
-- messaging-functional.spec.ts persistence tests
-- admin-setup-polish.spec.ts email templates
+- messaging-\*.spec.ts various tests
+- login-as-client.spec.ts
 
 **Mitigation**: Tests run with `--retries=2` to handle timing issues.
 
-### Skipped Tests (~162 tests across all projects):
+### Skipped Tests (~158 tests across all projects):
 
-| Category                 | Approx Count | Blocker                                                                             |
-| ------------------------ | ------------ | ----------------------------------------------------------------------------------- |
-| **SaaS Foundation**      | ~52          | Multi-tenancy migration not applied (`20251215000000_multi_tenancy_foundation.sql`) |
-| **Form/UI Tests**        | ~25          | Explicit `test.skip()` - need UI review                                             |
-| **Messaging Functional** | ~28          | Conditional skip when no conversations exist                                        |
-| **Team Assignments**     | ~20          | Conditional skip based on data state                                                |
-| **Report Builder**       | ~20          | Full workflow tests explicitly skipped                                              |
-| **Other**                | ~17          | Various explicit skips                                                              |
+| Category                  | Count | Blocker / Skip Reason                                                               |
+| ------------------------- | ----- | ----------------------------------------------------------------------------------- |
+| **SaaS Foundation**       | ~52   | Multi-tenancy migration not applied (`20251215000000_multi_tenancy_foundation.sql`) |
+| **Lead Form Submission**  | ~2    | Missing `referral_partner_id` column - needs migration applied                      |
+| **Intake Forms**          | ~6    | Page shows "Something went wrong" error during E2E - needs investigation            |
+| **Mobile Menu**           | ~2    | Selector updates needed for hamburger/sheet components                              |
+| **On-Call Schedule**      | ~1    | Dialog selector updates needed                                                      |
+| **Report Builder**        | ~6+   | Full workflow tests - wizard UI changed, tooltip help icons not found               |
+| **Team Management**       | ~6    | Complex UI interactions (time entry, schedule creation)                             |
+| **Messaging/Team Assign** | ~40+  | Conditional skips based on data state - most now work with seeding                  |
+| **Other**                 | ~10   | Various explicit skips (Calendly placeholder, email API tests)                      |
+
+### Recent Test Improvements (Dec 12, 2024):
+
+1. **Form validation tests enabled** (2 tests) - Rewrote to check HTML5 validation state instead of error message text
+2. **Messaging functional tests now run** - Conditional skips work with seeded conversation data
+3. **Identified migration blockers** - `referral_partner_id` column needed for lead submission tests
 
 ### To Enable More Tests:
 
@@ -626,11 +639,19 @@ These pass on retry but are timing-sensitive:
 
    This will enable ~52 SaaS Foundation tests.
 
-2. **Review explicitly skipped form/UI tests** - marked `test.skip()` due to:
-   - UI selector changes
-   - Features still in development
-   - Tests need updating for current UI
+2. **Apply referral partners migration**:
 
-3. **Messaging functional tests** should work with current seeding (conversation + messages seeded)
+   ```bash
+   # Migration: 20251217000000_lead_source_attribution.sql
+   # Adds referral_partner_id column to leads table
+   ```
+
+   This will enable ~2 lead submission tests.
+
+3. **Fix intake forms page error** - Debug why `/admin/setup/intake-forms` shows error during E2E
+
+4. **Update mobile menu selectors** - Review hamburger button aria-label and sheet component structure
+
+5. **Review report builder wizard** - Tooltip implementation changed, update test selectors
 
 ---

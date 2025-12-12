@@ -133,10 +133,10 @@ setup('seed test data', async () => {
       console.error('Failed to create organization:', orgError.message)
     }
     // Continue without organization - most tests don't require it
-  } else {
+  } else if (orgData) {
     organization = orgData
     organizationId = E2E_ORGANIZATION_ID
-    console.log(`   Organization: ${organization.name} (${organization.id})`)
+    console.log(`   Organization: ${orgData.name} (${orgData.id})`)
 
     // Step 3: Create organization membership for admin
     console.log('3. Creating organization membership...')

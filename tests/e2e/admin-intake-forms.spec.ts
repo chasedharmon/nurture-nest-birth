@@ -71,7 +71,7 @@ test.describe('Admin - Intake Forms Management', () => {
       await expect(page.locator('button:has-text("New Form")')).toBeVisible()
     })
 
-    // Skip: New Form may navigate to page instead of dialog - UI changed
+    // Skip: Page shows error intermittently - needs investigation
     test.skip('should open dialog when New Form clicked', async ({ page }) => {
       await page.goto('/admin/setup/intake-forms')
       await page.waitForLoadState('networkidle')
@@ -86,7 +86,7 @@ test.describe('Admin - Intake Forms Management', () => {
   })
 
   test.describe('Form Builder Dialog', () => {
-    // Skip: Dialog-based tests - UI may have changed to page navigation
+    // Skip: Page shows error intermittently - needs investigation
     test.skip('should display form builder UI in dialog', async ({ page }) => {
       await page.goto('/admin/setup/intake-forms')
       await page.waitForLoadState('networkidle')
@@ -111,6 +111,7 @@ test.describe('Admin - Intake Forms Management', () => {
       })
     })
 
+    // Skip: Page shows error intermittently - needs investigation
     test.skip('should have service type selector', async ({ page }) => {
       await page.goto('/admin/setup/intake-forms')
       await page.waitForLoadState('networkidle')
@@ -134,6 +135,7 @@ test.describe('Admin - Intake Forms Management', () => {
       expect(await serviceSelect.count()).toBeGreaterThanOrEqual(0)
     })
 
+    // Skip: Page shows error intermittently - needs investigation
     test.skip('should close dialog when clicking cancel', async ({ page }) => {
       await page.goto('/admin/setup/intake-forms')
       await page.waitForLoadState('networkidle')
@@ -184,7 +186,7 @@ test.describe('Admin - Intake Forms Management', () => {
   })
 
   test.describe('Form Creation', () => {
-    // Skip: New Form button navigates to page instead of opening dialog - UI changed
+    // Skip: Page shows error intermittently - needs investigation
     test.skip('should create a new intake form', async ({ page }) => {
       await page.goto('/admin/setup/intake-forms')
       await page.waitForLoadState('networkidle')
@@ -244,7 +246,7 @@ test.describe('Admin - Intake Forms Management', () => {
   })
 
   test.describe('Form Field Types', () => {
-    // Skip: New Form button navigates to page instead of opening dialog - UI changed
+    // Skip: Page shows error intermittently - needs investigation
     test.skip('should have field type options in builder', async ({ page }) => {
       await page.goto('/admin/setup/intake-forms')
       await page.waitForLoadState('networkidle')

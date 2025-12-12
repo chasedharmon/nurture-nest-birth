@@ -204,7 +204,7 @@ test.describe('Marketing Site - Mobile Navigation', () => {
     expect(isVisible || true).toBeTruthy() // Pass if visible or not found (UI may have changed)
   })
 
-  // Skip: Complex mobile menu interaction may have changed
+  // Skip: Mobile menu interaction needs selector updates
   test.skip('should open mobile menu when hamburger clicked', async ({
     page,
   }) => {
@@ -229,7 +229,7 @@ test.describe('Marketing Site - Mobile Navigation', () => {
     ).toBeVisible()
   })
 
-  // Skip: Complex mobile menu interaction may have changed
+  // Skip: Mobile menu selectors need updates
   test.skip('should close mobile menu when link clicked', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 })

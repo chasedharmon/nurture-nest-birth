@@ -131,8 +131,7 @@ test.describe('Admin - Manual Lead Entry', () => {
   })
 
   test.describe('Form Validation', () => {
-    // Skip: Validation error text may have changed, or uses browser validation
-    test.skip('should show error when name is empty', async ({ page }) => {
+    test('should show error when name is empty', async ({ page }) => {
       await page.goto('/admin/leads/new')
       await page.waitForLoadState('networkidle')
 
@@ -141,19 +140,20 @@ test.describe('Admin - Manual Lead Entry', () => {
       await emailInput.click({ force: true })
       await emailInput.pressSequentially('test@example.com', { delay: 30 })
 
-      // Submit form
-      await page
-        .locator('button[type="submit"]:has-text("Create Lead")')
-        .click()
+      // Try to submit form - browser validation will prevent submission
+      // Check that name field has required validation
+      const nameInput = page.locator('#name')
+      const isRequired = await nameInput.getAttribute('required')
+      expect(isRequired).not.toBeNull()
 
-      // Should show error
-      await expect(page.locator('text=Name is required')).toBeVisible({
-        timeout: 5000,
-      })
+      // Verify the field is invalid (empty required field)
+      const isInvalid = await nameInput.evaluate(
+        el => !(el as HTMLInputElement).validity.valid
+      )
+      expect(isInvalid).toBe(true)
     })
 
-    // Skip: Validation error text may have changed, or uses browser validation
-    test.skip('should show error when email is empty', async ({ page }) => {
+    test('should show error when email is empty', async ({ page }) => {
       await page.goto('/admin/leads/new')
       await page.waitForLoadState('networkidle')
 
@@ -162,20 +162,21 @@ test.describe('Admin - Manual Lead Entry', () => {
       await nameInput.click()
       await nameInput.pressSequentially('Test Lead', { delay: 30 })
 
-      // Submit form
-      await page
-        .locator('button[type="submit"]:has-text("Create Lead")')
-        .click()
+      // Check that email field has required validation
+      const emailInput = page.locator('#email')
+      const isRequired = await emailInput.getAttribute('required')
+      expect(isRequired).not.toBeNull()
 
-      // Should show error
-      await expect(page.locator('text=Email is required')).toBeVisible({
-        timeout: 5000,
-      })
+      // Verify the field is invalid (empty required field)
+      const isInvalid = await emailInput.evaluate(
+        el => !(el as HTMLInputElement).validity.valid
+      )
+      expect(isInvalid).toBe(true)
     })
   })
 
   test.describe('Form Submission', () => {
-    // Skip: Form submission not redirecting - may need server action investigation
+    // Skip: Server returns "Could not find the 'referral_partner_id' column" - missing migration
     test.skip('should create lead with minimum required fields', async ({
       page,
     }) => {
@@ -206,7 +207,7 @@ test.describe('Admin - Manual Lead Entry', () => {
       })
     })
 
-    // Skip: Form submission not redirecting - may need server action investigation
+    // Skip: Server returns "Could not find the 'referral_partner_id' column" - missing migration
     test.skip('should create lead with all fields filled', async ({ page }) => {
       await page.goto('/admin/leads/new')
       await page.waitForLoadState('networkidle')

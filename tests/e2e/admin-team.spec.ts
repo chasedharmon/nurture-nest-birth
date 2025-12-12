@@ -455,7 +455,7 @@ test.describe('Admin Team Management', () => {
       }
     })
 
-    // Skip: Complex UI interaction with state dependencies
+    // Skip: Complex UI interaction - dialog selectors need investigation
     test.skip('should open add schedule dialog', async ({ page }) => {
       await page.goto('/admin/team')
 

@@ -120,7 +120,7 @@ test.describe('Admin Reports', () => {
       ).toBeTruthy()
     })
 
-    // Skip: Complex tooltip interaction may have changed
+    // Skip: Help icons not found - tooltip implementation may have changed
     test.skip('should show helpful tooltips throughout wizard', async ({
       page,
     }) => {
