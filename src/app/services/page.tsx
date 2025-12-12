@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { ServiceCard } from '@/components/marketing/service-card'
 import {
   ServiceComparison,
@@ -10,19 +11,21 @@ import {
 import { spacing, maxWidth, grid, typography, icon } from '@/lib/design-system'
 
 export const metadata: Metadata = {
-  title: 'Services | Nurture Nest Birth | Doula Care in Kearney, NE',
+  title: 'Services | Nurture Nest Birth | Doula Care in Central Nebraska',
   description:
-    'Comprehensive doula services in Kearney, Nebraska and Central Nebraska. Birth doula support, postpartum doula care, infant feeding support, and more.',
+    'Comprehensive doula services in Central Nebraska. Birth doula support, postpartum doula care, infant feeding support, photography, and more.',
   keywords:
-    'doula services Kearney NE, birth doula, postpartum doula, infant feeding support, sibling classes Nebraska',
+    'doula services Central Nebraska, birth doula, postpartum doula, infant feeding support, birth photography Nebraska',
 }
 
-const services = [
+// Primary standalone services
+const primaryServices = [
   {
     title: 'Birth Doula Support',
     description:
       'Continuous physical, emotional, and informational support throughout labor and birth. Includes prenatal visits, 24/7 on-call availability, and postpartum follow-up.',
     href: '/services/birth-doula',
+    badge: 'Starting at $1,500',
     icon: (
       <svg
         className="h-7 w-7"
@@ -42,8 +45,9 @@ const services = [
   {
     title: 'Postpartum Doula Support',
     description:
-      'In-home support during the fourth trimester. Newborn care education, feeding assistance, emotional support, and light baby-focused help (baby laundry, baby dishes, nursery organization) so you can rest and bond.',
+      'In-home support during the fourth trimester. Newborn care education, feeding assistance, emotional support, and light baby-focused help so you can rest and bond.',
     href: '/services/postpartum-doula',
+    badge: 'Starting at $40/hr',
     icon: (
       <svg
         className="h-7 w-7"
@@ -61,13 +65,69 @@ const services = [
     ),
   },
   {
-    title: 'Infant Feeding Support',
+    title: 'Complete Care Bundle',
     description:
-      'Guidance and support for breastfeeding, bottle feeding, or combination feeding. Help with latch issues, supply concerns, pumping, and feeding challenges. Referral to IBCLC for complex issues.',
-    href: '/services/infant-feeding',
+      'Birth doula support plus discounted postpartum hours for seamless care from pregnancy through the fourth trimester. The best value for comprehensive support.',
+    href: '/pricing',
+    badge: 'Starting at $1,800',
+    featured: true,
     icon: (
       <svg
         className="h-7 w-7"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: 'Birth & Family Photography',
+    description:
+      'Professional photography capturing labor, delivery, fresh 48, and newborn sessions. Available as an add-on to doula services or standalone.',
+    href: '/services/photography',
+    badge: 'Contact for pricing',
+    icon: (
+      <svg
+        className="h-7 w-7"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+        />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+        />
+      </svg>
+    ),
+  },
+]
+
+// Services included with doula packages
+const includedServices = [
+  {
+    title: 'Infant Feeding Support',
+    description:
+      'Help with breastfeeding, bottle feeding, or combination feeding.',
+    href: '/services/infant-feeding',
+    includedWith: 'Postpartum Doula',
+    icon: (
+      <svg
+        className="h-6 w-6"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -84,11 +144,12 @@ const services = [
   {
     title: 'Sibling Preparation',
     description:
-      'Age-appropriate classes to help older children feel excited and prepared for their new sibling. Interactive, fun sessions tailored to your child.',
+      'Age-appropriate guidance for older children welcoming a new sibling.',
     href: '/services/sibling-prep',
+    includedWith: 'Birth & Postpartum',
     icon: (
       <svg
-        className="h-7 w-7"
+        className="h-6 w-6"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -102,6 +163,46 @@ const services = [
       </svg>
     ),
   },
+  {
+    title: 'Car Seat Safety Check',
+    description: 'CPST-certified installation check and education.',
+    includedWith: 'Birth & Postpartum',
+    icon: (
+      <svg
+        className="h-6 w-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: 'Infant Massage Instruction',
+    description: 'Learn gentle massage techniques to bond with baby.',
+    includedWith: 'Postpartum Doula',
+    icon: (
+      <svg
+        className="h-6 w-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"
+        />
+      </svg>
+    ),
+  },
 ]
 
 // Service comparison data
@@ -111,17 +212,17 @@ const comparisonFeatures: ComparisonFeature[] = [
   { name: 'Labor & Birth Support' },
   { name: 'Immediate Postpartum' },
   { name: 'Postpartum Follow-Up' },
-  { name: 'Breastfeeding Support' },
+  { name: 'Infant Feeding Support' },
   { name: 'Newborn Care Education' },
-  { name: 'Light Household Help' },
-  { name: 'Emotional Support' },
-  { name: 'Age-Appropriate Activities' },
+  { name: 'Car Seat Safety Check' },
+  { name: 'Sibling Preparation' },
+  { name: 'Infant Massage' },
 ]
 
 const comparisonServices: ComparisonService[] = [
   {
     name: 'Birth Doula',
-    description: 'Labor & delivery support',
+    description: 'Starting at $1,500',
     features: [
       '2-3 visits',
       true,
@@ -130,59 +231,43 @@ const comparisonServices: ComparisonService[] = [
       '1 visit',
       'Basic',
       'Basic',
-      false,
+      true,
       true,
       false,
     ],
-    highlighted: true,
   },
   {
     name: 'Postpartum Doula',
-    description: 'Fourth trimester care',
+    description: 'Starting at $40/hr',
     features: [
       false,
       'During visits',
       false,
       true,
-      'Multiple',
-      'Basic',
+      'Ongoing',
+      'Comprehensive',
       'Comprehensive',
       true,
       true,
-      false,
+      true,
     ],
   },
   {
-    name: 'Infant Feeding',
-    description: 'Feeding guidance & support',
+    name: 'Complete Care',
+    description: 'Starting at $1,800',
     features: [
-      '1 visit',
-      'Text/email',
-      false,
-      false,
-      '1-2 visits',
-      'Specialized',
-      'Feeding only',
-      false,
+      '2-3 visits',
       true,
-      false,
-    ],
-  },
-  {
-    name: 'Sibling Prep',
-    description: 'Prepare older children',
-    features: [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
+      true,
+      true,
+      'Ongoing',
+      'Comprehensive',
+      'Comprehensive',
+      true,
+      true,
       true,
     ],
+    highlighted: true,
   },
 ]
 
@@ -212,12 +297,60 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Services Grid */}
+      {/* Primary Services Grid */}
       <section className={`${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.layout}`}>
           <div className={`grid ${grid.gap.medium} ${grid.cols.four}`}>
-            {services.map(service => (
+            {primaryServices.map(service => (
               <ServiceCard key={service.href} {...service} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Included Services */}
+      <section
+        className={`bg-muted/30 ${spacing.container} ${spacing.section.md}`}
+      >
+        <div className={`mx-auto ${maxWidth.layout}`}>
+          <div className="text-center">
+            <h2 className={typography.h2}>Included With Doula Packages</h2>
+            <p className="mt-4 text-muted-foreground">
+              These services come included with birth and postpartum doula
+              packages at no additional cost.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {includedServices.map(service => (
+              <Card key={service.title} className="bg-background">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      {service.icon}
+                    </div>
+                    <div className="flex-1">
+                      {service.href ? (
+                        <Link
+                          href={service.href}
+                          className="font-semibold text-foreground hover:text-primary"
+                        >
+                          {service.title}
+                        </Link>
+                      ) : (
+                        <h3 className="font-semibold text-foreground">
+                          {service.title}
+                        </h3>
+                      )}
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {service.description}
+                      </p>
+                      <p className="mt-2 text-xs font-medium text-primary">
+                        Included with: {service.includedWith}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -359,56 +492,6 @@ export default function ServicesPage() {
             title="Compare Service Offerings"
             description="Each service is designed to support you at different stages of your journey. Mix and match to create your perfect support package."
           />
-        </div>
-      </section>
-
-      {/* Packages Info */}
-      <section
-        className={`bg-muted/30 ${spacing.container} ${spacing.section.md}`}
-      >
-        <div className={`mx-auto ${maxWidth.content}`}>
-          <h2 className={`text-center ${typography.h2}`}>
-            Flexible Service Packages
-          </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-center text-lg text-muted-foreground">
-            I offer both individual services and comprehensive packages. Many
-            families choose the Complete Care Bundle combining birth doula and
-            postpartum doula support for seamless care throughout their journey.
-          </p>
-          <div className="mt-12 space-y-4 rounded-2xl border-2 border-primary/20 bg-primary/5 p-8">
-            <h3 className="font-serif text-xl font-semibold text-foreground">
-              Custom Packages Available
-            </h3>
-            <ul className="space-y-3 text-muted-foreground">
-              <li className="flex items-start gap-3">
-                <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20">
-                  <span className="h-2 w-2 rounded-full bg-primary" />
-                </span>
-                <span>
-                  Birth + Postpartum package for seamless transition from
-                  pregnancy through the fourth trimester
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20">
-                  <span className="h-2 w-2 rounded-full bg-primary" />
-                </span>
-                <span>
-                  Postpartum doula + infant feeding bundle for comprehensive
-                  feeding and recovery support
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20">
-                  <span className="h-2 w-2 rounded-full bg-primary" />
-                </span>
-                <span>
-                  Sibling prep sessions can be added to any package to prepare
-                  your whole family
-                </span>
-              </li>
-            </ul>
-          </div>
         </div>
       </section>
 

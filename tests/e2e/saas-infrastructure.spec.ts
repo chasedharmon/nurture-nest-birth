@@ -60,6 +60,7 @@ test.describe('SaaS Infrastructure', () => {
       // If rate limiting is configured, verify response format
       if (hasRateLimitHeaders) {
         const lastResponse = responses[responses.length - 1]
+        if (!lastResponse) return
         const remaining = lastResponse.headers()['x-ratelimit-remaining']
 
         // Remaining should decrease with requests

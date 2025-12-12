@@ -52,9 +52,9 @@ export const card = {
 
 export const icon = {
   container: {
-    sm: 'h-6 w-6', // Small icons (navigation, inline)
-    md: 'h-12 w-12 rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/10', // Standard feature icons
-    lg: 'h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/10', // Hero/featured icons
+    sm: 'flex h-6 w-6 items-center justify-center', // Small icons (navigation, inline)
+    md: 'flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/10', // Standard feature icons
+    lg: 'flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/10', // Hero/featured icons
   },
   size: {
     sm: 'h-4 w-4',

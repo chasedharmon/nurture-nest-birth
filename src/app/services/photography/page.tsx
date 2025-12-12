@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { FadeIn } from '@/components/ui/fade-in'
-import { spacing, maxWidth, typography, grid, icon } from '@/lib/design-system'
+import { spacing, maxWidth, typography, grid } from '@/lib/design-system'
 import { Camera, Heart, Clock, Users, Image, Star } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -66,8 +66,8 @@ export default function PhotographyPage() {
             <FadeIn delay={0.1}>
               <Card className="h-full">
                 <CardContent className="pt-6">
-                  <div className={icon.container.lg}>
-                    <Heart className={`text-primary ${icon.size.md}`} />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Heart className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="mt-4 font-serif text-xl font-semibold">
                     Birth Photography
@@ -102,8 +102,8 @@ export default function PhotographyPage() {
             <FadeIn delay={0.2}>
               <Card className="h-full">
                 <CardContent className="pt-6">
-                  <div className={icon.container.lg}>
-                    <Clock className={`text-primary ${icon.size.md}`} />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Clock className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="mt-4 font-serif text-xl font-semibold">
                     Fresh 48 Session
@@ -138,8 +138,8 @@ export default function PhotographyPage() {
             <FadeIn delay={0.3}>
               <Card className="h-full">
                 <CardContent className="pt-6">
-                  <div className={icon.container.lg}>
-                    <Users className={`text-primary ${icon.size.md}`} />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Users className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="mt-4 font-serif text-xl font-semibold">
                     Newborn & Family
@@ -183,11 +183,11 @@ export default function PhotographyPage() {
             </h2>
           </FadeIn>
 
-          <div className={`mt-12 grid ${grid.gap.large} ${grid.cols.two}`}>
+          <div className={`mt-12 grid ${grid.gap.loose} ${grid.cols.two}`}>
             <FadeIn delay={0.1}>
               <div className="flex gap-4">
-                <div className={icon.container.md}>
-                  <Image className={`text-primary ${icon.size.sm}`} />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Image className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">
@@ -205,8 +205,8 @@ export default function PhotographyPage() {
 
             <FadeIn delay={0.2}>
               <div className="flex gap-4">
-                <div className={icon.container.md}>
-                  <Star className={`text-primary ${icon.size.sm}`} />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Star className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">
@@ -223,8 +223,8 @@ export default function PhotographyPage() {
 
             <FadeIn delay={0.3}>
               <div className="flex gap-4">
-                <div className={icon.container.md}>
-                  <Heart className={`text-primary ${icon.size.sm}`} />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Heart className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">
@@ -241,8 +241,8 @@ export default function PhotographyPage() {
 
             <FadeIn delay={0.4}>
               <div className="flex gap-4">
-                <div className={icon.container.md}>
-                  <Users className={`text-primary ${icon.size.sm}`} />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Users className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">

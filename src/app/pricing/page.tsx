@@ -57,8 +57,11 @@ export default function PricingPage() {
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col pt-6">
                   <div className="mb-6">
-                    <span className="text-4xl font-bold text-foreground">
-                      $1,200–$1,500
+                    <span className="text-sm text-muted-foreground">
+                      Starting at
+                    </span>
+                    <span className="block text-4xl font-bold text-foreground">
+                      $1,500
                     </span>
                   </div>
 
@@ -123,10 +126,15 @@ export default function PricingPage() {
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col pt-6">
                   <div className="mb-6">
-                    <span className="text-4xl font-bold text-foreground">
-                      $35–$45
+                    <span className="text-sm text-muted-foreground">
+                      Starting at
                     </span>
-                    <span className="text-muted-foreground">/hour</span>
+                    <span className="block text-4xl font-bold text-foreground">
+                      $40
+                      <span className="text-lg font-normal text-muted-foreground">
+                        /hour
+                      </span>
+                    </span>
                   </div>
 
                   <h4 className="mb-3 font-semibold text-foreground">
@@ -192,8 +200,11 @@ export default function PricingPage() {
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col pt-6">
                   <div className="mb-6">
-                    <span className="text-4xl font-bold text-foreground">
-                      Starting at $1,800
+                    <span className="text-sm text-muted-foreground">
+                      Starting at
+                    </span>
+                    <span className="block text-4xl font-bold text-foreground">
+                      $1,800
                     </span>
                   </div>
 
@@ -243,26 +254,31 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Additional Services */}
+      {/* Photography Services */}
       <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn direction="down">
             <h2 className={`text-center ${typography.h2}`}>
-              Additional Services
+              Photography Services
             </h2>
+            <p className="mt-4 text-center text-muted-foreground">
+              Capture your birth story and early days with professional
+              photography
+            </p>
           </FadeIn>
-          <div className={`mt-12 grid ${grid.gap.tight} ${grid.cols.two}`}>
+          <div className={`mt-12 grid ${grid.gap.tight} ${grid.cols.three}`}>
             <FadeIn delay={0.1}>
               <div className="rounded-2xl border-2 border-border bg-background p-6">
                 <h3 className="font-serif text-xl font-semibold text-foreground">
-                  Sibling Preparation
+                  Birth Photography
                 </h3>
-                <p className="mt-2 text-2xl font-bold text-foreground">
-                  $75–$100
-                </p>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  60–90 minute session tailored to your child's age. Includes
-                  activities, books, and hands-on practice.
+                  Starting at
+                </p>
+                <p className="text-2xl font-bold text-foreground">Contact</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Documentary-style coverage of labor, delivery, and golden
+                  hour. On-call from 38 weeks.
                 </p>
               </div>
             </FadeIn>
@@ -270,15 +286,113 @@ export default function PricingPage() {
             <FadeIn delay={0.2}>
               <div className="rounded-2xl border-2 border-border bg-background p-6">
                 <h3 className="font-serif text-xl font-semibold text-foreground">
-                  Car Seat Safety Check
+                  Fresh 48 Session
                 </h3>
-                <p className="mt-2 text-2xl font-bold text-foreground">
-                  Included with packages
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Starting at
+                </p>
+                <p className="text-2xl font-bold text-foreground">Contact</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Lifestyle portraits within the first 48 hours. Hospital or
+                  home setting, natural approach.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.3}>
+              <div className="rounded-2xl border-2 border-border bg-background p-6">
+                <h3 className="font-serif text-xl font-semibold text-foreground">
+                  Newborn & Family
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Starting at
+                </p>
+                <p className="text-2xl font-bold text-foreground">Contact</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  In-home lifestyle sessions 1-3 weeks after birth. Whole family
+                  and pets welcome.
+                </p>
+              </div>
+            </FadeIn>
+          </div>
+          <FadeIn delay={0.4}>
+            <p className="mt-8 text-center text-sm text-muted-foreground">
+              Photography can be added to any doula package or booked
+              standalone. Contact me for custom pricing.
+            </p>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Included Services */}
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
+          <FadeIn direction="down">
+            <h2 className={`text-center ${typography.h2}`}>
+              Included with Doula Packages
+            </h2>
+            <p className="mt-4 text-center text-muted-foreground">
+              These services are included at no extra cost when you book doula
+              support
+            </p>
+          </FadeIn>
+          <div className={`mt-12 grid ${grid.gap.tight} ${grid.cols.two}`}>
+            <FadeIn delay={0.1}>
+              <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-6">
+                <h3 className="font-serif text-xl font-semibold text-foreground">
+                  Infant Feeding Support
+                </h3>
+                <p className="mt-2 text-lg font-semibold text-primary">
+                  Included
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  CPST-certified car seat installation check and education.
-                  Included with doula packages or available at community check
-                  days.
+                  Breastfeeding, bottle feeding, and combination feeding
+                  guidance. Complex issues referred to IBCLC.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.2}>
+              <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-6">
+                <h3 className="font-serif text-xl font-semibold text-foreground">
+                  Car Seat Safety Check
+                </h3>
+                <p className="mt-2 text-lg font-semibold text-primary">
+                  Included
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  CPST-certified installation check and education. Also
+                  available at community check days.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.3}>
+              <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-6">
+                <h3 className="font-serif text-xl font-semibold text-foreground">
+                  Sibling Preparation
+                </h3>
+                <p className="mt-2 text-lg font-semibold text-primary">
+                  Included
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Guidance for helping older children adjust. Includes
+                  age-appropriate activities and sibling bonding support.
+                </p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.4}>
+              <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-6">
+                <h3 className="font-serif text-xl font-semibold text-foreground">
+                  Infant Massage Instruction
+                </h3>
+                <p className="mt-2 text-lg font-semibold text-primary">
+                  Included
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  CIMI-certified instruction included with postpartum doula
+                  packages. Learn techniques for bonding and soothing.
                 </p>
               </div>
             </FadeIn>
@@ -286,32 +400,34 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Package Bundles */}
-      <section className={`${spacing.container} ${spacing.section.md}`}>
+      {/* Discounts & Add-Ons */}
+      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
             <h2 className={`text-center ${typography.h2}`}>
-              Package Bundles & Discounts
+              Discounts & Add-Ons
             </h2>
           </FadeIn>
           <FadeIn delay={0.1}>
             <div className="mt-12 space-y-4 rounded-2xl border-2 border-primary/20 bg-primary/5 p-8">
               <div>
                 <h3 className="font-semibold text-foreground">
-                  Birth + Postpartum Package
+                  Complete Care Bundle Savings
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Save $200 when bundling birth doula services with 20+ hours of
-                  postpartum care
+                  Save $200+ when bundling birth doula with postpartum support.
+                  Plus discounted hourly rate ($35/hr) for additional postpartum
+                  hours.
                 </p>
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">
-                  Included Services
+                  Photography Add-On
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Infant feeding support, sibling preparation, and car seat
-                  safety are included with doula packages
+                  Add photography to any doula package for seamless support. As
+                  your doula AND photographer, I already know your preferences
+                  and have built trust.
                 </p>
               </div>
               <div>
@@ -328,7 +444,7 @@ export default function PricingPage() {
       </section>
 
       {/* Payment Info */}
-      <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
+      <section className={`${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn direction="down">
             <h2 className={`text-center ${typography.h2}`}>
