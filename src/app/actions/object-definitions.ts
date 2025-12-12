@@ -461,6 +461,35 @@ export async function deactivateObjectDefinition(id: string): Promise<{
 }
 
 /**
+ * Get all objects as options for lookup fields
+ * Returns id, api_name, and label for each active object
+ */
+export async function getObjectsForLookup(): Promise<{
+  data: { id: string; api_name: string; label: string }[] | null
+  error: string | null
+}> {
+  try {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+      .from('object_definitions')
+      .select('id, api_name, label')
+      .eq('is_active', true)
+      .order('is_standard', { ascending: false })
+      .order('label', { ascending: true })
+
+    if (error) {
+      return { data: null, error: error.message }
+    }
+
+    return { data, error: null }
+  } catch (err) {
+    console.error('Unexpected error in getObjectsForLookup:', err)
+    return { data: null, error: 'An unexpected error occurred' }
+  }
+}
+
+/**
  * Delete a custom object definition
  * Standard objects cannot be deleted
  * This will also delete all associated field definitions, page layouts, and record types
