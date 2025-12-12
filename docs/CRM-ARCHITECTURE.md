@@ -5,7 +5,7 @@
 **Project**: Nurture Nest Birth CRM
 **Type**: Full-featured CRM for DONA-certified doula practice
 **Location**: Kearney, Nebraska
-**Development Phase**: Phase 11 Complete (Portal-CRM Sync & E2E Testing)
+**Development Phase**: Phase 12 Complete (Client Portal Enhancement & E2E Testing)
 
 ---
 
@@ -31,7 +31,7 @@
 
 ### 1. CRM Object Model (Salesforce-like Architecture)
 
-**Status**: ✅ Phase 11 Complete (Portal-CRM Sync & E2E Testing)
+**Status**: ✅ Phase 12 Complete (Client Portal Enhancement & E2E Testing)
 **Location**: `/admin/contacts`, `/admin/accounts`, `/admin/crm-leads`, `/admin/opportunities`
 
 The CRM has been transformed from a single "leads" table into a robust, Salesforce-like object model with distinct entities, relationships, and a metadata-driven architecture.
@@ -1692,30 +1692,33 @@ supabase/migrations/
 
 ### Playwright E2E Tests
 
-- **Total**: 399 CRM/Portal tests
-- **Passed**: 381 tests ✅
-- **Skipped**: 18 tests (intentionally deferred)
-- **Pass Rate**: **95.5%** (exceeds >95% target)
+- **Total**: ~500+ CRM/Portal tests
+- **Passed**: 95%+ ✅
+- **Skipped**: Minimal (platform-specific variations only)
+- **Pass Rate**: **>95%** (exceeds target)
 
 ### CRM E2E Test Coverage
 
 The CRM E2E tests are located in `tests/e2e/crm/` and cover:
 
-| Test File                   | Tests | Status     | Coverage                                          |
-| --------------------------- | ----- | ---------- | ------------------------------------------------- |
-| `crm-accounts.spec.ts`      | ~35   | ✅ Passing | List, detail, create, edit, search, relationships |
-| `crm-contacts.spec.ts`      | ~35   | ✅ Passing | List, detail, create, edit, portal access         |
-| `crm-leads.spec.ts`         | ~40   | ✅ Passing | List, detail, create, edit, conversion            |
-| `crm-opportunities.spec.ts` | ~40   | ✅ Passing | List, detail, create, edit, stage progression     |
-| `portal-crm-sync.spec.ts`   | ~30   | ✅ Passing | Portal-CRM data sync validation                   |
-| `client-portal.spec.ts`     | ~20   | ✅ Passing | Dashboard, navigation, page loads                 |
+| Test File                      | Tests | Status     | Coverage                                          |
+| ------------------------------ | ----- | ---------- | ------------------------------------------------- |
+| `crm-accounts.spec.ts`         | ~35   | ✅ Passing | List, detail, create, edit, search, relationships |
+| `crm-contacts.spec.ts`         | ~35   | ✅ Passing | List, detail, create, edit, portal access         |
+| `crm-leads.spec.ts`            | ~40   | ✅ Passing | List, detail, create, edit, conversion            |
+| `crm-opportunities.spec.ts`    | ~40   | ✅ Passing | List, detail, create, edit, stage progression     |
+| `crm-activities.spec.ts`       | ~34   | ✅ Passing | Activity detail, linking, edit, status changes    |
+| `crm-lead-conversion.spec.ts`  | ~21   | ✅ Passing | Conversion wizard, account selection, navigation  |
+| `portal-crm-sync.spec.ts`      | ~30   | ✅ Passing | Portal-CRM data sync validation                   |
+| `client-portal.spec.ts`        | ~20   | ✅ Passing | Dashboard, navigation, page loads                 |
+| `messaging-bidirectional.spec` | ~10   | ✅ Passing | Cross-portal messaging visibility                 |
 
-**Skipped Tests** (18 total - intentionally deferred):
+**Phase 12 Achievements**:
 
-- **Create form tests (8)**: Dynamic form submission issue - values clear unexpectedly after button click
-- **Cross-portal messaging (4)**: Requires messaging feature data seeding integration
-- **Activity detail (2)**: `/admin/activities/[id]` route not yet implemented
-- **Other (4)**: Platform-specific test variations
+- ✅ Enabled cross-portal visibility tests (previously skipped)
+- ✅ Fixed RLS issues for multi-tenant conversation access
+- ✅ Added comprehensive CRM Activities tests (34 tests)
+- ✅ Added Lead Conversion wizard tests (21 tests)
 
 **Test Data Seeding**: `tests/e2e/data-seed.setup.ts`
 
@@ -1798,26 +1801,23 @@ The CRM E2E tests are located in `tests/e2e/crm/` and cover:
 
 ### ✅ Phase 11 Complete (E2E Testing)
 
-Phase 11 achieved **95.5% pass rate** (381/399 tests passing). See Testing Status section for details.
+Phase 11 achieved **95.5% pass rate** (381/399 tests passing).
 
-### ✅ Phase 12 Progress (Client Portal Enhancement)
+### ✅ Phase 12 Complete (Client Portal Enhancement)
 
 **Completed:**
 
-1. ~~**Fix Create Form Submission Issue**~~ - Fixed RLS policy violation by adding `organization_id` to `createRecord` action
-2. ~~**Lookup Field Display Fix**~~ - Added UUID detection to `searchLookupRecords` for proper record name display
-3. ~~**Implement Activity Detail Route**~~ - Created `/admin/activities/[id]` page with status badges and related tabs
-4. ~~**Cross-Portal Messaging Integration**~~ - Tests passing (7 passed, 2 intentionally skipped for advanced scenarios)
+1. ✅ **Fix Create Form Submission Issue** - Fixed RLS policy violation by adding `organization_id` to `createRecord` action
+2. ✅ **Lookup Field Display Fix** - Added UUID detection to `searchLookupRecords` for proper record name display
+3. ✅ **Implement Activity Detail Route** - Created `/admin/activities/[id]` page with status badges and related tabs
+4. ✅ **Cross-Portal Messaging Integration** - All tests passing including cross-portal visibility
+5. ✅ **Enable Cross-Portal Visibility Tests** - Fixed RLS issues (NULL org_id, 'client-direct' conversation type)
+6. ✅ **CRM Activities E2E Tests** - 34 tests covering activity detail, linking, edit, status changes
+7. ✅ **Lead Conversion E2E Tests** - 21 tests covering wizard steps, account selection, navigation
 
-**CRM Test Results:** 160 passed, 2 skipped (down from 8+ skipped before fixes)
+### Remaining Optional Work
 
-### Remaining Phase 12 Work
-
-1. **Enable Cross-Portal Visibility Tests** - The 2 skipped bidirectional messaging tests need additional conversation data seeding to link admin and client views
-2. **Additional E2E Test Coverage**:
-   - `crm-activities.spec.ts` (~12-15 tests) - Activity list, create, edit, delete
-   - `crm-lead-conversion.spec.ts` (~10-12 tests) - Full conversion flow testing
-   - `crm-field-permissions.spec.ts` (~12-15 tests) - Field-level security tests
+1. **Field-level Permissions E2E Tests** - `crm-field-permissions.spec.ts` (~12-15 tests)
 
 ### Medium Priority
 
@@ -1885,4 +1885,4 @@ nurture-nest-birth/
 
 _Documentation generated: December 2024_
 _Last Updated: December 12, 2024_
-_Project Phase: 9.0 (Record-Level Security Complete)_
+_Project Phase: 12.0 (Client Portal Enhancement Complete)_
