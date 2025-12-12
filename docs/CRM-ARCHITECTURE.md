@@ -29,14 +29,275 @@
 
 ## Feature Documentation
 
-### 1. Lead Management
+### 1. CRM Object Model (Salesforce-like Architecture)
 
-**Status**: ✅ Complete
+**Status**: 🔄 Phase 2 Complete (Core Tables)
+**Location**: `/admin/contacts`, `/admin/accounts`, `/admin/leads`, `/admin/opportunities`
+
+The CRM has been transformed from a single "leads" table into a robust, Salesforce-like object model with distinct entities, relationships, and a metadata-driven architecture.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     CRM OBJECT MODEL                                     │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Lead Conversion Flow:                                                   │
+│  ┌─────────────────┐                                                    │
+│  │     Lead        │  (Unqualified prospect - from forms, referrals)    │
+│  │  status: new,   │                                                    │
+│  │  contacted,     │                                                    │
+│  │  qualified      │                                                    │
+│  └────────┬────────┘                                                    │
+│           │ CONVERT                                                     │
+│           ▼                                                             │
+│  ┌─────────────────┐     ┌─────────────────────────────────────────┐   │
+│  │    Contact      │────▶│              Account                    │   │
+│  │  (Person data)  │     │         (Household/Family)              │   │
+│  │  - Birthing     │     │                                         │   │
+│  │    parent       │     │  Related Contacts:                      │   │
+│  │  - Partner      │     │  ├── Primary (birthing parent)          │   │
+│  │  - Family       │     │  ├── Partner                            │   │
+│  │    member       │     │  ├── Children                           │   │
+│  └────────┬────────┘     │  └── Other family members               │   │
+│           │              │                                         │   │
+│           ▼              │  Related Records:                       │   │
+│  ┌─────────────────┐     │  ├── Opportunities                      │   │
+│  │  Opportunity    │────▶│  ├── Services                           │   │
+│  │  (Specific deal)│     │  ├── Invoices                           │   │
+│  │  stage: qual,   │     │  └── Activities                         │   │
+│  │  proposal,      │     └─────────────────────────────────────────┘   │
+│  │  closed_won     │                                                    │
+│  └─────────────────┘                                                    │
+│                                                                          │
+│  Activity Object (Unified Log):                                          │
+│  ┌────────┬────────┬────────┬────────┬────────┐                        │
+│  │  Task  │ Event  │  Call  │ Email  │  Note  │                        │
+│  └────────┴────────┴────────┴────────┴────────┘                        │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Core CRM Objects
+
+| Object          | Table               | Purpose                                           |
+| --------------- | ------------------- | ------------------------------------------------- |
+| **Contact**     | `crm_contacts`      | Person records (birthing parent, partner, family) |
+| **Account**     | `crm_accounts`      | Household/family aggregate with billing           |
+| **Lead**        | `crm_leads`         | Unqualified prospects before conversion           |
+| **Opportunity** | `crm_opportunities` | Deals with stage progression                      |
+| **Activity**    | `crm_activities`    | Unified activity log                              |
+
+#### Metadata-Driven Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                  METADATA LAYER                                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌──────────────────────┐        ┌──────────────────────┐              │
+│  │  object_definitions  │───────▶│  field_definitions   │              │
+│  │  - api_name          │        │  - api_name          │              │
+│  │  - label             │        │  - data_type         │              │
+│  │  - is_standard       │        │  - is_required       │              │
+│  │  - is_custom         │        │  - type_config       │              │
+│  │  - features          │        │  - validation_rules  │              │
+│  └──────────────────────┘        └──────────────────────┘              │
+│           │                               │                             │
+│           │                               ▼                             │
+│           │                      ┌──────────────────────┐              │
+│           │                      │   picklist_values    │              │
+│           │                      │   (for picklist      │              │
+│           │                      │    fields)           │              │
+│           │                      └──────────────────────┘              │
+│           ▼                                                             │
+│  ┌──────────────────────┐        ┌──────────────────────┐              │
+│  │    page_layouts      │        │   field_permissions  │              │
+│  │  - layout_data       │        │   (per role)         │              │
+│  │  - is_default        │        └──────────────────────┘              │
+│  └──────────────────────┘                                              │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Field Data Types
+
+| Type             | Description      | Config Options                        |
+| ---------------- | ---------------- | ------------------------------------- |
+| `text`           | Single-line text | `max_length`                          |
+| `textarea`       | Multi-line text  | `max_length`, `rows`                  |
+| `rich_text`      | HTML content     | `max_length`                          |
+| `number`         | Numeric values   | `precision`, `scale`                  |
+| `currency`       | Money values     | `precision`, `currency_code`          |
+| `percent`        | Percentage       | `precision`                           |
+| `date`           | Date only        | -                                     |
+| `datetime`       | Date and time    | -                                     |
+| `checkbox`       | Boolean          | -                                     |
+| `picklist`       | Single select    | `picklist_id`                         |
+| `multi_picklist` | Multi select     | `picklist_id`                         |
+| `lookup`         | Related record   | `related_object`, `relationship_name` |
+| `email`          | Email address    | -                                     |
+| `phone`          | Phone number     | -                                     |
+| `url`            | Web address      | -                                     |
+| `formula`        | Calculated field | `formula`, `return_type`              |
+
+#### Contact-Account Relationships
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│               CONTACT-ACCOUNT RELATIONSHIP MODEL                      │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                       │
+│  Account (Household)                                                  │
+│  └── Contact Relationships:                                          │
+│      ├── primary        - Main client (birthing parent)              │
+│      ├── partner        - Partner/spouse                             │
+│      ├── parent         - Parent of client                           │
+│      ├── child          - Child (for postpartum tracking)            │
+│      ├── emergency_contact - Emergency contact                       │
+│      └── other          - Other family member                        │
+│                                                                       │
+│  Table: contact_account_relationships                                │
+│  - contact_id           - Link to crm_contacts                       │
+│  - account_id           - Link to crm_accounts                       │
+│  - relationship_type    - Type from list above                       │
+│  - is_primary           - Primary contact for account                │
+│  - is_billing_contact   - Receives invoices                          │
+│                                                                       │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+#### Opportunity Stage Progression
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                 OPPORTUNITY STAGES                                    │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                       │
+│  Stage               │ Probability │ Forecast Category                │
+│  ────────────────────┼─────────────┼─────────────────────────────────│
+│  qualification       │    10%      │ pipeline                         │
+│  needs_analysis      │    25%      │ pipeline                         │
+│  proposal            │    50%      │ best_case                        │
+│  negotiation         │    75%      │ commit                           │
+│  closed_won          │   100%      │ closed                           │
+│  closed_lost         │     0%      │ omitted                          │
+│                                                                       │
+│  Auto-calculated Fields:                                              │
+│  - probability (from stage)                                          │
+│  - expected_revenue = amount × probability                           │
+│                                                                       │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Files**:
+
+- `supabase/migrations/20251219000000_crm_metadata_foundation.sql` - Metadata tables
+- `supabase/migrations/20251219010000_crm_core_objects.sql` - CRM object tables
+- `src/lib/crm/types.ts` - TypeScript types for CRM
+- `src/app/actions/object-definitions.ts` - Object metadata actions
+- `src/app/actions/field-definitions.ts` - Field metadata actions
+
+**Contact Data Model**:
+
+```typescript
+interface CrmContact {
+  id: string
+  organization_id: string
+  owner_id: string
+
+  // Name
+  first_name: string
+  last_name: string
+
+  // Contact Info
+  email?: string
+  phone?: string
+  mobile_phone?: string
+
+  // Address
+  mailing_street?: string
+  mailing_city?: string
+  mailing_state?: string
+  mailing_postal_code?: string
+  mailing_country?: string
+
+  // Doula-specific
+  due_date?: string
+  birth_date?: string
+  medical_info?: object
+  birth_preferences?: object
+  emergency_contact?: object
+
+  // Source tracking
+  lead_source?: string
+  lead_source_detail?: string
+
+  // Extensibility
+  custom_fields?: object
+}
+```
+
+**Opportunity Data Model**:
+
+```typescript
+interface CrmOpportunity {
+  id: string
+  organization_id: string
+  account_id?: string
+  contact_id?: string
+  owner_id: string
+
+  name: string
+  description?: string
+
+  // Value
+  amount?: number
+  probability?: number // Auto-set from stage
+  expected_revenue?: number // Auto-calculated
+
+  // Stage
+  stage: OpportunityStage
+  forecast_category?: ForecastCategory
+
+  // Dates
+  close_date?: string
+  actual_close_date?: string
+
+  // Service
+  service_type?: string
+
+  // Lead conversion
+  converted_from_lead_id?: string
+
+  custom_fields?: object
+}
+```
+
+**Implementation Status**:
+
+- [x] Phase 1: Metadata foundation (object_definitions, field_definitions)
+- [x] Phase 2: Core CRM tables (contacts, accounts, leads, opportunities, activities)
+- [ ] Phase 3: Admin Setup UI for Objects & Fields
+- [ ] Phase 4: Dynamic Record Forms
+- [ ] Phase 5: CRM Object UIs
+- [ ] Phase 6: Lead Conversion Wizard
+- [ ] Phase 7: Data Migration from legacy leads
+- [ ] Phase 8: Field-Level Security
+- [ ] Phase 9: Record-Level Security (Sharing Rules)
+- [ ] Phase 10: Integration with existing features
+
+---
+
+### 2. Legacy Lead Management (To Be Migrated)
+
+**Status**: ✅ Complete (Being replaced by CRM objects)
 **Location**: `/admin/leads`
+
+> **Note**: This section documents the legacy leads system which will be migrated to the new CRM object model. See "CRM Object Model" above for the new architecture.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    LEAD MANAGEMENT                           │
+│                    LEAD MANAGEMENT (LEGACY)                  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌────────┐ │
@@ -66,37 +327,20 @@
 - `src/app/admin/leads/new/page.tsx` - New lead form
 - `src/app/actions/leads.ts` - Server actions
 
-**Data Model**:
+**Migration Plan**:
 
-```typescript
-interface Lead {
-  id: string
-  name: string
-  email: string
-  phone?: string
-  due_date?: string
-  status: 'new' | 'contacted' | 'scheduled' | 'client' | 'lost'
-  source: 'contact_form' | 'newsletter' | 'manual'
-  client_type?: 'lead' | 'expecting' | 'postpartum' | 'past_client'
-  lifecycle_stage?: 'lead' | 'consultation_scheduled' | 'active_client' | ...
-  // Attribution
-  utm_source?: string
-  utm_medium?: string
-  utm_campaign?: string
-  referral_partner_id?: string
-  landing_page?: string
-}
-```
-
-**Next Steps**:
-
-- [ ] Add lead scoring algorithm
-- [ ] Implement lead source analytics dashboard
-- [ ] Add duplicate detection
+| Old Field                  | New Location                       |
+| -------------------------- | ---------------------------------- |
+| `name`                     | `Contact.first_name + last_name`   |
+| `email`, `phone`           | `Contact.email, phone`             |
+| `status = 'client'`        | `Opportunity.stage = 'closed_won'` |
+| `status = 'new/contacted'` | `Lead.lead_status`                 |
+| `service_interest`         | `Opportunity.service_type`         |
+| All attribution fields     | Contact (preserved)                |
 
 ---
 
-### 2. Client Portal
+### 3. Client Portal
 
 **Status**: ✅ Complete
 **Location**: `/client`
@@ -155,7 +399,7 @@ interface Lead {
 
 ---
 
-### 3. Workflow Automation
+### 4. Workflow Automation
 
 **Status**: ✅ Complete (Core), 🔄 Ongoing refinement
 **Location**: `/admin/workflows`
@@ -245,7 +489,7 @@ interface Workflow {
 
 ---
 
-### 4. Unified Messaging
+### 5. Unified Messaging
 
 **Status**: ✅ Complete
 **Location**: `/admin/messages`, `/client/(portal)/messages`
@@ -301,7 +545,7 @@ interface Workflow {
 
 ---
 
-### 5. Invoicing & Payments
+### 6. Invoicing & Payments
 
 **Status**: ✅ Complete (Core), 🔄 Stripe integration stubbed
 **Location**: `/admin/leads/[id]` (Payments tab), `/client/(portal)/invoices`
@@ -362,7 +606,7 @@ interface Workflow {
 
 ---
 
-### 6. Team Management
+### 7. Team Management
 
 **Status**: ✅ Complete
 **Location**: `/admin/team`
@@ -414,7 +658,7 @@ interface Workflow {
 
 ---
 
-### 7. Reports & Dashboards
+### 8. Reports & Dashboards
 
 **Status**: ✅ Complete
 **Location**: `/admin/reports`, `/admin/dashboards`
@@ -473,7 +717,7 @@ interface Workflow {
 
 ---
 
-### 8. Email & SMS Templates
+### 9. Email & SMS Templates
 
 **Status**: ✅ Email Complete, 🔄 SMS Stubbed
 **Location**: `/admin/setup/email-templates`, `/admin/setup/sms-templates`
@@ -531,7 +775,7 @@ interface Workflow {
 
 ---
 
-### 9. Contracts & Documents
+### 10. Contracts & Documents
 
 **Status**: ✅ Complete
 **Location**: `/admin/setup/contracts`, Client documents tab
@@ -586,7 +830,7 @@ interface Workflow {
 
 ---
 
-### 10. Multi-Tenancy & SaaS Foundation
+### 11. Multi-Tenancy & SaaS Foundation
 
 **Status**: 🔄 Rails Complete, Feature Integration Ongoing
 **Location**: Database layer, `/admin/setup/billing`
@@ -651,7 +895,7 @@ interface Workflow {
 
 ---
 
-### 11. Attribution & Analytics
+### 12. Attribution & Analytics
 
 **Status**: ✅ Complete
 **Location**: Lead tracking, Dashboard analytics
@@ -700,7 +944,7 @@ interface Workflow {
 
 ---
 
-### 12. Surveys & NPS
+### 13. Surveys & NPS
 
 **Status**: ✅ Complete
 **Location**: `/admin/setup/surveys`, `/client/survey/[token]`
@@ -757,47 +1001,73 @@ interface Workflow {
 
 ## Database Schema Overview
 
-### 33 Migration Files
+### 35+ Migration Files
 
 ```
 supabase/migrations/
-├── 20251207000000_initial_schema.sql           # Core: leads, activities, users
-├── 20251207020000_phase3_schema.sql            # Client portal tables
-├── 20251207030000_client_portal_auth.sql       # Magic link auth
-├── 20251207040000_client_management.sql        # Services, meetings, documents
-├── 20251208100000_team_members.sql             # Team support
-├── 20251209000000_contract_signatures.sql      # E-signature tracking
-├── 20251210000000_salesforce_features.sql      # Reports, dashboards
-├── 20251211000000_email_templates.sql          # Email system
-├── 20251212000000_welcome_packets.sql          # Onboarding automation
-├── 20251213000000_workflow_automation.sql      # Workflow engine
-├── 20251214000000_unified_messaging.sql        # Messaging system
-├── 20251215000000_multi_tenancy_foundation.sql # Organizations
-├── 20251215010000_multi_tenancy_rls_policies.sql # RLS policies
-├── 20251215020000_subscription_plans.sql       # Subscription tiers
-├── 20251216000000_sms_templates.sql            # SMS integration
-├── 20251216010000_stripe_payment_rails.sql     # Stripe infrastructure
-├── 20251217000000_lead_source_attribution.sql  # UTM tracking
-├── 20251217010000_client_satisfaction.sql      # Survey system
-└── ... (14 more migrations)
+├── 20251207000000_initial_schema.sql              # Core: leads, activities, users
+├── 20251207020000_phase3_schema.sql               # Client portal tables
+├── 20251207030000_client_portal_auth.sql          # Magic link auth
+├── 20251207040000_client_management.sql           # Services, meetings, documents
+├── 20251208100000_team_members.sql                # Team support
+├── 20251209000000_contract_signatures.sql         # E-signature tracking
+├── 20251210000000_salesforce_features.sql         # Reports, dashboards
+├── 20251211000000_email_templates.sql             # Email system
+├── 20251212000000_welcome_packets.sql             # Onboarding automation
+├── 20251213000000_workflow_automation.sql         # Workflow engine
+├── 20251214000000_unified_messaging.sql           # Messaging system
+├── 20251215000000_multi_tenancy_foundation.sql    # Organizations
+├── 20251215010000_multi_tenancy_rls_policies.sql  # RLS policies
+├── 20251215020000_subscription_plans.sql          # Subscription tiers
+├── 20251216000000_sms_templates.sql               # SMS integration
+├── 20251216010000_stripe_payment_rails.sql        # Stripe infrastructure
+├── 20251217000000_lead_source_attribution.sql     # UTM tracking
+├── 20251217010000_client_satisfaction.sql         # Survey system
+├── 20251219000000_crm_metadata_foundation.sql     # CRM metadata (NEW)
+├── 20251219010000_crm_core_objects.sql            # CRM core tables (NEW)
+└── ... (additional migrations)
 ```
 
 ### Key Tables
 
-| Table                                 | Purpose                      |
-| ------------------------------------- | ---------------------------- |
-| `leads`                               | Contact records and pipeline |
-| `lead_activities`                     | Activity timeline            |
-| `client_services`                     | Service assignments          |
-| `meetings`                            | Appointments                 |
-| `invoices` + `invoice_line_items`     | Billing                      |
-| `payments` + `payment_events`         | Payment tracking             |
-| `team_members` + `client_assignments` | Team management              |
-| `workflows` + `workflow_executions`   | Automation                   |
-| `conversations` + `messages`          | Messaging                    |
-| `surveys` + `survey_responses`        | NPS/feedback                 |
-| `organizations`                       | Multi-tenancy                |
-| `email_templates` + `sms_templates`   | Communication                |
+#### CRM Object Tables (NEW)
+
+| Table                           | Purpose                          |
+| ------------------------------- | -------------------------------- |
+| `crm_contacts`                  | Person records (clients, family) |
+| `crm_accounts`                  | Household/family aggregates      |
+| `crm_leads`                     | Unqualified prospects            |
+| `crm_opportunities`             | Deals with stage progression     |
+| `crm_activities`                | Unified activity log             |
+| `contact_account_relationships` | Contact-Account many-to-many     |
+
+#### CRM Metadata Tables (NEW)
+
+| Table                | Purpose                                |
+| -------------------- | -------------------------------------- |
+| `object_definitions` | Registry of all CRM objects            |
+| `field_definitions`  | Field metadata for each object         |
+| `picklist_values`    | Valid values for picklist fields       |
+| `page_layouts`       | UI layout configuration per object     |
+| `record_types`       | Variants of objects (e.g., Lead types) |
+| `field_permissions`  | Field-level security per role          |
+
+#### Legacy/Core Tables
+
+| Table                                 | Purpose                       |
+| ------------------------------------- | ----------------------------- |
+| `leads`                               | Legacy leads (to be migrated) |
+| `lead_activities`                     | Activity timeline             |
+| `client_services`                     | Service assignments           |
+| `meetings`                            | Appointments                  |
+| `invoices` + `invoice_line_items`     | Billing                       |
+| `payments` + `payment_events`         | Payment tracking              |
+| `team_members` + `client_assignments` | Team management               |
+| `workflows` + `workflow_executions`   | Automation                    |
+| `conversations` + `messages`          | Messaging                     |
+| `surveys` + `survey_responses`        | NPS/feedback                  |
+| `organizations`                       | Multi-tenancy                 |
+| `email_templates` + `sms_templates`   | Communication                 |
 
 ---
 
@@ -920,5 +1190,5 @@ nurture-nest-birth/
 ---
 
 _Documentation generated: December 2024_
-_Last Updated: December 9, 2024_
-_Project Phase: 7+ (CRM Refinement & SaaS Foundation)_
+_Last Updated: December 11, 2024_
+_Project Phase: 8 (Salesforce-like CRM Transformation)_
