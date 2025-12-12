@@ -955,3 +955,40 @@ _Last Updated: December 11, 2024_
 ### Design System
 
 - Added flex centering to icon containers for consistent icon display
+
+### Vercel Deployment Fix (TEMPORARY - Can Revert)
+
+**Problem**: Vercel Hobby plan has a 2 cron job limit across ALL projects in the account. This project's 2 cron jobs exceeded the account-wide limit.
+
+**Temporary Solution**: Removed cron jobs from `vercel.json` to enable deployment.
+
+**Original vercel.json cron configuration** (for reverting later):
+
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/meeting-reminders",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/workflow-scheduler",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}
+```
+
+**To restore crons**: Either upgrade Vercel plan or remove crons from other projects in the account, then restore the above configuration.
+
+**Affected functionality**:
+
+- Meeting reminders (daily at 8am UTC)
+- Workflow scheduler (daily at 9am UTC)
+
+**Alternative solutions to consider**:
+
+1. Upgrade to Vercel Pro plan
+2. Use external cron service (cron-job.org, Upstash QStash, GitHub Actions)
+3. Consolidate into single combined cron endpoint
