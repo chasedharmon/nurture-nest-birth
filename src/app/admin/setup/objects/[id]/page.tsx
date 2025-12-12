@@ -5,6 +5,7 @@ import {
   getObjectWithFields,
   getObjectsForLookup,
 } from '@/app/actions/object-definitions'
+import { getDefaultPageLayout } from '@/app/actions/page-layouts'
 import {
   Card,
   CardContent,
@@ -30,6 +31,7 @@ import {
   Activity,
 } from 'lucide-react'
 import { FieldsManagement } from '@/components/admin/setup/fields-management'
+import { PageLayoutsTab } from '@/components/admin/setup/page-layouts-tab'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -55,13 +57,15 @@ export default async function ObjectDetailPage({ params }: PageProps) {
     redirect('/login')
   }
 
-  const [objectResult, relatedObjectsResult] = await Promise.all([
+  const [objectResult, relatedObjectsResult, layoutResult] = await Promise.all([
     getObjectWithFields(id),
     getObjectsForLookup(),
+    getDefaultPageLayout(id),
   ])
 
   const { data: objectData, error } = objectResult
   const { data: relatedObjects } = relatedObjectsResult
+  const { data: pageLayout } = layoutResult
 
   if (error || !objectData) {
     notFound()
@@ -126,7 +130,7 @@ export default async function ObjectDetailPage({ params }: PageProps) {
               <Settings className="h-4 w-4" />
               Settings
             </TabsTrigger>
-            <TabsTrigger value="layouts" className="gap-2" disabled>
+            <TabsTrigger value="layouts" className="gap-2">
               <Layout className="h-4 w-4" />
               Page Layouts
             </TabsTrigger>
@@ -291,7 +295,7 @@ export default async function ObjectDetailPage({ params }: PageProps) {
             </Card>
           </TabsContent>
 
-          {/* Page Layouts Tab (Placeholder) */}
+          {/* Page Layouts Tab */}
           <TabsContent value="layouts">
             <Card>
               <CardHeader>
@@ -301,10 +305,11 @@ export default async function ObjectDetailPage({ params }: PageProps) {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <Layout className="mb-4 h-12 w-12 text-muted-foreground/50" />
-                  <p>Page Layout Editor coming soon</p>
-                </div>
+                <PageLayoutsTab
+                  layout={pageLayout}
+                  fields={objectData.fields}
+                  objectDefinition={objectData}
+                />
               </CardContent>
             </Card>
           </TabsContent>
