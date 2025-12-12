@@ -5,7 +5,7 @@
 **Project**: Nurture Nest Birth CRM
 **Type**: Full-featured CRM for DONA-certified doula practice
 **Location**: Kearney, Nebraska
-**Development Phase**: Phase 7+ (CRM Refinement & SaaS Foundation)
+**Development Phase**: Phase 11 Complete (Portal-CRM Sync & E2E Testing)
 
 ---
 
@@ -31,7 +31,7 @@
 
 ### 1. CRM Object Model (Salesforce-like Architecture)
 
-**Status**: 🔄 Phase 5 Complete (List Views & Record Pages)
+**Status**: ✅ Phase 11 Complete (Portal-CRM Sync & E2E Testing)
 **Location**: `/admin/contacts`, `/admin/accounts`, `/admin/crm-leads`, `/admin/opportunities`
 
 The CRM has been transformed from a single "leads" table into a robust, Salesforce-like object model with distinct entities, relationships, and a metadata-driven architecture.
@@ -884,56 +884,92 @@ interface CrmOpportunity {
 
 ---
 
-### 3. Client Portal
+### 3. Client Portal (CRM-Integrated - Phase 11)
 
-**Status**: ✅ Complete
+**Status**: ✅ Complete (CRM Integration)
 **Location**: `/client`
+
+The client portal now reads/writes directly from CRM tables, providing a unified data experience where admin changes reflect immediately in the portal and vice versa.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    CLIENT PORTAL                             │
+│              CLIENT PORTAL (CRM-INTEGRATED)                  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│  Authentication Flow:                                        │
-│  ┌────────┐    ┌────────────┐    ┌──────────┐              │
-│  │ Email  │───▶│ Magic Link │───▶│ Dashboard│              │
-│  │ Entry  │    │ Sent/Click │    │ Access   │              │
-│  └────────┘    └────────────┘    └──────────┘              │
+│  Authentication Flow (CRM-Based):                            │
+│  ┌────────┐    ┌────────────┐    ┌────────────────┐        │
+│  │ Email  │───▶│ Check CRM  │───▶│ Magic Link     │        │
+│  │ Entry  │    │ contacts & │    │ to Dashboard   │        │
+│  └────────┘    │ leads      │    └────────────────┘        │
+│                └────────────┘                               │
+│                      │                                       │
+│        ┌─────────────┴─────────────┐                        │
+│        ▼                           ▼                        │
+│  ┌──────────────┐          ┌──────────────┐                │
+│  │ CRM Contact  │          │ CRM Lead     │                │
+│  │ (Full Access)│          │ (Limited)    │                │
+│  └──────────────┘          └──────────────┘                │
 │                                                              │
-│  Portal Sections:                                            │
+│  Data Sources (by CRM Record Type):                         │
 │  ┌──────────────────────────────────────────────┐           │
-│  │ Dashboard                                     │           │
-│  │ ├── Journey Timeline (milestones)            │           │
-│  │ ├── Care Team Display                        │           │
-│  │ ├── Next Appointment                         │           │
-│  │ ├── Action Items                             │           │
-│  │ └── Payment Summary                          │           │
+│  │ CONTACT (Full Portal):                        │           │
+│  │ ├── Dashboard: crm_contacts + crm_activities │           │
+│  │ ├── Services:  crm_opportunities (closed_won)│           │
+│  │ ├── Meetings:  crm_activities (events/calls) │           │
+│  │ ├── Profile:   crm_contacts (editable)       │           │
+│  │ └── Account:   crm_accounts (household)      │           │
 │  ├──────────────────────────────────────────────┤           │
-│  │ Services    - Active packages & status       │           │
-│  │ Meetings    - Scheduled appointments         │           │
-│  │ Documents   - Shared files & uploads         │           │
-│  │ Payments    - Invoices & payment history     │           │
-│  │ Messages    - Chat with care team            │           │
-│  │ Profile     - Contact information            │           │
-│  │ Intake      - Form completion                │           │
+│  │ LEAD (Limited Portal):                        │           │
+│  │ ├── Dashboard: crm_leads (basic info)        │           │
+│  │ ├── Profile:   crm_leads (read-only)         │           │
+│  │ └── Messages:  Available                      │           │
 │  └──────────────────────────────────────────────┘           │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
+**Portal-CRM Data Flow**:
+
+| Portal Page | CRM Source                                            | Access Level                 |
+| ----------- | ----------------------------------------------------- | ---------------------------- |
+| Dashboard   | `crm_contacts` / `crm_leads` + activities             | Contact: Full, Lead: Limited |
+| Services    | `crm_opportunities` (WHERE is_won = true)             | Contact Only                 |
+| Meetings    | `crm_activities` (WHERE activity_type IN event, call) | Contact Only                 |
+| Profile     | `crm_contacts` / `crm_leads`                          | Contact: Edit, Lead: View    |
+| Invoices    | `invoices` (via opportunity link)                     | Contact Only                 |
+
 **Key Files**:
 
-- `src/app/client/(portal)/dashboard/page.tsx` - Main dashboard
-- `src/app/actions/client-auth.ts` - Magic link auth
-- `src/components/client/journey-timeline.tsx` - Milestone tracker
-- `src/components/client/chat-widget/` - Floating chat
+- `src/app/actions/client-auth.ts` - CRM-based authentication
+  - `findCrmClient()` - Checks crm_contacts then crm_leads
+  - `getClientSession()` - Returns CRM record type + data
+  - `grantPortalAccess()` / `revokePortalAccess()` - Admin controls
+  - `loginAsClient()` - Admin impersonation
+- `src/app/actions/portal-crm-data.ts` - Portal data fetching from CRM
+  - `getPortalProfile()` - Contact/Lead profile data
+  - `getPortalOpportunities()` - Services for portal
+  - `getPortalMeetings()` - Activities for meetings page
+  - `getPortalAccount()` - Household account info
+- `src/components/admin/crm/portal-access-manager.tsx` - Admin UI for portal access
+
+**Portal Access Control**:
+
+- `portal_access_enabled` flag on both `crm_contacts` and `crm_leads`
+- Admin can grant/revoke via Portal Access tab on Contact/Lead detail pages
+- Session stores `crm_record_type` ('contact' | 'lead') and `crm_record_id`
+- Lead conversion automatically transfers portal access to new Contact
 
 **Authentication**:
 
 - Magic link tokens with 24-hour expiry
 - bcrypt hashing (12 rounds) for session tokens
 - 30-day session persistence
-- IP/User-Agent tracking
+- Sessions reference CRM record (not legacy leads table)
+
+**Database Migration**: `supabase/migrations/20251221000000_portal_crm_auth.sql`
+
+- Adds `crm_record_type` and `crm_record_id` to `client_sessions`
+- Adds `portal_access_enabled` to `crm_contacts` and `crm_leads`
 
 **Next Steps**:
 

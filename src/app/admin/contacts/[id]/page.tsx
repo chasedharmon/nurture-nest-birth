@@ -5,6 +5,7 @@ import { getRecordById, getRelatedRecords } from '@/app/actions/crm-records'
 import { getObjectMetadata } from '@/app/actions/object-metadata'
 import { SecureRecordDetailPage } from '@/components/admin/crm/secure-record-detail-page'
 import { RelatedRecordsList } from '@/components/admin/crm/related-records-list'
+import { PortalAccessManager } from '@/components/admin/crm/portal-access-manager'
 import {
   getRecordSecurityContext,
   serializeSecurityContext,
@@ -90,6 +91,19 @@ export default async function ContactDetailPage({
 
   // Related tabs
   const relatedTabs = [
+    {
+      id: 'portal-access',
+      label: 'Portal Access',
+      content: (
+        <PortalAccessManager
+          recordType="contact"
+          recordId={id}
+          recordName={recordName}
+          email={contact.email}
+          portalAccessEnabled={contact.portal_access_enabled ?? false}
+        />
+      ),
+    },
     {
       id: 'opportunities',
       label: `Opportunities (${opportunitiesResult.total})`,

@@ -552,6 +552,7 @@ export interface ObjectMetadata {
 
 /**
  * Base interface for all CRM records
+ * Index signature added to support dynamic field access in SecureRecordDetailPage
  */
 export interface CrmRecordBase {
   id: string
@@ -561,6 +562,7 @@ export interface CrmRecordBase {
   updated_at: string
   created_by: string | null
   custom_fields: Record<string, unknown>
+  [key: string]: unknown
 }
 
 /**
@@ -604,6 +606,9 @@ export interface CrmContact extends CrmRecordBase {
 
   // Status
   is_active: boolean
+
+  // Portal access
+  portal_access_enabled: boolean
 
   // Attribution
   lead_source: string | null
@@ -663,6 +668,9 @@ export interface CrmLead extends CrmRecordBase {
   // Doula-specific
   expected_due_date: string | null
   message: string | null
+
+  // Portal access
+  portal_access_enabled: boolean
 
   // Attribution
   referral_partner_id: string | null

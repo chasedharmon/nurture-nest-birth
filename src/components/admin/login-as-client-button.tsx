@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { LogIn, Loader2, Copy, Check, ExternalLink } from 'lucide-react'
-import { loginAsClient } from '@/app/actions/client-auth'
+import { loginAsClient, type CrmRecordType } from '@/app/actions/client-auth'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -16,12 +16,14 @@ import {
 } from '@/components/ui/alert-dialog'
 
 interface LoginAsClientButtonProps {
+  recordType: CrmRecordType
   clientId: string
   clientName: string
   clientEmail: string
 }
 
 export function LoginAsClientButton({
+  recordType,
   clientId,
   clientName,
   clientEmail,
@@ -40,7 +42,7 @@ export function LoginAsClientButton({
   const handleLoginAsClient = () => {
     setError(null)
     startTransition(async () => {
-      const result = await loginAsClient(clientId)
+      const result = await loginAsClient(recordType, clientId)
       if (result.success) {
         setShowSuccess(true)
       } else {

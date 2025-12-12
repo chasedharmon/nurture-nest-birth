@@ -33,6 +33,28 @@ const E2E_WORKFLOW_STEP_TRIGGER_ID = 'e2e00000-0000-0000-0000-000000000011'
 const E2E_WORKFLOW_STEP_ACTION_ID = 'e2e00000-0000-0000-0000-000000000012'
 const E2E_WORKFLOW_STEP_END_ID = 'e2e00000-0000-0000-0000-000000000013'
 
+// CRM Test Data UUIDs
+const E2E_CRM_ACCOUNT_ID = 'e2e00000-0000-0000-0000-000000000100'
+const E2E_CRM_CONTACT_ID = 'e2e00000-0000-0000-0000-000000000101'
+const E2E_CRM_LEAD_ID = 'e2e00000-0000-0000-0000-000000000102'
+const E2E_CRM_OPPORTUNITY_ID = 'e2e00000-0000-0000-0000-000000000103'
+const E2E_CRM_ACTIVITY_EVENT_ID = 'e2e00000-0000-0000-0000-000000000104'
+const E2E_CRM_ACTIVITY_TASK_ID = 'e2e00000-0000-0000-0000-000000000105'
+const E2E_CRM_ACTIVITY_CALL_ID = 'e2e00000-0000-0000-0000-000000000106'
+
+// Portal Test Data UUIDs (lead and contact with portal access)
+const E2E_PORTAL_LEAD_ID = 'e2e00000-0000-0000-0000-000000000150'
+const E2E_PORTAL_CONTACT_ID = 'e2e00000-0000-0000-0000-000000000151'
+const E2E_PORTAL_ACCOUNT_ID = 'e2e00000-0000-0000-0000-000000000152'
+const E2E_PORTAL_OPPORTUNITY_ID = 'e2e00000-0000-0000-0000-000000000153'
+const E2E_PORTAL_ACTIVITY_ID = 'e2e00000-0000-0000-0000-000000000154'
+
+// Test emails for CRM
+const CRM_CONTACT_EMAIL = 'e2e.contact@example.com'
+const CRM_LEAD_EMAIL = 'e2e.lead@example.com'
+const PORTAL_LEAD_EMAIL = 'portal.lead@example.com'
+const PORTAL_CONTACT_EMAIL = 'portal.contact@example.com'
+
 setup('seed test data', async () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -534,6 +556,454 @@ setup('seed test data', async () => {
     }
   }
 
+  // =========================================================================
+  // CRM DATA SEEDING
+  // =========================================================================
+  console.log('\n--- CRM Data Seeding ---\n')
+
+  // Step 13: Create CRM Account (household)
+  console.log('13. Creating CRM Account...')
+  const { data: crmAccount, error: crmAccountError } = await supabase
+    .from('crm_accounts')
+    .upsert(
+      {
+        id: E2E_CRM_ACCOUNT_ID,
+        name: 'E2E Test Household',
+        account_type: 'household',
+        account_status: 'active',
+        lifecycle_stage: 'customer',
+        billing_street: '123 E2E Test St',
+        billing_city: 'Test City',
+        billing_state: 'TX',
+        billing_postal_code: '75001',
+        phone: '555-123-4567',
+        email: CRM_CONTACT_EMAIL,
+        owner_id: adminUser.id,
+        ...(organizationId && { organization_id: organizationId }),
+      },
+      { onConflict: 'id' }
+    )
+    .select()
+    .single()
+
+  if (crmAccountError) {
+    console.error('Failed to create CRM account:', crmAccountError.message)
+  } else {
+    console.log(`   CRM Account: ${crmAccount.name} (${crmAccount.id})`)
+  }
+
+  // Step 14: Create CRM Contact
+  console.log('14. Creating CRM Contact...')
+  const { data: crmContact, error: crmContactError } = await supabase
+    .from('crm_contacts')
+    .upsert(
+      {
+        id: E2E_CRM_CONTACT_ID,
+        first_name: 'E2E',
+        last_name: 'TestContact',
+        email: CRM_CONTACT_EMAIL,
+        phone: '555-123-4567',
+        mobile_phone: '555-987-6543',
+        partner_name: 'Partner TestContact',
+        mailing_street: '123 E2E Test St',
+        mailing_city: 'Test City',
+        mailing_state: 'TX',
+        mailing_postal_code: '75001',
+        expected_due_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 90 days from now
+        contact_status: 'active',
+        lifecycle_stage: 'customer',
+        account_id: E2E_CRM_ACCOUNT_ID,
+        portal_access_enabled: false,
+        owner_id: adminUser.id,
+        ...(organizationId && { organization_id: organizationId }),
+      },
+      { onConflict: 'id' }
+    )
+    .select()
+    .single()
+
+  if (crmContactError) {
+    console.error('Failed to create CRM contact:', crmContactError.message)
+  } else {
+    console.log(
+      `   CRM Contact: ${crmContact.first_name} ${crmContact.last_name} (${crmContact.id})`
+    )
+  }
+
+  // Step 15: Create CRM Lead
+  console.log('15. Creating CRM Lead...')
+  const { data: crmLead, error: crmLeadError } = await supabase
+    .from('crm_leads')
+    .upsert(
+      {
+        id: E2E_CRM_LEAD_ID,
+        first_name: 'E2E',
+        last_name: 'TestLead',
+        email: CRM_LEAD_EMAIL,
+        phone: '555-222-3333',
+        expected_due_date: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 120 days from now
+        lead_status: 'qualified',
+        lead_source: 'website',
+        service_interest: 'birth_doula',
+        message: 'E2E test lead inquiry',
+        portal_access_enabled: false,
+        is_converted: false,
+        owner_id: adminUser.id,
+        ...(organizationId && { organization_id: organizationId }),
+      },
+      { onConflict: 'id' }
+    )
+    .select()
+    .single()
+
+  if (crmLeadError) {
+    console.error('Failed to create CRM lead:', crmLeadError.message)
+  } else {
+    console.log(
+      `   CRM Lead: ${crmLead.first_name} ${crmLead.last_name} (${crmLead.id})`
+    )
+  }
+
+  // Step 16: Create CRM Opportunity
+  console.log('16. Creating CRM Opportunity...')
+  const { data: crmOpportunity, error: crmOpportunityError } = await supabase
+    .from('crm_opportunities')
+    .upsert(
+      {
+        id: E2E_CRM_OPPORTUNITY_ID,
+        name: 'E2E Birth Doula Package',
+        account_id: E2E_CRM_ACCOUNT_ID,
+        primary_contact_id: E2E_CRM_CONTACT_ID,
+        stage: 'closed_won',
+        amount: 2500,
+        service_type: 'birth_doula',
+        close_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 30 days ago
+        actual_close_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0],
+        probability: 100,
+        is_won: true,
+        is_closed: true,
+        next_step: 'Schedule prenatal visit',
+        next_step_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 7 days from now
+        description: 'E2E test opportunity - birth doula services',
+        owner_id: adminUser.id,
+        ...(organizationId && { organization_id: organizationId }),
+      },
+      { onConflict: 'id' }
+    )
+    .select()
+    .single()
+
+  if (crmOpportunityError) {
+    console.error(
+      'Failed to create CRM opportunity:',
+      crmOpportunityError.message
+    )
+  } else {
+    console.log(
+      `   CRM Opportunity: ${crmOpportunity.name} (${crmOpportunity.id})`
+    )
+  }
+
+  // Step 17: Create CRM Activities (event, task, call)
+  console.log('17. Creating CRM Activities...')
+
+  // Event (meeting)
+  const { error: eventError } = await supabase.from('crm_activities').upsert(
+    {
+      id: E2E_CRM_ACTIVITY_EVENT_ID,
+      subject: 'E2E Prenatal Visit',
+      activity_type: 'event',
+      status: 'open',
+      who_id: E2E_CRM_CONTACT_ID,
+      what_id: E2E_CRM_OPPORTUNITY_ID,
+      due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0], // 14 days from now
+      due_datetime: new Date(
+        Date.now() + 14 * 24 * 60 * 60 * 1000 + 10 * 60 * 60 * 1000
+      ).toISOString(), // 10am
+      location: '123 Birth Center Blvd',
+      meeting_link: 'https://zoom.us/e2e-test-meeting',
+      description: 'First prenatal visit - E2E test event',
+      owner_id: adminUser.id,
+      ...(organizationId && { organization_id: organizationId }),
+    },
+    { onConflict: 'id' }
+  )
+
+  if (eventError) {
+    console.error('Failed to create event activity:', eventError.message)
+  } else {
+    console.log('   Created event activity (meeting)')
+  }
+
+  // Task
+  const { error: taskError } = await supabase.from('crm_activities').upsert(
+    {
+      id: E2E_CRM_ACTIVITY_TASK_ID,
+      subject: 'E2E Follow-up Call',
+      activity_type: 'task',
+      status: 'open',
+      priority: 'high',
+      who_id: E2E_CRM_CONTACT_ID,
+      due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0], // 3 days from now
+      description: 'Follow up with client - E2E test task',
+      owner_id: adminUser.id,
+      ...(organizationId && { organization_id: organizationId }),
+    },
+    { onConflict: 'id' }
+  )
+
+  if (taskError) {
+    console.error('Failed to create task activity:', taskError.message)
+  } else {
+    console.log('   Created task activity')
+  }
+
+  // Call (completed)
+  const { error: callError } = await supabase.from('crm_activities').upsert(
+    {
+      id: E2E_CRM_ACTIVITY_CALL_ID,
+      subject: 'E2E Initial Consultation',
+      activity_type: 'call',
+      status: 'completed',
+      who_id: E2E_CRM_CONTACT_ID,
+      what_id: E2E_CRM_OPPORTUNITY_ID,
+      due_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0], // 7 days ago
+      due_datetime: new Date(
+        Date.now() - 7 * 24 * 60 * 60 * 1000 + 14 * 60 * 60 * 1000
+      ).toISOString(), // 2pm
+      description:
+        'Initial consultation call - discussed birth plan preferences',
+      owner_id: adminUser.id,
+      ...(organizationId && { organization_id: organizationId }),
+    },
+    { onConflict: 'id' }
+  )
+
+  if (callError) {
+    console.error('Failed to create call activity:', callError.message)
+  } else {
+    console.log('   Created call activity (completed)')
+  }
+
+  // =========================================================================
+  // PORTAL-CRM SYNC TEST DATA
+  // =========================================================================
+  console.log('\n--- Portal-CRM Sync Test Data ---\n')
+
+  // Step 18: Create Portal Test Account
+  console.log('18. Creating Portal Test Account...')
+  const { data: portalAccount, error: portalAccountError } = await supabase
+    .from('crm_accounts')
+    .upsert(
+      {
+        id: E2E_PORTAL_ACCOUNT_ID,
+        name: 'Portal Test Household',
+        account_type: 'household',
+        account_status: 'active',
+        lifecycle_stage: 'customer',
+        billing_street: '456 Portal Test Ave',
+        billing_city: 'Portal City',
+        billing_state: 'CA',
+        billing_postal_code: '90210',
+        phone: '555-444-5555',
+        email: PORTAL_CONTACT_EMAIL,
+        owner_id: adminUser.id,
+        ...(organizationId && { organization_id: organizationId }),
+      },
+      { onConflict: 'id' }
+    )
+    .select()
+    .single()
+
+  if (portalAccountError) {
+    console.error(
+      'Failed to create portal account:',
+      portalAccountError.message
+    )
+  } else {
+    console.log(
+      `   Portal Account: ${portalAccount.name} (${portalAccount.id})`
+    )
+  }
+
+  // Step 19: Create Portal Contact (with portal access enabled)
+  console.log('19. Creating Portal Contact (with portal access)...')
+  const { data: portalContact, error: portalContactError } = await supabase
+    .from('crm_contacts')
+    .upsert(
+      {
+        id: E2E_PORTAL_CONTACT_ID,
+        first_name: 'Portal',
+        last_name: 'TestUser',
+        email: PORTAL_CONTACT_EMAIL,
+        phone: '555-444-5555',
+        mobile_phone: '555-666-7777',
+        partner_name: 'Partner Portal',
+        mailing_street: '456 Portal Test Ave',
+        mailing_city: 'Portal City',
+        mailing_state: 'CA',
+        mailing_postal_code: '90210',
+        expected_due_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 60 days from now
+        contact_status: 'active',
+        lifecycle_stage: 'customer',
+        account_id: E2E_PORTAL_ACCOUNT_ID,
+        portal_access_enabled: true, // Portal access enabled!
+        owner_id: adminUser.id,
+        ...(organizationId && { organization_id: organizationId }),
+      },
+      { onConflict: 'id' }
+    )
+    .select()
+    .single()
+
+  if (portalContactError) {
+    console.error(
+      'Failed to create portal contact:',
+      portalContactError.message
+    )
+  } else {
+    console.log(
+      `   Portal Contact: ${portalContact.first_name} ${portalContact.last_name} (portal_access_enabled: true)`
+    )
+  }
+
+  // Step 20: Create Portal Lead (with portal access enabled)
+  console.log('20. Creating Portal Lead (with portal access)...')
+  const { data: portalLead, error: portalLeadError } = await supabase
+    .from('crm_leads')
+    .upsert(
+      {
+        id: E2E_PORTAL_LEAD_ID,
+        first_name: 'Portal',
+        last_name: 'LeadUser',
+        email: PORTAL_LEAD_EMAIL,
+        phone: '555-888-9999',
+        expected_due_date: new Date(Date.now() + 150 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 150 days from now
+        lead_status: 'qualified',
+        lead_source: 'referral',
+        service_interest: 'postpartum_doula',
+        message: 'Portal test lead - interested in postpartum support',
+        portal_access_enabled: true, // Portal access enabled!
+        is_converted: false,
+        owner_id: adminUser.id,
+        ...(organizationId && { organization_id: organizationId }),
+      },
+      { onConflict: 'id' }
+    )
+    .select()
+    .single()
+
+  if (portalLeadError) {
+    console.error('Failed to create portal lead:', portalLeadError.message)
+  } else {
+    console.log(
+      `   Portal Lead: ${portalLead.first_name} ${portalLead.last_name} (portal_access_enabled: true)`
+    )
+  }
+
+  // Step 21: Create Portal Opportunity (active service for portal contact)
+  console.log('21. Creating Portal Opportunity...')
+  const { data: portalOpportunity, error: portalOpportunityError } =
+    await supabase
+      .from('crm_opportunities')
+      .upsert(
+        {
+          id: E2E_PORTAL_OPPORTUNITY_ID,
+          name: 'Portal Postpartum Package',
+          account_id: E2E_PORTAL_ACCOUNT_ID,
+          primary_contact_id: E2E_PORTAL_CONTACT_ID,
+          stage: 'closed_won',
+          amount: 1800,
+          service_type: 'postpartum_doula',
+          close_date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split('T')[0], // 14 days ago
+          actual_close_date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split('T')[0],
+          probability: 100,
+          is_won: true,
+          is_closed: true,
+          next_step: 'First postpartum visit',
+          next_step_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split('T')[0], // After due date
+          description: 'Postpartum doula services - portal test',
+          owner_id: adminUser.id,
+          ...(organizationId && { organization_id: organizationId }),
+        },
+        { onConflict: 'id' }
+      )
+      .select()
+      .single()
+
+  if (portalOpportunityError) {
+    console.error(
+      'Failed to create portal opportunity:',
+      portalOpportunityError.message
+    )
+  } else {
+    console.log(
+      `   Portal Opportunity: ${portalOpportunity.name} (${portalOpportunity.id})`
+    )
+  }
+
+  // Step 22: Create Portal Activity (meeting for portal contact)
+  console.log('22. Creating Portal Activity (meeting)...')
+  const { error: portalActivityError } = await supabase
+    .from('crm_activities')
+    .upsert(
+      {
+        id: E2E_PORTAL_ACTIVITY_ID,
+        subject: 'Portal Prenatal Consultation',
+        activity_type: 'event',
+        status: 'open',
+        who_id: E2E_PORTAL_CONTACT_ID,
+        what_id: E2E_PORTAL_OPPORTUNITY_ID,
+        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 7 days from now
+        due_datetime: new Date(
+          Date.now() + 7 * 24 * 60 * 60 * 1000 + 11 * 60 * 60 * 1000
+        ).toISOString(), // 11am
+        location: 'Virtual Meeting',
+        meeting_link: 'https://zoom.us/portal-test-meeting',
+        description: 'Prenatal consultation - portal test',
+        owner_id: adminUser.id,
+        ...(organizationId && { organization_id: organizationId }),
+      },
+      { onConflict: 'id' }
+    )
+
+  if (portalActivityError) {
+    console.error(
+      'Failed to create portal activity:',
+      portalActivityError.message
+    )
+  } else {
+    console.log('   Created portal activity (meeting)')
+  }
+
   console.log('\n=== DATA SEEDING COMPLETE ===\n')
   console.log('Seeded data summary:')
   if (organization) {
@@ -547,4 +1017,25 @@ setup('seed test data', async () => {
   console.log(`  - Conversation: ${conversation.subject}`)
   console.log(`  - Messages: 2 (1 from admin, 1 from client)`)
   console.log(`  - Workflow: E2E Test Workflow (with 3 steps)`)
+  console.log('')
+  console.log('CRM Data:')
+  console.log(`  - CRM Account: ${crmAccount?.name || 'failed'}`)
+  console.log(
+    `  - CRM Contact: ${crmContact ? `${crmContact.first_name} ${crmContact.last_name}` : 'failed'}`
+  )
+  console.log(
+    `  - CRM Lead: ${crmLead ? `${crmLead.first_name} ${crmLead.last_name}` : 'failed'}`
+  )
+  console.log(`  - CRM Opportunity: ${crmOpportunity?.name || 'failed'}`)
+  console.log(`  - CRM Activities: 3 (event, task, call)`)
+  console.log('')
+  console.log('Portal-CRM Sync Data:')
+  console.log(
+    `  - Portal Contact: ${portalContact ? `${portalContact.first_name} ${portalContact.last_name} (portal_access: true)` : 'failed'}`
+  )
+  console.log(
+    `  - Portal Lead: ${portalLead ? `${portalLead.first_name} ${portalLead.last_name} (portal_access: true)` : 'failed'}`
+  )
+  console.log(`  - Portal Opportunity: ${portalOpportunity?.name || 'failed'}`)
+  console.log(`  - Portal Activity: 1 (meeting)`)
 })

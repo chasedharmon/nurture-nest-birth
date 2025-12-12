@@ -9,6 +9,7 @@ import { getRecordById, getRelatedRecords } from '@/app/actions/crm-records'
 import { getObjectMetadata } from '@/app/actions/object-metadata'
 import { SecureRecordDetailPage } from '@/components/admin/crm/secure-record-detail-page'
 import { RelatedRecordsList } from '@/components/admin/crm/related-records-list'
+import { PortalAccessManager } from '@/components/admin/crm/portal-access-manager'
 import {
   getRecordSecurityContext,
   serializeSecurityContext,
@@ -78,10 +79,6 @@ export default async function CrmLeadDetailPage({
   const serializedContext = serializeSecurityContext(securityContextResult)
   const securityContext = deserializeSecurityContext(serializedContext)
 
-  // Build record name
-  const recordName =
-    `${lead.first_name} ${lead.last_name}`.trim() || 'Unnamed Lead'
-
   // Quick actions for leads
   const quickActions = lead.is_converted ? (
     <Badge
@@ -100,8 +97,25 @@ export default async function CrmLeadDetailPage({
     </Link>
   )
 
+  // Build record name
+  const recordName =
+    `${lead.first_name} ${lead.last_name}`.trim() || 'Unnamed Lead'
+
   // Related tabs
   const relatedTabs = [
+    {
+      id: 'portal-access',
+      label: 'Portal Access',
+      content: (
+        <PortalAccessManager
+          recordType="lead"
+          recordId={id}
+          recordName={recordName}
+          email={lead.email}
+          portalAccessEnabled={lead.portal_access_enabled ?? false}
+        />
+      ),
+    },
     {
       id: 'activities',
       label: `Activities (${activitiesResult.total})`,

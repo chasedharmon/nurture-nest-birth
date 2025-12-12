@@ -129,6 +129,7 @@ export default async function LeadDetailPage({
             </div>
             <div className="flex items-center gap-2">
               <LoginAsClientButton
+                recordType="lead"
                 clientId={lead.id}
                 clientName={lead.name}
                 clientEmail={lead.email}
