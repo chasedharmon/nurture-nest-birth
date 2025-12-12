@@ -496,9 +496,72 @@ interface CrmOpportunity {
 - [x] Phase 5: List Views & Record Pages
 - [x] Phase 6: Lead Conversion Wizard
 - [x] Phase 7: Data Migration from legacy leads ✅ **COMPLETE**
-- [ ] Phase 8: Field-Level Security
+- [x] Phase 8: Field-Level Security ✅ **COMPLETE**
 - [ ] Phase 9: Record-Level Security (Sharing Rules)
 - [ ] Phase 10: Integration with existing features
+
+#### Field-Level Security (Phase 8 Complete)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     FIELD-LEVEL SECURITY                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Security Model:                                                         │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │ field_permissions Table                                          │   │
+│  │ ├── role_id          → Which role this permission applies to     │   │
+│  │ ├── field_definition_id → Which field                            │   │
+│  │ ├── is_visible       → Can the role SEE this field?              │   │
+│  │ └── is_editable      → Can the role EDIT this field?             │   │
+│  │                                                                   │   │
+│  │ Default Behavior: If no explicit permission exists, field is     │   │
+│  │                   VISIBLE and EDITABLE (default-allow pattern)   │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  Admin UI (/admin/setup/field-permissions):                             │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │ ┌─────────────┐  ┌─────────────┐                                │   │
+│  │ │ Select Role │  │ Select Object │                              │   │
+│  │ └─────────────┘  └─────────────┘                                │   │
+│  │                                                                   │   │
+│  │ Permission Matrix:                                                │   │
+│  │ ┌────────────────────┬──────────┬──────────┐                    │   │
+│  │ │ Field              │ Visible  │ Editable │                    │   │
+│  │ ├────────────────────┼──────────┼──────────┤                    │   │
+│  │ │ First Name         │    ✓     │    ✓     │                    │   │
+│  │ │ Email              │    ✓     │    ✓     │                    │   │
+│  │ │ Medical Info ⚠     │    ☐     │    ☐     │ ← Sensitive       │   │
+│  │ │ Birth Preferences ⚠│    ✓     │    ☐     │ ← Read-only       │   │
+│  │ └────────────────────┴──────────┴──────────┘                    │   │
+│  │                                                                   │   │
+│  │ Actions: [Copy From Role] [Reset to Defaults] [Save]            │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+│  Integration Points:                                                     │
+│  • DynamicRecordForm - editableFieldIds prop for field-level control    │
+│  • Server Actions - filterRecordData(), filterUpdateData() utilities     │
+│  • Roles Table - Quick link to field permissions per role               │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Phase 8 Key Files**:
+
+- `src/lib/crm/field-security.ts` - Field security utility functions
+  - `checkFieldAccess()` - Check if user can read/write a field
+  - `filterFieldsByPermissions()` - Get visible/editable fields for user
+  - `filterRecordData()` - Strip restricted fields from record data
+  - `filterUpdateData()` - Remove unauthorized fields from updates
+  - `buildPermissionMatrix()` - Build UI-friendly permission data
+- `src/app/actions/field-security.ts` - Server actions
+  - `getFieldPermissionMatrix()` - Get permissions for admin UI
+  - `bulkSetFieldPermissions()` - Save multiple permissions
+  - `copyFieldPermissions()` - Clone from another role
+  - `getAccessibleFieldsForObject()` - Runtime permission check
+- `src/app/admin/setup/field-permissions/page.tsx` - Admin UI page
+- `src/app/admin/setup/field-permissions/field-permissions-selector.tsx` - Role/object selection
+- `src/components/admin/setup/field-permissions-matrix.tsx` - Permission matrix UI
 
 ---
 
@@ -1413,4 +1476,4 @@ nurture-nest-birth/
 
 _Documentation generated: December 2024_
 _Last Updated: December 12, 2024_
-_Project Phase: 8.6 (CRM Lead Conversion Wizard Complete)_
+_Project Phase: 8.8 (Field-Level Security Complete)_
