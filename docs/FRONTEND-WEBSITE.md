@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-**Type**: Marketing website for DONA-certified doula practice
+**Type**: Marketing website for professionally trained doula practice
 **Framework**: Next.js 16 (App Router) + React 19
 **Styling**: Tailwind CSS 4 + shadcn/ui
 **Target Market**: Central Nebraska (Kearney, Grand Island, Hastings)
@@ -82,7 +82,7 @@
 │                                                              │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  HERO SECTION                                          │ │
-│  │  ├── Credentials badge (DONA-Certified)                │ │
+│  │  ├── Credentials badge (Professionally Trained)        │ │
 │  │  ├── H1: "supported, informed, empowered"              │ │
 │  │  ├── Trust pills (3 indicators)                        │ │
 │  │  ├── Dual CTAs (Schedule / Explore)                    │ │
@@ -97,11 +97,12 @@
 │                                                              │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  SERVICES OVERVIEW (4-column grid)                     │ │
-│  │  Birth Doula │ Postpartum │ Lactation │ Sibling Prep   │ │
+│  │  Birth Doula │ Postpartum │ Complete Care │ Photography│ │
 │  └────────────────────────────────────────────────────────┘ │
 │                                                              │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │  DIFFERENTIATORS (3 cards)                             │ │
+│  │  CREDENTIALS + DIFFERENTIATORS (Combined Section)      │ │
+│  │  Certification Badges (icons-only)                     │ │
 │  │  Car Seat Safety │ Infant Massage │ 7+ Certifications  │ │
 │  └────────────────────────────────────────────────────────┘ │
 │                                                              │
@@ -110,8 +111,7 @@
 │  └────────────────────────────────────────────────────────┘ │
 │                                                              │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │  SERVICE AREA + FINAL CTA                              │ │
-│  │  Kearney, Grand Island, Hastings, Central Nebraska     │ │
+│  │  FINAL CTA                                             │ │
 │  └────────────────────────────────────────────────────────┘ │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
@@ -191,15 +191,22 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Individual Service Pages** (6 total):
+**Service Structure**:
+
+Primary Services (Standalone):
 | Slug | Service | Price Range |
 |------|---------|-------------|
-| `birth-doula` | Birth Doula Support | $1,200-$1,500 |
-| `postpartum-care` | Postpartum Care | $35-$45/hour |
-| `lactation` | Lactation Consulting | $125-$175/visit |
-| `sibling-prep` | Sibling Preparation | $75-$100 |
-| `car-seat-safety` | Car Seat Safety | CPST Certified |
-| `infant-massage` | Infant Massage | CIMI Certified |
+| `birth-doula` | Birth Doula Support | Starting at $1,500 |
+| `postpartum-doula` | Postpartum Doula Support | Starting at $40/hr |
+| `photography` | Birth & Family Photography | Contact for pricing |
+
+Included Services (With Doula Packages):
+| Slug | Service | Included With |
+|------|---------|---------------|
+| `infant-feeding` | Infant Feeding Support | Postpartum Doula |
+| `sibling-prep` | Sibling Preparation | Birth & Postpartum |
+| `car-seat-safety` | Car Seat Safety Check | Birth & Postpartum |
+| `infant-massage` | Infant Massage Instruction | Postpartum Doula |
 
 ---
 
@@ -215,27 +222,32 @@
 │                                                              │
 │  Main Service Cards (3):                                     │
 │  ┌────────────────┬────────────────┬────────────────┐      │
-│  │  Birth Doula   │  Postpartum    │   Lactation    │      │
-│  │  $1,200-$1,500 │  $35-$45/hr    │  $125-$175     │      │
-│  │  7 benefits    │  7 services    │  6 included    │      │
-│  │                │  MOST POPULAR  │                │      │
+│  │  Birth Doula   │  Postpartum    │ Complete Care  │      │
+│  │ Starting $1,500│ Starting $40/hr│ Starting $1,800│      │
+│  │  7 benefits    │  7 services    │ Best Value     │      │
 │  └────────────────┴────────────────┴────────────────┘      │
 │                                                              │
-│  Additional Services:                                        │
-│  • Sibling Preparation: $75-$100                            │
-│  • Overnight Postpartum: $45-$50/hour                       │
+│  Photography Services:                                       │
+│  • Birth Photography: Contact                               │
+│  • Fresh 48 Session: Contact                                │
+│  • Newborn & Family: Contact                                │
 │                                                              │
-│  Package Bundles:                                            │
-│  • Birth + Postpartum: Save $200                            │
-│  • Postpartum + Lactation: Save $100                        │
+│  Included with Doula Packages:                               │
+│  • Infant Feeding Support                                   │
+│  • Car Seat Safety Check                                    │
+│  • Sibling Preparation                                      │
+│  • Infant Massage Instruction                               │
+│                                                              │
+│  Discounts & Add-Ons:                                        │
+│  • Complete Care Bundle: Save $200+                         │
+│  • Photography Add-On                                       │
 │  • Multiple Birth: 10% discount                             │
 │                                                              │
 │  Payment Information:                                        │
-│  ✓ Flexible payment plans (no interest/fees)                │
-│  ✓ Nebraska Medicaid coverage                               │
-│  ✓ Insurance reimbursement assistance                       │
+│  ✓ Flexible payment plans (retainer model)                  │
+│  ✓ Nonrefundable retainer to reserve                        │
+│  ✓ Remaining balance due by 37 weeks                        │
 │  ✓ HSA/FSA eligible                                         │
-│  ✓ $300 deposit to reserve                                  │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -515,11 +527,11 @@ delay={0.1} delay={0.2} delay={0.3}
 │  7 Certifications:                                           │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │ Core (Primary olive):                                   │ │
-│  │   • DONA Birth Doula                                   │ │
-│  │   • DONA Postpartum Doula                              │ │
+│  │   • ProDoula Birth Doula                               │ │
+│  │   • ProDoula Postpartum Doula                          │ │
 │  ├────────────────────────────────────────────────────────┤ │
 │  │ Specialized (Secondary terracotta):                    │ │
-│  │   • Certified Lactation Consultant                     │ │
+│  │   • Breastfeeding Specialist                           │ │
 │  │   • Certified Infant Massage Instructor (CIMI)         │ │
 │  │   • Child Passenger Safety Technician (CPST)           │ │
 │  ├────────────────────────────────────────────────────────┤ │
@@ -911,4 +923,35 @@ nurture-nest-birth/src/
 ---
 
 _Documentation generated: December 2024_
-_Last Updated: December 10, 2024_
+_Last Updated: December 11, 2024_
+
+## Recent Changes (December 11, 2024)
+
+### Homepage Streamlining
+
+- Removed Service Area section for cleaner layout
+- Combined credentials and differentiators into single compact section
+- Reduced overall page length while maintaining key information
+
+### Pricing Page Updates
+
+- Added "Starting at" pricing model for flexibility
+- Added Photography Services section
+- Added "Included with Doula Packages" section
+- Updated Discounts & Add-Ons section
+
+### Services Page Restructure
+
+- Reorganized into primary services (standalone) vs included services
+- Added Photography as primary service
+- Updated pricing badges with "Starting at" model
+- Added service comparison table
+
+### Photography Page Fixes
+
+- Fixed icon scaling to match other service pages
+- Use consistent rounded-full bg-primary/10 pattern
+
+### Design System
+
+- Added flex centering to icon containers for consistent icon display
