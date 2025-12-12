@@ -27,6 +27,8 @@ import {
   CreditCard,
   Building,
   MessageSquare,
+  Database,
+  Handshake,
 } from 'lucide-react'
 
 interface SetupCategory {
@@ -44,6 +46,25 @@ interface SetupItem {
 }
 
 const setupCategories: SetupCategory[] = [
+  {
+    title: 'Data Management',
+    description: 'Configure CRM objects, fields, and data structure',
+    icon: <Database className="h-6 w-6" />,
+    items: [
+      {
+        title: 'Object Manager',
+        description: 'Manage CRM objects and custom fields',
+        href: '/admin/setup/objects',
+        icon: <Database className="h-5 w-5" />,
+      },
+      {
+        title: 'Referral Partners',
+        description: 'Track referral sources and partnerships',
+        href: '/admin/setup/referral-partners',
+        icon: <Handshake className="h-5 w-5" />,
+      },
+    ],
+  },
   {
     title: 'Administration',
     description: 'Manage users, roles, and system access',
