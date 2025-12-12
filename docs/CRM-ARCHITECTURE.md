@@ -1692,45 +1692,98 @@ supabase/migrations/
 
 ### Playwright E2E Tests
 
-- **Total**: 498 tests
-- **Passing**: 359 (72%)
-- **Failing**: 139 (28%)
-- **Test Suites**: 20+
+- **Total**: ~550+ tests (including new CRM E2E tests)
+- **CRM Tests**: 153 tests across 4 spec files
+- **CRM Passing**: 91 tests (60%)
+- **Test Suites**: 25+
 
-### Coverage Areas
+### CRM E2E Test Coverage
+
+The CRM E2E tests are located in `tests/e2e/crm/` and cover:
+
+| Test File                   | Tests | Status          | Coverage                                          |
+| --------------------------- | ----- | --------------- | ------------------------------------------------- |
+| `crm-accounts.spec.ts`      | 23    | ✅ Most passing | List, detail, create, edit, search, relationships |
+| `crm-contacts.spec.ts`      | 25    | 🔄 Partial      | List, detail, create, edit, portal access         |
+| `crm-leads.spec.ts`         | 22    | 🔄 Partial      | List, detail, create, edit, conversion            |
+| `crm-opportunities.spec.ts` | 20    | 🔄 Partial      | List, detail, create, edit, stage progression     |
+| `portal-crm-sync.spec.ts`   | ~15   | 🔄 Partial      | Portal-CRM data sync validation                   |
+
+**Test Data Seeding**: `tests/e2e/data-seed.setup.ts`
+
+- Seeds CRM records with known IDs for deterministic testing
+- Creates: Account, Contact, Lead, Opportunity, Activities
+- Links records properly (contact-account relationships, etc.)
+
+**Key Technical Notes**:
+
+1. **Dynamic Form Selectors**: CRM forms are metadata-driven and don't use standard `name` attributes. Tests use placeholder-based or role-based selectors:
+
+   ```typescript
+   // Use this pattern for dynamic forms
+   page.locator('input[placeholder*="billing city" i]')
+   page.getByRole('textbox', { name: /account name/i })
+   ```
+
+2. **Supabase Relationship Queries**: When querying tables with multiple FKs to the same table, use explicit FK reference:
+
+   ```typescript
+   // picklist_values has two FKs to field_definitions
+   picklist_values!field_definition_id (*)
+   ```
+
+3. **CRM Table Column Reference**:
+   - `crm_accounts`: name, account*type, account_status, billing*\* (no email/phone)
+   - `crm_contacts`: first_name, last_name, email, phone (use is_active, not contact_status)
+   - `crm_opportunities`: stage_probability (not probability)
+   - `crm_activities`: related_to_type/related_to_id, who_type/who_id (not what_id)
+
+### General Coverage Areas
 
 - Admin authentication
 - Dashboard KPIs
-- Lead management
+- CRM objects (Accounts, Contacts, Leads, Opportunities)
+- Activities and activity logging
 - Team management
 - Workflow builder
 - Messaging system
 - Setup hub
+- Portal-CRM sync
 
 ---
 
 ## Priority Next Steps
 
-### High Priority
+### High Priority (Phase 11 Completion)
 
-1. **Complete Stripe Integration** - Enable live payment processing
-2. **SMS Integration (Twilio)** - Activate text messaging
-3. **E-Signature Integration** - DocuSign/HelloSign for contracts
-4. **Fix Failing E2E Tests** - Improve test stability
+1. **Fix Remaining CRM E2E Tests** - Update selectors in contacts/leads/opportunities tests
+   - Update column header assertions for metadata-driven labels
+   - Change form selectors from `name` to `placeholder` based
+   - ~62 tests still failing due to selector mismatches
+
+2. **Create Additional CRM E2E Test Files**:
+   - `crm-activities.spec.ts` (~12-15 tests)
+   - `crm-lead-conversion.spec.ts` (~10-12 tests)
+   - `crm-field-permissions.spec.ts` (~12-15 tests)
+   - `crm-sharing-rules.spec.ts` (~12-15 tests)
+   - `crm-bulk-operations.spec.ts` (~8-10 tests)
 
 ### Medium Priority
 
-5. **Report Export** - PDF/CSV export for reports
-6. **Lead Scoring** - Automated qualification scoring
-7. **Calendar Integration** - Google/Outlook sync
-8. **Mobile Responsiveness** - Optimize client portal for mobile
+3. **Complete Stripe Integration** - Enable live payment processing
+4. **SMS Integration (Twilio)** - Activate text messaging
+5. **E-Signature Integration** - DocuSign/HelloSign for contracts
+6. **Report Export** - PDF/CSV export for reports
+7. **Lead Scoring** - Automated qualification scoring
+8. **Calendar Integration** - Google/Outlook sync
 
 ### Future Enhancements
 
-9. **Birth Photo Gallery** - Private photo sharing
-10. **Video Calling** - In-app video consultations
-11. **Public Booking Page** - Self-service scheduling
-12. **Mobile App** - React Native client app
+9. **Mobile Responsiveness** - Optimize client portal for mobile
+10. **Birth Photo Gallery** - Private photo sharing
+11. **Video Calling** - In-app video consultations
+12. **Public Booking Page** - Self-service scheduling
+13. **Mobile App** - React Native client app
 
 ---
 
