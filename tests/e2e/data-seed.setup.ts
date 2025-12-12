@@ -327,6 +327,10 @@ setup('seed test data', async () => {
   }
 
   // Step 8: Create conversation
+  // NOTE: Do NOT set organization_id on conversation data.
+  // The admin user may have multiple org memberships, and the RLS function
+  // get_user_organization_id() returns the oldest one. Setting organization_id
+  // would cause RLS mismatches. With NULL, the policy allows access.
   console.log('8. Creating conversation...')
   const { data: conversation, error: convError } = await supabase
     .from('conversations')
@@ -335,11 +339,11 @@ setup('seed test data', async () => {
         id: E2E_CONVERSATION_ID,
         client_id: clientLead.id,
         subject: 'E2E Test Conversation',
-        conversation_type: 'direct',
+        conversation_type: 'client-direct', // Must use 'client-direct' for RLS to allow admin access
         status: 'active',
         last_message_at: new Date().toISOString(),
         last_message_preview: 'Test message for E2E testing',
-        ...(organizationId && { organization_id: organizationId }),
+        // organization_id intentionally NOT set - see note above
       },
       { onConflict: 'id' }
     )
@@ -355,7 +359,7 @@ setup('seed test data', async () => {
   // Step 9: Add conversation participants
   console.log('9. Adding conversation participants...')
 
-  // Add admin participant
+  // Add admin participant (no organization_id - see conversation note)
   const { error: adminPartError } = await supabase
     .from('conversation_participants')
     .upsert(
@@ -366,7 +370,6 @@ setup('seed test data', async () => {
         display_name: adminUser.full_name || 'Admin',
         last_read_at: new Date().toISOString(),
         unread_count: 0,
-        ...(organizationId && { organization_id: organizationId }),
       },
       { onConflict: 'conversation_id,user_id', ignoreDuplicates: true }
     )
@@ -377,7 +380,7 @@ setup('seed test data', async () => {
     console.log('   Added admin as participant')
   }
 
-  // Add client participant
+  // Add client participant (no organization_id - see conversation note)
   const { error: clientPartError } = await supabase
     .from('conversation_participants')
     .upsert(
@@ -387,7 +390,6 @@ setup('seed test data', async () => {
         role: 'participant',
         display_name: clientLead.name,
         unread_count: 1, // Has unread message from admin
-        ...(organizationId && { organization_id: organizationId }),
       },
       { onConflict: 'conversation_id,client_id', ignoreDuplicates: true }
     )
@@ -401,7 +403,7 @@ setup('seed test data', async () => {
   // Step 10: Add seed messages
   console.log('10. Adding seed messages...')
 
-  // Message from admin
+  // Message from admin (no organization_id - see conversation note)
   const { error: msg1Error } = await supabase.from('messages').upsert(
     {
       id: E2E_MESSAGE_ADMIN_ID,
@@ -413,7 +415,6 @@ setup('seed test data', async () => {
       is_system_message: false,
       is_read: true,
       created_at: new Date(Date.now() - 60000).toISOString(), // 1 minute ago
-      ...(organizationId && { organization_id: organizationId }),
     },
     { onConflict: 'id' }
   )
@@ -424,7 +425,7 @@ setup('seed test data', async () => {
     console.log('   Added message from admin')
   }
 
-  // Message from client
+  // Message from client (no organization_id - see conversation note)
   const { error: msg2Error } = await supabase.from('messages').upsert(
     {
       id: E2E_MESSAGE_CLIENT_ID,
@@ -436,7 +437,6 @@ setup('seed test data', async () => {
       is_system_message: false,
       is_read: false,
       created_at: new Date().toISOString(), // Now
-      ...(organizationId && { organization_id: organizationId }),
     },
     { onConflict: 'id' }
   )
