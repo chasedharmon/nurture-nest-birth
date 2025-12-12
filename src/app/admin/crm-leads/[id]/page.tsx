@@ -2,7 +2,8 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { UserPlus } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { UserPlus, CheckCircle2 } from 'lucide-react'
 
 import { getRecordById, getRelatedRecords } from '@/app/actions/crm-records'
 import { getObjectMetadata } from '@/app/actions/object-metadata'
@@ -71,7 +72,15 @@ export default async function CrmLeadDetailPage({
     `${lead.first_name} ${lead.last_name}`.trim() || 'Unnamed Lead'
 
   // Quick actions for leads
-  const quickActions = !lead.is_converted && (
+  const quickActions = lead.is_converted ? (
+    <Badge
+      variant="outline"
+      className="border-green-500 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+    >
+      <CheckCircle2 className="mr-1 h-3 w-3" />
+      Converted
+    </Badge>
+  ) : (
     <Link href={`/admin/crm-leads/${id}/convert`}>
       <Button variant="default">
         <UserPlus className="mr-2 h-4 w-4" />
