@@ -4,7 +4,7 @@
 
 **Date Created:** December 11, 2025
 
-**Tester:** ************\_\_\_************
+**Tester:** ****\*\*\*\*****\_\_\_****\*\*\*\*****
 
 ---
 
@@ -1319,24 +1319,25 @@ These pages are for the doula/business owner. **Note:** Requires admin login.
 
 ## Quick Reference: All Public Page URLs
 
-| Page            | URL                       |
-| --------------- | ------------------------- |
-| Homepage        | /                         |
-| About           | /about                    |
-| Services        | /services                 |
-| Birth Doula     | /services/birth-doula     |
-| Postpartum Care | /services/postpartum-care |
-| Lactation       | /services/lactation       |
-| Sibling Prep    | /services/sibling-prep    |
-| Car Seat Safety | /services/car-seat-safety |
-| Infant Massage  | /services/infant-massage  |
-| Pricing         | /pricing                  |
-| Resources       | /resources                |
-| Gallery         | /gallery                  |
-| Blog            | /blog                     |
-| Testimonials    | /testimonials             |
-| FAQ             | /faq                      |
-| Contact         | /contact                  |
+| Page             | URL                        |
+| ---------------- | -------------------------- |
+| Homepage         | /                          |
+| About            | /about                     |
+| Services         | /services                  |
+| Birth Doula      | /services/birth-doula      |
+| Postpartum Doula | /services/postpartum-doula |
+| Infant Feeding   | /services/infant-feeding   |
+| Sibling Prep     | /services/sibling-prep     |
+| Car Seat Safety  | /services/car-seat-safety  |
+| Infant Massage   | /services/infant-massage   |
+| Photography      | /services/photography      |
+| Pricing          | /pricing                   |
+| Resources        | /resources                 |
+| Gallery          | /gallery                   |
+| Blog             | /blog                      |
+| Testimonials     | /testimonials              |
+| FAQ              | /faq                       |
+| Contact          | /contact                   |
 
 ---
 
