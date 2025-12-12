@@ -7,7 +7,7 @@
  * using the DynamicRecordForm component.
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
@@ -56,27 +56,24 @@ export function NewRecordPage({
   onSuccess,
 }: NewRecordPageProps) {
   const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Handle form submission
+  // Note: DynamicRecordForm manages its own isSubmitting state internally,
+  // so we don't need to track it here. The form handles showing the loading
+  // state on the submit button without unmounting the form.
   const handleSubmit = useCallback(
     async (data: Record<string, unknown>) => {
-      setIsSubmitting(true)
-      try {
-        const result = await createRecord(objectDefinition.api_name, data)
-        if (result.error) {
-          throw new Error(result.error)
-        }
+      const result = await createRecord(objectDefinition.api_name, data)
+      if (result.error) {
+        throw new Error(result.error)
+      }
 
-        const newId = (result.data as { id: string })?.id
-        if (onSuccess) {
-          onSuccess(newId)
-        } else {
-          // Navigate to the new record
-          router.push(`${backPath}/${newId}`)
-        }
-      } finally {
-        setIsSubmitting(false)
+      const newId = (result.data as { id: string })?.id
+      if (onSuccess) {
+        onSuccess(newId)
+      } else {
+        // Navigate to the new record
+        router.push(`${backPath}/${newId}`)
       }
     },
     [objectDefinition.api_name, backPath, onSuccess, router]
@@ -138,7 +135,6 @@ export function NewRecordPage({
               readOnly={false}
               onSubmit={handleSubmit}
               onCancel={handleCancel}
-              isLoading={isSubmitting}
               onLookupSearch={handleLookupSearch}
               submitLabel={`Create ${objectDefinition.label}`}
             />

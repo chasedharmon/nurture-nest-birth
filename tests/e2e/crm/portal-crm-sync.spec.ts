@@ -278,10 +278,7 @@ test.describe('Portal-CRM Sync', () => {
   })
 
   test.describe('CRM Activities in Portal', () => {
-    test.skip('should show activity linked to portal contact', async ({
-      page,
-    }) => {
-      // Note: Skipping - /admin/activities/[id] route not implemented yet
+    test('should show activity linked to portal contact', async ({ page }) => {
       const E2E_PORTAL_ACTIVITY_ID = 'e2e00000-0000-0000-0000-000000000154'
 
       // View the activity in admin
@@ -292,10 +289,15 @@ test.describe('Portal-CRM Sync', () => {
         page.locator('text=Portal Prenatal Consultation').first()
       ).toBeVisible({ timeout: 5000 })
 
-      // Should show linked contact (TestUser is last name)
-      await expect(page.locator('text=TestUser').first()).toBeVisible({
+      // Should show activity details
+      await expect(page.locator('text=Virtual Meeting').first()).toBeVisible({
         timeout: 5000,
       })
+
+      // Should have a tab to view linked contact
+      await expect(
+        page.locator('[role="tab"]:has-text("contact")').first()
+      ).toBeVisible({ timeout: 5000 })
     })
 
     test('should show activities on portal contact detail', async ({

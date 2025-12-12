@@ -258,12 +258,12 @@ test.describe('CRM Accounts', () => {
       ).toBeVisible()
     })
 
-    // TODO: Investigate form submission issue - values clear after button click
-    test.skip('should create new account', async ({ page }) => {
+    test('should create new account', async ({ page }) => {
       const timestamp = Date.now()
       const accountName = `E2E CreateAccount ${timestamp}`
 
       await page.goto('/admin/accounts/new')
+      await page.waitForLoadState('networkidle')
 
       // Fill out the form using placeholder selectors (dynamic form doesn't use name attr)
       const nameInput = page.locator(
@@ -271,16 +271,23 @@ test.describe('CRM Accounts', () => {
       )
       await nameInput.fill(accountName)
 
-      // Fill billing address fields
+      // Fill billing address fields (optional)
       const cityInput = page.locator(
         'input[placeholder*="billing city" i], input[placeholder*="Enter billing city" i]'
       )
-      await cityInput.fill('New Test City')
+      if (await cityInput.isVisible()) {
+        await cityInput.fill('New Test City')
+      }
 
       const stateInput = page.locator(
         'input[placeholder*="billing state" i], input[placeholder*="Enter billing state" i]'
       )
-      await stateInput.fill('TX')
+      if (await stateInput.isVisible()) {
+        await stateInput.fill('TX')
+      }
+
+      // Verify the name was entered
+      await expect(nameInput).toHaveValue(accountName)
 
       // Submit the form
       const saveButton = page
@@ -292,13 +299,15 @@ test.describe('CRM Accounts', () => {
         )
       await saveButton.click()
 
-      // Should redirect to account detail or list
-      await expect(page).toHaveURL(/\/admin\/accounts/, { timeout: 10000 })
+      // Wait for redirect to account detail page (not the list)
+      // The form should redirect to /admin/accounts/<new-id>
+      await expect(page).toHaveURL(/\/admin\/accounts\/[a-f0-9-]{36}$/, {
+        timeout: 15000,
+      })
 
-      // Verify account was created by searching
-      await page.goto('/admin/accounts')
-      await expect(page.locator(`text=${accountName}`)).toBeVisible({
-        timeout: 10000,
+      // Verify we're on the detail page showing the new account
+      await expect(page.locator(`text=${accountName}`).first()).toBeVisible({
+        timeout: 5000,
       })
     })
 

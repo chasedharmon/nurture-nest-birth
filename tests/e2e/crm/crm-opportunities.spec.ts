@@ -249,12 +249,12 @@ test.describe('CRM Opportunities', () => {
       await expect(page.locator('text=Stage').first()).toBeVisible()
     })
 
-    // TODO: Investigate form submission issue - values clear after button click
-    test.skip('should create new opportunity', async ({ page }) => {
+    test('should create new opportunity', async ({ page }) => {
       const timestamp = Date.now()
       const oppName = `E2E Test Opportunity ${timestamp}`
 
       await page.goto('/admin/opportunities/new')
+      await page.waitForLoadState('networkidle')
 
       // Fill out the form using placeholder selectors (dynamic form doesn't use name attr)
       const nameInput = page.locator(
@@ -262,7 +262,7 @@ test.describe('CRM Opportunities', () => {
       )
       await nameInput.fill(oppName)
 
-      // Amount field - look for currency input
+      // Amount field - look for currency input (optional)
       const amountInput = page
         .locator(
           'input[placeholder*="amount" i], input[placeholder*="Enter amount" i], input[type="number"]'
@@ -272,19 +272,24 @@ test.describe('CRM Opportunities', () => {
         await amountInput.fill('1500')
       }
 
+      // Verify the name was entered
+      await expect(nameInput).toHaveValue(oppName)
+
       // Submit the form
       const saveButton = page
         .locator('button:has-text("Save")')
         .or(page.locator('button:has-text("Create")'))
       await saveButton.click()
 
-      // Should redirect to opportunity detail or list
-      await expect(page).toHaveURL(/\/admin\/opportunities/, { timeout: 10000 })
+      // Wait for redirect to opportunity detail page (not the list)
+      // The form should redirect to /admin/opportunities/<new-id>
+      await expect(page).toHaveURL(/\/admin\/opportunities\/[a-f0-9-]{36}$/, {
+        timeout: 15000,
+      })
 
-      // Verify opportunity was created by searching
-      await page.goto('/admin/opportunities')
-      await expect(page.locator(`text=${oppName}`)).toBeVisible({
-        timeout: 10000,
+      // Verify we're on the detail page showing the new opportunity
+      await expect(page.locator(`text=${oppName}`).first()).toBeVisible({
+        timeout: 5000,
       })
     })
 

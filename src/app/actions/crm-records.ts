@@ -256,7 +256,7 @@ export async function createRecord<T = CrmRecord>(
       return { data: null, error: `Unknown object: ${objectApiName}` }
     }
 
-    // Get current user for owner_id
+    // Get current user for owner_id and organization_id
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -265,10 +265,26 @@ export async function createRecord<T = CrmRecord>(
       return { data: null, error: 'Not authenticated' }
     }
 
-    // Prepare record data
+    // Get user's organization_id from the users table (required for RLS)
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single()
+
+    if (userError || !userData?.organization_id) {
+      console.error('Error fetching user organization:', userError)
+      return {
+        data: null,
+        error: 'User not associated with an organization',
+      }
+    }
+
+    // Prepare record data with organization_id for RLS compliance
     const recordData = {
       ...data,
       owner_id: (data as Record<string, unknown>).owner_id || user.id,
+      organization_id: userData.organization_id,
     }
 
     const { data: created, error } = await supabase

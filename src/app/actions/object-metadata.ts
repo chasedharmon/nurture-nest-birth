@@ -198,12 +198,24 @@ export async function searchLookupRecords(
     // Determine display field based on object type
     const { displayField, secondaryField } = getDisplayFields(objectApiName)
 
+    // Check if the search term looks like a UUID (for loading record by ID)
+    const isUUID =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        searchTerm?.trim() || ''
+      )
+
     // Search the table - select all columns to avoid dynamic select type issues
     let query = supabase.from(objectDef.table_name).select('*').limit(limit)
 
     // Add search filter if term provided
     if (searchTerm && searchTerm.trim()) {
-      query = query.ilike(displayField, `%${searchTerm}%`)
+      if (isUUID) {
+        // Search by ID directly when the term is a UUID
+        query = query.eq('id', searchTerm.trim())
+      } else {
+        // Search by display field for text searches
+        query = query.ilike(displayField, `%${searchTerm}%`)
+      }
     }
 
     const { data, error } = await query

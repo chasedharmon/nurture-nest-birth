@@ -214,12 +214,13 @@ test.describe('CRM Leads', () => {
       await expect(page.locator('text=Email').first()).toBeVisible()
     })
 
-    // TODO: Investigate form submission issue - values clear after button click
-    test.skip('should create new lead', async ({ page }) => {
+    test('should create new lead', async ({ page }) => {
       const timestamp = Date.now()
       const testEmail = `e2e-newlead-${timestamp}@example.com`
+      const lastName = `NewLead${timestamp}`
 
       await page.goto('/admin/crm-leads/new')
+      await page.waitForLoadState('networkidle')
 
       // Fill out the form using placeholder selectors (dynamic form doesn't use name attr)
       const firstNameInput = page.locator(
@@ -230,7 +231,7 @@ test.describe('CRM Leads', () => {
       const lastNameInput = page.locator(
         'input[placeholder*="last name" i], input[placeholder*="Enter last name" i]'
       )
-      await lastNameInput.fill(`NewLead${timestamp}`)
+      await lastNameInput.fill(lastName)
 
       // Email field uses "email@example.com" placeholder
       const emailInput = page.locator(
@@ -244,19 +245,26 @@ test.describe('CRM Leads', () => {
         .first()
       await phoneInput.fill('555-888-7777')
 
+      // Verify fields have values before submission
+      await expect(firstNameInput).toHaveValue('E2E')
+      await expect(lastNameInput).toHaveValue(lastName)
+      await expect(emailInput).toHaveValue(testEmail)
+
       // Submit the form
       const saveButton = page
         .locator('button:has-text("Save")')
         .or(page.locator('button:has-text("Create")'))
       await saveButton.click()
 
-      // Should redirect to lead detail or list
-      await expect(page).toHaveURL(/\/admin\/crm-leads/, { timeout: 10000 })
+      // Wait for redirect to lead detail page (not the list)
+      // The form should redirect to /admin/crm-leads/<new-id>
+      await expect(page).toHaveURL(/\/admin\/crm-leads\/[a-f0-9-]{36}$/, {
+        timeout: 15000,
+      })
 
-      // Verify lead was created by searching
-      await page.goto('/admin/crm-leads')
-      await expect(page.locator(`text=${testEmail}`)).toBeVisible({
-        timeout: 10000,
+      // Verify we're on the detail page showing the new lead
+      await expect(page.locator(`text=${lastName}`).first()).toBeVisible({
+        timeout: 5000,
       })
     })
 

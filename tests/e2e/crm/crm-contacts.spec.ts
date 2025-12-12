@@ -232,69 +232,46 @@ test.describe('CRM Contacts', () => {
       await expect(page.locator('text=Email').first()).toBeVisible()
     })
 
-    // TODO: Investigate form submission issue - values clear after button click
-    test.skip('should create new contact', async ({ page }) => {
+    test('should create new contact', async ({ page }) => {
       const timestamp = Date.now()
       const testEmail = `e2e-create-${timestamp}@example.com`
       const lastName = `CreateTest${timestamp}`
 
-      // Capture console errors
-      const consoleErrors: string[] = []
-      page.on('console', msg => {
-        if (msg.type() === 'error') {
-          consoleErrors.push(msg.text())
-        }
-      })
-
       await page.goto('/admin/contacts/new')
       await page.waitForLoadState('networkidle')
 
-      // Wait for form to be ready
-      await page.waitForSelector('input[placeholder="Enter first name"]')
+      // Fill out the form
+      const firstNameInput = page.locator(
+        'input[placeholder="Enter first name"]'
+      )
+      await firstNameInput.fill('E2E')
 
-      // Fill form using type() for controlled inputs - this triggers React onChange
-      await page.locator('input[placeholder="Enter first name"]').click()
-      await page.keyboard.type('E2E')
+      const lastNameInput = page.locator('input[placeholder="Enter last name"]')
+      await lastNameInput.fill(lastName)
 
-      await page.locator('input[placeholder="Enter last name"]').click()
-      await page.keyboard.type(lastName)
-
-      await page.locator('input[placeholder="email@example.com"]').click()
-      await page.keyboard.type(testEmail)
+      const emailInput = page.locator('input[placeholder="email@example.com"]')
+      await emailInput.fill(testEmail)
 
       // Verify values persisted
-      await expect(
-        page.locator('input[placeholder="Enter first name"]')
-      ).toHaveValue('E2E')
-      await expect(
-        page.locator('input[placeholder="Enter last name"]')
-      ).toHaveValue(lastName)
-      await expect(
-        page.locator('input[placeholder="email@example.com"]')
-      ).toHaveValue(testEmail)
+      await expect(firstNameInput).toHaveValue('E2E')
+      await expect(lastNameInput).toHaveValue(lastName)
+      await expect(emailInput).toHaveValue(testEmail)
 
       // Submit the form
-      await page.click('button:has-text("Create Contact")')
+      const saveButton = page
+        .locator('button:has-text("Save")')
+        .or(page.locator('button:has-text("Create")'))
+      await saveButton.click()
 
-      // Wait a moment for form processing
-      await page.waitForTimeout(2000)
-
-      // Log any console errors for debugging
-      if (consoleErrors.length > 0) {
-        console.log('Console errors:', consoleErrors)
-      }
-
-      // Should redirect away from /new to either detail page or list
-      await expect(page).not.toHaveURL(/\/admin\/contacts\/new/, {
+      // Wait for redirect to contact detail page (not the list)
+      // The form should redirect to /admin/contacts/<new-id>
+      await expect(page).toHaveURL(/\/admin\/contacts\/[a-f0-9-]{36}$/, {
         timeout: 15000,
       })
 
-      // Navigate to list and verify contact was created
-      await page.goto('/admin/contacts')
-      await page.waitForLoadState('networkidle')
-
-      await expect(page.locator(`text=${testEmail}`)).toBeVisible({
-        timeout: 10000,
+      // Verify we're on the detail page showing the new contact
+      await expect(page.locator(`text=${lastName}`).first()).toBeVisible({
+        timeout: 5000,
       })
     })
 
