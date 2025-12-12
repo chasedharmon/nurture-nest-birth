@@ -495,19 +495,27 @@ interface CrmOpportunity {
 - [x] Phase 4: Dynamic Record Forms
 - [x] Phase 5: List Views & Record Pages
 - [x] Phase 6: Lead Conversion Wizard
-- [ ] Phase 7: Data Migration from legacy leads
+- [x] Phase 7: Data Migration from legacy leads ✅ **COMPLETE**
 - [ ] Phase 8: Field-Level Security
 - [ ] Phase 9: Record-Level Security (Sharing Rules)
 - [ ] Phase 10: Integration with existing features
 
 ---
 
-### 2. Legacy Lead Management (To Be Migrated)
+### 2. Legacy Lead Management (Migrated to CRM)
 
-**Status**: ✅ Complete (Being replaced by CRM objects)
-**Location**: `/admin/leads`
+**Status**: ✅ Migrated to CRM (Phase 7 Complete)
+**Location**: `/admin/leads` (legacy), `/admin/crm-leads` (new)
 
-> **Note**: This section documents the legacy leads system which will be migrated to the new CRM object model. See "CRM Object Model" above for the new architecture.
+> **Note**: All 15 legacy leads have been migrated to the CRM system. The legacy `/admin/leads` page remains available for reference. New leads should be created in the CRM system at `/admin/crm-leads`.
+>
+> **Migration Details**:
+>
+> - Migration dashboard: `/admin/setup/migration`
+> - Tracking column: `leads.migrated_to_crm_id` links to `crm_leads.id`
+> - Status mapping: new→new, contacted→contacted, scheduled→qualified, client→converted, lost→unqualified
+> - Name parsing: Single `name` field split into `first_name` + `last_name`
+> - Extra fields preserved in `custom_fields` JSONB
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
