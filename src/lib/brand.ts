@@ -87,13 +87,13 @@ export const colors = {
 
 export const credentialStyles = {
   // Group 1: Birth & Postpartum (Primary olive tones)
-  'dona-birth': {
+  'birth-doula': {
     icon: 'text-primary',
     bg: 'bg-primary/10',
     border: 'border-primary/20',
     hover: 'hover:border-primary/40',
   },
-  'dona-postpartum': {
+  'postpartum-doula': {
     icon: 'text-primary',
     bg: 'bg-primary/10',
     border: 'border-primary/20',
@@ -101,7 +101,7 @@ export const credentialStyles = {
   },
 
   // Group 2: Specialized Services (Secondary terracotta tones)
-  lactation: {
+  breastfeeding: {
     icon: 'text-secondary',
     bg: 'bg-secondary/10',
     border: 'border-secondary/20',

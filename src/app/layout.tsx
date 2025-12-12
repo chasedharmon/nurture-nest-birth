@@ -41,21 +41,22 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://nurturenestbirth.com'),
   title: {
-    default: 'Nurture Nest Birth | DONA-Certified Doula in Kearney, Nebraska',
+    default: 'Nurture Nest Birth | Professional Doula in Kearney, Nebraska',
     template: '%s | Nurture Nest Birth',
   },
   description:
-    'Compassionate, evidence-based doula care in Kearney, Nebraska. Birth support, postpartum care, lactation consulting, and sibling preparation. DONA-certified with over 3 years experience.',
+    'Compassionate, evidence-based doula care in Central Nebraska and beyond. Birth support, postpartum doula services, infant feeding support, and more. Professionally trained with multiple certifications.',
   keywords: [
     'doula Kearney Nebraska',
     'birth doula',
     'postpartum doula',
-    'lactation consultant',
+    'infant feeding support',
     'Kearney NE',
-    'DONA certified',
+    'professional doula',
     'doula Grand Island',
     'doula Hastings',
     'Nebraska doula',
+    'Central Nebraska doula',
   ],
   authors: [{ name: 'Nurture Nest Birth' }],
   creator: 'Nurture Nest Birth',
@@ -70,9 +71,9 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://nurturenestbirth.com',
     siteName: 'Nurture Nest Birth',
-    title: 'Nurture Nest Birth | DONA-Certified Doula in Kearney, Nebraska',
+    title: 'Nurture Nest Birth | Professional Doula in Kearney, Nebraska',
     description:
-      'Compassionate, evidence-based doula care in Kearney, Nebraska. Birth support, postpartum care, lactation consulting, and sibling preparation.',
+      'Compassionate, evidence-based doula care in Central Nebraska and beyond. Birth support, postpartum doula services, infant feeding support, and more.',
     images: [
       {
         url: '/images/hero-newborn.jpg',
@@ -84,9 +85,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Nurture Nest Birth | DONA-Certified Doula in Kearney, Nebraska',
+    title: 'Nurture Nest Birth | Professional Doula in Kearney, Nebraska',
     description:
-      'Compassionate, evidence-based doula care in Kearney, Nebraska.',
+      'Compassionate, evidence-based doula care in Central Nebraska and beyond.',
     images: ['/images/hero-newborn.jpg'],
   },
   robots: {

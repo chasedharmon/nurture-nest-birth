@@ -11,7 +11,6 @@ import { EVENTS } from '@/lib/analytics'
 import {
   Heart,
   Sun,
-  Moon,
   Clock,
   Baby,
   Utensils,
@@ -25,20 +24,20 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Postpartum Doula Care | Fourth Trimester Support',
+  title: 'Postpartum Doula Support | Fourth Trimester Care',
   description:
-    'Postpartum doula services in Kearney, Nebraska. Expert support for newborn care, recovery, feeding, and adjusting to life with baby. Day and overnight support available.',
+    'Postpartum doula services in Kearney, Nebraska and Central Nebraska. Expert support for newborn care, recovery, feeding, and adjusting to life with baby.',
   keywords:
-    'postpartum doula Kearney NE, newborn care, postpartum support Nebraska, fourth trimester, overnight doula, newborn care specialist',
+    'postpartum doula Kearney NE, newborn care, postpartum support Nebraska, fourth trimester, newborn care specialist',
 }
 
-export default function PostpartumCarePage() {
+export default function PostpartumDoulaPage() {
   const serviceSchema = getServiceSchema({
-    name: 'Postpartum Doula Care',
+    name: 'Postpartum Doula Support',
     description:
-      'DONA-certified postpartum doula providing newborn care education, feeding support, emotional care, and household help during the fourth trimester in Kearney, Nebraska.',
-    priceRange: '$30-$45/hour',
-    slug: 'postpartum-care',
+      'Professionally trained postpartum doula providing newborn care education, feeding support, emotional care, and household help during the fourth trimester in Kearney, Nebraska and Central Nebraska.',
+    priceRange: '$35-$45/hour',
+    slug: 'postpartum-doula',
   })
 
   return (
@@ -47,8 +46,8 @@ export default function PostpartumCarePage() {
       <PageViewTracker
         eventName={EVENTS.SERVICE_PAGE_VIEW}
         properties={{
-          service: 'postpartum-care',
-          title: 'Postpartum Doula Care',
+          service: 'postpartum-doula',
+          title: 'Postpartum Doula Support',
         }}
       />
 
@@ -58,7 +57,7 @@ export default function PostpartumCarePage() {
           <FadeIn>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              DONA-Certified Postpartum Doula
+              Professionally Trained Postpartum Doula
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
@@ -194,7 +193,7 @@ export default function PostpartumCarePage() {
               "You're recovering from a cesarean or difficult birth",
               'You want to establish breastfeeding successfully',
               "You're experiencing anxiety about newborn care",
-              'You need overnight support to get sleep',
+              'You want to rest and recover properly',
               'You simply want nurturing, professional help',
             ].map((item, i) => (
               <FadeIn key={i} delay={i * 0.05}>
@@ -214,138 +213,82 @@ export default function PostpartumCarePage() {
         </div>
       </section>
 
-      {/* Day vs Overnight */}
+      {/* Daytime Support */}
       <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
             <h2 className={`text-center ${typography.h2}`}>
-              Day Support vs. Overnight Support
+              Daytime Postpartum Support
             </h2>
             <p className="text-center text-muted-foreground mt-4 max-w-2xl mx-auto">
-              Choose the support that fits your family's needs. Many families
-              combine both.
+              I provide daytime support when life feels most chaotic. My visits
+              are tailored to what your family needs.
             </p>
           </FadeIn>
-          <div className={`mt-12 grid ${grid.gap.medium} ${grid.cols.two}`}>
+          <div className="mt-12">
             <FadeIn delay={0.1}>
-              <Card className="h-full border-2">
+              <Card className="border-2">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-3 rounded-full bg-secondary/10 text-secondary">
                       <Sun className="h-6 w-6" />
                     </div>
                     <h3 className="font-serif text-xl font-semibold text-foreground">
-                      Daytime Support
+                      What Daytime Support Includes
                     </h3>
                   </div>
-                  <p className="text-muted-foreground mb-4">
-                    Help during waking hours when life feels most chaotic.
-                  </p>
-                  <ul className="space-y-3 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <span className="text-secondary mt-1">•</span>
-                      <span>
-                        <strong>Feeding support</strong> - watch and assist with
-                        breastfeeding or bottle prep
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-secondary mt-1">•</span>
-                      <span>
-                        <strong>Baby care education</strong> - bathing,
-                        swaddling, soothing
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-secondary mt-1">•</span>
-                      <span>
-                        <strong>Light housework</strong> - baby laundry, baby
-                        dishes, nursery organization
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-secondary mt-1">•</span>
-                      <span>
-                        <strong>Sibling care</strong> - engaging older kids
-                        while you rest or nurse
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-secondary mt-1">•</span>
-                      <span>
-                        <strong>Your nap</strong> - I watch baby while you sleep
-                      </span>
-                    </li>
-                  </ul>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <ul className="space-y-3 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <span className="text-secondary mt-1">•</span>
+                        <span>
+                          <strong>Feeding support</strong> - breastfeeding
+                          assistance, bottle prep, or combination feeding help
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-secondary mt-1">•</span>
+                        <span>
+                          <strong>Baby care education</strong> - bathing,
+                          swaddling, soothing techniques
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-secondary mt-1">•</span>
+                        <span>
+                          <strong>Light housework</strong> - baby laundry, baby
+                          dishes, nursery organization
+                        </span>
+                      </li>
+                    </ul>
+                    <ul className="space-y-3 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <span className="text-secondary mt-1">•</span>
+                        <span>
+                          <strong>Sibling care</strong> - engaging older kids
+                          while you rest or nurse
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-secondary mt-1">•</span>
+                        <span>
+                          <strong>Your rest</strong> - I watch baby while you
+                          nap
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-secondary mt-1">•</span>
+                        <span>
+                          <strong>Emotional support</strong> - a listening ear
+                          and reassurance
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
                   <div className="mt-6 pt-4 border-t">
                     <p className="text-sm text-muted-foreground">
-                      <strong>Typical hours:</strong> 3-5 hour visits, morning
-                      or afternoon
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </FadeIn>
-            <FadeIn delay={0.2}>
-              <Card className="h-full border-2 border-primary">
-                <CardContent className="pt-6">
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                      Popular Choice
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 rounded-full bg-primary/10 text-primary">
-                      <Moon className="h-6 w-6" />
-                    </div>
-                    <h3 className="font-serif text-xl font-semibold text-foreground">
-                      Overnight Support
-                    </h3>
-                  </div>
-                  <p className="text-muted-foreground mb-4">
-                    Sleep is essential for recovery. Let me handle the nights.
-                  </p>
-                  <ul className="space-y-3 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      <span>
-                        <strong>Nighttime baby care</strong> - soothing,
-                        changing, settling
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      <span>
-                        <strong>Feeding support</strong> - bring baby to you for
-                        nursing, or handle bottle feeds
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      <span>
-                        <strong>You actually sleep</strong> - 5-8 hours of
-                        uninterrupted rest
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      <span>
-                        <strong>Morning update</strong> - detailed log of the
-                        night
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      <span>
-                        <strong>Light prep</strong> - breakfast ready, kitchen
-                        tidied
-                      </span>
-                    </li>
-                  </ul>
-                  <div className="mt-6 pt-4 border-t">
-                    <p className="text-sm text-muted-foreground">
-                      <strong>Typical hours:</strong> 8-10 hour shifts, usually
-                      9pm-7am
+                      <strong>Typical visits:</strong> 4+ hour minimum, morning
+                      or afternoon. I'm flexible to your needs.
                     </p>
                   </div>
                 </CardContent>
@@ -388,7 +331,7 @@ export default function PostpartumCarePage() {
               },
               {
                 time: '10:45 AM',
-                icon: <Moon className="h-5 w-5" />,
+                icon: <Sun className="h-5 w-5" />,
                 title: 'Your Rest',
                 desc: 'Baby is content and drowsy. You take a nap while I watch the baby, fold baby laundry, and do light meal prep.',
               },
@@ -436,7 +379,7 @@ export default function PostpartumCarePage() {
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
             <h2 className={`text-center ${typography.h2}`}>
-              What's Included in Postpartum Care
+              What's Included in Postpartum Doula Support
             </h2>
           </FadeIn>
           <div className={`mt-12 grid ${grid.gap.medium} ${grid.cols.three}`}>
@@ -492,6 +435,101 @@ export default function PostpartumCarePage() {
         </div>
       </section>
 
+      {/* Included Services Section */}
+      <section className={`${spacing.container} ${spacing.section.md}`}>
+        <div className={`mx-auto ${maxWidth.content}`}>
+          <FadeIn>
+            <h2 className={typography.h2}>Included with Postpartum Support</h2>
+            <p className="text-muted-foreground mt-4">
+              These specialized services are included as part of your postpartum
+              doula package—no extra charge.
+            </p>
+          </FadeIn>
+          <div className="mt-8 grid md:grid-cols-2 gap-4">
+            <FadeIn delay={0.1}>
+              <Link
+                href="/services/infant-feeding"
+                className="group flex items-center gap-4 rounded-lg border p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <Heart className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-serif font-semibold group-hover:text-primary">
+                    Infant Feeding Support
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Breastfeeding, bottle feeding, and combination feeding
+                    guidance
+                  </p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+              </Link>
+            </FadeIn>
+
+            <FadeIn delay={0.2}>
+              <Link
+                href="/services/infant-massage"
+                className="group flex items-center gap-4 rounded-lg border p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <Hand className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-serif font-semibold group-hover:text-primary">
+                    Infant Massage Instruction
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Learn gentle techniques to soothe baby and deepen your bond
+                  </p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+              </Link>
+            </FadeIn>
+
+            <FadeIn delay={0.3}>
+              <Link
+                href="/services/sibling-prep"
+                className="group flex items-center gap-4 rounded-lg border p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-serif font-semibold group-hover:text-primary">
+                    Sibling Preparation
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Guidance for helping older children adjust
+                  </p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+              </Link>
+            </FadeIn>
+
+            <FadeIn delay={0.4}>
+              <Link
+                href="/services/car-seat-safety"
+                className="group flex items-center gap-4 rounded-lg border p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <CheckCircle className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-serif font-semibold group-hover:text-primary">
+                    Car Seat Safety Check
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    CPST-certified installation check and education
+                  </p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+              </Link>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
       {/* Bonus: Infant Massage */}
       <section
         className={`bg-secondary/5 ${spacing.container} ${spacing.section.md}`}
@@ -513,10 +551,11 @@ export default function PostpartumCarePage() {
                 </div>
                 <h2 className={typography.h2}>Infant Massage Instruction</h2>
                 <p className="mt-4 text-muted-foreground">
-                  As a Certified Infant Massage Instructor, I include basic
-                  infant massage education in all postpartum packages. Learn
-                  gentle techniques to soothe your baby, ease gas and colic,
-                  improve sleep, and deepen your bond through nurturing touch.
+                  As a Certified Infant Massage Instructor (CIMI), I include
+                  basic infant massage education in all postpartum packages.
+                  Learn gentle techniques to soothe your baby, ease gas and
+                  colic, improve sleep, and deepen your bond through nurturing
+                  touch.
                 </p>
                 <div className="mt-4">
                   <Button asChild variant="outline">
@@ -589,8 +628,8 @@ export default function PostpartumCarePage() {
           <FadeIn>
             <h2 className={typography.h2}>You Don't Have to Do This Alone</h2>
             <p className={`mt-4 ${typography.lead}`}>
-              Whether you need one overnight shift or several weeks of support,
-              I'm here to help your family thrive in those precious (and
+              Whether you need a few visits or several weeks of support, I'm
+              here to help your family thrive in those precious (and
               exhausting!) early weeks.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">

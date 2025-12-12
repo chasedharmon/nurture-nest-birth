@@ -113,12 +113,12 @@ export default function DoulaCostPost() {
           </h2>
 
           <h3 className="font-serif text-2xl font-semibold text-foreground">
-            Experience & Certification
+            Experience & Training
           </h3>
           <p>
             Newer doulas building their practice may charge $600–$1,000, while
-            experienced, certified doulas (like DONA-certified professionals)
-            typically charge $1,200–$2,000+.
+            experienced, professionally trained doulas typically charge
+            $1,200–$2,000+.
           </p>
 
           <h3 className="font-serif text-2xl font-semibold text-foreground">
@@ -140,7 +140,7 @@ export default function DoulaCostPost() {
             <li>Additional prenatal visits</li>
             <li>Birth photography</li>
             <li>Placenta encapsulation</li>
-            <li>Lactation consulting</li>
+            <li>Infant feeding support</li>
             <li>Postpartum visits beyond the first</li>
           </ul>
 
@@ -201,7 +201,7 @@ export default function DoulaCostPost() {
             "The Postpartum Support Was Priceless"
           </h3>
           <p>
-            Many families say the emotional support, lactation help, and
+            Many families say the emotional support, feeding help, and
             reassurance during those first weeks was invaluable—especially for
             preventing postpartum mood disorders.
           </p>

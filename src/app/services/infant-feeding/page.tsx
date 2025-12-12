@@ -21,14 +21,14 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Lactation Consulting | Nurture Nest Birth | Kearney, NE',
+  title: 'Infant Feeding Support | Nurture Nest Birth | Kearney, NE',
   description:
-    'Certified lactation consultant in Kearney, Nebraska. Expert breastfeeding support for latch issues, supply concerns, and feeding challenges.',
+    'Certified breastfeeding specialist in Kearney, Nebraska. Support for breastfeeding, bottle feeding, and combination feeding. Referral to IBCLC for complex issues.',
   keywords:
-    'lactation consultant Kearney NE, breastfeeding support, IBCLC Nebraska, nursing help',
+    'infant feeding support Kearney NE, breastfeeding support, breastfeeding specialist Nebraska, nursing help',
 }
 
-export default function LactationPage() {
+export default function InfantFeedingPage() {
   return (
     <div className="bg-background">
       {/* Hero Section */}
@@ -37,21 +37,21 @@ export default function LactationPage() {
           <FadeIn>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <Milk className="h-4 w-4" />
-              Lactation Consulting
+              Infant Feeding Support
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>
             <h1 className={typography.h1}>
-              Expert Breastfeeding Support
+              Expert Feeding Support
               <span className="block text-primary">When You Need It Most</span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.2}>
             <p className={`mt-6 ${typography.lead}`}>
-              Breastfeeding is natural, but it doesn't always come naturally.
-              Whether you're navigating early challenges or seeking support
-              weeks later, compassionate, evidence-based guidance can make all
-              the difference.
+              Whether you're breastfeeding, bottle feeding, or combination
+              feeding—you deserve support that meets you where you are.
+              Compassionate, evidence-based guidance can make all the
+              difference.
             </p>
           </FadeIn>
           <FadeIn delay={0.3}>
@@ -67,12 +67,12 @@ export default function LactationPage() {
         </div>
       </section>
 
-      {/* The Truth About Breastfeeding Section */}
+      {/* The Truth About Infant Feeding Section */}
       <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
             <h2 className={`text-center ${typography.h2}`}>
-              The Truth About Breastfeeding
+              The Truth About Infant Feeding
             </h2>
             <p className="mt-4 text-center text-muted-foreground">
               Despite what you may have heard, many feeding challenges are
@@ -87,7 +87,7 @@ export default function LactationPage() {
                   <span className="text-2xl font-bold text-primary">92%</span>
                 </div>
                 <p className="mt-4 text-sm text-muted-foreground">
-                  of mothers who receive skilled lactation support meet their
+                  of mothers who receive skilled feeding support meet their
                   breastfeeding goals
                 </p>
               </div>
@@ -135,7 +135,7 @@ export default function LactationPage() {
       <section className={`${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
-            <h2 className={typography.h2}>When to Seek Lactation Support</h2>
+            <h2 className={typography.h2}>When to Seek Feeding Support</h2>
             <p className="mt-4 text-muted-foreground">
               You don't need to wait until things are "bad enough." Getting help
               early often means faster, easier solutions.
@@ -213,6 +213,18 @@ export default function LactationPage() {
               </Card>
             </FadeIn>
           </div>
+
+          <FadeIn delay={0.3}>
+            <div className="mt-8 rounded-lg border bg-muted/30 p-4">
+              <p className="text-sm text-muted-foreground">
+                <strong className="text-foreground">Note:</strong> For complex
+                lactation issues such as tongue ties, severe supply problems, or
+                medical complications, I can provide a referral to a certified
+                IBCLC (International Board Certified Lactation Consultant) for
+                specialized care.
+              </p>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
@@ -247,13 +259,13 @@ export default function LactationPage() {
               },
               {
                 icon: Heart,
-                title: 'Tongue & Lip Ties',
-                desc: 'Assessment for oral restrictions, referrals to specialists, pre and post-release exercises, healing support.',
+                title: 'Bottle Feeding',
+                desc: 'Paced bottle feeding techniques, choosing bottles and nipples, transitioning between breast and bottle.',
               },
               {
                 icon: Sparkles,
-                title: 'Special Situations',
-                desc: 'Multiples, NICU babies, premature infants, relactation, induced lactation, nursing after breast surgery.',
+                title: 'Combination Feeding',
+                desc: 'Balancing breast and bottle, maintaining supply while supplementing, creating a sustainable routine.',
               },
               {
                 icon: Calendar,
@@ -287,7 +299,7 @@ export default function LactationPage() {
           <FadeIn>
             <h2 className={typography.h2}>What to Expect in a Consultation</h2>
             <p className="mt-4 text-muted-foreground">
-              A lactation consultation is unhurried, thorough, and focused
+              A feeding consultation is unhurried, thorough, and focused
               entirely on your family's needs.
             </p>
           </FadeIn>
@@ -310,7 +322,7 @@ export default function LactationPage() {
                 step: '3',
                 title: 'Assessment',
                 time: '10-15 min',
-                desc: "If needed, I'll do a gentle oral exam of baby, check for tongue/lip ties, assess your nipples, and may do a weighted feed.",
+                desc: "If needed, I'll do a gentle assessment of baby and evaluate your comfort. For complex issues, I can provide referrals to specialists.",
               },
               {
                 step: '4',
@@ -390,7 +402,7 @@ export default function LactationPage() {
                   <ul className="mt-4 space-y-2">
                     {[
                       'Most comfortable for you and baby',
-                      'See your actual nursing setup',
+                      'See your actual feeding setup',
                       'No travel stress postpartum',
                       'Partner can easily participate',
                     ].map((item, i) => (
@@ -455,7 +467,7 @@ export default function LactationPage() {
       <section className={`${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
-            <h2 className={typography.h2}>My Approach to Lactation Support</h2>
+            <h2 className={typography.h2}>My Approach to Feeding Support</h2>
           </FadeIn>
 
           <div className="mt-8 grid gap-6 md:grid-cols-2">
@@ -466,7 +478,7 @@ export default function LactationPage() {
                     Evidence-Based
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    I stay current on lactation research and provide
+                    I stay current on infant feeding research and provide
                     recommendations backed by the latest evidence, not outdated
                     myths or personal opinions.
                   </p>
@@ -477,8 +489,8 @@ export default function LactationPage() {
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Whether your goal is exclusive breastfeeding, combo feeding,
-                    or anything in between, I support YOUR informed choices
-                    without pressure or guilt.
+                    or formula feeding, I support YOUR informed choices without
+                    pressure or guilt.
                   </p>
                 </div>
               </div>
@@ -502,8 +514,8 @@ export default function LactationPage() {
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
                     I work alongside your pediatrician, OB, and other providers.
-                    If you need specialist referrals, I'll help coordinate your
-                    care.
+                    If you need specialist referrals (like an IBCLC), I'll help
+                    coordinate your care.
                   </p>
                 </div>
               </div>
@@ -513,59 +525,40 @@ export default function LactationPage() {
           <FadeIn delay={0.3}>
             <blockquote className="mt-10 border-l-4 border-primary pl-6">
               <p className="text-lg italic text-muted-foreground">
-                "Breastfeeding may be natural, but that doesn't mean it's easy.
-                You deserve support, not just advice. I'm here to help you find
-                what works for YOUR family."
+                "Feeding your baby—however you choose to do it—should feel
+                manageable, not miserable. I'm here to help you find what works
+                for YOUR family."
               </p>
             </blockquote>
           </FadeIn>
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* Included with Doula Services */}
       <section className={`bg-card ${spacing.container} ${spacing.section.md}`}>
         <div className={`mx-auto ${maxWidth.content}`}>
           <FadeIn>
-            <h2 className={`text-center ${typography.h2}`}>
-              Frequently Asked Questions
-            </h2>
+            <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-8 text-center">
+              <h2 className="font-serif text-2xl font-semibold">
+                Included with Doula Packages
+              </h2>
+              <p className="mt-4 text-muted-foreground">
+                Infant feeding support is included as part of postpartum doula
+                packages. This means you get feeding guidance integrated into
+                your comprehensive postpartum care.
+              </p>
+              <div className="mt-6 flex flex-col justify-center gap-4 sm:flex-row">
+                <Button asChild>
+                  <Link href="/services/postpartum-doula">
+                    Learn About Postpartum Support
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/pricing">View Packages</Link>
+                </Button>
+              </div>
+            </div>
           </FadeIn>
-
-          <div className="mt-10 space-y-6">
-            {[
-              {
-                q: 'When should I schedule a lactation consultation?',
-                a: "Ideally, book prenatally so we can discuss feeding goals and I can see you within the first week after birth. However, it's never too late to get support—I help families with babies of all ages.",
-              },
-              {
-                q: 'Will my insurance cover lactation support?',
-                a: 'Many insurance plans cover lactation consulting. I can provide a superbill for you to submit for reimbursement. Check with your insurance about your specific coverage for IBCLC or CLC services.',
-              },
-              {
-                q: "What if I've already been supplementing with formula?",
-                a: "That's okay! Supplementing doesn't mean you've \"failed\" or can't breastfeed. I can help you work toward your goals, whether that's reducing supplements, combo feeding long-term, or anything in between.",
-              },
-              {
-                q: 'How many visits will I need?',
-                a: 'Many families find significant improvement after one visit with their personalized plan. Some situations benefit from follow-up visits. I also offer phone/text support between visits.',
-              },
-              {
-                q: 'Can my partner be involved?',
-                a: 'Absolutely! I encourage partners to participate. They can learn how to support positioning, recognize feeding cues, and help troubleshoot at home.',
-              },
-              {
-                q: "What if breastfeeding just isn't working for us?",
-                a: "I support ALL feeding journeys. If breastfeeding isn't the right fit, I can help you transition to formula feeding comfortably and without guilt. Your mental health and family wellbeing matter most.",
-              },
-            ].map((item, i) => (
-              <FadeIn key={i} delay={i * 0.05}>
-                <div className="border-b pb-4">
-                  <h3 className="font-serif text-lg font-semibold">{item.q}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{item.a}</p>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -575,14 +568,14 @@ export default function LactationPage() {
           <FadeIn>
             <h2 className={typography.h2}>Related Support Services</h2>
             <p className="mt-4 text-muted-foreground">
-              Lactation support is just one piece of the postpartum puzzle.
+              Feeding support is just one piece of the postpartum puzzle.
             </p>
           </FadeIn>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             <FadeIn delay={0.1}>
               <Link
-                href="/services/postpartum-care"
+                href="/services/postpartum-doula"
                 className="group flex items-center gap-4 rounded-lg border p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">

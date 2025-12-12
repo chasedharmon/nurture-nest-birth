@@ -86,8 +86,8 @@ export function generateServiceMetadata(options: {
     description,
     keywords: [
       ...keywords,
-      'doula Kearney NE',
-      'DONA certified',
+      'doula Central Nebraska',
+      'professional doula',
       'Nebraska doula',
     ],
     path: `/services/${slug}`,

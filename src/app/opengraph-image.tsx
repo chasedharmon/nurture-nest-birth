@@ -12,7 +12,7 @@ import { siteConfig } from '@/config/site'
 
 export const runtime = 'edge'
 export const alt =
-  'Nurture Nest Birth - DONA-Certified Doula in Kearney, Nebraska'
+  'Nurture Nest Birth - Professional Doula in Kearney, Nebraska'
 export const size = {
   width: 1200,
   height: 630,
@@ -57,7 +57,7 @@ export default async function Image() {
           maxWidth: '80%',
         }}
       >
-        DONA-Certified Doula in Kearney, Nebraska
+        Professional Doula in Central Nebraska
       </div>
 
       {/* Services */}
@@ -69,7 +69,7 @@ export default async function Image() {
           marginTop: 30,
         }}
       >
-        Birth Support • Postpartum Care • Lactation
+        Birth Doula • Postpartum Doula • Photography
       </div>
 
       {/* Bottom Badge */}

@@ -9,9 +9,9 @@ export const siteConfig = {
   // Business Information
   business: {
     name: 'Nurture Nest Birth',
-    tagline: 'Compassionate Doula Support in Kearney, Nebraska',
+    tagline: 'Compassionate Doula Support Based in Central Nebraska',
     description:
-      'DONA-certified doula providing birth support, postpartum care, and lactation consulting in Kearney and central Nebraska.',
+      'Professionally trained birth and postpartum doula providing comprehensive support in Central Nebraska and beyond. Willing to travel for the right fit.',
     owner: 'Your Name', // TODO: Update with actual name
     established: 2022, // TODO: Update with actual year
   },
@@ -44,6 +44,9 @@ export const siteConfig = {
       'Lexington',
       'Central Nebraska',
     ],
+    willingToTravel: true,
+    travelNote:
+      'Based in Central Nebraska, willing to travel for the right fit',
     coordinates: {
       // For map integrations and local SEO
       latitude: 40.6993,
@@ -60,60 +63,132 @@ export const siteConfig = {
 
   // Credentials & Certifications
   credentials: [
-    'DONA Certified Birth Doula',
-    'DONA Certified Postpartum Doula',
-    'Certified Lactation Consultant',
+    'Professionally Trained Birth Doula',
+    'Professionally Trained Postpartum Doula',
+    'Certified Breastfeeding Specialist',
     'Child Passenger Safety Technician (CPST)',
     'Certified Infant Massage Instructor (CIMI)',
     'Family Studies Degree',
     'Home Visitation Specialist',
   ],
 
+  // Future credentials (for when certifications are obtained)
+  futureCredentials: [
+    'DONA Certified Birth Doula', // In progress
+    'DONA Certified Postpartum Doula', // In progress
+  ],
+
   // Services (for navigation and metadata)
-  services: [
+  // Primary services are standalone; included services come with doula packages
+  services: {
+    primary: [
+      {
+        slug: 'birth-doula',
+        name: 'Birth Doula Support',
+        shortDescription: 'Continuous support during labor and delivery',
+        standalone: true,
+      },
+      {
+        slug: 'postpartum-doula',
+        name: 'Postpartum Doula Support',
+        shortDescription: 'Comprehensive support during the fourth trimester',
+        standalone: true,
+      },
+    ],
+    included: [
+      {
+        slug: 'infant-feeding',
+        name: 'Infant Feeding Support',
+        shortDescription:
+          'Guidance for breastfeeding, bottle feeding, and combination feeding',
+        includedWith: ['postpartum-doula'],
+        note: 'For complex issues, referral to certified IBCLC provided',
+      },
+      {
+        slug: 'sibling-prep',
+        name: 'Sibling Preparation',
+        shortDescription:
+          'Helping parents navigate conversations and involve siblings',
+        includedWith: ['birth-doula', 'postpartum-doula'],
+      },
+      {
+        slug: 'car-seat-safety',
+        name: 'Car Seat Safety',
+        shortDescription: 'CPST-certified car seat checks and education',
+        includedWith: ['birth-doula', 'postpartum-doula'],
+        note: 'Community check days also available',
+      },
+      {
+        slug: 'infant-massage',
+        name: 'Infant Massage',
+        shortDescription: 'Learn gentle massage techniques to bond with baby',
+        includedWith: ['postpartum-doula'],
+      },
+    ],
+    additional: [
+      {
+        slug: 'photography',
+        name: 'Birth & Family Photography',
+        shortDescription:
+          'Professional photography to capture precious moments',
+        standalone: true,
+        note: 'Can be added to any doula package or booked separately',
+      },
+    ],
+  },
+
+  // Legacy flat services array for backward compatibility
+  servicesFlat: [
     {
       slug: 'birth-doula',
-      name: 'Birth Doula',
+      name: 'Birth Doula Support',
       shortDescription: 'Continuous support during labor and delivery',
     },
     {
-      slug: 'postpartum-care',
-      name: 'Postpartum Care',
-      shortDescription: 'In-home support during the fourth trimester',
+      slug: 'postpartum-doula',
+      name: 'Postpartum Doula Support',
+      shortDescription: 'Comprehensive support during the fourth trimester',
     },
     {
-      slug: 'lactation',
-      name: 'Lactation Consulting',
-      shortDescription: 'Expert breastfeeding guidance and support',
+      slug: 'infant-feeding',
+      name: 'Infant Feeding Support',
+      shortDescription:
+        'Guidance for breastfeeding, bottle feeding, and combination feeding',
     },
     {
       slug: 'sibling-prep',
       name: 'Sibling Preparation',
-      shortDescription: 'Preparing older siblings for a new baby',
+      shortDescription:
+        'Helping parents navigate conversations and involve siblings',
     },
     {
       slug: 'car-seat-safety',
       name: 'Car Seat Safety',
-      shortDescription: 'Certified car seat installation checks and education',
+      shortDescription: 'CPST-certified car seat checks and education',
     },
     {
       slug: 'infant-massage',
       name: 'Infant Massage',
       shortDescription: 'Learn gentle massage techniques to bond with baby',
     },
+    {
+      slug: 'photography',
+      name: 'Birth & Family Photography',
+      shortDescription: 'Professional photography to capture precious moments',
+    },
   ],
 
   // SEO & Metadata
   seo: {
-    title: 'Nurture Nest Birth | DONA Certified Doula in Kearney, NE',
+    title: 'Nurture Nest Birth | Professional Doula in Central Nebraska',
     description:
-      'DONA-certified birth doula, postpartum care, and lactation consulting in Kearney, Nebraska. Compassionate support for your birth journey.',
+      'Professionally trained birth and postpartum doula providing compassionate support in Central Nebraska. Infant feeding guidance, car seat safety, and more.',
     keywords: [
       'doula Kearney NE',
       'birth doula Nebraska',
       'postpartum doula Kearney',
-      'lactation consultant Kearney',
-      'DONA certified doula',
+      'breastfeeding support Nebraska',
+      'professional doula',
       'pregnancy support Nebraska',
       'birth support Grand Island',
       'doula services central Nebraska',
@@ -136,31 +211,62 @@ export const siteConfig = {
   },
 
   // Pricing (centralized for easier updates)
+  // Based on Nebraska market research (Dec 2025): NE range $750-$2,400 for birth doula
   pricing: {
     currency: 'USD',
+    displayMode: 'starting_at', // 'full', 'starting_at', or 'contact'
     packages: {
       birthDoula: {
-        price: 1200,
-        range: '1,000-1,500', // Display range if pricing varies
+        startingAt: 1500,
+        includes: [
+          'Initial consultation',
+          '2 prenatal visits',
+          'On-call support from 38 weeks',
+          'Continuous labor & delivery support',
+          '1 postpartum visit',
+          'Sibling preparation guidance',
+          'Car seat safety check',
+        ],
+        payment: {
+          retainer: 50, // percentage
+          retainerNote: 'Non-refundable retainer due at contract signing',
+          balanceDue: '36 weeks',
+        },
       },
-      postpartumCare: {
-        hourly: 40,
-        packageHours: [10, 20, 40],
+      postpartumDoula: {
+        hourlyRate: 40,
+        minimumHours: 4, // daytime minimum
+        includes: [
+          'Infant feeding support',
+          'Newborn care assistance',
+          'Light household help',
+          'Emotional support',
+          'Infant massage instruction',
+          'Sibling adjustment support',
+        ],
+        payment: {
+          // Per training: <2 weeks = 100% upfront, >2 weeks = 50% retainer
+          retainerNote: 'Retainer structure based on booking timeline',
+        },
       },
-      lactation: {
-        initialConsult: 150,
-        followUp: 75,
+      completeCarBundle: {
+        startingAt: 1800,
+        postpartumRate: 35, // discounted hourly
+        discount: 'Save with bundled pricing',
+        includes: [
+          'Everything in Birth Doula Support',
+          'Discounted postpartum hourly rate',
+          'Seamless continuity of care',
+          'Priority scheduling',
+        ],
       },
-      siblingPrep: {
-        single: 200,
-        group: 150,
+      photography: {
+        startingAt: null, // Contact for pricing
+        note: 'Can be added to any package or booked separately',
       },
     },
-    paymentOptions: [
-      'Payment plans available',
-      'HSA/FSA accepted',
-      'Sliding scale for financial hardship',
-    ],
+    paymentOptions: ['HSA/FSA accepted', 'Retainer required (non-refundable)'],
+    // Note: Payment plans removed per wife's preference - want to get paid efficiently
   },
 
   // Feature Flags (for gradually rolling out features)
@@ -173,12 +279,13 @@ export const siteConfig = {
   },
 
   // Testimonials (easy to maintain - just add/edit here!)
+  // Note: These are placeholder testimonials - update with real ones when available
   testimonials: [
     {
       id: '1',
       name: 'Sarah M.',
       location: 'Kearney, NE',
-      service: 'Birth Doula',
+      service: 'Birth Doula Support',
       quote:
         'Having a doula made all the difference in my birth experience. The support and guidance were invaluable, and I felt empowered throughout my entire labor.',
       rating: 5,
@@ -188,9 +295,9 @@ export const siteConfig = {
       id: '2',
       name: 'Jessica L.',
       location: 'Grand Island, NE',
-      service: 'Postpartum Care',
+      service: 'Postpartum Doula Support',
       quote:
-        'The postpartum support was exactly what I needed. From breastfeeding help to just having someone to talk to, I felt cared for during such a vulnerable time.',
+        'The postpartum support was exactly what I needed. From feeding help to just having someone to talk to, I felt cared for during such a vulnerable time.',
       rating: 5,
       featured: true,
     },
@@ -198,9 +305,9 @@ export const siteConfig = {
       id: '3',
       name: 'Amanda K.',
       location: 'Hastings, NE',
-      service: 'Lactation Consulting',
+      service: 'Infant Feeding Support',
       quote:
-        'I was ready to give up on breastfeeding until I worked with my lactation consultant. Her patience and expertise helped us succeed when I thought it was impossible.',
+        'I was ready to give up on breastfeeding until I got the support I needed. The patience and expertise helped us succeed when I thought it was impossible.',
       rating: 5,
       featured: true,
     },
@@ -208,7 +315,7 @@ export const siteConfig = {
       id: '4',
       name: 'Emily R.',
       location: 'Kearney, NE',
-      service: 'Birth Doula',
+      service: 'Birth Doula Support',
       quote:
         'Professional, knowledgeable, and incredibly supportive. I recommend this doula service to every expecting parent I meet!',
       rating: 5,
@@ -219,5 +326,11 @@ export const siteConfig = {
 
 // Type exports for TypeScript autocomplete
 export type SiteConfig = typeof siteConfig
-export type Service = (typeof siteConfig.services)[number]
+export type PrimaryService = (typeof siteConfig.services.primary)[number]
+export type IncludedService = (typeof siteConfig.services.included)[number]
+export type AdditionalService = (typeof siteConfig.services.additional)[number]
+export type ServiceFlat = (typeof siteConfig.servicesFlat)[number]
 export type Testimonial = (typeof siteConfig.testimonials)[number]
+
+// Backward compatibility alias
+export type Service = ServiceFlat

@@ -7,9 +7,9 @@ import { spacing, maxWidth, typography, grid, card } from '@/lib/design-system'
 export const metadata: Metadata = {
   title: 'Blog | Nurture Nest Birth | Doula Resources & Birth Tips',
   description:
-    'Expert advice on pregnancy, birth, and postpartum from a DONA-certified doula in Kearney, Nebraska. Tips for preparing for birth, choosing a doula, and more.',
+    'Expert advice on pregnancy, birth, and postpartum from a professional doula in Central Nebraska. Tips for preparing for birth, choosing a doula, and more.',
   keywords:
-    'birth tips, doula advice, pregnancy blog, postpartum tips, Kearney NE doula',
+    'birth tips, doula advice, pregnancy blog, postpartum tips, Central Nebraska doula',
 }
 
 const blogPosts = [

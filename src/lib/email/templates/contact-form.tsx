@@ -18,9 +18,9 @@ interface ContactFormEmailProps {
 export function ContactFormEmail({ data }: ContactFormEmailProps) {
   const serviceLabels: Record<string, string> = {
     'birth-doula': 'Birth Doula Support',
-    'postpartum-care': 'Postpartum Care',
-    lactation: 'Lactation Consulting',
-    'sibling-prep': 'Sibling Preparation',
+    'postpartum-doula': 'Postpartum Doula Support',
+    'complete-care': 'Complete Care Bundle (Birth + Postpartum)',
+    photography: 'Birth & Family Photography',
     multiple: 'Multiple Services',
     'not-sure': 'Not Sure Yet',
   }

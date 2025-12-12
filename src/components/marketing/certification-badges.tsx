@@ -42,32 +42,32 @@ interface Certification {
 
 const certifications: Certification[] = [
   {
-    id: 'dona-birth',
-    name: 'DONA Certified Birth Doula',
+    id: 'birth-doula',
+    name: 'Professionally Trained Birth Doula',
     shortName: 'Birth Doula',
-    organization: 'DONA International',
+    organization: 'Professional Doula Training',
     description:
-      "Trained and certified by DONA International, the world's oldest and largest doula certifying organization. Includes extensive training in labor support, comfort measures, and advocacy.",
+      'Professionally trained birth doula with extensive education in labor support, comfort measures, and advocacy. Comprehensive training in evidence-based birth support techniques.',
     icon: Heart,
     group: 'core',
   },
   {
-    id: 'dona-postpartum',
-    name: 'DONA Certified Postpartum Doula',
+    id: 'postpartum-doula',
+    name: 'Professionally Trained Postpartum Doula',
     shortName: 'Postpartum Doula',
-    organization: 'DONA International',
+    organization: 'Professional Doula Training',
     description:
-      'Certified to provide evidence-based postpartum support including newborn care, feeding assistance, family adjustment, and recovery support during the fourth trimester.',
+      'Trained to provide evidence-based postpartum support including newborn care, feeding assistance, family adjustment, and recovery support during the fourth trimester.',
     icon: Baby,
     group: 'core',
   },
   {
-    id: 'lactation',
-    name: 'Certified Lactation Consultant',
-    shortName: 'Lactation',
+    id: 'breastfeeding',
+    name: 'Certified Breastfeeding Specialist',
+    shortName: 'Breastfeeding',
     organization: 'Lactation Education Resources',
     description:
-      'Trained to provide evidence-based lactation support, including latch assessment, supply management, and troubleshooting common breastfeeding challenges.',
+      'Trained to provide evidence-based infant feeding support, including latch assessment, supply management, and troubleshooting common breastfeeding challenges. For complex issues, referral to certified IBCLC provided.',
     icon: HandHeart,
     group: 'specialized',
   },
@@ -384,9 +384,9 @@ export function CertificationBadge({
 // Featured certifications highlight component
 export function FeaturedCertifications({ className }: { className?: string }) {
   const featured = [
-    'dona-birth',
-    'dona-postpartum',
-    'lactation',
+    'birth-doula',
+    'postpartum-doula',
+    'breastfeeding',
     'cpst',
     'infant-massage',
   ]

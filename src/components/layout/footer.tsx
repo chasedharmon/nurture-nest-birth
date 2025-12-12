@@ -15,9 +15,9 @@ import { NewsletterSignup } from '@/components/newsletter/newsletter-signup'
 const footerNavigation = {
   services: [
     { name: 'Birth Doula', href: '/services/birth-doula' },
-    { name: 'Postpartum Care', href: '/services/postpartum-care' },
-    { name: 'Lactation Consulting', href: '/services/lactation' },
-    { name: 'Sibling Preparation', href: '/services/sibling-prep' },
+    { name: 'Postpartum Doula', href: '/services/postpartum-doula' },
+    { name: 'Infant Feeding Support', href: '/services/infant-feeding' },
+    { name: 'Photography', href: '/services/photography' },
   ],
   company: [
     { name: 'About', href: '/about' },

@@ -12,9 +12,9 @@ import { spacing, maxWidth, grid, typography, icon } from '@/lib/design-system'
 export const metadata: Metadata = {
   title: 'Services | Nurture Nest Birth | Doula Care in Kearney, NE',
   description:
-    'Comprehensive doula services in Kearney, Nebraska including birth support, postpartum care, lactation consulting, and sibling preparation classes.',
+    'Comprehensive doula services in Kearney, Nebraska and Central Nebraska. Birth doula support, postpartum doula care, infant feeding support, and more.',
   keywords:
-    'doula services Kearney NE, birth doula, postpartum doula, lactation consultant, sibling classes Nebraska',
+    'doula services Kearney NE, birth doula, postpartum doula, infant feeding support, sibling classes Nebraska',
 }
 
 const services = [
@@ -40,10 +40,10 @@ const services = [
     ),
   },
   {
-    title: 'Postpartum Care',
+    title: 'Postpartum Doula Support',
     description:
       'In-home support during the fourth trimester. Newborn care education, feeding assistance, emotional support, and light baby-focused help (baby laundry, baby dishes, nursery organization) so you can rest and bond.',
-    href: '/services/postpartum-care',
+    href: '/services/postpartum-doula',
     icon: (
       <svg
         className="h-7 w-7"
@@ -61,10 +61,10 @@ const services = [
     ),
   },
   {
-    title: 'Lactation Consulting',
+    title: 'Infant Feeding Support',
     description:
-      'Expert breastfeeding support from a Certified Lactation Consultant. Help with latch issues, supply concerns, pumping, and feeding challenges.',
-    href: '/services/lactation',
+      'Guidance and support for breastfeeding, bottle feeding, or combination feeding. Help with latch issues, supply concerns, pumping, and feeding challenges. Referral to IBCLC for complex issues.',
+    href: '/services/infant-feeding',
     icon: (
       <svg
         className="h-7 w-7"
@@ -137,7 +137,7 @@ const comparisonServices: ComparisonService[] = [
     highlighted: true,
   },
   {
-    name: 'Postpartum',
+    name: 'Postpartum Doula',
     description: 'Fourth trimester care',
     features: [
       false,
@@ -153,15 +153,15 @@ const comparisonServices: ComparisonService[] = [
     ],
   },
   {
-    name: 'Lactation',
-    description: 'Expert feeding support',
+    name: 'Infant Feeding',
+    description: 'Feeding guidance & support',
     features: [
       '1 visit',
       'Text/email',
       false,
       false,
       '1-2 visits',
-      'Expert',
+      'Specialized',
       'Feeding only',
       false,
       true,
@@ -372,8 +372,8 @@ export default function ServicesPage() {
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-center text-lg text-muted-foreground">
             I offer both individual services and comprehensive packages. Many
-            families combine birth doula support with postpartum care or
-            lactation consulting for complete support throughout their journey.
+            families choose the Complete Care Bundle combining birth doula and
+            postpartum doula support for seamless care throughout their journey.
           </p>
           <div className="mt-12 space-y-4 rounded-2xl border-2 border-primary/20 bg-primary/5 p-8">
             <h3 className="font-serif text-xl font-semibold text-foreground">
@@ -394,8 +394,8 @@ export default function ServicesPage() {
                   <span className="h-2 w-2 rounded-full bg-primary" />
                 </span>
                 <span>
-                  Postpartum + Lactation bundle for comprehensive feeding and
-                  recovery support
+                  Postpartum doula + infant feeding bundle for comprehensive
+                  feeding and recovery support
                 </span>
               </li>
               <li className="flex items-start gap-3">

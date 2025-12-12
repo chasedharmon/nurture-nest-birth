@@ -51,7 +51,7 @@ export function LocalBusinessStructuredData() {
           '@type': 'Offer',
           itemOffered: {
             '@type': 'Service',
-            name: 'Postpartum Care',
+            name: 'Postpartum Doula Support',
             description:
               'In-home fourth trimester support with newborn care and feeding assistance',
           },
@@ -60,9 +60,9 @@ export function LocalBusinessStructuredData() {
           '@type': 'Offer',
           itemOffered: {
             '@type': 'Service',
-            name: 'Lactation Consulting',
+            name: 'Infant Feeding Support',
             description:
-              'Expert breastfeeding support from a Certified Lactation Consultant',
+              'Guidance and support for breastfeeding, bottle feeding, or combination feeding from a Certified Breastfeeding Specialist',
           },
         },
       ],

@@ -20,11 +20,11 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'About | Nurture Nest Birth | DONA Doula Kearney, NE',
+  title: 'About | Nurture Nest Birth | Professional Doula Kearney, NE',
   description:
-    'Meet your DONA-certified doula in Kearney, Nebraska. Learn about my philosophy, credentials, and approach to supporting families through pregnancy, birth, and postpartum.',
+    'Meet your professionally trained doula in Kearney, Nebraska. Learn about my philosophy, credentials, and approach to supporting families through pregnancy, birth, and postpartum.',
   keywords:
-    'about doula Kearney NE, DONA certified, lactation consultant Nebraska, birth support philosophy',
+    'about doula Kearney NE, professional doula, breastfeeding specialist Nebraska, birth support philosophy',
 }
 
 export default function AboutPage() {
@@ -84,9 +84,10 @@ export default function AboutPage() {
               </FadeIn>
               <FadeIn delay={0.3}>
                 <p className={`mt-6 ${typography.lead}`}>
-                  I'm a DONA-certified doula, lactation consultant, and mom who
-                  believes every family deserves compassionate, evidence-based
-                  support during the transformative journey into parenthood.
+                  I'm a professionally trained doula, certified breastfeeding
+                  specialist, and mom who believes every family deserves
+                  compassionate, evidence-based support during the
+                  transformative journey into parenthood.
                 </p>
               </FadeIn>
               <FadeIn delay={0.4}>
@@ -160,11 +161,11 @@ export default function AboutPage() {
             </FadeIn>
             <FadeIn delay={0.5}>
               <p>
-                I pursued DONA certification for both birth and postpartum
-                support, became a certified lactation consultant, and continued
-                adding specialized training that helps me serve families more
-                completely—including car seat safety certification and infant
-                massage instruction.
+                I pursued professional training for both birth and postpartum
+                support, became a certified breastfeeding specialist, and
+                continued adding specialized training that helps me serve
+                families more completely—including car seat safety certification
+                (CPST) and infant massage instruction (CIMI).
               </p>
             </FadeIn>
           </div>
@@ -223,7 +224,7 @@ export default function AboutPage() {
                     </div>
                     <div>
                       <h3 className="font-serif text-lg font-semibold">
-                        Car Seat Safety Expert
+                        Child Passenger Safety Technician
                       </h3>
                       <p className="text-xs text-muted-foreground">
                         CPST Certified

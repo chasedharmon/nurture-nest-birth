@@ -28,7 +28,7 @@ const serviceIcons: Record<string, React.ReactNode> = {
       />
     </svg>
   ),
-  'postpartum-care': (
+  'postpartum-doula': (
     <svg
       className="h-6 w-6"
       fill="none"
@@ -43,7 +43,7 @@ const serviceIcons: Record<string, React.ReactNode> = {
       />
     </svg>
   ),
-  lactation: (
+  'infant-feeding': (
     <svg
       className="h-6 w-6"
       fill="none"
@@ -103,29 +103,53 @@ const serviceIcons: Record<string, React.ReactNode> = {
       />
     </svg>
   ),
+  photography: (
+    <svg
+      className="h-6 w-6"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+    </svg>
+  ),
 }
 
 // Full service descriptions (more detailed than shortDescription in config)
 const serviceDescriptions: Record<string, string> = {
   'birth-doula':
     'Continuous physical, emotional, and informational support during labor and delivery. I help you advocate for your birth preferences and provide comfort measures throughout your journey.',
-  'postpartum-care':
-    'Nurturing support during the fourth trimester. From newborn care education to emotional support and recovery assistance, I help your family adjust to life with your new baby.',
-  lactation:
-    'Expert guidance to establish and maintain a successful breastfeeding relationship. I provide personalized support for latch issues, supply concerns, and feeding plans.',
+  'postpartum-doula':
+    'Comprehensive support during the fourth trimester. From newborn care education to emotional support and recovery assistance, I help your family adjust to life with your new baby.',
+  'infant-feeding':
+    'Guidance and support for breastfeeding, bottle feeding, or combination feeding. I meet you where you are and support whatever decision is best for your family.',
   'sibling-prep':
-    'Help your older children feel excited and prepared for their new sibling. Age-appropriate education and activities to ease the transition for the whole family.',
+    'Help parents navigate conversations with older children and involve siblings after baby arrives so they feel included and excited about their new role.',
   'car-seat-safety':
-    'As a certified Child Passenger Safety Technician, I ensure your car seat is installed correctly and your baby travels safely from day one.',
+    'As a certified Child Passenger Safety Technician (CPST), I ensure your car seat is installed correctly and your baby travels safely from day one.',
   'infant-massage':
     'Learn gentle massage techniques to soothe your baby, ease gas and colic, improve sleep, and deepen your bond through nurturing touch.',
+  photography:
+    "Professional photography to capture precious moments during birth and the early days with your newborn. Authentic, beautiful images you'll treasure forever.",
 }
 
 export function ServicesOverview() {
   // Build services array from config + icons + descriptions
-  const services = siteConfig.services.map(service => ({
+  // Using servicesFlat for backward compatibility (flat array of all services)
+  const services = siteConfig.servicesFlat.map(service => ({
     title: service.name,
-    description: serviceDescriptions[service.slug] || '',
+    description: serviceDescriptions[service.slug] || service.shortDescription,
     href: `/services/${service.slug}`,
     icon: serviceIcons[service.slug],
   }))

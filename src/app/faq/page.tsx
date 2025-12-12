@@ -9,7 +9,7 @@ import { JSONLDScript, getFAQSchema } from '@/lib/schema'
 export const metadata: Metadata = {
   title: 'FAQ | Nurture Nest Birth | Common Doula Questions',
   description:
-    'Frequently asked questions about doula services, birth support, postpartum care, and lactation consulting in Kearney, Nebraska.',
+    'Frequently asked questions about doula services, birth support, postpartum doula care, and infant feeding support in Kearney, Nebraska.',
   keywords:
     'doula FAQ, birth doula questions, postpartum doula cost, what does a doula do',
 }
@@ -58,7 +58,7 @@ const faqs = [
   {
     question: 'Can you help with breastfeeding?',
     answer:
-      'Yes! As a Certified Lactation Consultant, I can provide specialized breastfeeding support. This includes help with latch, addressing pain or supply concerns, pumping strategies, and combination feeding. Lactation support can be part of postpartum doula care or scheduled as standalone consultations.',
+      'Yes! As a Certified Breastfeeding Specialist, I can provide infant feeding support. This includes help with latch, addressing pain or supply concerns, pumping strategies, and combination feeding. For more complex lactation issues, I can refer you to a certified IBCLC. Feeding support can be part of postpartum doula care or scheduled as standalone consultations.',
   },
   {
     question: 'What if I need to have a cesarean birth?',

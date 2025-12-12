@@ -19,10 +19,10 @@ export function Footer() {
             </p>
             <div className="mt-6">
               <p className="text-sm font-medium text-foreground">
-                DONA Certified Doula
+                Professionally Trained Birth & Postpartum Doula
               </p>
               <p className="text-sm text-muted-foreground">
-                Lactation Consultant
+                Certified Breastfeeding Specialist
               </p>
             </div>
           </div>
@@ -41,18 +41,18 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/services/postpartum-care"
+                  href="/services/postpartum-doula"
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Postpartum Care
+                  Postpartum Doula Support
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/services/lactation"
+                  href="/services/infant-feeding"
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Lactation Consulting
+                  Infant Feeding Support
                 </Link>
               </li>
               <li>

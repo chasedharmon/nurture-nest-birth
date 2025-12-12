@@ -26,7 +26,7 @@ import {
 export const metadata: Metadata = {
   title: 'Birth Doula Support | Comprehensive Labor & Delivery Care',
   description:
-    'DONA-certified birth doula in Kearney, NE. Continuous labor support, prenatal planning, and postpartum follow-up. Supporting all birth settings and preferences.',
+    'Professionally trained birth doula in Kearney, NE and Central Nebraska. Continuous labor support, prenatal planning, and postpartum follow-up. Supporting all birth settings.',
   keywords:
     'birth doula Kearney, labor support, doula services Nebraska, hospital birth support, home birth doula',
 }
@@ -35,8 +35,8 @@ export default function BirthDoulaPage() {
   const serviceSchema = getServiceSchema({
     name: 'Birth Doula Support',
     description:
-      'DONA-certified birth doula providing continuous labor support, prenatal planning, and postpartum follow-up. Supporting all birth settings and preferences in Kearney, Nebraska.',
-    priceRange: '$800-$1500',
+      'Professionally trained birth doula providing continuous labor support, prenatal planning, and postpartum follow-up. Supporting all birth settings and preferences in Kearney, Nebraska and Central Nebraska.',
+    priceRange: 'Starting at $1,500',
     slug: 'birth-doula',
   })
 
@@ -54,7 +54,7 @@ export default function BirthDoulaPage() {
           <FadeIn>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              DONA-Certified Birth Doula
+              Professionally Trained Birth Doula
             </div>
           </FadeIn>
           <FadeIn delay={0.1}>

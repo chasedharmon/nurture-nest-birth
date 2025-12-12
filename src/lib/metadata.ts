@@ -25,7 +25,7 @@ interface PageMetadataProps {
  * @example
  * export const metadata = generateMetadata({
  *   title: 'About',
- *   description: 'Learn about our DONA-certified doula services',
+ *   description: 'Learn about our professional doula services',
  *   path: '/about',
  * })
  */

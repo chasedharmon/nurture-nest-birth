@@ -167,7 +167,7 @@ export default function Home() {
                       <Car className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <h3 className="mt-4 font-serif text-xl font-semibold">
-                      Car Seat Safety Expert
+                      Child Passenger Safety Technician
                     </h3>
                     <p className="mt-2 text-sm font-medium text-muted-foreground">
                       CPST Certified
@@ -239,8 +239,8 @@ export default function Home() {
                       7+ Certifications
                     </p>
                     <p className="mt-3 text-sm text-muted-foreground">
-                      DONA birth & postpartum doula, lactation consultant, and
-                      more. I bring{' '}
+                      Professionally trained birth & postpartum doula, certified
+                      breastfeeding specialist, and more. I bring{' '}
                       <strong className="text-foreground">
                         evidence-based expertise
                       </strong>{' '}
@@ -279,9 +279,9 @@ export default function Home() {
                 variant="icons-only"
                 showTooltips={true}
                 filter={[
-                  'dona-birth',
-                  'dona-postpartum',
-                  'lactation',
+                  'birth-doula',
+                  'postpartum-doula',
+                  'breastfeeding',
                   'cpst',
                   'infant-massage',
                 ]}

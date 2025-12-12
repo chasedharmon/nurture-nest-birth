@@ -66,8 +66,8 @@ const galleryImages: GalleryImage[] = [
     alt: 'Mother breastfeeding baby',
     width: 800,
     height: 800,
-    caption: 'Lactation support and guidance',
-    category: 'Lactation',
+    caption: 'Infant feeding support and guidance',
+    category: 'Feeding Support',
   },
   {
     src: 'https://images.unsplash.com/photo-1519689373023-dd07c7988603?w=800&h=800&fit=crop',

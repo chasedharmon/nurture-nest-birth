@@ -271,7 +271,7 @@ export default async function ClientResourcesPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Heart className="h-5 w-5 text-primary" />
-                Lactation Support
+                Infant Feeding Support
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -279,7 +279,7 @@ export default async function ClientResourcesPage() {
                 name="CHI Health Lactation Services"
                 address="Good Samaritan Hospital, Kearney"
                 phone="(308) 865-7100"
-                description="IBCLCs available for consults"
+                description="IBCLCs available for complex feeding issues"
               />
               <LocalResource
                 name="WIC Program"
@@ -288,7 +288,7 @@ export default async function ClientResourcesPage() {
                 description="Free breastfeeding support and supplies"
               />
               <p className="text-sm text-muted-foreground italic">
-                Your doula can also provide lactation support! Ask us about
+                Your doula can also provide feeding support! Ask us about
                 included services.
               </p>
             </CardContent>

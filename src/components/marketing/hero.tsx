@@ -49,7 +49,7 @@ export function Hero() {
                     clipRule="evenodd"
                   />
                 </svg>
-                DONA-Certified Doula & Lactation Consultant
+                Professionally Trained Doula & Breastfeeding Specialist
               </div>
             </FadeIn>
 
@@ -82,7 +82,7 @@ export function Hero() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-foreground">
                   <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  Certified Lactation Consultant
+                  Certified Breastfeeding Specialist
                 </div>
                 <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-foreground">
                   <span className="h-1.5 w-1.5 rounded-full bg-primary" />

@@ -9,9 +9,9 @@ import { spacing, maxWidth, grid, typography, card } from '@/lib/design-system'
 export const metadata: Metadata = {
   title: 'Pricing | Nurture Nest Birth | Doula Services in Kearney, NE',
   description:
-    'Transparent pricing for birth doula, postpartum, and lactation services in Kearney, Nebraska. Flexible packages and payment plans available.',
+    'Transparent pricing for birth doula and postpartum doula services in Kearney, Nebraska and Central Nebraska. Flexible packages available.',
   keywords:
-    'doula pricing Kearney NE, birth doula cost, postpartum doula rates, lactation consultant fees Nebraska',
+    'doula pricing Kearney NE, birth doula cost, postpartum doula rates, infant feeding support Nebraska',
 }
 
 export default function PricingPage() {
@@ -115,7 +115,7 @@ export default function PricingPage() {
                 </div>
                 <CardHeader className="bg-gradient-to-br from-primary/10 to-secondary/10">
                   <CardTitle className="font-serif text-2xl">
-                    Postpartum Care
+                    Postpartum Doula Support
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
                     In-home fourth trimester support
@@ -177,64 +177,63 @@ export default function PricingPage() {
               </Card>
             </FadeIn>
 
-            {/* Lactation Consulting */}
+            {/* Complete Care Bundle */}
             <FadeIn delay={0.2}>
               <Card
                 className={`relative flex h-full flex-col overflow-hidden ${card.base} ${card.interactive}`}
               >
                 <CardHeader className="bg-gradient-to-br from-primary/5 to-secondary/5">
                   <CardTitle className="font-serif text-2xl">
-                    Lactation Consulting
+                    Complete Care Bundle
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Expert breastfeeding support
+                    Birth + postpartum support
                   </p>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col pt-6">
                   <div className="mb-6">
                     <span className="text-4xl font-bold text-foreground">
-                      $125–$175
+                      Starting at $1,800
                     </span>
-                    <span className="text-muted-foreground">/visit</span>
                   </div>
 
                   <h4 className="mb-3 font-semibold text-foreground">
-                    Consultation Includes:
+                    Bundle Includes:
                   </h4>
                   <ul className="mb-4 flex-1 space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                      Comprehensive feeding assessment
+                      Everything in Birth Doula Support
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                      Latch evaluation
+                      Discounted postpartum hourly rate ($35/hr)
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                      Supply assessment
+                      Seamless continuity of care
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                      Pumping strategies
+                      Priority scheduling
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                      Personalized feeding plan
+                      Infant feeding support included
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                      Follow-up support via phone/text
+                      Car seat safety check included
                     </li>
                   </ul>
 
                   <p className="mb-6 text-sm text-muted-foreground">
-                    60–90 minute in-home visit
+                    Best value for comprehensive support
                   </p>
 
                   <div className="mt-auto">
                     <Button asChild className="w-full">
-                      <Link href="/contact">Book Consultation</Link>
+                      <Link href="/contact">Get Started</Link>
                     </Button>
                   </div>
                 </CardContent>
@@ -271,14 +270,15 @@ export default function PricingPage() {
             <FadeIn delay={0.2}>
               <div className="rounded-2xl border-2 border-border bg-background p-6">
                 <h3 className="font-serif text-xl font-semibold text-foreground">
-                  Overnight Postpartum Support
+                  Car Seat Safety Check
                 </h3>
                 <p className="mt-2 text-2xl font-bold text-foreground">
-                  $45–$50/hour
+                  Included with packages
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  10-hour shifts (8pm–6am). I care for baby while you sleep,
-                  bringing baby for feedings.
+                  CPST-certified car seat installation check and education.
+                  Included with doula packages or available at community check
+                  days.
                 </p>
               </div>
             </FadeIn>
@@ -307,11 +307,11 @@ export default function PricingPage() {
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">
-                  Postpartum + Lactation Package
+                  Included Services
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Save $100 when combining postpartum care with lactation
-                  consulting
+                  Infant feeding support, sibling preparation, and car seat
+                  safety are included with doula packages
                 </p>
               </div>
               <div>
@@ -338,10 +338,10 @@ export default function PricingPage() {
           <div className="mt-12 space-y-6 text-muted-foreground">
             <FadeIn delay={0.1}>
               <div>
-                <h3 className="font-semibold text-foreground">Payment Plans</h3>
+                <h3 className="font-semibold text-foreground">Retainer</h3>
                 <p className="mt-2">
-                  Flexible monthly payment plans available for all packages. No
-                  interest, no fees.
+                  A non-refundable retainer (typically 50%) is due at contract
+                  signing to reserve your due date. Balance due by 36 weeks.
                 </p>
               </div>
             </FadeIn>
@@ -373,12 +373,12 @@ export default function PricingPage() {
             <FadeIn delay={0.4}>
               <div>
                 <h3 className="font-semibold text-foreground">
-                  Deposit & Cancellation
+                  Postpartum Booking
                 </h3>
                 <p className="mt-2">
-                  $300 non-refundable deposit reserves your due date. Balance
-                  due by 36 weeks. Full refund (minus deposit) if you move out
-                  of service area.
+                  For postpartum services booked less than 2 weeks out, full
+                  payment is due upfront. For services booked more than 2 weeks
+                  out, a 50% retainer reserves your spot.
                 </p>
               </div>
             </FadeIn>

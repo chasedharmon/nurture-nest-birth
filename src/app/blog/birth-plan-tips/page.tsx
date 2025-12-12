@@ -201,7 +201,7 @@ export default function BirthPlanTipsPost() {
               Immediate skin-to-skin (unless baby needs medical attention)
             </li>
             <li>Delay cord clamping for at least 1–3 minutes</li>
-            <li>I plan to breastfeed and would like lactation support</li>
+            <li>I plan to breastfeed and would like feeding support</li>
             <li>
               Delay newborn procedures until after first hour (if possible)
             </li>

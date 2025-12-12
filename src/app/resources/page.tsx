@@ -92,7 +92,7 @@ const resources: Resource[] = [
   {
     title: 'Breastfeeding Quick Start Guide',
     description:
-      'Get off to a good start with breastfeeding. Covers early latching, hunger cues, how to tell if baby is getting enough, and when to seek lactation support.',
+      'Get off to a good start with breastfeeding. Covers early latching, hunger cues, how to tell if baby is getting enough, and when to seek feeding support.',
     category: 'Breastfeeding',
     fileType: 'PDF',
     fileSize: '2.1 MB',
@@ -132,7 +132,7 @@ const resources: Resource[] = [
   {
     title: 'Local Resources Directory',
     description:
-      'Central Nebraska-specific resources including hospitals, pediatricians, lactation consultants, mental health support, and community programs.',
+      'Central Nebraska-specific resources including hospitals, pediatricians, breastfeeding specialists, mental health support, and community programs.',
     category: 'Local Resources',
     fileType: 'PDF',
     fileSize: '600 KB',

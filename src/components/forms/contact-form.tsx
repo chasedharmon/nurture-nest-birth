@@ -185,9 +185,11 @@ export function ContactForm() {
             <Select id="service" name="service" disabled={isSubmitting}>
               <option value="">Select a service...</option>
               <option value="birth-doula">Birth Doula Support</option>
-              <option value="postpartum-care">Postpartum Care</option>
-              <option value="lactation">Lactation Consulting</option>
-              <option value="sibling-prep">Sibling Preparation</option>
+              <option value="postpartum-doula">Postpartum Doula Support</option>
+              <option value="complete-care">
+                Complete Care Bundle (Birth + Postpartum)
+              </option>
+              <option value="photography">Birth & Family Photography</option>
               <option value="multiple">Multiple Services</option>
               <option value="not-sure">Not Sure Yet</option>
             </Select>
