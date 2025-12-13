@@ -119,6 +119,7 @@ export const breadcrumbConfig: Record<string, BreadcrumbDef> = {
   '/admin/setup/api-keys': { label: 'API Keys', parent: '/admin/setup' },
   '/admin/setup/webhooks': { label: 'Webhooks', parent: '/admin/setup' },
   '/admin/setup/objects': { label: 'Objects', parent: '/admin/setup' },
+  '/admin/setup/navigation': { label: 'Navigation', parent: '/admin/setup' },
   '/admin/setup/migration': { label: 'Data Migration', parent: '/admin/setup' },
   '/admin/setup/audit-logs': { label: 'Audit Logs', parent: '/admin/setup' },
   '/admin/setup/organization': {
