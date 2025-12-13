@@ -375,6 +375,12 @@ Removed per-page headers from 30+ admin pages:
 - Dynamic routes support any custom object from crm_object_definitions
 - Per-organization navigation customization via navigation_config table
 
+**Phase 11 Technical Notes:**
+
+- **Serialization Pattern**: Navigation config uses `SerializableNavItem` type (excludes React components like `iconComponent`). Client components call `getIconComponent(item.icon)` to look up Lucide icons by name. This avoids "Functions cannot be passed directly to Client Components" errors.
+- **Fallback Config**: `FALLBACK_NAV_DATA` in `src/lib/admin-navigation.ts` provides hardcoded navigation when database function not available (useful for development without applying navigation_config migration)
+- **Database Function**: `get_navigation_config` RPC function (in migration) returns per-org nav config; falls back gracefully if not applied
+
 #### Phase 8: UX Polish & Onboarding (Week 6) ✅ COMPLETE
 
 | Task                          | Status      | Notes                                      |
@@ -804,12 +810,13 @@ rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
 
 ---
 
-## E2E Testing Status (Last Updated: Dec 13, 2024)
+## E2E Testing Status (Last Updated: Dec 12, 2025)
 
-### Recent Test Run Results (Post-Phase 9):
+### Recent Test Run Results (Post-Phase 11):
 
-- **~895 passed** ✅ (including 20 new Phase 9 data management tests)
-- **15 flaky** (pass on retry with `--retries=2`)
+- **All messaging tests passing** ✅ (37/37 messaging-realtime tests)
+- **Admin navigation tests passing** ✅ (navigation system fully tested)
+- **~15 flaky** (pass on retry with `--retries=2`)
 - **~8 failed** (mobile viewport timing issues)
 - **~140 skipped** (across all test projects - reduced with import_jobs migration)
 
@@ -893,11 +900,17 @@ playwright.config.ts projects:
 | **Messaging/Team Assign** | ~40+  | Conditional skips based on data state - most now work with seeding                  |
 | **Other**                 | ~10   | Various explicit skips (Calendly placeholder, email API tests)                      |
 
-### Recent Test Improvements (Dec 12, 2024):
+### Recent Test Improvements (Dec 12, 2025):
 
 1. **Form validation tests enabled** (2 tests) - Rewrote to check HTML5 validation state instead of error message text
 2. **Messaging functional tests now run** - Conditional skips work with seeded conversation data
 3. **Identified migration blockers** - `referral_partner_id` column needed for lead submission tests
+4. **Admin navigation E2E tests passing** - Fixed serialization issues and test selectors for Phase 11
+5. **Messaging-realtime tests fixed** (37/37 passing):
+   - Fixed Messages link test to click Tools dropdown first (Messages moved to Tools menu)
+   - Updated URL expectations from `/admin/leads` to `/admin/crm-leads` for CRM navigation
+   - Fixed send button enablement test with proper hydration waits
+   - Updated Messages tab tests to use legacy leads page with clickable table rows
 
 ### To Enable More Tests:
 
