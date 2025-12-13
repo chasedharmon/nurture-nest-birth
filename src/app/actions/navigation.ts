@@ -18,6 +18,8 @@ import {
   type SerializableNavItem,
   transformNavItems,
   filterByRole,
+  FALLBACK_NAV_DATA,
+  getObjectHref,
 } from '@/lib/admin-navigation'
 import { getUnreadCount } from './messaging'
 
@@ -63,8 +65,9 @@ export async function getNavigationConfig(): Promise<{
 
     const userRole = teamMember?.role || null
 
-    // Fetch navigation config using the database function
-    const { data: navItems, error: navError } = await supabase.rpc(
+    // Try to fetch navigation config using the database function
+    let navItems: DbNavItem[] | null = null
+    const { data: rpcResult, error: navError } = await supabase.rpc(
       'get_navigation_config',
       {
         p_user_id: user.id,
@@ -73,19 +76,32 @@ export async function getNavigationConfig(): Promise<{
     )
 
     if (navError) {
-      console.error('Error fetching navigation config:', navError)
-      // Return null so layout uses its own serializable fallback
-      return {
-        success: true,
-        data: null,
-        error: 'Database function unavailable (using fallback)',
-      }
+      console.error('Error fetching navigation config from RPC:', navError)
+      // RPC unavailable - we'll build navigation from object_definitions instead
+    } else {
+      navItems = rpcResult as DbNavItem[] | null
     }
 
-    // Transform database items (returns SerializableNavItem without iconComponent)
-    const { primaryTabs, toolsMenu, adminMenu } = transformNavItems(
-      (navItems as DbNavItem[]) || []
-    )
+    let primaryTabs: SerializableNavItem[]
+    let toolsMenu: SerializableNavItem[]
+    let adminMenu: SerializableNavItem[]
+
+    if (navItems && navItems.length > 0) {
+      // Transform database items (returns SerializableNavItem without iconComponent)
+      const transformed = transformNavItems(navItems)
+      primaryTabs = transformed.primaryTabs
+      toolsMenu = transformed.toolsMenu
+      adminMenu = transformed.adminMenu
+    } else {
+      // Fallback: Build navigation from object_definitions + default tools
+      const customObjectTabs = await getCustomObjectNavItems(
+        supabase,
+        profile?.organization_id
+      )
+      primaryTabs = [...FALLBACK_NAV_DATA.primaryTabs, ...customObjectTabs]
+      toolsMenu = FALLBACK_NAV_DATA.toolsMenu
+      adminMenu = FALLBACK_NAV_DATA.adminMenu
+    }
 
     // Filter by role (works with SerializableNavItem)
     const filteredToolsMenu = filterByRole(toolsMenu, userRole)
@@ -316,5 +332,58 @@ export async function reorderNavItems(
   } catch (error) {
     console.error('Error in reorderNavItems:', error)
     return { success: false, error: 'Failed to reorder navigation items' }
+  }
+}
+
+// =====================================================
+// HELPER FUNCTIONS
+// =====================================================
+
+/**
+ * Get custom object navigation items from object_definitions
+ * This is used as a fallback when navigation_config table or RPC is unavailable
+ */
+async function getCustomObjectNavItems(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  organizationId: string | null | undefined
+): Promise<SerializableNavItem[]> {
+  if (!organizationId) {
+    return []
+  }
+
+  try {
+    // Fetch custom objects for this organization
+    const { data: customObjects, error } = await supabase
+      .from('object_definitions')
+      .select('id, api_name, label, plural_label, icon_name, color')
+      .eq('organization_id', organizationId)
+      .eq('is_custom', true)
+      .eq('is_active', true)
+      .order('label', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching custom objects for navigation:', error)
+      return []
+    }
+
+    if (!customObjects || customObjects.length === 0) {
+      return []
+    }
+
+    // Transform custom objects into navigation items
+    return customObjects.map(obj => ({
+      id: obj.id,
+      type: 'object' as const,
+      key: obj.api_name,
+      label: obj.plural_label || obj.label,
+      pluralLabel: obj.plural_label || obj.label,
+      href: getObjectHref(obj.api_name, true), // true = isCustomObject
+      icon: obj.icon_name || 'database',
+      isCustomObject: true,
+      visibleToRoles: null, // Visible to all roles by default
+    }))
+  } catch (err) {
+    console.error('Error in getCustomObjectNavItems:', err)
+    return []
   }
 }

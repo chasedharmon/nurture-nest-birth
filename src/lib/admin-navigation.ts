@@ -19,6 +19,23 @@ import {
   Users2,
   Settings,
   File,
+  // Additional icons for custom objects
+  Box,
+  Briefcase,
+  Calendar,
+  ClipboardList,
+  Database,
+  FileSpreadsheet,
+  Folder,
+  Heart,
+  Home,
+  MapPin,
+  Package,
+  Star,
+  Tag,
+  Zap,
+  User,
+  TrendingUp,
 } from 'lucide-react'
 
 // =====================================================
@@ -121,6 +138,7 @@ export interface NavUserContext {
  * Map icon names to Lucide components
  */
 const iconMap: Record<string, LucideIcon> = {
+  // Standard navigation icons
   'building-2': Building2,
   building2: Building2,
   users: Users,
@@ -139,6 +157,27 @@ const iconMap: Record<string, LucideIcon> = {
   users2: Users2,
   settings: Settings,
   file: File,
+  // Custom object icons (matching create-object-wizard.tsx)
+  box: Box,
+  briefcase: Briefcase,
+  calendar: Calendar,
+  'clipboard-list': ClipboardList,
+  clipboardlist: ClipboardList,
+  database: Database,
+  'file-spreadsheet': FileSpreadsheet,
+  filespreadsheet: FileSpreadsheet,
+  folder: Folder,
+  heart: Heart,
+  home: Home,
+  'map-pin': MapPin,
+  mappin: MapPin,
+  package: Package,
+  star: Star,
+  tag: Tag,
+  zap: Zap,
+  user: User,
+  'trending-up': TrendingUp,
+  trendingup: TrendingUp,
 }
 
 /**
