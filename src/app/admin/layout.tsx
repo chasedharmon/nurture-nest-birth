@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { AdminNavigation } from '@/components/admin/navigation'
 import { getNavigationConfig } from '@/app/actions/navigation'
 import { KeyboardShortcutsProvider } from '@/components/admin/keyboard-shortcuts-provider'
+import { FALLBACK_NAV_CONFIG } from '@/lib/admin-navigation'
 
 /**
  * Admin Portal Layout
@@ -41,12 +42,13 @@ export default async function AdminLayout({
   // Fetch navigation configuration
   const navResult = await getNavigationConfig()
 
-  if (!navResult.success || !navResult.data) {
-    // If navigation config fails, still render with fallback
+  if (!navResult.success) {
+    // If navigation config fails, log it but continue with fallback
     console.error('Failed to load navigation config:', navResult.error)
   }
 
-  const navConfig = navResult.data!
+  // Use fallback config if data is null
+  const navConfig = navResult.data ?? FALLBACK_NAV_CONFIG
 
   return (
     <KeyboardShortcutsProvider>
