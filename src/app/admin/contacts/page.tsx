@@ -6,6 +6,10 @@ import { Plus, Users } from 'lucide-react'
 
 import { getRecords } from '@/app/actions/crm-records'
 import { getObjectMetadata } from '@/app/actions/object-metadata'
+import {
+  getCrmListViews,
+  getCrmListViewById,
+} from '@/app/actions/crm-list-views'
 import { DynamicListView } from '@/components/admin/crm/dynamic-list-view'
 import { PageHeader } from '@/components/admin/navigation'
 import type { CrmContact, FilterCondition } from '@/lib/crm/types'
@@ -18,6 +22,7 @@ export default async function ContactsListPage({
     page?: string
     sort?: string
     dir?: string
+    view?: string
   }>
 }) {
   const params = await searchParams
@@ -51,8 +56,21 @@ export default async function ContactsListPage({
 
   const { object: objectDef, fields } = metadataResult.data
 
-  // Build filters from search
-  const filters: FilterCondition[] = []
+  // Get saved views for this object
+  const viewsResult = await getCrmListViews('Contact')
+  const savedViews = viewsResult.data
+
+  // Get current view if specified
+  let currentViewFilters: FilterCondition[] = []
+  if (params.view) {
+    const viewResult = await getCrmListViewById(params.view)
+    if (viewResult.success && viewResult.data) {
+      currentViewFilters = viewResult.data.filters || []
+    }
+  }
+
+  // Build filters from search params and view
+  const filters: FilterCondition[] = [...currentViewFilters]
   const search = params.q?.trim()
 
   // Build sort config
@@ -115,6 +133,12 @@ export default async function ContactsListPage({
         displayFields={displayFields}
         basePath="/admin/contacts"
         enableBulkActions={true}
+        // Enable advanced toolbar with all features
+        enableAdvancedToolbar={true}
+        currentUserId={user.id}
+        savedViews={savedViews}
+        currentViewId={params.view || null}
+        filters={filters}
       />
     </div>
   )

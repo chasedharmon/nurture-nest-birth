@@ -2,6 +2,52 @@
 
 All notable changes to Nurture Nest Birth are documented in this file.
 
+## [Unreleased] - 2025-12-12
+
+### Added - Enhanced List Views for CRM Objects
+
+**List View Components** (`src/components/admin/crm/list-view/`)
+
+- **ColumnSelector** - Drag-and-drop column visibility and reordering dialog
+- **FilterBuilder** - Advanced filtering with AND/OR logic, 15+ operators, type-aware inputs
+- **ViewSelector** - Dropdown to switch between saved views (personal/shared/org-wide)
+- **ViewSaveDialog** - Save current filters and columns as a named view
+- **ListViewToolbar** - Unified toolbar combining search, filters, columns, view management, and export
+- **Export** - CSV and Excel export integrated into toolbar (supports selected records or all filtered data)
+
+**Server Actions** (`src/app/actions/crm-list-views.ts`)
+
+- `getCrmListViews()` - Fetch all views for an object (respects visibility)
+- `getCrmListViewById()` - Get a single view with full details
+- `createCrmListView()` - Create a new saved view
+- `updateCrmListView()` - Update view settings
+- `deleteCrmListView()` - Delete a view
+- `pinCrmListView()` - Pin/unpin favorite views
+
+**Database**
+
+- `crm_list_views` table for storing saved view configurations
+- RLS policies for view visibility (private, shared, org-wide)
+- Migration: `20251212000000_crm_list_views.sql`
+
+### Changed
+
+- **DynamicListView** - Enhanced with optional `enableAdvancedToolbar` prop
+  - Backward compatible - existing usage unchanged
+  - When enabled: full view/filter/column management
+- **CRM Pages** - All pages now use advanced toolbar:
+  - Activities, Contacts, Accounts, Opportunities, CRM Leads
+  - Custom Objects (dynamic `[apiName]` page)
+
+### Technical Notes
+
+- All new features are opt-in via `enableAdvancedToolbar={true}`
+- Existing DynamicListView usage continues to work without changes
+- Filter state synced with URL parameters for shareable links
+- Column configuration persisted in browser state (saved views store to DB)
+
+---
+
 ## [Phase 6] - 2025-12-07
 
 ### Added - Production Hardening

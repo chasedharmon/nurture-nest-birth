@@ -9,16 +9,17 @@
  * - Format cell values based on field type
  * - Enable search across text fields
  * - Support bulk actions
+ * - Column customization (add/remove/reorder)
+ * - Advanced filtering with multiple conditions
+ * - Saveable views (personal, shared, org-wide)
  *
- * Unlike the legacy ListViewContainer, this component is designed to work
- * with the new CRM object model and metadata-driven architecture.
+ * All advanced features are optional - existing usage continues to work.
  */
 
-import { useState, useCallback, useTransition, useMemo } from 'react'
+import { useState, useCallback, useTransition, useMemo, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
-  Search,
   ChevronUp,
   ChevronDown,
   ChevronLeft,
@@ -32,7 +33,6 @@ import {
   X,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
@@ -55,8 +55,23 @@ import {
 } from '@/components/ui/alert-dialog'
 import { cn } from '@/lib/utils'
 
-import type { FieldWithPicklistValues, ObjectDefinition } from '@/lib/crm/types'
+import type {
+  FieldWithPicklistValues,
+  ObjectDefinition,
+  FilterCondition,
+} from '@/lib/crm/types'
 import { bulkDeleteRecords } from '@/app/actions/crm-records'
+
+// List view components
+import {
+  ListViewToolbar,
+  ColumnSelector,
+  FilterBuilder,
+  ViewSaveDialog,
+  type ColumnConfig,
+  type SavedView,
+  type ViewVisibility,
+} from './list-view'
 
 // =====================================================
 // TYPES
@@ -94,6 +109,39 @@ export interface DynamicListViewProps<
   rowActions?: (record: T) => React.ReactNode
   /** Additional header actions (shown in toolbar) */
   headerActions?: React.ReactNode
+
+  // =====================================================
+  // NEW: Advanced list view features (all optional)
+  // =====================================================
+
+  /** Enable the enhanced toolbar with view/filter/column management */
+  enableAdvancedToolbar?: boolean
+  /** Current user ID (required for view management) */
+  currentUserId?: string
+  /** Saved views for this object */
+  savedViews?: SavedView[]
+  /** Currently selected view ID */
+  currentViewId?: string | null
+  /** Current filters (from URL or view) */
+  filters?: FilterCondition[]
+  /** Callback when view changes */
+  onViewChange?: (viewId: string | null) => void
+  /** Callback to save a new view */
+  onSaveView?: (
+    name: string,
+    visibility: ViewVisibility,
+    isDefault: boolean,
+    columns: ColumnConfig[],
+    filters: FilterCondition[]
+  ) => Promise<void>
+  /** Callback to delete a view */
+  onDeleteView?: (viewId: string) => Promise<void>
+  /** Callback to pin/unpin a view */
+  onPinView?: (viewId: string, pinned: boolean) => Promise<void>
+  /** Callback when filters change */
+  onFiltersChange?: (filters: FilterCondition[]) => void
+  /** Callback when columns change */
+  onColumnsChange?: (columns: ColumnConfig[]) => void
 }
 
 interface ColumnDef {
@@ -270,6 +318,35 @@ function truncateUrl(url: string): string {
 }
 
 // =====================================================
+// HELPER: Build ColumnConfig from fields
+// =====================================================
+
+function buildColumnConfigs(
+  fields: FieldWithPicklistValues[],
+  displayFields?: string[]
+): ColumnConfig[] {
+  let fieldsToShow = fields.filter(f => f.is_visible && f.is_active)
+
+  // Filter to displayFields if provided
+  if (displayFields?.length) {
+    fieldsToShow = fieldsToShow.filter(f => displayFields.includes(f.api_name))
+  }
+
+  // Sort by display_order
+  fieldsToShow.sort((a, b) => a.display_order - b.display_order)
+
+  return fieldsToShow.map(field => ({
+    fieldId: field.id,
+    apiName: field.api_name,
+    label: field.label,
+    visible: true,
+    sortable: !['textarea', 'rich_text', 'multipicklist'].includes(
+      field.data_type
+    ),
+  }))
+}
+
+// =====================================================
 // MAIN COMPONENT
 // =====================================================
 
@@ -288,6 +365,18 @@ export function DynamicListView<T extends { id: string; [key: string]: any }>({
   enableBulkActions = true,
   rowActions,
   headerActions,
+  // New advanced features
+  enableAdvancedToolbar = false,
+  currentUserId = '',
+  savedViews = [],
+  currentViewId = null,
+  filters: propFilters = [],
+  onViewChange,
+  onSaveView,
+  onDeleteView,
+  onPinView,
+  onFiltersChange,
+  onColumnsChange,
 }: DynamicListViewProps<T>) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -298,29 +387,45 @@ export function DynamicListView<T extends { id: string; [key: string]: any }>({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
-  // Search state with debounce
+  // Search state
   const [searchInput, setSearchInput] = useState(searchParams.get('q') || '')
+
+  // Dialog states
+  const [showFilterBuilder, setShowFilterBuilder] = useState(false)
+  const [showColumnSelector, setShowColumnSelector] = useState(false)
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+
+  // Column configuration state
+  const defaultColumns = useMemo(
+    () => buildColumnConfigs(fields, displayFields),
+    [fields, displayFields]
+  )
+  const [columnConfig, setColumnConfig] =
+    useState<ColumnConfig[]>(defaultColumns)
+
+  // Filter state (local copy for the filter builder)
+  const [localFilters, setLocalFilters] =
+    useState<FilterCondition[]>(propFilters)
+
+  // Sync local filters when props change
+  useEffect(() => {
+    setLocalFilters(propFilters)
+  }, [propFilters])
 
   // Get current sort from URL
   const sortField = searchParams.get('sort') || 'created_at'
   const sortDir = (searchParams.get('dir') || 'desc') as 'asc' | 'desc'
 
-  // Build columns from fields
+  // Build columns from field metadata and column config
   const columns = useMemo((): ColumnDef[] => {
-    let fieldsToShow = fields.filter(f => f.is_visible && f.is_active)
-
-    // Filter to displayFields if provided
-    if (displayFields?.length) {
-      fieldsToShow = fieldsToShow.filter(f =>
-        displayFields.includes(f.api_name)
-      )
-    }
-
-    // Sort by display_order
-    fieldsToShow.sort((a, b) => a.display_order - b.display_order)
-
-    return fieldsToShow.map(f => ({ field: f }))
-  }, [fields, displayFields])
+    const visibleConfigs = columnConfig.filter(c => c.visible)
+    return visibleConfigs
+      .map(config => {
+        const field = fields.find(f => f.api_name === config.apiName)
+        return { field: field! }
+      })
+      .filter(col => col.field) // Filter out any that don't have matching fields
+  }, [fields, columnConfig])
 
   // =====================================================
   // URL HANDLERS
@@ -341,12 +446,27 @@ export function DynamicListView<T extends { id: string; [key: string]: any }>({
     [router, pathname, searchParams]
   )
 
-  const handleSearch = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault()
+  const handleSearch = useCallback((value: string) => {
+    setSearchInput(value)
+    // Debounced URL update would be better, but for now just update on enter
+  }, [])
+
+  const handleSearchSubmit = useCallback(
+    (e?: React.FormEvent) => {
+      e?.preventDefault()
       updateUrl({ q: searchInput || null, page: null })
     },
     [searchInput, updateUrl]
+  )
+
+  // Trigger search on Enter key
+  const handleSearchKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleSearchSubmit()
+      }
+    },
+    [handleSearchSubmit]
   )
 
   const handleSort = useCallback(
@@ -363,6 +483,81 @@ export function DynamicListView<T extends { id: string; [key: string]: any }>({
       updateUrl({ page: newPage.toString() })
     },
     [updateUrl]
+  )
+
+  // =====================================================
+  // VIEW HANDLERS
+  // =====================================================
+
+  const handleViewChange = useCallback(
+    (viewId: string | null) => {
+      if (onViewChange) {
+        onViewChange(viewId)
+      } else {
+        // Default behavior: update URL
+        const params = new URLSearchParams(searchParams.toString())
+        if (viewId) {
+          params.set('view', viewId)
+        } else {
+          params.delete('view')
+        }
+        params.delete('page')
+        router.push(`${pathname}?${params.toString()}`)
+      }
+    },
+    [onViewChange, router, pathname, searchParams]
+  )
+
+  // =====================================================
+  // FILTER HANDLERS
+  // =====================================================
+
+  const handleApplyFilters = useCallback(
+    (newFilters: FilterCondition[]) => {
+      setLocalFilters(newFilters)
+      if (onFiltersChange) {
+        onFiltersChange(newFilters)
+      }
+      setShowFilterBuilder(false)
+      // Refresh to apply filters
+      router.refresh()
+    },
+    [onFiltersChange, router]
+  )
+
+  // =====================================================
+  // COLUMN HANDLERS
+  // =====================================================
+
+  const handleApplyColumns = useCallback(
+    (newColumns: ColumnConfig[]) => {
+      setColumnConfig(newColumns)
+      if (onColumnsChange) {
+        onColumnsChange(newColumns)
+      }
+      setShowColumnSelector(false)
+    },
+    [onColumnsChange]
+  )
+
+  // =====================================================
+  // SAVE VIEW HANDLER
+  // =====================================================
+
+  const handleSaveView = useCallback(
+    async (name: string, visibility: ViewVisibility, isDefault: boolean) => {
+      if (onSaveView) {
+        await onSaveView(
+          name,
+          visibility,
+          isDefault,
+          columnConfig,
+          localFilters
+        )
+      }
+      setShowSaveDialog(false)
+    },
+    [onSaveView, columnConfig, localFilters]
   )
 
   // =====================================================
@@ -434,32 +629,84 @@ export function DynamicListView<T extends { id: string; [key: string]: any }>({
   const allSelected = data.length > 0 && selectedIds.size === data.length
   const someSelected = selectedIds.size > 0 && selectedIds.size < data.length
 
+  // Calculate if there are unsaved changes (for save button highlight)
+  const hasUnsavedChanges =
+    localFilters.length > 0 ||
+    columnConfig.some((c, i) => {
+      const defaultCol = defaultColumns[i]
+      return !defaultCol || c.visible !== defaultCol.visible
+    })
+
   // =====================================================
   // RENDER
   // =====================================================
 
   return (
     <Card className="flex flex-col">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between border-b border-border p-4">
-        <div className="flex items-center gap-4">
-          {/* Search */}
-          {searchFields.length > 0 && (
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder={`Search ${objectDefinition.plural_label.toLowerCase()}...`}
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                className="w-64 pl-9"
-              />
-            </form>
-          )}
-        </div>
+      {/* Advanced Toolbar (when enabled) */}
+      {enableAdvancedToolbar ? (
+        <ListViewToolbar
+          views={savedViews}
+          currentViewId={currentViewId}
+          onViewChange={handleViewChange}
+          onDeleteView={onDeleteView}
+          onPinView={onPinView}
+          currentUserId={currentUserId}
+          objectLabel={objectDefinition.plural_label}
+          searchValue={searchInput}
+          onSearchChange={handleSearch}
+          searchPlaceholder={`Search ${objectDefinition.plural_label.toLowerCase()}...`}
+          enableSearch={searchFields.length > 0}
+          filters={localFilters}
+          onOpenFilterBuilder={() => setShowFilterBuilder(true)}
+          onOpenColumnSelector={() => setShowColumnSelector(true)}
+          visibleColumnCount={columnConfig.filter(c => c.visible).length}
+          totalColumnCount={columnConfig.length}
+          onOpenSaveDialog={() => setShowSaveDialog(true)}
+          hasUnsavedChanges={hasUnsavedChanges}
+          // Export props
+          exportData={data}
+          exportFilename={objectDefinition.api_name.toLowerCase()}
+          exportColumns={columnConfig}
+          selectedIds={selectedIds}
+          totalCount={totalCount}
+          isPending={isPending}
+        />
+      ) : (
+        /* Simple Toolbar (backward compatible) */
+        <div className="flex items-center justify-between border-b border-border p-4">
+          <div className="flex items-center gap-4">
+            {/* Search */}
+            {searchFields.length > 0 && (
+              <form onSubmit={handleSearchSubmit} className="relative">
+                <input
+                  type="text"
+                  placeholder={`Search ${objectDefinition.plural_label.toLowerCase()}...`}
+                  value={searchInput}
+                  onChange={e => setSearchInput(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  className="w-64 rounded-md border border-input bg-background px-3 py-2 pl-9 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+                <svg
+                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </form>
+            )}
+          </div>
 
-        <div className="flex items-center gap-2">{headerActions}</div>
-      </div>
+          <div className="flex items-center gap-2">{headerActions}</div>
+        </div>
+      )}
 
       {/* Bulk Action Bar */}
       {selectedIds.size > 0 && enableBulkActions && (
@@ -515,7 +762,7 @@ export function DynamicListView<T extends { id: string; [key: string]: any }>({
                   key={field.id}
                   className={cn(
                     'px-4 py-3 text-left font-medium text-muted-foreground',
-                    'cursor-pointer hover:text-foreground transition-colors'
+                    'cursor-pointer transition-colors hover:text-foreground'
                   )}
                   onClick={() =>
                     handleSort(field.column_name || field.api_name)
@@ -553,7 +800,7 @@ export function DynamicListView<T extends { id: string; [key: string]: any }>({
                 <tr
                   key={record.id}
                   className={cn(
-                    'border-b border-border hover:bg-muted/30 transition-colors',
+                    'border-b border-border transition-colors hover:bg-muted/30',
                     selectedIds.has(record.id) && 'bg-muted/50'
                   )}
                 >
@@ -707,6 +954,34 @@ export function DynamicListView<T extends { id: string; [key: string]: any }>({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Column Selector Dialog */}
+      <ColumnSelector
+        open={showColumnSelector}
+        onOpenChange={setShowColumnSelector}
+        fields={fields}
+        columns={columnConfig}
+        onApply={handleApplyColumns}
+      />
+
+      {/* Filter Builder Dialog */}
+      <FilterBuilder
+        open={showFilterBuilder}
+        onOpenChange={setShowFilterBuilder}
+        fields={fields}
+        filters={localFilters}
+        onApply={handleApplyFilters}
+      />
+
+      {/* Save View Dialog */}
+      <ViewSaveDialog
+        open={showSaveDialog}
+        onOpenChange={setShowSaveDialog}
+        onSave={handleSaveView}
+        filterCount={localFilters.length}
+        columnCount={columnConfig.filter(c => c.visible).length}
+        objectLabel={objectDefinition.plural_label}
+      />
     </Card>
   )
 }

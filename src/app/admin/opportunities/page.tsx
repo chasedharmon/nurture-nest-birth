@@ -6,6 +6,10 @@ import { Plus, Target } from 'lucide-react'
 
 import { getRecords } from '@/app/actions/crm-records'
 import { getObjectMetadata } from '@/app/actions/object-metadata'
+import {
+  getCrmListViews,
+  getCrmListViewById,
+} from '@/app/actions/crm-list-views'
 import { DynamicListView } from '@/components/admin/crm/dynamic-list-view'
 import { PageHeader } from '@/components/admin/navigation'
 import type { CrmOpportunity, FilterCondition } from '@/lib/crm/types'
@@ -19,6 +23,7 @@ export default async function OpportunitiesListPage({
     sort?: string
     dir?: string
     stage?: string
+    view?: string
   }>
 }) {
   const params = await searchParams
@@ -52,11 +57,24 @@ export default async function OpportunitiesListPage({
 
   const { object: objectDef, fields } = metadataResult.data
 
-  // Build filters from search params
-  const filters: FilterCondition[] = []
+  // Get saved views for this object
+  const viewsResult = await getCrmListViews('Opportunity')
+  const savedViews = viewsResult.data
+
+  // Get current view if specified
+  let currentViewFilters: FilterCondition[] = []
+  if (params.view) {
+    const viewResult = await getCrmListViewById(params.view)
+    if (viewResult.success && viewResult.data) {
+      currentViewFilters = viewResult.data.filters || []
+    }
+  }
+
+  // Build filters from search params and view
+  const filters: FilterCondition[] = [...currentViewFilters]
   const search = params.q?.trim()
 
-  // Stage filter
+  // Stage filter (from URL params)
   if (params.stage && params.stage !== 'all') {
     filters.push({
       id: 'stage-filter',
@@ -144,6 +162,12 @@ export default async function OpportunitiesListPage({
         displayFields={displayFields}
         basePath="/admin/opportunities"
         enableBulkActions={true}
+        // Enable advanced toolbar with all features
+        enableAdvancedToolbar={true}
+        currentUserId={user.id}
+        savedViews={savedViews}
+        currentViewId={params.view || null}
+        filters={filters}
       />
     </div>
   )

@@ -6,6 +6,10 @@ import { Plus, Activity } from 'lucide-react'
 
 import { getRecords } from '@/app/actions/crm-records'
 import { getObjectMetadata } from '@/app/actions/object-metadata'
+import {
+  getCrmListViews,
+  getCrmListViewById,
+} from '@/app/actions/crm-list-views'
 import { DynamicListView } from '@/components/admin/crm/dynamic-list-view'
 import { PageHeader } from '@/components/admin/navigation'
 import type { CrmActivity, FilterCondition } from '@/lib/crm/types'
@@ -20,6 +24,7 @@ export default async function ActivitiesListPage({
     dir?: string
     type?: string
     status?: string
+    view?: string
   }>
 }) {
   const params = await searchParams
@@ -53,11 +58,24 @@ export default async function ActivitiesListPage({
 
   const { object: objectDef, fields } = metadataResult.data
 
-  // Build filters from search params
-  const filters: FilterCondition[] = []
+  // Get saved views for this object
+  const viewsResult = await getCrmListViews('Activity')
+  const savedViews = viewsResult.data
+
+  // Get current view if specified
+  let currentViewFilters: FilterCondition[] = []
+  if (params.view) {
+    const viewResult = await getCrmListViewById(params.view)
+    if (viewResult.success && viewResult.data) {
+      currentViewFilters = viewResult.data.filters || []
+    }
+  }
+
+  // Build filters from search params and view
+  const filters: FilterCondition[] = [...currentViewFilters]
   const search = params.q?.trim()
 
-  // Activity type filter
+  // Activity type filter (from URL params)
   if (params.type && params.type !== 'all') {
     filters.push({
       id: 'type-filter',
@@ -67,7 +85,7 @@ export default async function ActivitiesListPage({
     })
   }
 
-  // Status filter
+  // Status filter (from URL params)
   if (params.status && params.status !== 'all') {
     filters.push({
       id: 'status-filter',
@@ -151,6 +169,12 @@ export default async function ActivitiesListPage({
         displayFields={displayFields}
         basePath="/admin/activities"
         enableBulkActions={true}
+        // Enable advanced toolbar with all features
+        enableAdvancedToolbar={true}
+        currentUserId={user.id}
+        savedViews={savedViews}
+        currentViewId={params.view || null}
+        filters={filters}
       />
     </div>
   )
