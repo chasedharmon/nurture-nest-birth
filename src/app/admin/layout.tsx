@@ -5,6 +5,8 @@ import { getNavigationConfig } from '@/app/actions/navigation'
 import { KeyboardShortcutsProvider } from '@/components/admin/keyboard-shortcuts-provider'
 import { OrganizationProvider } from '@/lib/hooks/use-organization'
 import { getTenantContext } from '@/lib/platform/tenant-context'
+import { TrialBanner } from '@/components/billing/trial-banner'
+import { getTrialStatus } from '@/lib/trial/utils'
 import {
   FALLBACK_NAV_DATA,
   type SerializableNavigationConfig,
@@ -89,6 +91,9 @@ export default async function AdminLayout({
     brandLogoUrl: organization.logo_url || null,
   }
 
+  // Calculate trial status for banner
+  const trialStatus = getTrialStatus(organization)
+
   return (
     <OrganizationProvider
       initialOrganization={organization}
@@ -98,6 +103,13 @@ export default async function AdminLayout({
         <div className="min-h-screen bg-background">
           {/* Navigation Header */}
           <AdminNavigation config={navConfig} userRole={userRole} />
+
+          {/* Trial Banner - shows for trialing organizations */}
+          {trialStatus.isTrialing && (
+            <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+              <TrialBanner trialStatus={trialStatus} />
+            </div>
+          )}
 
           {/* Main Content */}
           <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">

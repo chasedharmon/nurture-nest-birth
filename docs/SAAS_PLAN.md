@@ -1,7 +1,7 @@
 # SaaS Platform Plan - Multi-Tenant CRM Infrastructure
 
 > **Created**: December 13, 2025
-> **Status**: Phase 0 - Architecture Cleanup
+> **Status**: Phase 1 Complete - Self-Service Signup
 > **Goal**: Transform single-tenant CRM into multi-tenant SaaS platform
 > **Relationship**: This plan covers PLATFORM infrastructure. See [MASTER_PLAN.md](MASTER_PLAN.md) for CRM PRODUCT features.
 
@@ -58,7 +58,8 @@
 | Super-admin dashboard                    | ✅ Complete | 0     |
 | Tenant provisioning                      | ✅ Complete | 0     |
 | Tenant impersonation                     | Not started | 0     |
-| Self-service signup                      | Not started | 1     |
+| Self-service signup                      | ✅ Complete | 1     |
+| Trial management                         | ✅ Complete | 1     |
 | Live Stripe billing (subscriptions)      | Stubbed     | 2     |
 | Platform marketing site                  | Not started | 0     |
 
@@ -196,32 +197,52 @@ CREATE TABLE tenant_branding (
 ### Phase 1: Self-Service Signup
 
 **Goal**: Public signup flow for new tenants
-**Status**: Not Started
+**Status**: ✅ Complete
+
+#### Phase 1 Progress
+
+| Task                           | File                                      | Status |
+| ------------------------------ | ----------------------------------------- | ------ |
+| Public signup page             | `src/app/signup/page.tsx`                 | ✅     |
+| Signup form component          | `src/components/auth/signup-form.tsx`     | ✅     |
+| Signup server action           | `src/app/actions/signup.ts`               | ✅     |
+| Trial utility functions        | `src/lib/trial/utils.ts`                  | ✅     |
+| Trial banner component         | `src/components/billing/trial-banner.tsx` | ✅     |
+| Middleware trial enforcement   | `src/lib/supabase/middleware.ts`          | ✅     |
+| Admin layout trial integration | `src/app/admin/layout.tsx`                | ✅     |
+| Billing page redirect handling | `src/app/admin/setup/billing/page.tsx`    | ✅     |
+| Login page signup link         | `src/components/auth/login-form.tsx`      | ✅     |
+| Feature flag enabled           | `src/config/platform.ts`                  | ✅     |
 
 #### 1.1 Public Signup Page
 
-- `src/app/(public)/signup/page.tsx`
+- `src/app/signup/page.tsx`
 - `src/app/actions/signup.ts`
 
 **Flow:**
 
 1. User enters: email, password, business name
-2. Create auth user (Supabase Auth)
+2. Create auth user (Supabase Auth) - auto-confirmed
 3. Create organization with `subscription_status: 'trialing'`
-4. Create membership with role: 'owner'
-5. Redirect to onboarding wizard
+4. Set `trial_ends_at` to 30 days from now
+5. Create membership with role: 'owner'
+6. Auto sign-in user
+7. Redirect to /admin (onboarding checklist shows there)
 
 #### 1.2 Trial Management
 
-- Trial banner component
-- Expiration checks in middleware
-- Grace period (3 days read-only)
-- Upgrade redirect after grace
+- **Trial banner component**: Shows days remaining, dismissible, urgent styling when ≤3 days
+- **Middleware enforcement**:
+  - Active trial: Full access
+  - Grace period (3 days after expiration): Read-only access, write operations blocked with 403
+  - Fully expired: Redirect all non-exempt routes to `/admin/setup/billing?expired=true`
+- **Exempt routes**: Billing page, logout, auth APIs always accessible
+- **Billing page**: Shows contextual alerts based on redirect reason (expired/grace/suspended)
 
 #### 1.3 Team Invitation Enhancement
 
-- Invitation emails include org name
-- Accept flow joins correct organization
+- Invitation emails include org name (existing functionality)
+- Accept flow joins correct organization (existing functionality)
 
 ---
 

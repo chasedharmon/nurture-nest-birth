@@ -2,6 +2,26 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { CURRENT_TERMS_VERSION } from '@/lib/config/terms'
 
+/**
+ * Grace period configuration
+ */
+const GRACE_PERIOD_DAYS = 3
+
+/**
+ * Routes that should be accessible even when trial is fully expired
+ * (billing page, logout, etc.)
+ */
+const TRIAL_EXEMPT_ROUTES = [
+  '/admin/setup/billing',
+  '/admin/logout',
+  '/api/auth',
+]
+
+/**
+ * HTTP methods that indicate a write operation
+ */
+const WRITE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -72,6 +92,100 @@ export async function updateSession(request: NextRequest) {
         redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
       })
       return redirectResponse
+    }
+  }
+
+  // Check trial expiration for authenticated users accessing /admin
+  if (user && pathname.startsWith('/admin')) {
+    // Skip trial check for exempt routes (billing page, etc.)
+    const isExemptRoute = TRIAL_EXEMPT_ROUTES.some(route =>
+      pathname.startsWith(route)
+    )
+
+    if (!isExemptRoute) {
+      // Get user's organization membership to find their org
+      const { data: membership } = await supabase
+        .from('organization_memberships')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .single()
+
+      if (membership) {
+        // Get organization trial status
+        const { data: org } = await supabase
+          .from('organizations')
+          .select('subscription_status, trial_ends_at')
+          .eq('id', membership.organization_id)
+          .single()
+
+        if (org?.subscription_status === 'trialing' && org.trial_ends_at) {
+          const now = new Date()
+          const trialEndsAt = new Date(org.trial_ends_at)
+          const gracePeriodEndsAt = new Date(trialEndsAt)
+          gracePeriodEndsAt.setDate(
+            gracePeriodEndsAt.getDate() + GRACE_PERIOD_DAYS
+          )
+
+          const isTrialExpired = now > trialEndsAt
+          const isGracePeriodExpired = now > gracePeriodEndsAt
+          const isWriteOperation = WRITE_METHODS.includes(request.method)
+
+          // Fully expired (past grace period) - redirect to billing
+          if (isGracePeriodExpired) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/admin/setup/billing'
+            url.searchParams.set('expired', 'true')
+            const redirectResponse = NextResponse.redirect(url)
+            supabaseResponse.cookies.getAll().forEach(cookie => {
+              redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+            })
+            return redirectResponse
+          }
+
+          // In grace period - block write operations
+          if (isTrialExpired && isWriteOperation) {
+            // Return 403 for API routes, redirect for page routes
+            if (
+              pathname.startsWith('/api/') ||
+              pathname.startsWith('/admin/api/')
+            ) {
+              return new NextResponse(
+                JSON.stringify({
+                  error: 'Trial expired',
+                  message:
+                    'Your trial has expired. Please upgrade to continue making changes.',
+                }),
+                {
+                  status: 403,
+                  headers: { 'Content-Type': 'application/json' },
+                }
+              )
+            }
+            // For non-API write attempts, redirect to billing
+            const url = request.nextUrl.clone()
+            url.pathname = '/admin/setup/billing'
+            url.searchParams.set('grace', 'true')
+            const redirectResponse = NextResponse.redirect(url)
+            supabaseResponse.cookies.getAll().forEach(cookie => {
+              redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+            })
+            return redirectResponse
+          }
+        }
+
+        // Check for suspended status
+        if (org?.subscription_status === 'suspended') {
+          const url = request.nextUrl.clone()
+          url.pathname = '/admin/setup/billing'
+          url.searchParams.set('suspended', 'true')
+          const redirectResponse = NextResponse.redirect(url)
+          supabaseResponse.cookies.getAll().forEach(cookie => {
+            redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+          })
+          return redirectResponse
+        }
+      }
     }
   }
 

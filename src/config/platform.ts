@@ -66,7 +66,7 @@ export const platformConfig = {
     superAdminPanel: true,
     tenantBranding: true,
     tenantImpersonation: true,
-    selfServiceSignup: false, // Future: enable for self-service onboarding
+    selfServiceSignup: true, // Self-service onboarding enabled
     publicApi: false, // Future: enable when API is ready
     whiteLabeling: false, // Future: remove platform branding entirely
   },

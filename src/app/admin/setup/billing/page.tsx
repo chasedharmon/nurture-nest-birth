@@ -12,11 +12,14 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
   ChevronLeft,
   CreditCard,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
+  Ban,
   Sparkles,
   Users,
   FileText,
@@ -101,7 +104,19 @@ const tierBadgeVariants: Record<string, 'default' | 'secondary' | 'outline'> = {
   enterprise: 'outline',
 }
 
-export default async function BillingPage() {
+interface BillingPageProps {
+  searchParams: Promise<{
+    expired?: string
+    grace?: string
+    suspended?: string
+  }>
+}
+
+export default async function BillingPage({ searchParams }: BillingPageProps) {
+  const params = await searchParams
+  const isExpiredRedirect = params.expired === 'true'
+  const isGraceRedirect = params.grace === 'true'
+  const isSuspendedRedirect = params.suspended === 'true'
   const supabase = await createClient()
 
   const {
@@ -260,8 +275,44 @@ export default async function BillingPage() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Urgent Redirect Alerts - shown when redirected from middleware */}
+        {isExpiredRedirect && (
+          <Alert variant="destructive" className="mb-6">
+            <Ban className="h-5 w-5" />
+            <AlertTitle>Trial Expired</AlertTitle>
+            <AlertDescription>
+              Your free trial has ended. Please upgrade to a paid plan to
+              continue using the platform. Your data is safe and will be
+              restored once you upgrade.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isGraceRedirect && (
+          <Alert className="mb-6 border-orange-200 bg-orange-50 text-orange-800">
+            <AlertTriangle className="h-5 w-5" />
+            <AlertTitle>Read-Only Mode</AlertTitle>
+            <AlertDescription>
+              Your trial has ended. You&apos;re currently in a 3-day grace
+              period with read-only access. Upgrade now to continue making
+              changes to your account.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isSuspendedRedirect && (
+          <Alert variant="destructive" className="mb-6">
+            <Ban className="h-5 w-5" />
+            <AlertTitle>Account Suspended</AlertTitle>
+            <AlertDescription>
+              Your account has been suspended. Please contact support or upgrade
+              your subscription to restore access.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Status Alerts */}
-        {isTrialing && (
+        {isTrialing && !isExpiredRedirect && !isGraceRedirect && (
           <div className="mb-6 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
             <AlertCircle className="h-5 w-5 text-amber-600" />
             <div className="flex-1">
