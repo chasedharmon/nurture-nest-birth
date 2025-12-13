@@ -15,6 +15,45 @@
 **Current Phase**: Phase 12 In Progress - Custom Objects & CRM Enhancement
 **Last Updated**: December 13, 2025
 
+### Phase 12: CRM Enhancement & Custom Objects (Current)
+
+| Task                        | Status      | Notes                                                  |
+| --------------------------- | ----------- | ------------------------------------------------------ |
+| CRM-1: Enhanced List Views  | ✅ COMPLETE | Column customization, filters, saved views, export     |
+| CRM-2: Custom Object Wizard | ✅ COMPLETE | 5-step wizard: name, fields, layout, relationships, UI |
+| CRM-3: E2E Test Fixes       | ✅ COMPLETE | 43 list view tests passing (Radix UI locators fixed)   |
+| CRM-4: Navigation Fallback  | ✅ COMPLETE | Build nav from object_definitions when RPC unavailable |
+
+**Phase 12 Files Created:**
+
+Enhanced List Views:
+
+- `src/components/admin/crm/list-view/` - Modular list view components
+  - `list-view-toolbar.tsx` - Search, filters, columns, save view, export buttons
+  - `column-selector.tsx` - Drag-and-drop column visibility/ordering
+  - `filter-builder.tsx` - Multi-condition filter dialog with operators
+  - `view-selector.tsx` - Saved views dropdown
+  - `view-save-dialog.tsx` - Save/create views with visibility settings
+- `src/components/admin/crm/dynamic-list-view.tsx` - Unified list view with all features
+- `src/components/admin/export-button.tsx` - Reusable CSV/Excel export with selection awareness
+
+Custom Objects:
+
+- `src/components/admin/setup/objects/create-object-wizard.tsx` - 5-step wizard for creating custom CRM objects
+- `src/app/admin/setup/objects/objects-page-client.tsx` - Client component for objects setup page
+- `src/app/actions/custom-objects.ts` - Server actions for custom object CRUD
+- `tests/e2e/crm/custom-objects.spec.ts` - E2E tests for custom object wizard
+
+Navigation:
+
+- `src/lib/admin-navigation.ts` - Added FALLBACK_NAV_DATA, getObjectHref, extended icon mapping
+- `src/app/actions/navigation.ts` - Added getCustomObjectNavItems fallback builder
+
+**Phase 12 E2E Tests:**
+
+- `tests/e2e/crm/crm-list-views.spec.ts` - 43 tests for enhanced list views (column customization, filtering, saved views, export, search, responsive)
+- `tests/e2e/crm/custom-objects.spec.ts` - Custom object wizard tests
+
 ### Active Development Plan (6-Week Roadmap)
 
 We are executing a comprehensive refinement and SaaS preparation plan. Goals:
@@ -969,11 +1008,16 @@ playwright.config.ts projects:
 
 ### Recent Test Improvements (Dec 13, 2025):
 
-1. **Custom objects E2E tests** (58 tests) - Full wizard flow, field creation, object management
-2. **Fixed mobile viewport issues** - Added accordion expansion, specific locators for hidden nav items
-3. **URL detection for redirects** - UUID regex pattern to distinguish detail page from list page
-4. **Role-based test skipping** - Mobile navigation test skips gracefully (nav in hamburger menu)
-5. **Robust element locators** - Using `getByRole('link', { name: /Standard Account/i })` pattern
+1. **CRM list views E2E tests fixed** (43 tests) - Updated locators for Radix UI components:
+   - Use `getByRole('dialog')`, `getByRole('option')`, `[role="combobox"]` for Radix Select
+   - Use `exact: true` to prevent "Equals" from matching "Not equals"
+   - Use `getByLabel()` for checkbox columns with htmlFor associations
+   - Updated filter dialog button to match "Apply Filters (${count})" pattern
+2. **Custom objects E2E tests** (58 tests) - Full wizard flow, field creation, object management
+3. **Fixed mobile viewport issues** - Added accordion expansion, specific locators for hidden nav items
+4. **URL detection for redirects** - UUID regex pattern to distinguish detail page from list page
+5. **Role-based test skipping** - Mobile navigation test skips gracefully (nav in hamburger menu)
+6. **Robust element locators** - Using `getByRole('link', { name: /Standard Account/i })` pattern
 
 ### Previous Test Improvements (Dec 12, 2025):
 
