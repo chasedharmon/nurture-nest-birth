@@ -255,7 +255,14 @@ test.describe('Real-Time Messaging - Unread Badges', () => {
     await page.goto('/admin')
     await page.waitForLoadState('networkidle')
 
-    // Look for Messages link with potential badge
+    // Messages is in the Tools dropdown menu - click to open it first
+    const toolsButton = page.locator('button:has-text("Tools")')
+    if ((await toolsButton.count()) > 0) {
+      await toolsButton.click()
+      await page.waitForTimeout(300)
+    }
+
+    // Look for Messages link with potential badge in the dropdown
     const messagesLink = page.locator(
       'a:has-text("Messages"), button:has-text("Messages")'
     )
@@ -344,28 +351,31 @@ test.describe('Unified Client View - Messages Tab', () => {
     const leadsButton = page.locator('a:has-text("Leads")')
     if ((await leadsButton.count()) > 0) {
       await leadsButton.click()
-      await expect(page).toHaveURL(/\/admin\/leads/, { timeout: 10000 })
+      // Leads page is at /admin/crm-leads
+      await expect(page).toHaveURL(/\/admin\/crm-leads/, { timeout: 10000 })
     }
   })
 
   test('should display tabs on lead detail page', async ({ page }) => {
     // Navigate to leads list first
-    await page.goto('/admin/leads')
+    await page.goto('/admin/crm-leads')
     await page.waitForLoadState('networkidle')
 
-    // Find a clickable lead row in the table (rows use onClick, not href)
-    const leadRows = page.locator(
-      'tbody tr[class*="cursor-pointer"], tbody tr:has(td)'
-    )
-    const count = await leadRows.count()
+    // Find a clickable link to a lead detail page in the table
+    const leadLinks = page.locator('a[href^="/admin/crm-leads/"]').filter({
+      hasNot: page.locator('button'), // Exclude links containing buttons
+    })
+    const count = await leadLinks.count()
 
     if (count > 0) {
-      // Click first row that has actual data (skip header rows)
-      await leadRows.first().click()
+      // Click first lead link
+      await leadLinks.first().click()
       await page.waitForLoadState('networkidle')
 
       // Wait for navigation to complete
-      await page.waitForURL(/\/admin\/leads\/[a-f0-9-]+/, { timeout: 10000 })
+      await page.waitForURL(/\/admin\/crm-leads\/[a-f0-9-]+/, {
+        timeout: 10000,
+      })
 
       // Check for tabs
       const tabs = page.locator('[role="tablist"], [class*="tabs"]')
@@ -377,16 +387,18 @@ test.describe('Unified Client View - Messages Tab', () => {
   })
 
   test('should have Messages tab in lead detail', async ({ page }) => {
+    // The Messages tab exists on the legacy leads page, not the new CRM leads page
     await page.goto('/admin/leads')
     await page.waitForLoadState('networkidle')
 
-    // Find a clickable lead row in the table
+    // Find clickable rows in the legacy leads table (rows use onClick, not href)
     const leadRows = page.locator(
-      'tbody tr[class*="cursor-pointer"], tbody tr:has(td)'
+      'table tbody tr, table rowgroup:last-of-type row'
     )
     const count = await leadRows.count()
 
     if (count > 0) {
+      // Click first data row to navigate to lead detail
       await leadRows.first().click()
       await page.waitForLoadState('networkidle')
 
@@ -404,16 +416,18 @@ test.describe('Unified Client View - Messages Tab', () => {
   })
 
   test('should show messages badge with unread count', async ({ page }) => {
+    // The Messages tab exists on the legacy leads page
     await page.goto('/admin/leads')
     await page.waitForLoadState('networkidle')
 
-    // Find a clickable lead row in the table
+    // Find clickable rows in the legacy leads table (rows use onClick, not href)
     const leadRows = page.locator(
-      'tbody tr[class*="cursor-pointer"], tbody tr:has(td)'
+      'table tbody tr, table rowgroup:last-of-type row'
     )
     const count = await leadRows.count()
 
     if (count > 0) {
+      // Click first data row to navigate to lead detail
       await leadRows.first().click()
       await page.waitForLoadState('networkidle')
 
@@ -434,16 +448,18 @@ test.describe('Unified Client View - Messages Tab', () => {
   })
 
   test('should switch to Messages tab and show content', async ({ page }) => {
+    // The Messages tab exists on the legacy leads page
     await page.goto('/admin/leads')
     await page.waitForLoadState('networkidle')
 
-    // Find a clickable lead row in the table
+    // Find clickable rows in the legacy leads table (rows use onClick, not href)
     const leadRows = page.locator(
-      'tbody tr[class*="cursor-pointer"], tbody tr:has(td)'
+      'table tbody tr, table rowgroup:last-of-type row'
     )
     const count = await leadRows.count()
 
     if (count > 0) {
+      // Click first data row to navigate to lead detail
       await leadRows.first().click()
       await page.waitForLoadState('networkidle')
 
@@ -472,16 +488,18 @@ test.describe('Unified Client View - Messages Tab', () => {
   test('should display lead messages card with recent messages or empty state', async ({
     page,
   }) => {
+    // The Messages tab exists on the legacy leads page
     await page.goto('/admin/leads')
     await page.waitForLoadState('networkidle')
 
-    // Find a clickable lead row in the table
+    // Find clickable rows in the legacy leads table (rows use onClick, not href)
     const leadRows = page.locator(
-      'tbody tr[class*="cursor-pointer"], tbody tr:has(td)'
+      'table tbody tr, table rowgroup:last-of-type row'
     )
     const count = await leadRows.count()
 
     if (count > 0) {
+      // Click first data row to navigate to lead detail
       await leadRows.first().click()
       await page.waitForLoadState('networkidle')
 
@@ -543,24 +561,27 @@ test.describe('Message Composer Functionality', () => {
     ).toBeTruthy()
 
     await page.goto(`/admin/messages/${conversationId}`)
-    // Use domcontentloaded instead of networkidle to avoid timeout on mobile
-    await page.waitForLoadState('domcontentloaded')
+    await page.waitForLoadState('networkidle')
 
-    // Find message input - wait for it to be visible
+    // Find message input - wait for it to be visible and enabled
     const messageInput = page.locator(
-      'textarea[placeholder*="message"], input[placeholder*="message"]'
+      'textarea[placeholder*="message" i], input[placeholder*="message" i]'
     )
-    const inputVisible = await messageInput
-      .first()
-      .isVisible({ timeout: 10000 })
-      .catch(() => false)
-    if (inputVisible) {
-      await messageInput.first().fill('Test message')
+    await expect(messageInput.first()).toBeVisible({ timeout: 10000 })
 
-      // Send button should be enabled or clickable
-      const sendButton = page.locator('button:has-text("Send")')
-      await expect(sendButton).toBeEnabled({ timeout: 5000 })
-    }
+    // Wait for hydration - ensure input is interactive
+    await messageInput.first().click()
+    await page.waitForTimeout(500)
+
+    // Type the message
+    await messageInput.first().fill('Test message')
+
+    // Wait a bit for React state to update
+    await page.waitForTimeout(300)
+
+    // Send button should be enabled after text is entered
+    const sendButton = page.locator('button:has-text("Send")')
+    await expect(sendButton).toBeEnabled({ timeout: 5000 })
   })
 
   test('should clear input after message is sent', async ({ page }) => {
