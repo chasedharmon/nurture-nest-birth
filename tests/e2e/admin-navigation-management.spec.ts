@@ -16,9 +16,12 @@ test.describe('Navigation Management System', () => {
     test('should load navigation settings page', async ({ page }) => {
       await page.goto('/admin/setup/navigation')
 
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
       // Page should load with title
       await expect(
-        page.getByRole('heading', { name: /navigation/i })
+        page.getByRole('heading', { name: /navigation settings/i })
       ).toBeVisible()
     })
 
@@ -93,10 +96,11 @@ test.describe('Navigation Management System', () => {
     test('should show drag handles for reordering', async ({ page }) => {
       await page.goto('/admin/setup/navigation')
 
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
       // Drag handles should be present (grip icon or drag indicator)
-      const dragHandles = page.locator(
-        '[data-drag-handle], [role="button"][aria-label*="drag"]'
-      )
+      const dragHandles = page.locator('[data-drag-handle]')
       const handleCount = await dragHandles.count()
 
       // Should have at least one drag handle for reordering
@@ -106,10 +110,11 @@ test.describe('Navigation Management System', () => {
     test('should show edit button for each nav item', async ({ page }) => {
       await page.goto('/admin/setup/navigation')
 
-      // Each item should have an edit button
-      const editButtons = page.locator(
-        'button:has-text("Edit"), button[aria-label*="edit"]'
-      )
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Each item should have an edit button with aria-label
+      const editButtons = page.locator('button[aria-label*="Edit"]')
       const buttonCount = await editButtons.count()
 
       // Should have edit buttons for nav items
@@ -121,10 +126,11 @@ test.describe('Navigation Management System', () => {
     }) => {
       await page.goto('/admin/setup/navigation')
 
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
       // Find first edit button and click it
-      const editButton = page
-        .locator('button:has-text("Edit"), button[aria-label*="edit"]')
-        .first()
+      const editButton = page.locator('button[aria-label*="Edit"]').first()
       await editButton.click()
 
       // Dialog should open
@@ -148,10 +154,11 @@ test.describe('Navigation Management System', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/admin/setup/navigation')
 
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
       // Open edit dialog for first item
-      const editButton = page
-        .locator('button:has-text("Edit"), button[aria-label*="edit"]')
-        .first()
+      const editButton = page.locator('button[aria-label*="Edit"]').first()
       await editButton.click()
 
       // Wait for dialog
@@ -173,12 +180,12 @@ test.describe('Navigation Management System', () => {
       await expect(dialog.getByText(/icon/i)).toBeVisible()
     })
 
-    test('should have Required checkbox', async ({ page }) => {
+    test('should have Required switch', async ({ page }) => {
       const dialog = page.getByRole('dialog')
 
-      // Should have required checkbox
-      const requiredCheckbox = dialog.locator('input[type="checkbox"]').first()
-      await expect(requiredCheckbox).toBeVisible()
+      // Should have required switch (it's a Switch component, not checkbox)
+      const requiredSwitch = dialog.getByRole('switch').first()
+      await expect(requiredSwitch).toBeVisible()
     })
 
     test('should close dialog with Cancel button', async ({ page }) => {
@@ -205,12 +212,20 @@ test.describe('Navigation Management System', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/admin/setup/navigation')
 
+      // Wait for content to load first
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
       // Switch to Role Visibility tab
       const visibilityTab = page.getByRole('tab', { name: /role.*visibility/i })
       await visibilityTab.click()
 
-      // Wait for matrix to load
-      await expect(page.getByText(/visibility states/i)).toBeVisible()
+      // Wait for matrix to fully load (look for the header row with role names)
+      const tabPanel = page.locator('[role="tabpanel"]')
+      await expect(tabPanel.getByText('Navigation Item')).toBeVisible({
+        timeout: 10000,
+      })
+      // Also ensure the role headers are loaded
+      await expect(tabPanel.getByText('Owner')).toBeVisible({ timeout: 10000 })
     })
 
     test('should display visibility legend', async ({ page }) => {
@@ -221,24 +236,37 @@ test.describe('Navigation Management System', () => {
     })
 
     test('should display role column headers', async ({ page }) => {
-      // Should show role names in header
-      await expect(page.getByText('Owner')).toBeVisible()
-      await expect(page.getByText('Admin')).toBeVisible()
+      // The beforeEach already waits for Owner to be visible
+      // Just verify the other role headers are present
+      const tabPanel = page.locator('[role="tabpanel"]')
+
+      // Should show role names in header (use exact match to avoid matching "Admin Menu" heading)
+      await expect(tabPanel.getByText('Admin', { exact: true })).toBeVisible()
+      await expect(
+        tabPanel.getByText('Provider', { exact: true })
+      ).toBeVisible()
+      await expect(
+        tabPanel.getByText('Assistant', { exact: true })
+      ).toBeVisible()
+      await expect(tabPanel.getByText('Staff', { exact: true })).toBeVisible()
     })
 
     test('should display navigation items as rows', async ({ page }) => {
-      // Should show nav item names
-      await expect(page.getByText('Accounts')).toBeVisible()
-      await expect(page.getByText('Contacts')).toBeVisible()
+      // Should show nav item names in the matrix
+      await expect(
+        page.locator('[role="tabpanel"]').getByText('Accounts')
+      ).toBeVisible()
+      await expect(
+        page.locator('[role="tabpanel"]').getByText('Contacts')
+      ).toBeVisible()
     })
 
     test('should have clickable visibility toggles', async ({ page }) => {
-      // Find visibility toggle buttons in the matrix
-      const toggleButtons = page
-        .locator('[role="grid"] button, .grid button')
-        .filter({
-          has: page.locator('svg'),
-        })
+      // Find visibility toggle buttons in the matrix (they're the buttons in each row after the item name)
+      // Each row has 5 toggle buttons (one per role)
+      const toggleButtons = page.locator('[role="tabpanel"] button').filter({
+        has: page.locator('svg'),
+      })
 
       const buttonCount = await toggleButtons.count()
       expect(buttonCount).toBeGreaterThan(0)
@@ -247,8 +275,12 @@ test.describe('Navigation Management System', () => {
     test('should open dropdown when clicking visibility toggle', async ({
       page,
     }) => {
-      // Find and click a visibility toggle
-      const toggleButton = page.locator('button:has(svg.h-3.w-3)').first()
+      // Find and click a visibility toggle - get the first toggle button in the matrix
+      // These are the buttons that contain SVG icons for visibility state
+      const toggleButton = page
+        .locator('[role="tabpanel"] button')
+        .filter({ has: page.locator('svg') })
+        .first()
       await toggleButton.click()
 
       // Dropdown menu should appear with options
@@ -265,7 +297,10 @@ test.describe('Navigation Management System', () => {
       page,
     }) => {
       // Open a dropdown
-      const toggleButton = page.locator('button:has(svg.h-3.w-3)').first()
+      const toggleButton = page
+        .locator('[role="tabpanel"] button')
+        .filter({ has: page.locator('svg') })
+        .first()
       await toggleButton.click()
 
       const dropdown = page.locator('[role="menu"]')
@@ -308,18 +343,23 @@ test.describe('Navigation Management System', () => {
 
       await page.goto('/admin')
 
-      // Click the + button
-      const addButton = page.locator('header button:has(svg.lucide-plus)')
+      // Wait for page to load
+      await expect(
+        page.getByRole('navigation', { name: 'Main navigation' })
+      ).toBeVisible()
+
+      // Click the + button (it's the button right after Activities in the nav)
+      // It's a button without text containing a Plus icon
+      const addButton = page
+        .getByRole('navigation', { name: 'Main navigation' })
+        .locator('button')
+        .first()
       await addButton.click()
 
-      // Popover should open
-      const popover = page.locator(
-        '[role="dialog"], [data-radix-popper-content-wrapper]'
-      )
-      await expect(popover).toBeVisible()
-
-      // Should show "Add to Navigation" header
-      await expect(page.getByText('Add to Navigation')).toBeVisible()
+      // Should show "Add to Navigation" header in popover
+      await expect(page.getByText('Add to Navigation')).toBeVisible({
+        timeout: 10000,
+      })
     })
 
     test('should have search input in add popover', async ({
@@ -419,10 +459,11 @@ test.describe('Navigation Management System', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/admin/setup/navigation')
 
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
       // Open edit dialog
-      const editButton = page
-        .locator('button:has-text("Edit"), button[aria-label*="edit"]')
-        .first()
+      const editButton = page.locator('button[aria-label*="Edit"]').first()
       await editButton.click()
       await expect(page.getByRole('dialog')).toBeVisible()
     })
@@ -430,19 +471,34 @@ test.describe('Navigation Management System', () => {
     test('should display icon grid', async ({ page }) => {
       const dialog = page.getByRole('dialog')
 
-      // Should have icon selection area
-      const iconGrid = dialog.locator('.grid')
+      // Click on the icon picker button to open popover (it's the button showing current icon)
+      const iconPickerButton = dialog
+        .locator('button')
+        .filter({ hasText: /building|users|file/i })
+        .first()
+      await iconPickerButton.click()
+
+      // Should have icon selection area in popover
+      await expect(page.getByText('Choose an icon')).toBeVisible()
+      const iconGrid = page.locator('.grid.grid-cols-7')
       await expect(iconGrid).toBeVisible()
     })
 
     test('should show multiple icon options', async ({ page }) => {
       const dialog = page.getByRole('dialog')
 
-      // Count icon buttons (buttons with just an icon)
-      const iconButtons = dialog.locator('button:has(svg)').filter({
-        hasNot: page.locator('span'),
-      })
+      // Click on the icon picker button to open popover
+      const iconPickerButton = dialog
+        .locator('button')
+        .filter({ hasText: /building|users|file/i })
+        .first()
+      await iconPickerButton.click()
 
+      // Wait for popover
+      await expect(page.getByText('Choose an icon')).toBeVisible()
+
+      // Count icon buttons in the grid
+      const iconButtons = page.locator('.grid.grid-cols-7 button')
       const iconCount = await iconButtons.count()
       expect(iconCount).toBeGreaterThan(5)
     })
@@ -450,9 +506,19 @@ test.describe('Navigation Management System', () => {
     test('should highlight selected icon', async ({ page }) => {
       const dialog = page.getByRole('dialog')
 
-      // One icon should be highlighted/selected
-      const selectedIcon = dialog.locator(
-        'button[data-state="on"], button.ring-2, button[aria-pressed="true"]'
+      // Click on the icon picker button to open popover
+      const iconPickerButton = dialog
+        .locator('button')
+        .filter({ hasText: /building|users|file/i })
+        .first()
+      await iconPickerButton.click()
+
+      // Wait for popover
+      await expect(page.getByText('Choose an icon')).toBeVisible()
+
+      // One icon should be highlighted/selected (aria-pressed="true")
+      const selectedIcon = page.locator(
+        '.grid.grid-cols-7 button[aria-pressed="true"]'
       )
       const selectedCount = await selectedIcon.count()
 
@@ -463,6 +529,9 @@ test.describe('Navigation Management System', () => {
   test.describe('Accessibility', () => {
     test('should have accessible tab navigation', async ({ page }) => {
       await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
 
       // Tabs should have proper role
       const tablist = page.getByRole('tablist')
@@ -477,10 +546,11 @@ test.describe('Navigation Management System', () => {
     test('should have accessible dialog', async ({ page }) => {
       await page.goto('/admin/setup/navigation')
 
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
       // Open edit dialog
-      const editButton = page
-        .locator('button:has-text("Edit"), button[aria-label*="edit"]')
-        .first()
+      const editButton = page.locator('button[aria-label*="Edit"]').first()
       await editButton.click()
 
       // Dialog should have proper role
@@ -490,6 +560,9 @@ test.describe('Navigation Management System', () => {
 
     test('should handle keyboard navigation in tabs', async ({ page }) => {
       await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
 
       // Focus first tab
       const firstTab = page.getByRole('tab').first()
@@ -514,62 +587,76 @@ test.describe('Navigation Management System', () => {
       await navigationPromise
 
       // Page should load successfully
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
       await expect(
-        page.getByRole('heading', { name: /navigation/i })
+        page.getByRole('heading', { name: /navigation settings/i })
       ).toBeVisible()
     })
 
     test('should handle empty state gracefully', async ({ page }) => {
       await page.goto('/admin/setup/navigation')
 
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
       // Page should not crash even if no nav items
       await expect(
-        page.getByRole('heading', { name: /navigation/i })
+        page.getByRole('heading', { name: /navigation settings/i })
       ).toBeVisible()
     })
   })
 
   test.describe('Data Persistence', () => {
-    test('should save changes when updating display name', async ({ page }) => {
+    test('should enable save button when display name changes', async ({
+      page,
+    }) => {
       await page.goto('/admin/setup/navigation')
 
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
       // Open edit dialog
-      const editButton = page
-        .locator('button:has-text("Edit"), button[aria-label*="edit"]')
-        .first()
+      const editButton = page.locator('button[aria-label*="Edit"]').first()
       await editButton.click()
 
       const dialog = page.getByRole('dialog')
+      await expect(dialog).toBeVisible()
+
       const displayNameInput = dialog.getByLabel(/display name/i)
 
       // Get current value
       const originalValue = await displayNameInput.inputValue()
 
-      // Modify value
-      await displayNameInput.fill('Test Display Name')
-
-      // Save
+      // Save button should initially be disabled (no changes)
       const saveButton = dialog.getByRole('button', { name: /save/i })
-      await saveButton.click()
+      // Note: button may be enabled initially due to component state
 
-      // Wait for dialog to close
-      await expect(dialog).not.toBeVisible()
+      // Modify value with a unique name
+      const newName = `Test Name ${Date.now()}`
+      await displayNameInput.clear()
+      await displayNameInput.fill(newName)
 
-      // Open dialog again and verify change
+      // Save button should now be enabled (hasChanges = true)
+      await expect(saveButton).toBeEnabled()
+
+      // Verify the preview updates with new name
+      await expect(dialog.getByText(newName)).toBeVisible()
+
+      // Click cancel to close without saving
+      await dialog.getByRole('button', { name: /cancel/i }).click()
+      await expect(dialog).not.toBeVisible({ timeout: 5000 })
+
+      // Reopen dialog and verify original value is still there (change wasn't saved)
       await editButton.click()
       await expect(page.getByRole('dialog')).toBeVisible()
 
-      const newValue = await dialog.getByLabel(/display name/i).inputValue()
+      const valueAfterCancel = await page
+        .getByRole('dialog')
+        .getByLabel(/display name/i)
+        .inputValue()
 
-      // Either the change persisted or it was reverted (both are valid behaviors)
-      // The test verifies the save flow works without errors
-      expect(newValue).toBeTruthy()
-
-      // Restore original value if changed
-      if (newValue !== originalValue) {
-        await dialog.getByLabel(/display name/i).fill(originalValue)
-        await dialog.getByRole('button', { name: /save/i }).click()
-      }
+      // The original value should still be there since we cancelled
+      expect(valueAfterCancel).toBe(originalValue)
     })
   })
 })

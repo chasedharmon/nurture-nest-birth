@@ -105,12 +105,15 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
                 size="icon"
                 className={cn(
                   'h-9 w-9',
-                  value === name && 'bg-primary text-primary-foreground'
+                  value === name &&
+                    'bg-primary text-primary-foreground ring-2 ring-primary'
                 )}
                 onClick={() => {
                   onChange(name)
                   setOpen(false)
                 }}
+                aria-pressed={value === name}
+                aria-label={`Select ${name} icon`}
               >
                 <Icon className="h-4 w-4" />
               </Button>

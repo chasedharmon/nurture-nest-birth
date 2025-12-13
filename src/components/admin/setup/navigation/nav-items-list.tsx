@@ -87,6 +87,8 @@ function SortableItem({ item, onEdit }: SortableItemProps) {
         {...attributes}
         {...listeners}
         className="cursor-grab text-muted-foreground hover:text-foreground touch-none"
+        aria-label={`Drag to reorder ${item.displayName}`}
+        data-drag-handle
       >
         <GripVertical className="h-4 w-4" />
       </button>
@@ -126,6 +128,7 @@ function SortableItem({ item, onEdit }: SortableItemProps) {
         size="icon"
         className="h-8 w-8"
         onClick={() => onEdit(item)}
+        aria-label={`Edit ${item.displayName}`}
       >
         <Pencil className="h-4 w-4" />
       </Button>
