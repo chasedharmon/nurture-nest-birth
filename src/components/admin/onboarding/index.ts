@@ -1,5 +1,5 @@
 export {
   SetupChecklist,
-  getDefaultOnboardingSteps,
   type OnboardingStep,
+  type OnboardingCompletionStatus,
 } from './setup-checklist'

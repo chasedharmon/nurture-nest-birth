@@ -35,20 +35,77 @@ export interface OnboardingStep {
   optional?: boolean
 }
 
+export interface OnboardingCompletionStatus {
+  hasCompanyProfile: boolean
+  hasService: boolean
+  hasEmailTemplate: boolean
+  hasWorkflow: boolean
+  hasTeamMember: boolean
+}
+
 interface SetupChecklistProps {
-  steps: OnboardingStep[]
+  completionStatus: OnboardingCompletionStatus
   onDismiss?: () => void
   className?: string
 }
 
+// Generate steps with icons inside the client component
+function generateSteps(
+  completionStatus: OnboardingCompletionStatus
+): OnboardingStep[] {
+  return [
+    {
+      id: 'company-profile',
+      title: 'Complete your company profile',
+      description: 'Add your business name, logo, and contact details',
+      icon: <Building2 className="h-5 w-5" />,
+      href: '/admin/setup/organization',
+      completed: completionStatus.hasCompanyProfile,
+    },
+    {
+      id: 'service-package',
+      title: 'Add your first service package',
+      description: 'Define the services you offer to clients',
+      icon: <Briefcase className="h-5 w-5" />,
+      href: '/admin/setup/services',
+      completed: completionStatus.hasService,
+    },
+    {
+      id: 'email-template',
+      title: 'Customize an email template',
+      description: 'Personalize your automated communications',
+      icon: <Mail className="h-5 w-5" />,
+      href: '/admin/setup/email-templates',
+      completed: completionStatus.hasEmailTemplate,
+    },
+    {
+      id: 'workflow',
+      title: 'Create your first workflow',
+      description: 'Automate follow-ups and client communications',
+      icon: <Workflow className="h-5 w-5" />,
+      href: '/admin/workflows',
+      completed: completionStatus.hasWorkflow,
+    },
+    {
+      id: 'team-member',
+      title: 'Invite a team member',
+      description: 'Add colleagues to collaborate with you',
+      icon: <Users className="h-5 w-5" />,
+      href: '/admin/setup/users',
+      completed: completionStatus.hasTeamMember,
+      optional: true,
+    },
+  ]
+}
+
 export function SetupChecklist({
-  steps,
+  completionStatus,
   onDismiss,
   className,
 }: SetupChecklistProps) {
   const router = useRouter()
   const [isDismissing, setIsDismissing] = useState(false)
-  const [localSteps] = useState(steps)
+  const [localSteps] = useState(() => generateSteps(completionStatus))
 
   const completedSteps = localSteps.filter(s => s.completed).length
   const requiredSteps = localSteps.filter(s => !s.optional)
@@ -225,57 +282,4 @@ export function SetupChecklist({
       </CardContent>
     </Card>
   )
-}
-
-// Default steps configuration
-export function getDefaultOnboardingSteps(completionStatus: {
-  hasCompanyProfile: boolean
-  hasService: boolean
-  hasEmailTemplate: boolean
-  hasWorkflow: boolean
-  hasTeamMember: boolean
-}): OnboardingStep[] {
-  return [
-    {
-      id: 'company-profile',
-      title: 'Complete your company profile',
-      description: 'Add your business name, logo, and contact details',
-      icon: <Building2 className="h-5 w-5" />,
-      href: '/admin/setup/organization',
-      completed: completionStatus.hasCompanyProfile,
-    },
-    {
-      id: 'service-package',
-      title: 'Add your first service package',
-      description: 'Define the services you offer to clients',
-      icon: <Briefcase className="h-5 w-5" />,
-      href: '/admin/setup/services',
-      completed: completionStatus.hasService,
-    },
-    {
-      id: 'email-template',
-      title: 'Customize an email template',
-      description: 'Personalize your automated communications',
-      icon: <Mail className="h-5 w-5" />,
-      href: '/admin/setup/email-templates',
-      completed: completionStatus.hasEmailTemplate,
-    },
-    {
-      id: 'workflow',
-      title: 'Create your first workflow',
-      description: 'Automate follow-ups and client communications',
-      icon: <Workflow className="h-5 w-5" />,
-      href: '/admin/workflows',
-      completed: completionStatus.hasWorkflow,
-    },
-    {
-      id: 'team-member',
-      title: 'Invite a team member',
-      description: 'Add colleagues to collaborate with you',
-      icon: <Users className="h-5 w-5" />,
-      href: '/admin/setup/users',
-      completed: completionStatus.hasTeamMember,
-      optional: true,
-    },
-  ]
 }

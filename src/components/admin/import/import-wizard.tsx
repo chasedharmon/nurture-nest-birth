@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -160,6 +160,7 @@ export function ImportWizard({ objectType }: ImportWizardProps) {
     if (currentStep !== 'preview') {
       hasInitializedPreviewRef.current = false
     }
+    return undefined
   }, [currentStep, parsedFile])
 
   // Import complete handler

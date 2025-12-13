@@ -105,6 +105,7 @@ export function ImportProgressStep({
       }, 0)
       return () => clearTimeout(timeoutId)
     }
+    return undefined
   }, [phase, startImport])
 
   const downloadErrorReport = () => {

@@ -15,10 +15,7 @@ import { DoulaDashboard } from '@/components/admin/dashboards'
 import { QuickMessagesSheet } from '@/components/admin/quick-messages-sheet'
 import { AdminMessageNotifications } from '@/components/admin/message-notifications'
 import { KeyboardShortcutsProvider } from '@/components/admin/keyboard-shortcuts-provider'
-import {
-  SetupChecklist,
-  getDefaultOnboardingSteps,
-} from '@/components/admin/onboarding'
+import { SetupChecklist } from '@/components/admin/onboarding'
 import {
   getDashboardKPIs,
   getLeadFunnelData,
@@ -114,9 +111,6 @@ export default async function AdminPage() {
   const onboardingStatus = onboardingResult.status
   const showOnboarding =
     onboardingStatus && !onboardingStatus.isDismissed && canAccessWorkflows
-  const onboardingSteps = onboardingStatus
-    ? getDefaultOnboardingSteps(onboardingStatus)
-    : []
 
   return (
     <KeyboardShortcutsProvider>
@@ -191,9 +185,9 @@ export default async function AdminPage() {
         {/* Main Content */}
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Onboarding Checklist */}
-          {showOnboarding && (
+          {showOnboarding && onboardingStatus && (
             <div className="mb-8">
-              <SetupChecklist steps={onboardingSteps} />
+              <SetupChecklist completionStatus={onboardingStatus} />
             </div>
           )}
 
