@@ -341,6 +341,11 @@ Custom Object Dynamic Routes:
 - `src/app/admin/objects/[apiName]/[id]/page.tsx` - Custom object detail view
 - `src/app/admin/objects/[apiName]/new/page.tsx` - Custom object create form
 
+Activities Pages (added to fix missing list view):
+
+- `src/app/admin/activities/page.tsx` - Activities list view with filtering by type/status
+- `src/app/admin/activities/new/page.tsx` - New Activity creation form
+
 Database:
 
 - `supabase/migrations/20251223000000_navigation_config.sql` - navigation_config table for per-org customization
@@ -353,6 +358,7 @@ Removed per-page headers from 30+ admin pages:
 - `src/app/admin/contacts/page.tsx` - Uses PageHeader component
 - `src/app/admin/opportunities/page.tsx` - Uses PageHeader component
 - `src/app/admin/crm-leads/page.tsx` - Uses PageHeader component
+- `src/app/admin/activities/page.tsx` - **NEW** List view for Activities (was missing, caused 404)
 - `src/app/admin/dashboards/page.tsx` - Uses PageHeader component
 - `src/app/admin/messages/page.tsx` - Uses PageHeader component
 - `src/app/admin/reports/page.tsx` - Uses PageHeader component
