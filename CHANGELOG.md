@@ -35,6 +35,13 @@ All notable changes to Nurture Nest Birth are documented in this file.
 - Root cause: `reorderAdminNavItems` creates new org-specific records for global items, causing ID mismatches
 - Solution: call `getNavigationItemsForAdmin()` after successful reorder to sync with database state
 
+**Standard Object Reordering**
+
+- Fixed standard objects (Account, Contact, etc.) reverting after reorder
+- Root cause: upsert with partial indexes didn't work reliably for org-specific overrides
+- Solution: replaced upsert with explicit check-then-insert/update pattern
+- Also fixed frontend state sync timing by explicitly updating localItems after refetch
+
 **Delete Navigation Items**
 
 - Added delete button (trash icon) to navigation items in the settings list
@@ -47,7 +54,7 @@ All notable changes to Nurture Nest Birth are documented in this file.
 - 18 new tests for Add Navigation Item functionality
 - 8 new tests for Drag-and-Drop Reordering and Delete functionality
 - Tests cover: drag handles, item persistence, add/delete workflow, delete persistence after reload
-- Total navigation management tests: 64
+- Total navigation management tests: 65
 
 ---
 
