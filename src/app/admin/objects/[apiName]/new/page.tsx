@@ -1,10 +1,19 @@
-import { redirect } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 import { getObjectMetadata } from '@/app/actions/object-metadata'
 import { NewRecordPage } from '@/components/admin/crm/new-record-page'
 
-export default async function NewAccountPage() {
+interface PageParams {
+  apiName: string
+}
+
+export default async function CustomObjectNewPage({
+  params,
+}: {
+  params: Promise<PageParams>
+}) {
+  const { apiName } = await params
   const supabase = await createClient()
 
   // Check auth
@@ -16,19 +25,10 @@ export default async function NewAccountPage() {
     redirect('/login')
   }
 
-  // Get Account object metadata
-  const metadataResult = await getObjectMetadata('Account')
+  // Get object metadata
+  const metadataResult = await getObjectMetadata(apiName)
   if (metadataResult.error || !metadataResult.data) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <h2 className="text-lg font-semibold text-foreground">
-            Error loading Account metadata
-          </h2>
-          <p className="mt-2 text-muted-foreground">{metadataResult.error}</p>
-        </div>
-      </div>
-    )
+    notFound()
   }
 
   const { object: objectDef, fields, page_layout } = metadataResult.data
@@ -38,7 +38,7 @@ export default async function NewAccountPage() {
       objectDefinition={objectDef}
       fields={fields}
       layout={page_layout}
-      backPath="/admin/accounts"
+      backPath={`/admin/objects/${apiName}`}
     />
   )
 }

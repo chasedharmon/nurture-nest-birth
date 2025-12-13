@@ -3,18 +3,12 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getConversations, getUnreadCount } from '@/app/actions/messaging'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-  ChevronLeft,
-  MessageSquare,
-  Search,
-  Archive,
-  Inbox,
-} from 'lucide-react'
+import { MessageSquare, Search, Archive, Inbox } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { ConversationList } from '@/components/admin/messages/conversation-list'
 import { NewConversationDialog } from '@/components/admin/messages/new-conversation-dialog'
+import { PageHeader } from '@/components/admin/navigation'
 import { cn } from '@/lib/utils'
 
 export const metadata = {
@@ -69,45 +63,18 @@ export default async function MessagesPage({
   const activeCount = activeResult.total || 0
   const archivedCount = archivedResult.total || 0
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/admin">
-                <Button variant="ghost" size="sm">
-                  <ChevronLeft className="mr-1 h-4 w-4" />
-                  Dashboard
-                </Button>
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <MessageSquare className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h1 className="font-serif text-xl font-bold text-foreground">
-                    Messages
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    {activeCount} conversation{activeCount !== 1 ? 's' : ''}
-                    {totalUnread > 0 && (
-                      <span className="ml-2 text-primary">
-                        ({totalUnread} unread)
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <NewConversationDialog />
-          </div>
-        </div>
-      </header>
+  const subtitleText = `${activeCount} conversation${activeCount !== 1 ? 's' : ''}${totalUnread > 0 ? ` (${totalUnread} unread)` : ''}`
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Messages"
+        subtitle={subtitleText}
+        icon={<MessageSquare className="h-5 w-5 text-primary" />}
+        actions={<NewConversationDialog />}
+      />
+
+      <div>
         {/* Stats */}
         <div className="mb-8 grid gap-4 sm:grid-cols-3">
           <Card>
@@ -227,7 +194,7 @@ export default async function MessagesPage({
             )}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

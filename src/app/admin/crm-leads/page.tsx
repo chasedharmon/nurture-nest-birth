@@ -2,11 +2,13 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { Plus, ArrowRight } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Plus, ArrowRight, UserPlus } from 'lucide-react'
 
 import { getRecords } from '@/app/actions/crm-records'
 import { getObjectMetadata } from '@/app/actions/object-metadata'
 import { DynamicListView } from '@/components/admin/crm/dynamic-list-view'
+import { PageHeader } from '@/components/admin/navigation'
 import type { CrmLead, FilterCondition } from '@/lib/crm/types'
 
 export default async function CrmLeadsListPage({
@@ -100,64 +102,49 @@ export default async function CrmLeadsListPage({
   ]
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-serif text-2xl font-bold text-foreground">
-                  {objectDef.plural_label}
-                </h1>
-                <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                  New CRM
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {result.total}{' '}
-                {result.total === 1
-                  ? objectDef.label.toLowerCase()
-                  : objectDef.plural_label.toLowerCase()}{' '}
-                total
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link href="/admin/crm-leads/new">
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  New {objectDef.label}
-                </Button>
-              </Link>
-              <Link href="/admin/leads">
-                <Button variant="outline">
-                  Legacy Leads
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/admin">
-                <Button variant="outline">Dashboard</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <PageHeader
+        title={objectDef.plural_label}
+        subtitle={`${result.total} ${result.total === 1 ? objectDef.label.toLowerCase() : objectDef.plural_label.toLowerCase()} total`}
+        icon={<UserPlus className="h-5 w-5 text-primary" />}
+        badge={
+          <Badge
+            variant="secondary"
+            className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+          >
+            New CRM
+          </Badge>
+        }
+        actions={
+          <>
+            <Link href="/admin/crm-leads/new">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                New {objectDef.label}
+              </Button>
+            </Link>
+            <Link href="/admin/leads">
+              <Button variant="outline">
+                Legacy Leads
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <DynamicListView
-          objectDefinition={objectDef}
-          fields={fields}
-          data={result.data}
-          totalCount={result.total}
-          page={page}
-          pageSize={pageSize}
-          searchFields={searchFields}
-          displayFields={displayFields}
-          basePath="/admin/crm-leads"
-          enableBulkActions={true}
-        />
-      </main>
+      <DynamicListView
+        objectDefinition={objectDef}
+        fields={fields}
+        data={result.data}
+        totalCount={result.total}
+        page={page}
+        pageSize={pageSize}
+        searchFields={searchFields}
+        displayFields={displayFields}
+        basePath="/admin/crm-leads"
+        enableBulkActions={true}
+      />
     </div>
   )
 }

@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select } from '@/components/ui/select-native'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChevronLeft, ChevronDown, ChevronUp, UserPlus } from 'lucide-react'
+import { ChevronDown, ChevronUp, UserPlus } from 'lucide-react'
 import type { ReferralPartner } from '@/lib/supabase/types'
 
 const REFERRAL_SOURCE_OPTIONS = [
@@ -112,36 +112,24 @@ export default function NewLeadPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4">
-            <Link href="/admin/leads">
-              <Button variant="ghost" size="sm">
-                <ChevronLeft className="mr-1 h-4 w-4" />
-                Leads
-              </Button>
-            </Link>
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-primary/10 p-2">
-                <UserPlus className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h1 className="font-serif text-xl font-bold text-foreground">
-                  New Lead
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Manually add a new lead to your CRM
-                </p>
-              </div>
-            </div>
-          </div>
+    <div className="space-y-6 max-w-3xl">
+      {/* Page Header */}
+      <div className="flex items-center gap-3">
+        <div className="rounded-lg bg-primary/10 p-2">
+          <UserPlus className="h-5 w-5 text-primary" />
         </div>
-      </header>
+        <div>
+          <h1 className="font-serif text-xl font-bold text-foreground">
+            New Lead
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Manually add a new lead to your CRM
+          </p>
+        </div>
+      </div>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+      <div>
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
             <div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
@@ -395,7 +383,7 @@ export default function NewLeadPage() {
             </Button>
           </div>
         </form>
-      </main>
+      </div>
     </div>
   )
 }

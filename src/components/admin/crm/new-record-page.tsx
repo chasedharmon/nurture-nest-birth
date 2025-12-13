@@ -9,9 +9,6 @@
 
 import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { DynamicRecordForm } from './dynamic-record-form'
@@ -98,49 +95,36 @@ export function NewRecordPage({
   )
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4">
-            <Link href={backPath}>
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div>
-              <p className="text-sm text-muted-foreground">
-                New {objectDefinition.label}
-              </p>
-              <h1 className="font-serif text-2xl font-bold text-foreground">
-                Create {objectDefinition.label}
-              </h1>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div>
+        <p className="text-sm text-muted-foreground">
+          New {objectDefinition.label}
+        </p>
+        <h1 className="font-serif text-2xl font-bold text-foreground">
+          Create {objectDefinition.label}
+        </h1>
+      </div>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>{objectDefinition.label} Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DynamicRecordForm
-              layout={layout}
-              fields={fields}
-              initialData={defaultValues}
-              mode="create"
-              readOnly={false}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-              onLookupSearch={handleLookupSearch}
-              submitLabel={`Create ${objectDefinition.label}`}
-            />
-          </CardContent>
-        </Card>
-      </main>
+      {/* Form Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{objectDefinition.label} Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DynamicRecordForm
+            layout={layout}
+            fields={fields}
+            initialData={defaultValues}
+            mode="create"
+            readOnly={false}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            onLookupSearch={handleLookupSearch}
+            submitLabel={`Create ${objectDefinition.label}`}
+          />
+        </CardContent>
+      </Card>
     </div>
   )
 }

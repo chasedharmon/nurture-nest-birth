@@ -13,9 +13,7 @@
 
 import { useState, useCallback, useTransition, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import {
-  ArrowLeft,
   Edit,
   Trash2,
   MoreHorizontal,
@@ -231,123 +229,106 @@ export function SecureRecordDetailPage<
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b border-border bg-card">
-          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Link href={backPath}>
-                  <Button variant="ghost" size="icon">
-                    <ArrowLeft className="h-5 w-5" />
-                  </Button>
-                </Link>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm text-muted-foreground">
-                      {objectDefinition.label}
-                    </p>
-                    {/* Security indicator */}
-                    {securityContext.isLoaded && !securityContext.canEdit && (
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Lock className="h-3 w-3 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>You have read-only access to this record</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                  </div>
-                  <h1 className="font-serif text-2xl font-bold text-foreground">
-                    {recordName}
-                  </h1>
-                </div>
-              </div>
+      <div className="space-y-6">
+        {/* Record Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-muted-foreground">
+                {objectDefinition.label}
+              </p>
+              {/* Security indicator */}
+              {securityContext.isLoaded && !securityContext.canEdit && (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Lock className="h-3 w-3 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>You have read-only access to this record</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+            <h1 className="font-serif text-2xl font-bold text-foreground">
+              {recordName}
+            </h1>
+          </div>
 
-              <div className="flex items-center gap-3">
-                {/* Mode Toggle - only show Edit if user can edit */}
+          <div className="flex items-center gap-3">
+            {/* Mode Toggle - only show Edit if user can edit */}
+            {securityContext.canEdit && (
+              <>
+                {mode === 'view' ? (
+                  <Button onClick={() => setMode('edit')}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </Button>
+                ) : (
+                  <Button variant="outline" onClick={() => setMode('view')}>
+                    <X className="mr-2 h-4 w-4" />
+                    Cancel
+                  </Button>
+                )}
+              </>
+            )}
+
+            {/* Quick Actions */}
+            {quickActions}
+
+            {/* More Actions Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
                 {securityContext.canEdit && (
+                  <DropdownMenuItem
+                    onClick={() => router.push(`${backPath}/${record.id}/edit`)}
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit in Full Page
+                  </DropdownMenuItem>
+                )}
+                {securityContext.canDelete && (
                   <>
-                    {mode === 'view' ? (
-                      <Button onClick={() => setMode('edit')}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </Button>
-                    ) : (
-                      <Button variant="outline" onClick={() => setMode('view')}>
-                        <X className="mr-2 h-4 w-4" />
-                        Cancel
-                      </Button>
-                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => setShowDeleteDialog(true)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
                   </>
                 )}
-
-                {/* Quick Actions */}
-                {quickActions}
-
-                {/* More Actions Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {securityContext.canEdit && (
-                      <DropdownMenuItem
-                        onClick={() =>
-                          router.push(`${backPath}/${record.id}/edit`)
-                        }
-                      >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit in Full Page
-                      </DropdownMenuItem>
-                    )}
-                    {securityContext.canDelete && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => setShowDeleteDialog(true)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    {!securityContext.canEdit && !securityContext.canDelete && (
-                      <DropdownMenuItem disabled>
-                        <Shield className="mr-2 h-4 w-4" />
-                        Limited Access
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
+                {!securityContext.canEdit && !securityContext.canDelete && (
+                  <DropdownMenuItem disabled>
+                    <Shield className="mr-2 h-4 w-4" />
+                    Limited Access
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        </header>
+        </div>
 
         {/* Security Notice Banner (for read-only users) */}
         {securityContext.isLoaded &&
           !securityContext.canEdit &&
           mode === 'view' && (
-            <div className="border-b border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
-              <div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
-                <Alert className="border-0 bg-transparent p-0">
-                  <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  <AlertDescription className="text-sm text-amber-700 dark:text-amber-400">
-                    You have read-only access to this record. Contact the owner
-                    or an administrator for edit access.
-                  </AlertDescription>
-                </Alert>
-              </div>
-            </div>
+            <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
+              <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <AlertDescription className="text-sm text-amber-700 dark:text-amber-400">
+                You have read-only access to this record. Contact the owner or
+                an administrator for edit access.
+              </AlertDescription>
+            </Alert>
           )}
 
         {/* Main Content */}
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div>
           <Tabs defaultValue="details" className="space-y-6">
             <TabsList>
               <TabsTrigger value="details">Details</TabsTrigger>
@@ -381,7 +362,7 @@ export function SecureRecordDetailPage<
               </TabsContent>
             ))}
           </Tabs>
-        </main>
+        </div>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

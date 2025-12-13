@@ -20,14 +20,12 @@ export default async function NewCrmLeadPage() {
   const metadataResult = await getObjectMetadata('Lead')
   if (metadataResult.error || !metadataResult.data) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-7xl px-4 py-12">
-          <div className="text-center">
-            <h2 className="text-lg font-semibold text-foreground">
-              Error loading Lead metadata
-            </h2>
-            <p className="mt-2 text-muted-foreground">{metadataResult.error}</p>
-          </div>
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <h2 className="text-lg font-semibold text-foreground">
+            Error loading Lead metadata
+          </h2>
+          <p className="mt-2 text-muted-foreground">{metadataResult.error}</p>
         </div>
       </div>
     )

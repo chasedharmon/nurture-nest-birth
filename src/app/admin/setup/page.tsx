@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/admin/navigation'
 import {
   Users,
   Shield,
@@ -18,7 +18,6 @@ import {
   Plug,
   Settings,
   ChevronRight,
-  ChevronLeft,
   Building2,
   Briefcase,
   Heart,
@@ -227,38 +226,14 @@ export default async function SetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/admin">
-                <Button variant="ghost" size="sm">
-                  <ChevronLeft className="mr-1 h-4 w-4" />
-                  Dashboard
-                </Button>
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <Settings className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h1 className="font-serif text-2xl font-bold text-foreground">
-                    Setup
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    Configure your Nurture Nest Birth CRM
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <PageHeader
+        title="Setup"
+        subtitle="Configure your CRM settings and preferences"
+        icon={<Settings className="h-5 w-5 text-primary" />}
+      />
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div>
         {/* Categories */}
         <div className="space-y-8">
           {setupCategories.map(category => (
@@ -333,7 +308,7 @@ export default async function SetupPage() {
             </Link>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

@@ -10,8 +10,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
+import { PageHeader } from '@/components/admin/navigation'
 import {
-  ChevronLeft,
   Workflow,
   Plus,
   Zap,
@@ -107,124 +107,95 @@ export default async function WorkflowsPage() {
   )
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/admin">
-                <Button variant="ghost" size="sm">
-                  <ChevronLeft className="mr-1 h-4 w-4" />
-                  Dashboard
-                </Button>
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <Workflow className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h1 className="font-serif text-xl font-bold text-foreground">
-                    Workflow Automations
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    {workflows.length} workflow
-                    {workflows.length !== 1 ? 's' : ''} ({activeCount} active)
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link href="/admin/workflows/templates">
+    <div className="space-y-6">
+      <PageHeader
+        title="Workflow Automations"
+        subtitle={`${workflows.length} workflow${workflows.length !== 1 ? 's' : ''} (${activeCount} active)`}
+        icon={<Workflow className="h-5 w-5 text-primary" />}
+        actions={
+          <>
+            <Link href="/admin/workflows/templates">
+              <Button variant="outline">
+                <LayoutTemplate className="mr-2 h-4 w-4" />
+                Browse Templates
+              </Button>
+            </Link>
+            <Dialog>
+              <DialogTrigger asChild>
                 <Button variant="outline">
-                  <LayoutTemplate className="mr-2 h-4 w-4" />
-                  Browse Templates
+                  <Zap className="mr-2 h-4 w-4" />
+                  Quick Start
                 </Button>
-              </Link>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <Zap className="mr-2 h-4 w-4" />
-                    Quick Start
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Create from Template</DialogTitle>
-                    <DialogDescription>
-                      Choose a pre-built workflow template to get started
-                      quickly
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-3 py-4 max-h-[60vh] overflow-y-auto">
-                    {templates.map(template => {
-                      const Icon = categoryIcons[template.category] || FileText
-                      return (
-                        <form
-                          key={template.id}
-                          action={async () => {
-                            'use server'
-                            const result = await createWorkflowFromTemplate(
-                              template.id
-                            )
-                            if (result.data) {
-                              redirect(`/admin/workflows/${result.data.id}`)
-                            }
-                          }}
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Create from Template</DialogTitle>
+                  <DialogDescription>
+                    Choose a pre-built workflow template to get started quickly
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-3 py-4 max-h-[60vh] overflow-y-auto">
+                  {templates.map(template => {
+                    const Icon = categoryIcons[template.category] || FileText
+                    return (
+                      <form
+                        key={template.id}
+                        action={async () => {
+                          'use server'
+                          const result = await createWorkflowFromTemplate(
+                            template.id
+                          )
+                          if (result.data) {
+                            redirect(`/admin/workflows/${result.data.id}`)
+                          }
+                        }}
+                      >
+                        <button
+                          type="submit"
+                          className="w-full text-left p-4 rounded-lg border hover:border-primary hover:bg-accent transition-colors"
                         >
-                          <button
-                            type="submit"
-                            className="w-full text-left p-4 rounded-lg border hover:border-primary hover:bg-accent transition-colors"
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="rounded-md bg-muted p-2">
-                                <Icon className="h-4 w-4 text-muted-foreground" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="font-medium">
-                                  {template.name}
-                                </div>
-                                <p className="text-sm text-muted-foreground mt-0.5">
-                                  {template.description}
-                                </p>
-                                <div className="flex gap-2 mt-2">
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {objectTypeLabels[template.object_type]}
-                                  </Badge>
-                                  <Badge variant="outline" className="text-xs">
-                                    {triggerTypeLabels[template.trigger_type]}
-                                  </Badge>
-                                </div>
+                          <div className="flex items-start gap-3">
+                            <div className="rounded-md bg-muted p-2">
+                              <Icon className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-medium">{template.name}</div>
+                              <p className="text-sm text-muted-foreground mt-0.5">
+                                {template.description}
+                              </p>
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant="secondary" className="text-xs">
+                                  {objectTypeLabels[template.object_type]}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {triggerTypeLabels[template.trigger_type]}
+                                </Badge>
                               </div>
                             </div>
-                          </button>
-                        </form>
-                      )
-                    })}
-                    {templates.length === 0 && (
-                      <p className="text-center text-muted-foreground py-8">
-                        No templates available
-                      </p>
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
-              <Link href="/admin/workflows/new">
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Workflow
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+                          </div>
+                        </button>
+                      </form>
+                    )
+                  })}
+                  {templates.length === 0 && (
+                    <p className="text-center text-muted-foreground py-8">
+                      No templates available
+                    </p>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Link href="/admin/workflows/new">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                New Workflow
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div>
         {/* Stats */}
         <div className="mb-8 grid gap-4 sm:grid-cols-4">
           <Card>
@@ -351,7 +322,7 @@ export default async function WorkflowsPage() {
             ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   )
 }

@@ -10,7 +10,6 @@ import {
   getClientsWithTeamAssignments,
 } from '@/app/actions/team'
 import type { TeamMember, OnCallSchedule } from '@/lib/supabase/types'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -22,7 +21,8 @@ import {
   TimeEntriesList,
   OnCallScheduleManager,
 } from '@/components/admin/team'
-import { Users, Clock, UserCheck, Calendar } from 'lucide-react'
+import { PageHeader } from '@/components/admin/navigation'
+import { Users, Clock, UserCheck, Calendar, Users2 } from 'lucide-react'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -86,33 +86,18 @@ export default async function TeamPage() {
     0
   )
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="font-serif text-2xl font-bold text-foreground">
-                Team Management
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {activeCount} active member{activeCount !== 1 ? 's' : ''}
-                {inactiveCount > 0 && `, ${inactiveCount} inactive`}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link href="/admin">
-                <Button variant="outline">Back to Dashboard</Button>
-              </Link>
-              <AddTeamMemberDialog />
-            </div>
-          </div>
-        </div>
-      </header>
+  const subtitleText = `${activeCount} active member${activeCount !== 1 ? 's' : ''}${inactiveCount > 0 ? `, ${inactiveCount} inactive` : ''}`
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Team Management"
+        subtitle={subtitleText}
+        icon={<Users2 className="h-5 w-5 text-primary" />}
+        actions={<AddTeamMemberDialog />}
+      />
+
+      <div>
         {/* On-Call Status */}
         {currentOnCall.length > 0 && (
           <Card className="mb-6">
@@ -480,7 +465,7 @@ export default async function TeamPage() {
             />
           </TabsContent>
         </Tabs>
-      </main>
+      </div>
     </div>
   )
 }

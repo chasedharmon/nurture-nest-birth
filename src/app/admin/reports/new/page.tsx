@@ -2,9 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, AlertCircle } from 'lucide-react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ReportBuilderWizard } from '@/components/admin/reports'
 import { createReport } from '@/app/actions/reports'
@@ -33,18 +31,13 @@ export default function NewReportPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/admin/reports">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Create Report</h1>
-          <p className="text-muted-foreground">
-            Build a custom report step by step
-          </p>
-        </div>
+      <div>
+        <h1 className="font-serif text-2xl font-bold text-foreground">
+          Create Report
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Build a custom report step by step
+        </p>
       </div>
 
       {/* Error Alert */}
