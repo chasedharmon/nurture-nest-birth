@@ -13,10 +13,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import {
-  type DbNavItem,
+  type DbUserNavItem,
   type SerializableNavigationConfig,
   type SerializableNavItem,
-  transformNavItems,
   filterByRole,
   FALLBACK_NAV_DATA,
   getObjectHref,
@@ -65,21 +64,46 @@ export async function getNavigationConfig(): Promise<{
 
     const userRole = teamMember?.role || null
 
-    // Try to fetch navigation config using the database function
-    let navItems: DbNavItem[] | null = null
-    const { data: rpcResult, error: navError } = await supabase.rpc(
-      'get_navigation_config',
+    // Try to fetch navigation using the new user-aware RPC function first
+    let navItems: DbUserNavItem[] | null = null
+    let usedLegacyRpc = false
+
+    // First try the new get_user_navigation RPC (includes personalization)
+    const { data: userNavResult, error: userNavError } = await supabase.rpc(
+      'get_user_navigation',
       {
         p_user_id: user.id,
         p_app_id: 'default',
       }
     )
 
-    if (navError) {
-      console.error('Error fetching navigation config from RPC:', navError)
-      // RPC unavailable - we'll build navigation from object_definitions instead
+    if (userNavError) {
+      console.warn(
+        'get_user_navigation RPC unavailable, trying legacy:',
+        userNavError.message
+      )
+
+      // Fallback to legacy get_navigation_config RPC
+      const { data: legacyResult, error: legacyError } = await supabase.rpc(
+        'get_navigation_config',
+        {
+          p_user_id: user.id,
+          p_app_id: 'default',
+        }
+      )
+
+      if (legacyError) {
+        console.error(
+          'Error fetching navigation config from legacy RPC:',
+          legacyError
+        )
+        // Both RPCs unavailable - we'll build navigation from object_definitions
+      } else {
+        navItems = legacyResult as DbUserNavItem[] | null
+        usedLegacyRpc = true
+      }
     } else {
-      navItems = rpcResult as DbNavItem[] | null
+      navItems = userNavResult as DbUserNavItem[] | null
     }
 
     let primaryTabs: SerializableNavItem[]
@@ -87,8 +111,11 @@ export async function getNavigationConfig(): Promise<{
     let adminMenu: SerializableNavItem[]
 
     if (navItems && navItems.length > 0) {
-      // Transform database items (returns SerializableNavItem without iconComponent)
-      const transformed = transformNavItems(navItems)
+      // Transform database items with personalization support
+      const transformed = transformNavItemsWithPersonalization(
+        navItems,
+        usedLegacyRpc
+      )
       primaryTabs = transformed.primaryTabs
       toolsMenu = transformed.toolsMenu
       adminMenu = transformed.adminMenu
@@ -103,8 +130,11 @@ export async function getNavigationConfig(): Promise<{
       adminMenu = FALLBACK_NAV_DATA.adminMenu
     }
 
-    // Filter by role (works with SerializableNavItem)
-    const filteredToolsMenu = filterByRole(toolsMenu, userRole)
+    // Filter by role (works with SerializableNavItem) - only needed for legacy RPC
+    // The new RPC already filters based on role visibility
+    const filteredToolsMenu = usedLegacyRpc
+      ? filterByRole(toolsMenu, userRole)
+      : toolsMenu
 
     // Get organization name for branding
     let brandName = 'Admin Portal'
@@ -338,6 +368,76 @@ export async function reorderNavItems(
 // =====================================================
 // HELPER FUNCTIONS
 // =====================================================
+
+/**
+ * Transform nav items with personalization support
+ * Works with both new get_user_navigation and legacy get_navigation_config RPCs
+ */
+function transformNavItemsWithPersonalization(
+  dbItems: DbUserNavItem[],
+  isLegacy: boolean
+): {
+  primaryTabs: SerializableNavItem[]
+  toolsMenu: SerializableNavItem[]
+  adminMenu: SerializableNavItem[]
+} {
+  const primaryTabs: SerializableNavItem[] = []
+  const toolsMenu: SerializableNavItem[] = []
+  const adminMenu: SerializableNavItem[] = []
+
+  for (const item of dbItems) {
+    const key = item.object_api_name || item.item_key || item.id
+    const label = item.display_name || item.object_label || key
+    const pluralLabel = item.object_plural_label || label
+
+    // Determine href
+    let href: string
+    if (item.item_type === 'object' && item.object_api_name) {
+      href = getObjectHref(item.object_api_name, item.is_custom_object)
+    } else if (item.item_href) {
+      href = item.item_href
+    } else if (item.item_key) {
+      href = `/admin/${item.item_key}`
+    } else {
+      href = '/admin'
+    }
+
+    const navItem: SerializableNavItem = {
+      id: item.id,
+      type: item.item_type,
+      key,
+      label,
+      pluralLabel,
+      href,
+      icon: item.icon_name,
+      isCustomObject: item.is_custom_object,
+      visibleToRoles: item.visible_to_roles,
+      // Add personalization fields if using new RPC
+      ...(isLegacy
+        ? {}
+        : {
+            visibilityState: item.visibility_state,
+            isUserAdded: item.is_user_added,
+            isRequired: item.is_required,
+            canBeRemoved: item.can_be_removed,
+          }),
+    }
+
+    switch (item.nav_type) {
+      case 'primary_tab':
+        primaryTabs.push(navItem)
+        break
+      case 'tools_menu':
+        toolsMenu.push(navItem)
+        break
+      case 'admin_menu':
+        adminMenu.push(navItem)
+        break
+    }
+  }
+
+  return { primaryTabs, toolsMenu, adminMenu }
+}
 
 /**
  * Get custom object navigation items from object_definitions

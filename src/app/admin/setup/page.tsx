@@ -33,6 +33,7 @@ import {
   ScrollText,
   Key,
   Webhook,
+  PanelTop,
 } from 'lucide-react'
 
 interface SetupCategory {
@@ -91,6 +92,12 @@ const setupCategories: SetupCategory[] = [
         description: 'Configure access control and permissions',
         href: '/admin/setup/roles',
         icon: <Shield className="h-5 w-5" />,
+      },
+      {
+        title: 'Navigation',
+        description: 'Configure navigation visibility and ordering',
+        href: '/admin/setup/navigation',
+        icon: <PanelTop className="h-5 w-5" />,
       },
       {
         title: 'Field-Level Security',

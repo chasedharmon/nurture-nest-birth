@@ -53,7 +53,15 @@ export type NavItemType = 'object' | 'tool' | 'external_link'
 export type NavType = 'primary_tab' | 'tools_menu' | 'admin_menu'
 
 /**
- * Raw navigation item from database
+ * Visibility state for role-based navigation control
+ * - visible: Always shown (Default On)
+ * - available: Can be added by user (Default Off)
+ * - hidden: Not accessible at all
+ */
+export type VisibilityState = 'visible' | 'available' | 'hidden'
+
+/**
+ * Raw navigation item from database (legacy get_navigation_config)
  */
 export interface DbNavItem {
   id: string
@@ -73,6 +81,18 @@ export interface DbNavItem {
 }
 
 /**
+ * Enhanced navigation item from get_user_navigation RPC
+ * Includes personalization and visibility state
+ */
+export interface DbUserNavItem extends DbNavItem {
+  nav_config_id: string
+  visibility_state: VisibilityState
+  is_user_added: boolean
+  is_required: boolean
+  can_be_removed: boolean
+}
+
+/**
  * Serializable navigation item (safe to pass server → client)
  * Does NOT include iconComponent as React components can't be serialized
  */
@@ -87,6 +107,11 @@ export interface SerializableNavItem {
   badge?: number
   isCustomObject: boolean
   visibleToRoles: string[] | null
+  // Personalization fields (optional for backwards compatibility)
+  visibilityState?: VisibilityState
+  isUserAdded?: boolean
+  isRequired?: boolean
+  canBeRemoved?: boolean
 }
 
 /**
@@ -187,6 +212,12 @@ export function getIconComponent(iconName: string): LucideIcon {
   const normalized = iconName.toLowerCase().replace(/[-_]/g, '')
   return iconMap[normalized] || iconMap[iconName] || File
 }
+
+/**
+ * Icon map export for components that need to avoid dynamic component creation
+ * Use this with useMemo to get the icon component
+ */
+export { iconMap }
 
 // =====================================================
 // PATH UTILITIES
