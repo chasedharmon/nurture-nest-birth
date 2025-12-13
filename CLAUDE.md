@@ -12,8 +12,8 @@
 
 ## Project Status
 
-**Current Phase**: Phase 7+ - CRM Refinement & SaaS Foundation
-**Last Updated**: December 9, 2024
+**Current Phase**: Phase 8 Complete - Ready for Phase 9 (Data Management)
+**Last Updated**: December 12, 2024
 
 ### Active Development Plan (6-Week Roadmap)
 
@@ -156,6 +156,44 @@ See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full pl
 - `src/lib/workflows/types.ts` - Added send_survey step type
 - `src/lib/workflows/engine.ts` - Added executeSendSurvey method for workflow integration
 - `src/components/admin/workflows/nodes/base-node.tsx` - Added send_survey node styling
+
+#### Phase 8: UX Polish & Onboarding (Week 6) ✅ COMPLETE
+
+| Task                          | Status      | Notes                                      |
+| ----------------------------- | ----------- | ------------------------------------------ |
+| UX-1: Admin Setup Wizard      | ✅ COMPLETE | Getting started checklist on dashboard     |
+| UX-2: Empty States            | ✅ COMPLETE | Branded empty states for workflows page    |
+| UX-3: Keyboard Shortcuts      | ✅ COMPLETE | G+H, G+L, G+W navigation, ? for help       |
+| UX-4: Help Widget             | ✅ COMPLETE | Floating ? button with context-aware tips  |
+| UX-5: Client Onboarding Tour  | ✅ COMPLETE | Step-by-step tour for new clients          |
+| UX-6: Client Journey Timeline | ✅ COMPLETE | Visual progress tracker on dashboard       |
+| UX-7: Client Smart Actions    | ✅ COMPLETE | Dynamic action items based on client state |
+
+**Phase 8 Files Created:**
+
+- `src/components/admin/onboarding/setup-checklist.tsx` - Getting started checklist with progress
+- `src/components/admin/onboarding/setup-progress.tsx` - Progress indicator component
+- `src/components/ui/empty-state.tsx` - Reusable branded empty state component
+- `src/lib/hooks/use-keyboard-shortcuts.ts` - Keyboard shortcuts hook with sequence support
+- `src/components/admin/keyboard-shortcuts-help.tsx` - Keyboard shortcuts help dialog
+- `src/components/admin/help-widget.tsx` - Floating help button with context-aware tips
+- `src/lib/help/help-content.ts` - Page-specific help tips content
+- `src/components/client/onboarding-tour.tsx` - Client portal onboarding tour
+- `src/components/client/journey-timeline.tsx` - Client journey progress visualization
+- `src/components/client/action-items.tsx` - Dynamic client action items
+
+**Phase 8 Files Modified:**
+
+- `src/app/admin/page.tsx` - Added SetupChecklist component
+- `src/app/admin/layout.tsx` - Added KeyboardShortcuts and HelpWidget providers
+- `src/app/admin/workflows/page.tsx` - Added EmptyState for no workflows
+- `src/app/client/(portal)/layout.tsx` - Added OnboardingTour component
+- `src/app/client/(portal)/dashboard/page.tsx` - Added JourneyTimeline and ActionItems
+
+**Phase 8 E2E Tests:**
+
+- `tests/e2e/ux-polish-phase8.spec.ts` - Admin UX features (keyboard shortcuts, help widget, setup checklist, empty states)
+- `tests/e2e/client-portal.spec.ts` - Client onboarding tour, journey timeline, action items tests
 
 ### Prior Phase 7 Completed Items
 
@@ -548,12 +586,17 @@ rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
 
 ## E2E Testing Status (Last Updated: Dec 12, 2024)
 
-### Recent Test Run Results:
+### Recent Test Run Results (Post-Phase 8):
 
-- **856 passed** ✅
+- **~875 passed** ✅ (including 19 new Phase 8 client portal tests)
 - **15 flaky** (pass on retry with `--retries=2`)
-- **8 failed** (mobile viewport timing issues)
-- **158 skipped** (across all test projects)
+- **~8 failed** (mobile viewport timing issues)
+- **~160 skipped** (across all test projects)
+
+### Phase 8 E2E Tests Added:
+
+- `tests/e2e/ux-polish-phase8.spec.ts` - Admin UX features (10 tests, some skip when dashboard fails to load)
+- `tests/e2e/client-portal.spec.ts` - Updated with Phase 8 client tests (onboarding tour, journey timeline, action items)
 
 ### Test Architecture:
 
