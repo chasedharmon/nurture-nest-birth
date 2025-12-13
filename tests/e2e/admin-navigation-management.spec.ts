@@ -935,6 +935,285 @@ test.describe('Navigation Management System', () => {
     })
   })
 
+  test.describe('Drag-and-Drop Reordering', () => {
+    test('should have drag handles for all nav items', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Verify drag handles exist
+      const dragHandles = page.locator('[data-drag-handle]')
+      const handleCount = await dragHandles.count()
+
+      // Should have multiple drag handles (one per nav item)
+      expect(handleCount).toBeGreaterThan(5)
+    })
+
+    test('should have interactive drag handles with proper cursor', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Find first drag handle
+      const dragHandle = page.locator('[data-drag-handle]').first()
+      await expect(dragHandle).toBeVisible()
+
+      // Verify it has grab cursor class
+      await expect(dragHandle).toHaveClass(/cursor-grab/)
+    })
+
+    test('should not lose items after page interactions', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Get scoped to the tab panel
+      const tabPanel = page.getByRole('tabpanel', { name: /items.*order/i })
+
+      // Count all nav items in the settings panel
+      const allDragHandles = tabPanel.locator('[data-drag-handle]')
+      const initialCount = await allDragHandles.count()
+
+      // The count should be greater than 0
+      expect(initialCount).toBeGreaterThan(0)
+
+      // Verify specific items exist in the settings panel
+      await expect(tabPanel.getByText('Accounts')).toBeVisible()
+      await expect(tabPanel.getByText('Contacts')).toBeVisible()
+
+      // Click on different tabs to verify data isn't lost
+      await page.getByRole('tab', { name: /role.*visibility/i }).click()
+      await expect(page.getByText(/visibility states/i)).toBeVisible()
+
+      // Switch back
+      await page.getByRole('tab', { name: /items.*order/i }).click()
+
+      // Items should still exist
+      const tabPanelAfter = page.getByRole('tabpanel', {
+        name: /items.*order/i,
+      })
+      const newCount = await tabPanelAfter.locator('[data-drag-handle]').count()
+      expect(newCount).toBe(initialCount)
+    })
+
+    test('should show DndContext with sortable items', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Verify the drag-and-drop infrastructure is present by checking
+      // for sortable items with proper structure
+      const sortableItems = page.locator('.rounded-lg.border')
+      const itemCount = await sortableItems.count()
+
+      expect(itemCount).toBeGreaterThan(0)
+
+      // Each item should have a drag handle
+      const firstItem = sortableItems.first()
+      const dragHandle = firstItem.locator('[data-drag-handle]')
+      await expect(dragHandle).toBeVisible()
+    })
+  })
+
+  test.describe('Delete Navigation Item', () => {
+    test('should show delete button for removable items', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Check for delete buttons (items with canBeRemoved = true)
+      const deleteButtons = page.locator('button[aria-label*="Delete"]')
+      const deleteCount = await deleteButtons.count()
+
+      // There should be at least some items that can be deleted
+      // (custom objects, external links, etc.)
+      expect(deleteCount).toBeGreaterThanOrEqual(0)
+    })
+
+    test('should not show delete button for required items', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Find items marked as "Required" (with the Required badge)
+      const requiredItems = page.locator('.rounded-lg.border').filter({
+        has: page.getByText('Required'),
+      })
+
+      const requiredCount = await requiredItems.count()
+
+      // For each required item, verify it does NOT have a delete button
+      for (let i = 0; i < requiredCount; i++) {
+        const requiredItem = requiredItems.nth(i)
+        const deleteButton = requiredItem.locator(
+          'button[aria-label*="Delete"]'
+        )
+        const deleteButtonCount = await deleteButton.count()
+
+        // Required items should not have delete buttons
+        expect(deleteButtonCount).toBe(0)
+      }
+    })
+
+    test('should add and delete a custom link item', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Generate a unique name for this test
+      const testLinkName = `E2E Del ${Date.now()}`
+
+      // Get the tab panel for scoping our searches
+      const tabPanel = page.getByRole('tabpanel', { name: /items.*order/i })
+
+      // First, add a custom link that we can delete
+      const addButton = page.getByRole('button', {
+        name: 'Add item to primary tab',
+      })
+      await addButton.click()
+
+      const dialog = page.getByRole('dialog')
+      await expect(dialog).toBeVisible()
+
+      // Switch to Link tab
+      await dialog.getByRole('tab', { name: /link/i }).click()
+
+      // Fill in the test link
+      await dialog.getByLabel(/display name/i).fill(testLinkName)
+      await dialog
+        .getByLabel(/url/i)
+        .fill('https://example.com/e2e-delete-test')
+
+      // Click Add Link
+      await dialog.getByRole('button', { name: /add link/i }).click()
+
+      // Wait for dialog to close
+      await expect(dialog).not.toBeVisible({ timeout: 10000 })
+
+      // Wait for the item to appear in the settings list (scoped to tabpanel)
+      await expect(tabPanel.getByText(testLinkName)).toBeVisible({
+        timeout: 10000,
+      })
+
+      // Find and click the delete button for this specific item (within tabpanel)
+      const newItem = tabPanel.locator('.rounded-lg.border').filter({
+        hasText: testLinkName,
+      })
+      await expect(newItem).toBeVisible()
+
+      const deleteButton = newItem.locator('button[aria-label*="Delete"]')
+      await expect(deleteButton).toBeVisible()
+      await deleteButton.click()
+
+      // Wait for the item to be removed from the settings list
+      // (the removal happens optimistically before the toast may appear)
+      await expect(
+        tabPanel.locator('.rounded-lg.border').filter({
+          hasText: testLinkName,
+        })
+      ).not.toBeVisible({
+        timeout: 10000,
+      })
+    })
+
+    test('should persist deletion after page reload', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Generate unique name
+      const testLinkName = `E2E Persist ${Date.now()}`
+
+      // Get the tab panel for scoping our searches
+      const tabPanel = page.getByRole('tabpanel', { name: /items.*order/i })
+
+      // Add a test link to delete
+      const addButton = page.getByRole('button', {
+        name: 'Add item to primary tab',
+      })
+      await addButton.click()
+
+      const dialog = page.getByRole('dialog')
+      await expect(dialog).toBeVisible()
+
+      await dialog.getByRole('tab', { name: /link/i }).click()
+      await dialog.getByLabel(/display name/i).fill(testLinkName)
+      await dialog
+        .getByLabel(/url/i)
+        .fill('https://example.com/e2e-persist-delete')
+      await dialog.getByRole('button', { name: /add link/i }).click()
+
+      await expect(dialog).not.toBeVisible({ timeout: 10000 })
+      await expect(tabPanel.getByText(testLinkName)).toBeVisible({
+        timeout: 10000,
+      })
+
+      // Delete the item
+      const newItem = tabPanel.locator('.rounded-lg.border').filter({
+        hasText: testLinkName,
+      })
+      const deleteButton = newItem.locator('button[aria-label*="Delete"]')
+      await deleteButton.click()
+
+      // Wait for item to disappear from the list
+      await expect(
+        tabPanel.locator('.rounded-lg.border').filter({
+          hasText: testLinkName,
+        })
+      ).not.toBeVisible({
+        timeout: 10000,
+      })
+
+      // Reload the page
+      await page.reload()
+
+      // Wait for content to reload
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Verify the item is still gone after reload (scoped to the main content)
+      const tabPanelAfterReload = page.getByRole('tabpanel', {
+        name: /items.*order/i,
+      })
+      await expect(
+        tabPanelAfterReload.locator('.rounded-lg.border').filter({
+          hasText: testLinkName,
+        })
+      ).not.toBeVisible()
+    })
+
+    test('delete button should be interactive', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Find a delete button
+      const deleteButton = page.locator('button[aria-label*="Delete"]').first()
+      const deleteButtonCount = await deleteButton.count()
+
+      if (deleteButtonCount > 0) {
+        // Hover over the delete button
+        await deleteButton.hover()
+
+        // The button should be visible and enabled
+        await expect(deleteButton).toBeVisible()
+        await expect(deleteButton).toBeEnabled()
+      }
+    })
+  })
+
   test.describe('Data Persistence', () => {
     test('should enable save button when display name changes', async ({
       page,

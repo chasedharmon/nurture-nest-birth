@@ -1,7 +1,14 @@
 'use client'
 
 import { useState, useTransition, createElement } from 'react'
-import { GripVertical, Pencil, Lock, Sparkles, Plus } from 'lucide-react'
+import {
+  GripVertical,
+  Pencil,
+  Lock,
+  Sparkles,
+  Plus,
+  Trash2,
+} from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -26,6 +33,8 @@ import { toast } from 'sonner'
 import { getIconComponent } from '@/lib/admin-navigation'
 import {
   reorderAdminNavItems,
+  getNavigationItemsForAdmin,
+  deleteNavigationItem,
   type AdminNavItem,
   type NavType,
 } from '@/app/actions/navigation-admin'
@@ -44,6 +53,8 @@ interface NavItemsListProps {
 interface SortableItemProps {
   item: AdminNavItem
   onEdit: (item: AdminNavItem) => void
+  onDelete: (item: AdminNavItem) => void
+  isDeleting: boolean
 }
 
 /**
@@ -61,7 +72,12 @@ function DynamicIcon({
   return createElement(iconComponent, { className })
 }
 
-function SortableItem({ item, onEdit }: SortableItemProps) {
+function SortableItem({
+  item,
+  onEdit,
+  onDelete,
+  isDeleting,
+}: SortableItemProps) {
   const {
     attributes,
     listeners,
@@ -127,15 +143,29 @@ function SortableItem({ item, onEdit }: SortableItemProps) {
         )}
       </div>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => onEdit(item)}
-        aria-label={`Edit ${item.displayName}`}
-      >
-        <Pencil className="h-4 w-4" />
-      </Button>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => onEdit(item)}
+          aria-label={`Edit ${item.displayName}`}
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+        {item.canBeRemoved && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            onClick={() => onDelete(item)}
+            disabled={isDeleting}
+            aria-label={`Delete ${item.displayName}`}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
     </div>
   )
 }
@@ -152,6 +182,7 @@ export function NavItemsList({
   const [editingItem, setEditingItem] = useState<AdminNavItem | null>(null)
   const [localItems, setLocalItems] = useState(items)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null)
 
   // Sync local items when props change
   if (items !== localItems && !isPending) {
@@ -181,16 +212,23 @@ export function NavItemsList({
         const result = await reorderAdminNavItems(itemIds, navType)
 
         if (result.success) {
-          // Update parent state with new order
-          const updatedAllItems = allItems.map(item => {
-            const newIndex = newItems.findIndex(i => i.id === item.id)
-            if (newIndex !== -1) {
-              return { ...item, sortOrder: (newIndex + 1) * 10 }
-            }
-            return item
-          })
-          onItemsChange(updatedAllItems)
-          toast.success('Order saved')
+          // Refetch all items to get fresh IDs (reorder may create new org-specific records)
+          const refetchResult = await getNavigationItemsForAdmin()
+          if (refetchResult.success && refetchResult.data) {
+            onItemsChange(refetchResult.data)
+            toast.success('Order saved')
+          } else {
+            // Fallback: update sort order locally if refetch fails
+            const updatedAllItems = allItems.map(item => {
+              const newIndex = newItems.findIndex(i => i.id === item.id)
+              if (newIndex !== -1) {
+                return { ...item, sortOrder: (newIndex + 1) * 10 }
+              }
+              return item
+            })
+            onItemsChange(updatedAllItems)
+            toast.success('Order saved')
+          }
         } else {
           // Revert on error
           setLocalItems(items)
@@ -215,6 +253,28 @@ export function NavItemsList({
 
   const handleItemMoved = (itemId: string, newNavType: NavType) => {
     onItemMoved?.(itemId, newNavType)
+  }
+
+  const handleDelete = (item: AdminNavItem) => {
+    if (!item.canBeRemoved) {
+      toast.error('This item cannot be removed')
+      return
+    }
+
+    setDeletingItemId(item.id)
+    startTransition(async () => {
+      const result = await deleteNavigationItem(item.id)
+
+      if (result.success) {
+        // Remove from local state immediately
+        const updatedItems = allItems.filter(i => i.id !== item.id)
+        onItemsChange(updatedItems)
+        toast.success(`"${item.displayName}" removed`)
+      } else {
+        toast.error(result.error || 'Failed to remove item')
+      }
+      setDeletingItemId(null)
+    })
   }
 
   if (localItems.length === 0) {
@@ -260,7 +320,13 @@ export function NavItemsList({
         >
           <div className="space-y-2">
             {localItems.map(item => (
-              <SortableItem key={item.id} item={item} onEdit={setEditingItem} />
+              <SortableItem
+                key={item.id}
+                item={item}
+                onEdit={setEditingItem}
+                onDelete={handleDelete}
+                isDeleting={deletingItemId === item.id}
+              />
             ))}
           </div>
         </SortableContext>
