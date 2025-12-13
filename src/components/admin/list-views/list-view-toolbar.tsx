@@ -2,7 +2,12 @@
 
 import { useState } from 'react'
 import { Search, Filter, Columns, ChevronDown, Save, X } from 'lucide-react'
-import type { ListView, ObjectType } from '@/lib/supabase/types'
+import type {
+  ListView,
+  ObjectType,
+  FilterCondition,
+  ColumnConfig,
+} from '@/lib/supabase/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -13,8 +18,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
+import { ExportButton } from '@/components/admin/export-button'
 
-interface ListViewToolbarProps {
+interface ListViewToolbarProps<
+  T extends Record<string, unknown> & { id: string },
+> {
   objectType: ObjectType
   views: ListView[]
   currentView: ListView | null
@@ -27,9 +35,18 @@ interface ListViewToolbarProps {
   onOpenFilterBuilder: () => void
   onOpenColumnSelector: () => void
   onSaveView: () => void
+  // Export props
+  data: T[]
+  columns: ColumnConfig[]
+  filters: FilterCondition[]
+  selectedIds: Set<string>
+  totalCount: number
 }
 
-export function ListViewToolbar({
+export function ListViewToolbar<
+  T extends Record<string, unknown> & { id: string },
+>({
+  objectType,
   views,
   currentView,
   filterOptions,
@@ -41,7 +58,13 @@ export function ListViewToolbar({
   onOpenFilterBuilder,
   onOpenColumnSelector,
   onSaveView,
-}: ListViewToolbarProps) {
+  // Export props
+  data,
+  columns,
+  filters,
+  selectedIds,
+  totalCount,
+}: ListViewToolbarProps<T>) {
   const [localSearch, setLocalSearch] = useState(searchValue)
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -230,6 +253,16 @@ export function ListViewToolbar({
           <Columns className="mr-1 h-3 w-3" />
           Columns
         </Button>
+
+        {/* Export Button */}
+        <ExportButton
+          data={data}
+          filename={objectType}
+          columns={columns}
+          filters={filters}
+          selectedIds={selectedIds}
+          totalCount={totalCount}
+        />
       </div>
     </div>
   )

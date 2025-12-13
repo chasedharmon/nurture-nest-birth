@@ -285,6 +285,69 @@ export async function bulkDelete(objectType: ObjectType, ids: string[]) {
   return { success: true }
 }
 
+export async function bulkAssignTeamMember(
+  objectType: ObjectType,
+  ids: string[],
+  teamMemberId: string,
+  assignmentRole: 'primary' | 'backup' | 'support' = 'primary'
+) {
+  // Only leads and clients can have team member assignments
+  if (objectType !== 'leads' && objectType !== 'clients') {
+    return {
+      success: false,
+      error: 'Team assignment not supported for this object type',
+    }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { success: false, error: 'Not authenticated' }
+
+  // For each record, upsert the client_assignment
+  // Using upsert to handle existing assignments
+  const assignments = ids.map(clientId => ({
+    client_id: clientId,
+    team_member_id: teamMemberId,
+    assignment_role: assignmentRole,
+    assigned_by: user.id,
+  }))
+
+  // Delete existing assignments of the same role first
+  for (const id of ids) {
+    await supabase
+      .from('client_assignments')
+      .delete()
+      .eq('client_id', id)
+      .eq('assignment_role', assignmentRole)
+  }
+
+  // Insert new assignments
+  const { error } = await supabase
+    .from('client_assignments')
+    .insert(assignments)
+
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/admin')
+  return { success: true, assignedCount: ids.length }
+}
+
+export async function getTeamMembers() {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('team_members')
+    .select('id, name, role, is_active')
+    .eq('is_active', true)
+    .order('name')
+
+  if (error) return { success: false, error: error.message, data: [] }
+  return { success: true, data }
+}
+
 // ============================================================================
 // INLINE EDITING
 // ============================================================================

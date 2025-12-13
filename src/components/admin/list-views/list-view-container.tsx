@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useTransition } from 'react'
+import { useState, useCallback, useTransition, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type {
   ListView,
@@ -66,10 +66,14 @@ export function ListViewContainer<T extends { id: string }>({
   const columns = currentView?.columns?.length
     ? currentView.columns
     : defaultColumns
-  const sortConfig = currentView?.sort_config || {
-    field: 'created_at',
-    direction: 'desc' as const,
-  }
+  const sortConfig = useMemo(
+    () =>
+      currentView?.sort_config || {
+        field: 'created_at',
+        direction: 'desc' as const,
+      },
+    [currentView?.sort_config]
+  )
 
   // Selection handlers
   const handleSelectAll = useCallback(
@@ -271,16 +275,24 @@ export function ListViewContainer<T extends { id: string }>({
             ([key]) => !['view', 'page', 'q', 'sort', 'dir'].includes(key)
           )
         )}
+        // Export props
+        data={data}
+        columns={columns}
+        filters={pendingFilters}
+        selectedIds={selectedIds}
+        totalCount={totalCount}
       />
 
       {/* Bulk Action Bar (shown when items selected) */}
       {selectedIds.size > 0 && (
         <BulkActionBar
           selectedCount={selectedIds.size}
+          selectedIds={Array.from(selectedIds)}
           objectType={objectType}
           onAction={handleBulkAction}
           onClearSelection={() => setSelectedIds(new Set())}
           isPending={isPending}
+          onAssignmentComplete={() => router.refresh()}
         />
       )}
 

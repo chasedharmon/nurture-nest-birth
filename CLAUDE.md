@@ -12,7 +12,7 @@
 
 ## Project Status
 
-**Current Phase**: Phase 8 Complete - Ready for Phase 9 (Data Management)
+**Current Phase**: Phase 9 Complete - Data Management
 **Last Updated**: December 12, 2024
 
 ### Active Development Plan (6-Week Roadmap)
@@ -156,6 +156,81 @@ See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full pl
 - `src/lib/workflows/types.ts` - Added send_survey step type
 - `src/lib/workflows/engine.ts` - Added executeSendSurvey method for workflow integration
 - `src/components/admin/workflows/nodes/base-node.tsx` - Added send_survey node styling
+
+#### Phase 9: Data Management ✅ COMPLETE
+
+| Task                       | Status      | Notes                                               |
+| -------------------------- | ----------- | --------------------------------------------------- |
+| DM-1: CSV/Excel Import     | ✅ COMPLETE | 4-step wizard: upload, map columns, preview, import |
+| DM-2: Quick Export Buttons | ✅ COMPLETE | Export dropdown on list views (CSV/Excel)           |
+| DM-3: Filter-Aware Exports | ✅ COMPLETE | Exports respect current filters, include metadata   |
+| DM-4: Bulk Actions         | ✅ COMPLETE | Team member assignment added to bulk actions bar    |
+| DM-5: Duplicate Detection  | ✅ COMPLETE | Import-time duplicate skip via email checking       |
+
+**Phase 9 Files Created:**
+
+Import Library:
+
+- `src/lib/import/types.ts` - ParsedFile, ColumnMapping, ValidationError, ImportResult types
+- `src/lib/import/parsers.ts` - CSV and Excel parsing using xlsx library
+- `src/lib/import/field-definitions.ts` - Field definitions per object type, auto-mapping with aliases
+- `src/lib/import/validators.ts` - Row validation (email, phone, date), transform for DB insert
+- `src/lib/import/index.ts` - Re-exports for import module
+
+Export Library:
+
+- `src/lib/export/excel.ts` - Excel export utilities using xlsx library
+- `src/lib/export/csv.ts` - CSV export with metadata headers and proper escaping
+- `src/lib/export/types.ts` - Export types (ExcelExportOptions, CSVExportOptions)
+- `src/lib/export/index.ts` - Re-exports for export module
+
+Import UI Components:
+
+- `src/components/admin/import/import-wizard.tsx` - Main 4-step wizard container
+- `src/components/admin/import/file-upload-step.tsx` - Drag-and-drop file upload
+- `src/components/admin/import/column-mapping-step.tsx` - Column mapping with auto-map, templates
+- `src/components/admin/import/preview-step.tsx` - Data preview with validation, row selection
+- `src/components/admin/import/import-progress-step.tsx` - Progress bar, results, error download
+- `src/components/admin/import/index.ts` - Re-exports
+
+Export UI:
+
+- `src/components/admin/export-button.tsx` - Reusable export dropdown (CSV/Excel, selection-aware)
+
+Import Pages:
+
+- `src/app/admin/import/page.tsx` - Import landing page with object type selection
+- `src/app/admin/import/[object]/page.tsx` - Dynamic route for object-specific import wizard
+
+Server Actions:
+
+- `src/app/actions/import.ts` - executeImport, saveMappingTemplate, getMappingTemplates, getImportHistory
+
+Database Migration:
+
+- `supabase/migrations/20251218000000_import_jobs.sql` - import_jobs, import_mapping_templates tables
+
+**Phase 9 Files Modified:**
+
+- `src/components/admin/list-views/list-view-toolbar.tsx` - Added ExportButton integration
+- `src/components/admin/list-views/list-view-container.tsx` - Pass export props (data, columns, filters, selectedIds)
+- `src/components/admin/list-views/bulk-action-bar.tsx` - Added team member assignment dropdown
+- `src/app/actions/list-views.ts` - Added bulkAssignTeamMember, getTeamMembers actions
+
+**Phase 9 Key Features:**
+
+- Import wizard supports CSV and Excel (.xlsx, .xls) files
+- Auto-mapping recognizes common column names via aliases (e.g., "First Name" → first_name)
+- Mapping templates can be saved and reused for repeated imports
+- Duplicate detection skips rows where email already exists in database
+- Batch processing (50 records at a time) prevents timeout on large imports
+- Export includes filter metadata and supports selection-based exports
+- Bulk team assignment with role selection (primary/backup/support)
+
+**Phase 9 E2E Tests:**
+
+- `tests/e2e/data-management-phase9.spec.ts` - Import wizard, export buttons, bulk actions, list view toolbar tests
+  - Note: Import-related tests skip gracefully if `import_jobs` migration not applied
 
 #### Phase 8: UX Polish & Onboarding (Week 6) ✅ COMPLETE
 
