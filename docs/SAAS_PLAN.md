@@ -53,10 +53,11 @@
 
 | Gap                                      | Status      | Phase |
 | ---------------------------------------- | ----------- | ----- |
-| Architecture cleanup (separate concerns) | Not started | 0     |
-| Platform config vs tenant config         | Not started | 0     |
-| Super-admin dashboard                    | Not started | 0     |
-| Tenant provisioning                      | Not started | 0     |
+| Architecture cleanup (separate concerns) | ✅ Complete | 0     |
+| Platform config vs tenant config         | ✅ Complete | 0     |
+| Super-admin dashboard                    | ✅ Complete | 0     |
+| Tenant provisioning                      | ✅ Complete | 0     |
+| Tenant impersonation                     | Not started | 0     |
 | Self-service signup                      | Not started | 1     |
 | Live Stripe billing (subscriptions)      | Stubbed     | 2     |
 | Platform marketing site                  | Not started | 0     |
@@ -68,7 +69,20 @@
 ### Phase 0: Architecture Cleanup & Beta Prep
 
 **Goal**: Clean separation of concerns + enable manual tenant provisioning
-**Status**: Current Phase
+**Status**: Week 1-2 Complete, Week 3 Remaining (Marketing Site)
+
+#### Week 1 Progress (✅ Complete)
+
+| Task                        | File                                               | Status |
+| --------------------------- | -------------------------------------------------- | ------ |
+| Platform config             | `src/config/platform.ts`                           | ✅     |
+| Tenant context              | `src/lib/platform/tenant-context.ts`               | ✅     |
+| Super-admin utils           | `src/lib/platform/super-admin.ts`                  | ✅     |
+| is_platform_admin migration | Via Supabase MCP                                   | ✅     |
+| tenant_branding table       | Via Supabase MCP                                   | ✅     |
+| Branding server actions     | `src/app/actions/tenant-branding.ts`               | ✅     |
+| Branding settings UI        | `src/components/admin/setup/branding-settings.tsx` | ✅     |
+| Admin layout org injection  | `src/app/admin/layout.tsx`                         | ✅     |
 
 #### 0.0 Project Structure Clarification
 
@@ -323,9 +337,45 @@ CREATE TABLE tenant_branding (
 7. Update `/admin/setup/organization/` page
 8. Update `src/app/admin/layout.tsx`
 
-**Week 2: Super-Admin & Provisioning (0.3 - 0.4)** 9. Create `/super-admin/layout.tsx` 10. Create `/super-admin/tenants/page.tsx` 11. Create `/super-admin/tenants/new/page.tsx` 12. Create `/super-admin/tenants/[id]/page.tsx` 13. Implement tenant impersonation 14. Create onboarding wizard
+#### Week 2 Progress (✅ Complete)
 
-**Week 3: Platform Marketing & Restructure (0.5)** 15. Rename `(marketing)/` -> `(nnb-marketing)/` 16. Create `(platform-marketing)/` site 17. Update middleware for host-based routing 18. Seed fresh NNB tenant with demo data
+| Task                       | File                                        | Status |
+| -------------------------- | ------------------------------------------- | ------ |
+| Super-admin layout         | `src/app/super-admin/layout.tsx`            | ✅     |
+| Super-admin dashboard      | `src/app/super-admin/page.tsx`              | ✅     |
+| Tenant list page           | `src/app/super-admin/tenants/page.tsx`      | ✅     |
+| Create tenant page         | `src/app/super-admin/tenants/new/page.tsx`  | ✅     |
+| Tenant detail page         | `src/app/super-admin/tenants/[id]/page.tsx` | ✅     |
+| Super-admin server actions | `src/app/actions/super-admin.ts`            | ✅     |
+| Settings placeholder       | `src/app/super-admin/settings/page.tsx`     | ✅     |
+| Error boundary             | `src/app/super-admin/error.tsx`             | ✅     |
+| Loading state              | `src/app/super-admin/loading.tsx`           | ✅     |
+| Platform admin DB flag     | `users.is_platform_admin` set for owner     | ✅     |
+
+**Features implemented:**
+
+- Dashboard with tenant stats (total, active, trialing, suspended)
+- Recent signups table (last 7 days)
+- Tenant list with search, filter by status/tier, pagination
+- Create tenant form (org + owner user + membership)
+- Tenant detail view with usage statistics
+- Suspend/reactivate tenant actions
+- Change subscription tier
+
+**Remaining for Phase 0 (optional):**
+
+- Tenant impersonation (0.4)
+- Platform marketing site (0.5)
+
+#### Week 3: Platform Marketing & Restructure (0.5) - Optional
+
+| Task                      | Status      |
+| ------------------------- | ----------- |
+| Rename `(marketing)/`     | Not started |
+| Create platform marketing | Not started |
+| Host-based routing        | Not started |
+| Seed NNB tenant demo data | Not started |
+| Tenant impersonation      | Not started |
 
 ---
 

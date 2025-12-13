@@ -128,6 +128,7 @@ export async function listTenants(options?: {
   // Use admin client to bypass RLS
   const supabase = createAdminClient()
 
+  // Query organizations without the FK join (no FK constraint exists)
   let query = supabase.from('organizations').select(
     `
       id,
@@ -137,7 +138,6 @@ export async function listTenants(options?: {
       subscription_tier,
       created_at,
       owner_user_id,
-      users!organizations_owner_user_id_fkey(email),
       organization_memberships(count)
     `,
     { count: 'exact' }
@@ -173,6 +173,27 @@ export async function listTenants(options?: {
     throw new Error(`Failed to list tenants: ${error.message}`)
   }
 
+  // Fetch owner emails separately
+  const ownerIds = (data || [])
+    .map((org: Record<string, unknown>) => org.owner_user_id)
+    .filter((id): id is string => !!id)
+
+  let ownerEmails: Record<string, string> = {}
+  if (ownerIds.length > 0) {
+    const { data: owners } = await supabase
+      .from('users')
+      .select('id, email')
+      .in('id', ownerIds)
+
+    ownerEmails = (owners || []).reduce(
+      (acc: Record<string, string>, user: { id: string; email: string }) => {
+        acc[user.id] = user.email
+        return acc
+      },
+      {}
+    )
+  }
+
   // Transform data
   const tenants: TenantListItem[] = (data || []).map(
     (org: Record<string, unknown>) => ({
@@ -181,9 +202,9 @@ export async function listTenants(options?: {
       slug: org.slug as string,
       subscription_status: org.subscription_status as string,
       subscription_tier: org.subscription_tier as string,
-      owner_email: (org.users as Record<string, unknown> | null)?.email as
-        | string
-        | null,
+      owner_email: org.owner_user_id
+        ? ownerEmails[org.owner_user_id as string] || null
+        : null,
       member_count:
         (org.organization_memberships as { count: number }[] | null)?.[0]
           ?.count || 0,

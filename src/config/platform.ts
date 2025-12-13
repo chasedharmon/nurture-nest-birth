@@ -119,10 +119,7 @@ export const superAdminConfig = {
    * Specific emails that are always platform admins
    * These users bypass domain checks
    */
-  allowedEmails: [
-    // Add specific admin emails here
-    // 'admin@example.com',
-  ] as string[],
+  allowedEmails: ['chase.d.harmon@gmail.com'] as string[],
 
   /**
    * Super admin routes prefix
