@@ -2,9 +2,10 @@
  * Error Logging Utility
  *
  * Provides a centralized way to log errors throughout the application.
- * In production, this can be extended to send errors to external services
- * like Sentry, LogRocket, or other error tracking platforms.
+ * Integrates with Sentry for production error tracking.
  */
+
+import * as Sentry from '@sentry/nextjs'
 
 export interface ErrorContext {
   component?: string
@@ -19,6 +20,17 @@ export interface ErrorLog {
   timestamp: string
   context?: ErrorContext
   severity: 'low' | 'medium' | 'high' | 'critical'
+}
+
+// Map severity to Sentry levels
+const severityToSentryLevel: Record<
+  ErrorLog['severity'],
+  Sentry.SeverityLevel
+> = {
+  low: 'info',
+  medium: 'warning',
+  high: 'error',
+  critical: 'fatal',
 }
 
 /**
@@ -42,27 +54,41 @@ export function logError(
     console.error('Error logged:', errorLog)
   }
 
-  // In production, send to error tracking service
-  if (process.env.NODE_ENV === 'production') {
-    // Example integrations (commented out - add when ready):
-    // sendToSentry(errorLog)
-    // sendToLogRocket(errorLog)
-    // sendToDatadog(errorLog)
+  // Send to Sentry in production (or when DSN is configured)
+  if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+    Sentry.withScope(scope => {
+      // Set severity level
+      scope.setLevel(severityToSentryLevel[severity])
 
-    // For now, just log critical errors to console in production
-    if (severity === 'critical') {
-      console.error('Critical error:', errorLog)
-    }
+      // Add context as tags and extra data
+      if (context?.component) {
+        scope.setTag('component', context.component)
+      }
+      if (context?.action) {
+        scope.setTag('action', context.action)
+      }
+      if (context?.userId) {
+        scope.setUser({ id: context.userId })
+      }
+      if (context?.metadata) {
+        scope.setExtras(context.metadata)
+      }
+
+      // Capture the exception
+      Sentry.captureException(error)
+    })
   }
 
   // Store in session storage for debugging (last 10 errors)
-  try {
-    const stored = sessionStorage.getItem('error-logs')
-    const logs: ErrorLog[] = stored ? JSON.parse(stored) : []
-    logs.unshift(errorLog)
-    sessionStorage.setItem('error-logs', JSON.stringify(logs.slice(0, 10)))
-  } catch {
-    // Ignore storage errors
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = sessionStorage.getItem('error-logs')
+      const logs: ErrorLog[] = stored ? JSON.parse(stored) : []
+      logs.unshift(errorLog)
+      sessionStorage.setItem('error-logs', JSON.stringify(logs.slice(0, 10)))
+    } catch {
+      // Ignore storage errors
+    }
   }
 }
 

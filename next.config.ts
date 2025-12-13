@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { withSentryConfig } from '@sentry/nextjs'
 
 // Security headers for production
 const securityHeaders = [
@@ -87,4 +88,32 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+// Wrap with Sentry config for production error tracking
+// Sentry configuration options
+const sentryConfig = {
+  // Organization and project (set via environment variables)
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+
+  // Disable source map upload in CI/CD without auth token
+  silent: !process.env.SENTRY_AUTH_TOKEN,
+
+  // Upload source maps for better stack traces
+  widenClientFileUpload: true,
+
+  // Routes to hide from Sentry
+  hideSourceMaps: true,
+
+  // Disable logger to reduce noise
+  disableLogger: true,
+
+  // Automatically tree-shake Sentry SDK
+  automaticVercelMonitors: true,
+}
+
+// Only wrap with Sentry if DSN is configured
+const finalConfig = process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? withSentryConfig(nextConfig, sentryConfig)
+  : nextConfig
+
+export default finalConfig

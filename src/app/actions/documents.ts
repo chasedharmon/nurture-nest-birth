@@ -219,6 +219,8 @@ export async function toggleDocumentVisibility(documentId: string) {
   return { success: true, isVisible: newVisibility }
 }
 
+const BUCKET_NAME = 'client-documents'
+
 export async function deleteDocument(documentId: string) {
   const supabase = await createClient()
 
@@ -231,13 +233,43 @@ export async function deleteDocument(documentId: string) {
     return { success: false, error: 'Unauthorized' }
   }
 
-  // Get document for revalidation and potential file deletion
+  // Get document for revalidation and file deletion
   const { data: document } = await supabase
     .from('client_documents')
     .select('client_id, file_url')
     .eq('id', documentId)
     .single()
 
+  if (!document) {
+    return { success: false, error: 'Document not found' }
+  }
+
+  // Delete file from Supabase Storage
+  if (document.file_url) {
+    try {
+      const url = new URL(document.file_url)
+      const pathMatch = url.pathname.match(
+        /\/storage\/v1\/object\/public\/client-documents\/(.+)/
+      )
+
+      if (pathMatch && pathMatch[1]) {
+        const filePath = decodeURIComponent(pathMatch[1])
+        const { error: storageError } = await supabase.storage
+          .from(BUCKET_NAME)
+          .remove([filePath])
+
+        if (storageError) {
+          console.error('Error deleting file from storage:', storageError)
+          // Continue to delete database record even if storage deletion fails
+        }
+      }
+    } catch (urlError) {
+      console.error('Error parsing file URL:', urlError)
+      // Continue to delete database record even if URL parsing fails
+    }
+  }
+
+  // Delete database record
   const { error } = await supabase
     .from('client_documents')
     .delete()
@@ -248,15 +280,11 @@ export async function deleteDocument(documentId: string) {
     return { success: false, error: error.message }
   }
 
-  // TODO: Delete file from Supabase Storage if needed
-  // if (document?.file_url) {
-  //   // Extract file path from URL and delete from storage
-  // }
-
-  if (document?.client_id) {
+  if (document.client_id) {
     revalidatePath(`/admin/leads/${document.client_id}`)
   }
   revalidatePath('/admin')
+  revalidatePath('/client/documents')
 
   return { success: true }
 }
@@ -279,4 +307,118 @@ export async function getDocumentDownloadUrl(documentId: string) {
   // If using Supabase Storage, generate a signed URL
   // For now, return the direct URL
   return { success: true, url: document.file_url }
+}
+
+/**
+ * Admin function to find and clean up orphaned storage files.
+ * Orphaned files are files in storage that don't have a corresponding database record.
+ * This is useful for maintenance and freeing up storage space.
+ */
+export async function cleanupOrphanedFiles(dryRun: boolean = true) {
+  const supabase = await createClient()
+
+  // Check auth - only admin users should be able to run this
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  // Check if user is admin
+  const { data: teamMember } = await supabase
+    .from('team_members')
+    .select('role')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!teamMember || !['owner', 'admin'].includes(teamMember.role)) {
+    return { success: false, error: 'Admin access required' }
+  }
+
+  // Get all file URLs from database
+  const { data: documents, error: dbError } = await supabase
+    .from('client_documents')
+    .select('file_url')
+
+  if (dbError) {
+    return { success: false, error: dbError.message }
+  }
+
+  const dbFileUrls = new Set(documents?.map(d => d.file_url) || [])
+
+  // List all files in storage bucket
+  const { data: storageFiles, error: storageError } = await supabase.storage
+    .from(BUCKET_NAME)
+    .list('', { limit: 1000, offset: 0 })
+
+  if (storageError) {
+    return { success: false, error: storageError.message }
+  }
+
+  // Find orphaned files by checking each folder (client ID)
+  const orphanedFiles: string[] = []
+  const checkedFolders: string[] = []
+
+  for (const folder of storageFiles || []) {
+    if (folder.id === null) {
+      // This is a folder, list its contents recursively
+      checkedFolders.push(folder.name)
+
+      const { data: folderContents } = await supabase.storage
+        .from(BUCKET_NAME)
+        .list(folder.name, { limit: 1000 })
+
+      for (const subFolder of folderContents || []) {
+        if (subFolder.id === null) {
+          // This is a document type folder
+          const { data: files } = await supabase.storage
+            .from(BUCKET_NAME)
+            .list(`${folder.name}/${subFolder.name}`, { limit: 1000 })
+
+          for (const file of files || []) {
+            if (file.id !== null) {
+              const filePath = `${folder.name}/${subFolder.name}/${file.name}`
+              const { data: urlData } = supabase.storage
+                .from(BUCKET_NAME)
+                .getPublicUrl(filePath)
+
+              if (!dbFileUrls.has(urlData.publicUrl)) {
+                orphanedFiles.push(filePath)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Delete orphaned files if not a dry run
+  let deletedCount = 0
+  if (!dryRun && orphanedFiles.length > 0) {
+    const { error: deleteError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .remove(orphanedFiles)
+
+    if (deleteError) {
+      return {
+        success: false,
+        error: deleteError.message,
+        orphanedFiles,
+        deletedCount: 0,
+      }
+    }
+
+    deletedCount = orphanedFiles.length
+  }
+
+  return {
+    success: true,
+    dryRun,
+    orphanedFiles,
+    deletedCount,
+    checkedFolders,
+    totalFilesInDb: dbFileUrls.size,
+  }
 }

@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test'
 
 // Test data IDs from data-seed.setup.ts
 const E2E_CRM_LEAD_ID = 'e2e00000-0000-0000-0000-000000000102'
-const _E2E_CRM_ACCOUNT_ID = 'e2e00000-0000-0000-0000-000000000100'
 
 test.describe('CRM Lead Conversion', () => {
   // Authentication is handled by Playwright setup project via storageState

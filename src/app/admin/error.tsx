@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
+import * as Sentry from '@sentry/nextjs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
@@ -11,6 +12,7 @@ import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
  *
  * This error boundary is specific to the admin section and provides
  * admin-friendly error messages and recovery options.
+ * Automatically reports errors to Sentry in production.
  */
 export default function AdminError({
   error,
@@ -23,8 +25,13 @@ export default function AdminError({
     // Log the error to console
     console.error('[Admin Error]', error)
 
-    // In production, send to error logging service
-    // TODO: Integrate with error tracking service (e.g., Sentry)
+    // Send to Sentry with admin context
+    Sentry.captureException(error, {
+      tags: {
+        section: 'admin',
+        digest: error.digest,
+      },
+    })
   }, [error])
 
   return (

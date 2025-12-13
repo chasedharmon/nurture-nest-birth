@@ -31,6 +31,9 @@ import {
   Handshake,
   ArrowRightLeft,
   KeyRound,
+  ScrollText,
+  Key,
+  Webhook,
 } from 'lucide-react'
 
 interface SetupCategory {
@@ -102,6 +105,12 @@ const setupCategories: SetupCategory[] = [
         href: '/admin/team',
         icon: <UserCog className="h-5 w-5" />,
       },
+      {
+        title: 'Audit Logs',
+        description: 'Track who changed what and when',
+        href: '/admin/setup/audit-logs',
+        icon: <ScrollText className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -170,6 +179,18 @@ const setupCategories: SetupCategory[] = [
         description: 'Stripe, Resend, and other services',
         href: '/admin/setup/integrations',
         icon: <Plug className="h-5 w-5" />,
+      },
+      {
+        title: 'API Keys',
+        description: 'Manage API access for external integrations',
+        href: '/admin/setup/api-keys',
+        icon: <Key className="h-5 w-5" />,
+      },
+      {
+        title: 'Webhooks',
+        description: 'Configure outbound event notifications',
+        href: '/admin/setup/webhooks',
+        icon: <Webhook className="h-5 w-5" />,
       },
     ],
   },

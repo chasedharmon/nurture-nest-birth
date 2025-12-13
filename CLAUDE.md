@@ -12,8 +12,8 @@
 
 ## Project Status
 
-**Current Phase**: Phase 9 Complete - Data Management
-**Last Updated**: December 13, 2024
+**Current Phase**: Phase 10 Complete - Admin & Operations
+**Last Updated**: December 12, 2025
 
 ### Active Development Plan (6-Week Roadmap)
 
@@ -231,6 +231,69 @@ Database Migration:
 
 - `tests/e2e/data-management-phase9.spec.ts` - Import wizard, export buttons, bulk actions, list view toolbar tests
   - Note: Import-related tests skip gracefully if `import_jobs` migration not applied
+
+#### Phase 10: Admin & Operations ✅ COMPLETE
+
+| Task                         | Status      | Notes                                                |
+| ---------------------------- | ----------- | ---------------------------------------------------- |
+| AO-1: Audit Log Dashboard    | ✅ COMPLETE | Full audit trail with filtering, search, CSV export  |
+| AO-2: API Keys Management    | ✅ COMPLETE | Generate, permissions, revoke, regenerate keys       |
+| TD-1: Site Config Updates    | ✅ COMPLETE | Owner name, phone, OG image configuration            |
+| TD-2: Document Storage       | ✅ COMPLETE | Fixed storage deletion, added orphan cleanup         |
+| TD-3: Sentry Error Tracking  | ✅ COMPLETE | Client/server/edge tracking with session replay      |
+| AO-3: Webhook Management     | ✅ COMPLETE | Configure outbound webhooks with HMAC signatures     |
+| AO-4: Rate Limiting          | ✅ COMPLETE | API rate limits per key with Redis sliding window    |
+
+**Phase 10 Files Created:**
+
+Audit Log System:
+- `supabase/migrations/20251221000000_audit_logs.sql` - audit_logs table with retention policies
+- `src/app/actions/audit-logs.ts` - Audit log CRUD, search, export actions
+- `src/app/admin/setup/audit-logs/page.tsx` - Audit log dashboard with filters
+- `src/app/api/audit-logs/export/route.ts` - CSV export endpoint
+- `src/app/api/cron/cleanup-audit-logs/route.ts` - Retention cleanup cron
+
+API Keys System:
+- `supabase/migrations/20251222000000_api_keys.sql` - api_keys table with SHA-256 hashing
+- `src/app/actions/api-keys.ts` - API key CRUD, regenerate, usage stats
+- `src/app/admin/setup/api-keys/page.tsx` - API keys management page
+- `src/app/admin/setup/api-keys/*.tsx` - Create/edit/view/delete/regenerate/revoke dialogs
+- `src/lib/constants/api-permissions.ts` - API permissions constant
+- `src/lib/api-auth/index.ts` - API key authentication middleware
+- `src/app/api/v1/leads/route.ts` - Example external API endpoint
+
+Sentry Integration:
+- `sentry.client.config.ts` - Client-side Sentry with session replay
+- `sentry.server.config.ts` - Server-side Sentry configuration
+- `sentry.edge.config.ts` - Edge runtime Sentry configuration
+- `src/instrumentation.ts` - Next.js instrumentation for Sentry
+
+Webhook System:
+- `supabase/migrations/20251222100000_webhooks.sql` - webhooks, webhook_deliveries tables
+- `src/app/actions/webhooks.ts` - Webhook CRUD, test, trigger actions
+- `src/app/admin/setup/webhooks/page.tsx` - Webhook management page
+- `src/app/admin/setup/webhooks/*.tsx` - Create/edit/view/delete/test dialogs
+- `src/lib/constants/webhook-events.ts` - Webhook events constant
+
+Rate Limiting Extensions:
+- `src/lib/rate-limit/index.ts` - Extended with checkApiKeyRateLimit, recordApiKeyUsage, getApiKeyUsageStats
+
+**Phase 10 Files Modified:**
+- `next.config.ts` - Added Sentry configuration wrapper
+- `src/app/actions/documents.ts` - Fixed storage deletion, added cleanupOrphanedFiles
+- `src/app/admin/error.tsx` - Added Sentry error reporting
+- `src/app/error.tsx` - Added Sentry error reporting
+- `src/lib/errors/logger.ts` - Integrated with Sentry
+- `src/app/admin/setup/page.tsx` - Added Audit Logs, API Keys, Webhooks links
+
+**Phase 10 Key Features:**
+- Audit logs capture all CRUD operations with actor, action, entity, and changes
+- API keys use SHA-256 hashing (only prefix stored, full key shown once on creation)
+- Per-key rate limiting with configurable requests per minute/hour/day
+- Webhooks support HMAC signature verification (`X-Webhook-Signature` header)
+- Webhook events cover leads, clients, invoices, payments, contracts, meetings
+- Sentry captures errors with environment tags, user context, and session replay
+- Document deletion now properly cleans up Supabase Storage files
 
 #### Phase 8: UX Polish & Onboarding (Week 6) ✅ COMPLETE
 
@@ -616,12 +679,12 @@ interface Permissions {
 
 When ready to launch:
 
-- [ ] Update owner name (line 15)
+- [x] Update owner name (line 15) - ✅ Done in Phase 10 (TD-1)
+- [x] Update phone number (line 22) - ✅ Done in Phase 10 (TD-1)
+- [x] Add OG image (line 109) - ✅ Done in Phase 10 (TD-1)
 - [ ] Update established year (line 16)
 - [ ] Update email address (line 21)
-- [ ] Update phone number (line 22)
 - [ ] Update Calendly link (line 24)
-- [ ] Add OG image (line 109)
 - [ ] Update Twitter/X handle when account exists (line 110)
 
 ### Other

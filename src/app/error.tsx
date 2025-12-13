@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
+import * as Sentry from '@sentry/nextjs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -10,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
  *
  * This component is automatically used by Next.js when an error occurs
  * in the app directory. It provides a user-friendly error message and
- * recovery options.
+ * recovery options. Errors are automatically reported to Sentry.
  *
  * See: https://nextjs.org/docs/app/api-reference/file-conventions/error
  */
@@ -27,8 +28,13 @@ export default function Error({
       console.error('Global error handler:', error)
     }
 
-    // In production, send to error logging service
-    // Example: logErrorToService(error)
+    // Send to Sentry
+    Sentry.captureException(error, {
+      tags: {
+        section: 'global',
+        digest: error.digest,
+      },
+    })
   }, [error])
 
   return (

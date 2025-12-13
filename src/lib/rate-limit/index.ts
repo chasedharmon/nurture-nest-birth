@@ -234,3 +234,114 @@ export function addRateLimitHeaders(
   response.headers.set('X-RateLimit-Reset', result.reset.toString())
   return response
 }
+
+/**
+ * Check rate limit for an API key
+ * Uses the API key's configured rate limit (requests per minute)
+ */
+export async function checkApiKeyRateLimit(
+  apiKeyId: string,
+  requestsPerMinute: number
+): Promise<RateLimitResult | null> {
+  const redisClient = getRedis()
+  if (!redisClient) return null
+
+  // Create a rate limiter for this specific API key's limit
+  const limiter = new Ratelimit({
+    redis: redisClient,
+    limiter: Ratelimit.slidingWindow(requestsPerMinute, '1 m'),
+    analytics: true,
+    prefix: `ratelimit:apikey`,
+  })
+
+  const result = await limiter.limit(apiKeyId)
+
+  return {
+    success: result.success,
+    limit: result.limit,
+    remaining: result.remaining,
+    reset: result.reset,
+  }
+}
+
+/**
+ * Record API key usage for analytics
+ */
+export async function recordApiKeyUsage(
+  apiKeyId: string,
+  endpoint: string,
+  success: boolean
+): Promise<void> {
+  const redisClient = getRedis()
+  if (!redisClient) return
+
+  const now = new Date()
+  const hourKey = `apikey:usage:${apiKeyId}:${now.toISOString().slice(0, 13)}`
+  const dayKey = `apikey:usage:${apiKeyId}:${now.toISOString().slice(0, 10)}`
+
+  try {
+    // Increment hourly and daily counters
+    await Promise.all([
+      redisClient.hincrby(hourKey, success ? 'success' : 'failure', 1),
+      redisClient.hincrby(hourKey, 'total', 1),
+      redisClient.hincrby(hourKey, `endpoint:${endpoint}`, 1),
+      redisClient.expire(hourKey, 86400), // 24 hours
+      redisClient.hincrby(dayKey, success ? 'success' : 'failure', 1),
+      redisClient.hincrby(dayKey, 'total', 1),
+      redisClient.expire(dayKey, 604800), // 7 days
+    ])
+  } catch (error) {
+    console.error('[RateLimit] Error recording API key usage:', error)
+  }
+}
+
+/**
+ * Get API key usage stats
+ */
+export async function getApiKeyUsageStats(
+  apiKeyId: string,
+  hours: number = 24
+): Promise<{
+  total: number
+  success: number
+  failure: number
+  hourlyBreakdown: { hour: string; total: number }[]
+} | null> {
+  const redisClient = getRedis()
+  if (!redisClient) return null
+
+  try {
+    const now = new Date()
+    const hourlyBreakdown: { hour: string; total: number }[] = []
+    let total = 0
+    let success = 0
+    let failure = 0
+
+    for (let i = 0; i < hours; i++) {
+      const date = new Date(now.getTime() - i * 3600000)
+      const hourKey = `apikey:usage:${apiKeyId}:${date.toISOString().slice(0, 13)}`
+
+      const data = await redisClient.hgetall(hourKey)
+      if (data) {
+        const hourTotal = parseInt(String(data.total) || '0', 10)
+        total += hourTotal
+        success += parseInt(String(data.success) || '0', 10)
+        failure += parseInt(String(data.failure) || '0', 10)
+        hourlyBreakdown.push({
+          hour: date.toISOString().slice(0, 13),
+          total: hourTotal,
+        })
+      }
+    }
+
+    return {
+      total,
+      success,
+      failure,
+      hourlyBreakdown: hourlyBreakdown.reverse(),
+    }
+  } catch (error) {
+    console.error('[RateLimit] Error getting API key usage stats:', error)
+    return null
+  }
+}
