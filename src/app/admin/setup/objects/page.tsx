@@ -9,14 +9,13 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Database,
   ChevronLeft,
   ChevronRight,
   Lock,
-  Plus,
   User,
   Building2,
   Target,
@@ -24,6 +23,7 @@ import {
   Activity,
   Layers,
 } from 'lucide-react'
+import { ObjectsPageClient } from './objects-page-client'
 
 const objectIcons: Record<string, React.ReactNode> = {
   Contact: <User className="h-5 w-5" />,
@@ -81,10 +81,7 @@ export default async function ObjectsPage() {
                 </div>
               </div>
             </div>
-            <Button disabled title="Custom objects coming soon">
-              <Plus className="mr-2 h-4 w-4" />
-              New Custom Object
-            </Button>
+            <ObjectsPageClient />
           </div>
         </div>
       </header>
@@ -234,10 +231,7 @@ export default async function ObjectsPage() {
                   Custom objects allow you to store data unique to your
                   business. This feature is coming soon.
                 </p>
-                <Button disabled variant="outline">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Custom Object
-                </Button>
+                <ObjectsPageClient variant="outline" />
               </CardContent>
             </Card>
           ) : (

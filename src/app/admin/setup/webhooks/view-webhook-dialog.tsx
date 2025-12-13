@@ -59,7 +59,7 @@ export function ViewWebhookDialog({
 
   // Load deliveries when dialog opens
   const webhookId = webhook.id
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- loadDeliveries calls setState after async operation
+
   useEffect(() => {
     if (open) {
       loadDeliveries(webhookId)
@@ -68,7 +68,7 @@ export function ViewWebhookDialog({
 
   // Sync secret when webhook prop changes - legitimate derived state pattern
   const webhookSecret = webhook.secret
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing prop to state
+
   useEffect(() => {
     setCurrentSecret(webhookSecret)
   }, [webhookSecret])

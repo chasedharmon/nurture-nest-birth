@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -36,23 +36,33 @@ export function ViewApiKeyDialog({
   const [usage, setUsage] = useState<ApiKeyUsageStats | null>(null)
   const [loadingUsage, setLoadingUsage] = useState(false)
 
-  const fetchUsage = useCallback(async (keyId: string) => {
-    setLoadingUsage(true)
-    const result = await getApiKeyUsage(keyId)
-    if (result.success) {
-      setUsage(result.stats ?? null)
-    }
-    setLoadingUsage(false)
-  }, [])
-
   // Fetch usage when dialog opens with a new API key
   const apiKeyId = apiKey?.id
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetchUsage calls setState after async operation
+
   useEffect(() => {
-    if (open && apiKeyId) {
-      fetchUsage(apiKeyId)
+    if (!open || !apiKeyId) return
+
+    let cancelled = false
+
+    const fetchData = async () => {
+      const result = await getApiKeyUsage(apiKeyId)
+      if (cancelled) return
+      if (result.success) {
+        setUsage(result.stats ?? null)
+      }
+      setLoadingUsage(false)
     }
-  }, [open, apiKeyId, fetchUsage])
+
+    // Set loading state and fetch - using queueMicrotask to avoid synchronous setState
+    queueMicrotask(() => {
+      if (!cancelled) setLoadingUsage(true)
+    })
+    fetchData()
+
+    return () => {
+      cancelled = true
+    }
+  }, [open, apiKeyId])
 
   if (!apiKey) return null
 

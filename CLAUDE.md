@@ -12,8 +12,8 @@
 
 ## Project Status
 
-**Current Phase**: Phase 11 Complete - Admin Navigation System
-**Last Updated**: December 12, 2025
+**Current Phase**: Phase 12 In Progress - Custom Objects & CRM Enhancement
+**Last Updated**: December 13, 2025
 
 ### Active Development Plan (6-Week Roadmap)
 
@@ -386,6 +386,52 @@ Removed per-page headers from 30+ admin pages:
 - **Serialization Pattern**: Navigation config uses `SerializableNavItem` type (excludes React components like `iconComponent`). Client components call `getIconComponent(item.icon)` to look up Lucide icons by name. This avoids "Functions cannot be passed directly to Client Components" errors.
 - **Fallback Config**: `FALLBACK_NAV_DATA` in `src/lib/admin-navigation.ts` provides hardcoded navigation when database function not available (useful for development without applying navigation_config migration)
 - **Database Function**: `get_navigation_config` RPC function (in migration) returns per-org nav config; falls back gracefully if not applied
+
+#### Phase 12: Custom Objects & CRM Enhancement 🚧 IN PROGRESS
+
+| Task                       | Status      | Notes                                                               |
+| -------------------------- | ----------- | ------------------------------------------------------------------- |
+| CO-1: Custom Object Wizard | ✅ COMPLETE | 5-step wizard: Basic Info → Features → Appearance → Fields → Review |
+| CO-2: Custom Object Detail | ✅ COMPLETE | Object detail page with Fields, Settings, Page Layouts tabs         |
+| CO-3: Object Manager UI    | ✅ COMPLETE | Standard/Custom objects list with accordion view                    |
+| CO-4: CRM List Views       | ✅ COMPLETE | Column customization, saved views, filtering                        |
+| CO-5: Custom Objects E2E   | ✅ COMPLETE | 58 tests passing, 1 skipped (mobile nav)                            |
+
+**Phase 12 Files Created:**
+
+Custom Objects UI:
+
+- `src/components/admin/setup/objects/create-object-wizard.tsx` - 5-step wizard with field creation
+- `src/app/admin/setup/objects/objects-page-client.tsx` - Client component for objects list
+- `src/app/actions/custom-objects.ts` - Server actions for custom object CRUD
+
+CRM List Views:
+
+- `tests/e2e/crm/crm-list-views.spec.ts` - List view E2E tests
+- `tests/e2e/crm/custom-objects.spec.ts` - Custom objects E2E tests (58 passing)
+
+**Phase 12 Files Modified:**
+
+- `src/app/admin/setup/objects/page.tsx` - Updated to use client component
+- `src/app/actions/navigation.ts` - Enhanced with custom object navigation support
+- `src/lib/admin-navigation.ts` - Added getIconComponent helper for icon lookup
+
+**Phase 12 Key Features:**
+
+- Create custom objects with full wizard flow (similar to Salesforce Object Manager)
+- Auto-generate API name from label (snake_case with \_\_c suffix)
+- Configure object features: Activities, Notes, Reports, Sharing Model
+- Visual icon and color picker for object branding
+- Add text and picklist fields during object creation
+- Objects automatically appear in admin navigation after creation
+- Full E2E test coverage with mobile viewport support
+
+**Phase 12 E2E Test Fixes:**
+
+- Fixed URL detection logic for object detail page redirect (uses UUID regex)
+- Added mobile accordion expansion for Standard Objects section
+- Used `getByRole('link', { name: /Standard Account/i })` to avoid hidden nav matching
+- Skipped mobile navigation test (nav is in hamburger menu on mobile)
 
 #### Phase 8: UX Polish & Onboarding (Week 6) ✅ COMPLETE
 
@@ -816,15 +862,30 @@ rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
 
 ---
 
-## E2E Testing Status (Last Updated: Dec 12, 2025)
+## E2E Testing Status (Last Updated: Dec 13, 2025)
 
-### Recent Test Run Results (Post-Phase 11):
+### Recent Test Run Results (Post-Phase 12):
 
 - **All messaging tests passing** ✅ (37/37 messaging-realtime tests)
 - **Admin navigation tests passing** ✅ (navigation system fully tested)
+- **Custom objects tests passing** ✅ (58 passed, 1 skipped)
 - **~15 flaky** (pass on retry with `--retries=2`)
 - **~8 failed** (mobile viewport timing issues)
 - **~140 skipped** (across all test projects - reduced with import_jobs migration)
+
+### Phase 12 E2E Tests Added:
+
+- `tests/e2e/crm/custom-objects.spec.ts` - Custom objects wizard and functionality (58 tests)
+  - Objects Setup Page (load, buttons, standard/custom sections, navigation)
+  - Create Object Wizard - Dialog (open/close, step display)
+  - Create Object Wizard - Step 1: Basic Info (required fields, auto-generation, validation)
+  - Create Object Wizard - Step 2: Features (toggles, sharing model)
+  - Create Object Wizard - Step 3: Appearance (icon selection, color selection, preview)
+  - Create Object Wizard - Step 4: Fields (add field button, text fields, picklist fields)
+  - Create Object Wizard - Step 5: Review (summary, API name warning, create button)
+  - Full Flow test (end-to-end object creation with fields)
+  - Navigation Integration (admin navigation shows objects)
+- `tests/e2e/crm/crm-list-views.spec.ts` - CRM list view functionality
 
 ### Phase 9 E2E Tests Added:
 
@@ -906,7 +967,15 @@ playwright.config.ts projects:
 | **Messaging/Team Assign** | ~40+  | Conditional skips based on data state - most now work with seeding                  |
 | **Other**                 | ~10   | Various explicit skips (Calendly placeholder, email API tests)                      |
 
-### Recent Test Improvements (Dec 12, 2025):
+### Recent Test Improvements (Dec 13, 2025):
+
+1. **Custom objects E2E tests** (58 tests) - Full wizard flow, field creation, object management
+2. **Fixed mobile viewport issues** - Added accordion expansion, specific locators for hidden nav items
+3. **URL detection for redirects** - UUID regex pattern to distinguish detail page from list page
+4. **Role-based test skipping** - Mobile navigation test skips gracefully (nav in hamburger menu)
+5. **Robust element locators** - Using `getByRole('link', { name: /Standard Account/i })` pattern
+
+### Previous Test Improvements (Dec 12, 2025):
 
 1. **Form validation tests enabled** (2 tests) - Rewrote to check HTML5 validation state instead of error message text
 2. **Messaging functional tests now run** - Conditional skips work with seeded conversation data
