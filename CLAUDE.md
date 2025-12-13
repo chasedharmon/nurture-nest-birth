@@ -62,7 +62,7 @@ Navigation:
 
 - `tests/e2e/crm/crm-list-views.spec.ts` - 43 tests for enhanced list views (column customization, filtering, saved views, export, search, responsive)
 - `tests/e2e/crm/custom-objects.spec.ts` - Custom object wizard tests
-- `tests/e2e/admin-navigation-management.spec.ts` - Navigation management system tests (manager page, role visibility matrix, nav item editor, user personalization)
+- `tests/e2e/admin-navigation-management.spec.ts` - 41 tests for navigation management system (manager page, role visibility matrix, nav item editor, icon picker, user personalization, accessibility)
 
 ### Active Development Plan (6-Week Roadmap)
 
