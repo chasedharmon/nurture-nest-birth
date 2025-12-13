@@ -27,11 +27,27 @@ All notable changes to Nurture Nest Birth are documented in this file.
 - `NavItemsList` - Enhanced with Add Item button and dialog integration
 - `NavigationManager` - Added handlers for add/move operations
 
+### Fixed - Navigation Settings
+
+**Drag-and-Drop Persistence**
+
+- Fixed reorder not persisting: after reordering, the page now refetches navigation items to get fresh IDs
+- Root cause: `reorderAdminNavItems` creates new org-specific records for global items, causing ID mismatches
+- Solution: call `getNavigationItemsForAdmin()` after successful reorder to sync with database state
+
+**Delete Navigation Items**
+
+- Added delete button (trash icon) to navigation items in the settings list
+- Delete button only appears for removable items (`canBeRemoved = true`)
+- Button has destructive hover styling and disabled state during deletion
+- Required items (like Setup) cannot be deleted
+
 **E2E Tests** (`tests/e2e/admin-navigation-management.spec.ts`)
 
 - 18 new tests for Add Navigation Item functionality
-- Tests cover: button visibility, dialog tabs, Link tab validation, search filtering, cancel behavior
-- Total navigation management tests: 56
+- 8 new tests for Drag-and-Drop Reordering and Delete functionality
+- Tests cover: drag handles, item persistence, add/delete workflow, delete persistence after reload
+- Total navigation management tests: 64
 
 ---
 
