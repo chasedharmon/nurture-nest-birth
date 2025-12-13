@@ -4,6 +4,7 @@
 
 | Document                                                 | Description                                                                                 |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **[docs/MASTER_PLAN.md](docs/MASTER_PLAN.md)**           | **Single source of truth** for project planning, phases, and roadmap                        |
 | **[docs/CRM-ARCHITECTURE.md](docs/CRM-ARCHITECTURE.md)** | CRM feature docs: 12 features with architecture diagrams, data models, APIs, and next steps |
 | **[docs/FRONTEND-WEBSITE.md](docs/FRONTEND-WEBSITE.md)** | Marketing website docs: 13 pages, design system, components, SEO, personalization           |
 | **[docs/TESTING.md](docs/TESTING.md)**                   | E2E testing guide and patterns                                                              |
@@ -12,8 +13,20 @@
 
 ## Project Status
 
-**Current Phase**: Phase 12 Complete - Custom Objects & Navigation Management
-**Last Updated**: December 24, 2025
+**Current Phase**: Phase 12 Complete - Ready for Phase 13 (Launch Preparation)
+**Last Updated**: December 13, 2025
+**Master Plan**: See [docs/MASTER_PLAN.md](docs/MASTER_PLAN.md) for full roadmap
+
+### Quick Status Summary
+
+| Category                          | Status      |
+| --------------------------------- | ----------- |
+| Foundation (Phases 1-6)           | ✅ Complete |
+| Refinement (Phases A-E)           | ✅ Complete |
+| CRM Enhancement (Phases 7-12)     | ✅ Complete |
+| Launch Preparation (Phase 13)     | 🔜 Next     |
+| Integration Activation (Phase 14) | Planned     |
+| Advanced Features (Phase 15)      | Planned     |
 
 ### Phase 12: CRM Enhancement & Custom Objects (Complete)
 
@@ -64,16 +77,39 @@ Navigation:
 - `tests/e2e/crm/custom-objects.spec.ts` - Custom object wizard tests
 - `tests/e2e/admin-navigation-management.spec.ts` - 41 tests for navigation management system (manager page, role visibility matrix, nav item editor, icon picker, user personalization, accessibility)
 
-### Active Development Plan (6-Week Roadmap)
+### Development Guidelines
 
-We are executing a comprehensive refinement and SaaS preparation plan. Goals:
+> **Full Guidelines**: See [.claude/instructions.md](.claude/instructions.md) for comprehensive engineering practices
 
-1. **Polish existing features** before adding new ones
-2. **Enhance workflow builder** to Marketing Cloud quality
-3. **Build foundation rails** for Stripe, SMS, multi-tenancy (without live integration)
-4. **Prepare for SaaS launch** with organizations, tiers, and metering
+**Core Principles**:
 
-See `/Users/chaseharmon/.claude/plans/flickering-tickling-harbor.md` for full plan details.
+1. **Tests are mandatory** - Every feature needs E2E tests; tests are part of "done"
+2. **Commit frequently** - One commit = one purpose; atomic, working commits
+3. **Document as you go** - Update docs in same commit as code changes
+4. **No ambiguity** - If unclear, document it; if confused, ask first
+
+**Commit Message Format**:
+
+```
+type(scope): concise description
+🧪 Tests: filename.spec.ts - what was tested
+```
+
+Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
+
+**Before Starting Work**:
+
+1. Review current phase in MASTER_PLAN.md
+2. Check this CLAUDE.md for technical context
+3. Verify E2E tests pass: `pnpm test:e2e`
+
+**After Completing Work**:
+
+1. Run tests: `pnpm test:e2e`
+2. Update MASTER_PLAN.md with progress
+3. Update CLAUDE.md if architecture changed
+4. Verify build: `pnpm build`
+5. Commit with docs included
 
 ### Phase 7+ Execution Progress
 
