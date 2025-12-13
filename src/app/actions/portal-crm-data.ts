@@ -259,7 +259,43 @@ export async function getPortalProfile(): Promise<{
         .single()
 
       if (error || !lead) {
-        return { data: null, error: error?.message || 'Lead not found' }
+        // Fallback to legacy leads table for backwards compatibility
+        const { data: legacyLead, error: legacyError } = await supabase
+          .from('leads')
+          .select(
+            'id, name, email, phone, expected_due_date, partner_name, actual_birth_date, status, created_at'
+          )
+          .eq('id', session.id)
+          .single()
+
+        if (legacyError || !legacyLead) {
+          return {
+            data: null,
+            error: error?.message || legacyError?.message || 'Lead not found',
+          }
+        }
+
+        // Parse name into first/last for legacy leads
+        const nameParts = (legacyLead.name || '').split(' ')
+        const firstName = nameParts[0] || ''
+        const lastName = nameParts.slice(1).join(' ') || ''
+
+        return {
+          data: {
+            recordType: 'lead',
+            id: legacyLead.id,
+            firstName,
+            lastName,
+            email: legacyLead.email,
+            phone: legacyLead.phone,
+            partnerName: legacyLead.partner_name,
+            expectedDueDate: legacyLead.expected_due_date,
+            actualBirthDate: legacyLead.actual_birth_date,
+            leadStatus: legacyLead.status,
+            createdAt: legacyLead.created_at,
+          },
+          error: null,
+        }
       }
 
       return {
