@@ -48,17 +48,25 @@ CREATE TABLE IF NOT EXISTS navigation_config (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
 
-  -- Constraints
-  -- For object-based nav items, ensure uniqueness per org/app/object
-  CONSTRAINT nav_config_object_unique UNIQUE NULLS NOT DISTINCT (organization_id, app_id, object_definition_id),
-  -- For tool-based nav items, ensure uniqueness per org/app/item_key
-  CONSTRAINT nav_config_tool_unique UNIQUE NULLS NOT DISTINCT (organization_id, app_id, item_key),
   -- Ensure either object_definition_id OR item_key is set
   CONSTRAINT nav_config_item_check CHECK (
     (object_definition_id IS NOT NULL AND item_type = 'object')
     OR (object_definition_id IS NULL AND item_type IN ('tool', 'external_link') AND item_key IS NOT NULL)
   )
 );
+
+-- Partial unique indexes for proper uniqueness handling
+-- For object-based nav items (only when object_definition_id IS NOT NULL)
+CREATE UNIQUE INDEX IF NOT EXISTS nav_config_object_unique_idx
+  ON navigation_config (organization_id, app_id, object_definition_id)
+  NULLS NOT DISTINCT
+  WHERE object_definition_id IS NOT NULL;
+
+-- For tool-based nav items (only when item_key IS NOT NULL)
+CREATE UNIQUE INDEX IF NOT EXISTS nav_config_tool_unique_idx
+  ON navigation_config (organization_id, app_id, item_key)
+  NULLS NOT DISTINCT
+  WHERE item_key IS NOT NULL;
 
 -- Indexes for fast navigation queries
 CREATE INDEX IF NOT EXISTS idx_nav_config_org_app ON navigation_config(organization_id, app_id, is_visible);
