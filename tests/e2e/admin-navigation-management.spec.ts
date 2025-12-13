@@ -88,9 +88,13 @@ test.describe('Navigation Management System', () => {
     test('should display standard CRM objects in list', async ({ page }) => {
       await page.goto('/admin/setup/navigation')
 
-      // Should show standard objects
-      await expect(page.getByText('Accounts')).toBeVisible()
-      await expect(page.getByText('Contacts')).toBeVisible()
+      // Wait for page to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Should show standard objects within the Items & Order section
+      const itemsSection = page.getByRole('tabpanel', { name: /items.*order/i })
+      await expect(itemsSection.getByText('Accounts')).toBeVisible()
+      await expect(itemsSection.getByText('Contacts')).toBeVisible()
     })
 
     test('should show drag handles for reordering', async ({ page }) => {
