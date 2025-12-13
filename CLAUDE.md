@@ -374,6 +374,8 @@ All admin pages tested with Playwright:
 
 1. Reports & Dashboards pages - missing left padding (added container wrapper)
 2. Company Profile page - RLS error (changed to authenticated client)
+3. Client portal /client route - 404 error (added page.tsx redirect handler)
+4. Client dashboard data loading - "Cannot coerce to single JSON object" (added legacy leads table fallback to getPortalProfile())
 
 ### Future Features (Not Started)
 
