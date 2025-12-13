@@ -12,7 +12,7 @@
 
 ## Project Status
 
-**Current Phase**: Phase 10 Complete - Admin & Operations
+**Current Phase**: Phase 11 Complete - Admin Navigation System
 **Last Updated**: December 12, 2025
 
 ### Active Development Plan (6-Week Roadmap)
@@ -234,19 +234,20 @@ Database Migration:
 
 #### Phase 10: Admin & Operations ✅ COMPLETE
 
-| Task                         | Status      | Notes                                                |
-| ---------------------------- | ----------- | ---------------------------------------------------- |
-| AO-1: Audit Log Dashboard    | ✅ COMPLETE | Full audit trail with filtering, search, CSV export  |
-| AO-2: API Keys Management    | ✅ COMPLETE | Generate, permissions, revoke, regenerate keys       |
-| TD-1: Site Config Updates    | ✅ COMPLETE | Owner name, phone, OG image configuration            |
-| TD-2: Document Storage       | ✅ COMPLETE | Fixed storage deletion, added orphan cleanup         |
-| TD-3: Sentry Error Tracking  | ✅ COMPLETE | Client/server/edge tracking with session replay      |
-| AO-3: Webhook Management     | ✅ COMPLETE | Configure outbound webhooks with HMAC signatures     |
-| AO-4: Rate Limiting          | ✅ COMPLETE | API rate limits per key with Redis sliding window    |
+| Task                        | Status      | Notes                                               |
+| --------------------------- | ----------- | --------------------------------------------------- |
+| AO-1: Audit Log Dashboard   | ✅ COMPLETE | Full audit trail with filtering, search, CSV export |
+| AO-2: API Keys Management   | ✅ COMPLETE | Generate, permissions, revoke, regenerate keys      |
+| TD-1: Site Config Updates   | ✅ COMPLETE | Owner name, phone, OG image configuration           |
+| TD-2: Document Storage      | ✅ COMPLETE | Fixed storage deletion, added orphan cleanup        |
+| TD-3: Sentry Error Tracking | ✅ COMPLETE | Client/server/edge tracking with session replay     |
+| AO-3: Webhook Management    | ✅ COMPLETE | Configure outbound webhooks with HMAC signatures    |
+| AO-4: Rate Limiting         | ✅ COMPLETE | API rate limits per key with Redis sliding window   |
 
 **Phase 10 Files Created:**
 
 Audit Log System:
+
 - `supabase/migrations/20251221000000_audit_logs.sql` - audit_logs table with retention policies
 - `src/app/actions/audit-logs.ts` - Audit log CRUD, search, export actions
 - `src/app/admin/setup/audit-logs/page.tsx` - Audit log dashboard with filters
@@ -254,6 +255,7 @@ Audit Log System:
 - `src/app/api/cron/cleanup-audit-logs/route.ts` - Retention cleanup cron
 
 API Keys System:
+
 - `supabase/migrations/20251222000000_api_keys.sql` - api_keys table with SHA-256 hashing
 - `src/app/actions/api-keys.ts` - API key CRUD, regenerate, usage stats
 - `src/app/admin/setup/api-keys/page.tsx` - API keys management page
@@ -263,12 +265,14 @@ API Keys System:
 - `src/app/api/v1/leads/route.ts` - Example external API endpoint
 
 Sentry Integration:
+
 - `sentry.client.config.ts` - Client-side Sentry with session replay
 - `sentry.server.config.ts` - Server-side Sentry configuration
 - `sentry.edge.config.ts` - Edge runtime Sentry configuration
 - `src/instrumentation.ts` - Next.js instrumentation for Sentry
 
 Webhook System:
+
 - `supabase/migrations/20251222100000_webhooks.sql` - webhooks, webhook_deliveries tables
 - `src/app/actions/webhooks.ts` - Webhook CRUD, test, trigger actions
 - `src/app/admin/setup/webhooks/page.tsx` - Webhook management page
@@ -276,9 +280,11 @@ Webhook System:
 - `src/lib/constants/webhook-events.ts` - Webhook events constant
 
 Rate Limiting Extensions:
+
 - `src/lib/rate-limit/index.ts` - Extended with checkApiKeyRateLimit, recordApiKeyUsage, getApiKeyUsageStats
 
 **Phase 10 Files Modified:**
+
 - `next.config.ts` - Added Sentry configuration wrapper
 - `src/app/actions/documents.ts` - Fixed storage deletion, added cleanupOrphanedFiles
 - `src/app/admin/error.tsx` - Added Sentry error reporting
@@ -287,6 +293,7 @@ Rate Limiting Extensions:
 - `src/app/admin/setup/page.tsx` - Added Audit Logs, API Keys, Webhooks links
 
 **Phase 10 Key Features:**
+
 - Audit logs capture all CRUD operations with actor, action, entity, and changes
 - API keys use SHA-256 hashing (only prefix stored, full key shown once on creation)
 - Per-key rate limiting with configurable requests per minute/hour/day
@@ -294,6 +301,79 @@ Rate Limiting Extensions:
 - Webhook events cover leads, clients, invoices, payments, contracts, meetings
 - Sentry captures errors with environment tags, user context, and session replay
 - Document deletion now properly cleans up Supabase Storage files
+
+#### Phase 11: Admin Navigation System ✅ COMPLETE
+
+| Task                        | Status      | Notes                                             |
+| --------------------------- | ----------- | ------------------------------------------------- |
+| NAV-1: Navigation Layout    | ✅ COMPLETE | Shared admin layout.tsx with server-side fetching |
+| NAV-2: Object Tabs          | ✅ COMPLETE | Horizontal tabs for Accounts, Contacts, etc.      |
+| NAV-3: Tools & User Menus   | ✅ COMPLETE | Dropdown menus for tools and user actions         |
+| NAV-4: Breadcrumbs          | ✅ COMPLETE | Dynamic trail with async label resolution         |
+| NAV-5: Mobile Navigation    | ✅ COMPLETE | Responsive hamburger menu with Sheet drawer       |
+| NAV-6: Custom Object Routes | ✅ COMPLETE | Dynamic routes for any custom CRM object          |
+
+**Phase 11 Files Created:**
+
+Navigation Components:
+
+- `src/components/admin/navigation/admin-navigation.tsx` - Main navigation wrapper
+- `src/components/admin/navigation/admin-nav-header.tsx` - Desktop header with tabs
+- `src/components/admin/navigation/admin-mobile-nav.tsx` - Mobile Sheet drawer
+- `src/components/admin/navigation/nav-tabs.tsx` - Object tab buttons
+- `src/components/admin/navigation/tools-menu.tsx` - Tools dropdown (Reports, Dashboards, etc.)
+- `src/components/admin/navigation/user-menu.tsx` - User dropdown (Team, Setup, Sign Out)
+- `src/components/admin/navigation/breadcrumbs.tsx` - Breadcrumb trail component
+- `src/components/admin/navigation/page-header.tsx` - Standardized page header
+- `src/components/admin/navigation/index.ts` - Barrel exports
+
+Layout & Utilities:
+
+- `src/app/admin/layout.tsx` - Shared admin layout with auth check and data fetching
+- `src/lib/admin-navigation.ts` - Navigation types, icon mappings, config fetching
+- `src/lib/breadcrumbs.ts` - Breadcrumb config and path parsing
+- `src/lib/navigation-utils.ts` - Query param preservation for list views
+- `src/app/actions/navigation.ts` - Server action for unread message count
+
+Custom Object Dynamic Routes:
+
+- `src/app/admin/objects/[apiName]/page.tsx` - Custom object list view
+- `src/app/admin/objects/[apiName]/[id]/page.tsx` - Custom object detail view
+- `src/app/admin/objects/[apiName]/new/page.tsx` - Custom object create form
+
+Database:
+
+- `supabase/migrations/20251223000000_navigation_config.sql` - navigation_config table for per-org customization
+
+**Phase 11 Files Modified:**
+
+Removed per-page headers from 30+ admin pages:
+
+- `src/app/admin/accounts/page.tsx` - Uses PageHeader component
+- `src/app/admin/contacts/page.tsx` - Uses PageHeader component
+- `src/app/admin/opportunities/page.tsx` - Uses PageHeader component
+- `src/app/admin/crm-leads/page.tsx` - Uses PageHeader component
+- `src/app/admin/dashboards/page.tsx` - Uses PageHeader component
+- `src/app/admin/messages/page.tsx` - Uses PageHeader component
+- `src/app/admin/reports/page.tsx` - Uses PageHeader component
+- `src/app/admin/team/page.tsx` - Uses PageHeader component
+- `src/app/admin/workflows/page.tsx` - Uses PageHeader component
+- `src/app/admin/setup/page.tsx` - Uses PageHeader component
+- `src/components/admin/crm/secure-record-detail-page.tsx` - Simplified header
+- `src/components/admin/crm/new-record-page.tsx` - Simplified header
+- All "new" record pages - Removed full-page headers
+
+**Phase 11 Key Features:**
+
+- Salesforce-like horizontal object tabs for primary CRM objects
+- Tools dropdown with Reports, Dashboards, Workflows, Messages
+- User dropdown with Team, Setup, Sign Out
+- Clickable logo returns to dashboard
+- Breadcrumb trail shows hierarchical navigation path
+- Query param preservation when navigating back to list views (filters, page, sort)
+- Mobile-responsive with hamburger menu opening Sheet drawer
+- Dynamic routes support any custom object from crm_object_definitions
+- Per-organization navigation customization via navigation_config table
 
 #### Phase 8: UX Polish & Onboarding (Week 6) ✅ COMPLETE
 
