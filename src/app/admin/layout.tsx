@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { AdminNavigation } from '@/components/admin/navigation'
 import { getNavigationConfig } from '@/app/actions/navigation'
 import { KeyboardShortcutsProvider } from '@/components/admin/keyboard-shortcuts-provider'
+import { OrganizationProvider } from '@/lib/hooks/use-organization'
+import { getTenantContext } from '@/lib/platform/tenant-context'
 import {
   FALLBACK_NAV_DATA,
   type SerializableNavigationConfig,
@@ -13,6 +15,7 @@ import {
  *
  * Server Component layout that provides:
  * - Authentication check
+ * - Organization context (server-side resolved, passed to client)
  * - Navigation configuration from database
  * - Consistent header/nav across all admin pages
  * - Keyboard shortcuts support
@@ -37,7 +40,21 @@ export default async function AdminLayout({
     redirect('/login')
   }
 
-  // Get user's role from team_members
+  // Resolve tenant context (organization + membership)
+  const tenantResult = await getTenantContext()
+
+  if (!tenantResult.success) {
+    // Handle tenant resolution errors
+    if (tenantResult.redirectTo) {
+      redirect(tenantResult.redirectTo)
+    }
+    // If no redirect specified, show error
+    throw new Error(`Tenant context unavailable: ${tenantResult.error}`)
+  }
+
+  const { organization, membership } = tenantResult.context
+
+  // Get user's role from team_members (for nav filtering)
   const { data: teamMember } = await supabase
     .from('team_members')
     .select('role')
@@ -65,19 +82,29 @@ export default async function AdminLayout({
   }
 
   // Use fallback config if data is null
-  const navConfig = navResult.data ?? fallbackConfig
+  // Override brand name with organization name
+  const navConfig = {
+    ...(navResult.data ?? fallbackConfig),
+    brandName: organization.name,
+    brandLogoUrl: organization.logo_url || null,
+  }
 
   return (
-    <KeyboardShortcutsProvider>
-      <div className="min-h-screen bg-background">
-        {/* Navigation Header */}
-        <AdminNavigation config={navConfig} userRole={userRole} />
+    <OrganizationProvider
+      initialOrganization={organization}
+      initialMembership={membership}
+    >
+      <KeyboardShortcutsProvider>
+        <div className="min-h-screen bg-background">
+          {/* Navigation Header */}
+          <AdminNavigation config={navConfig} userRole={userRole} />
 
-        {/* Main Content */}
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          {children}
-        </main>
-      </div>
-    </KeyboardShortcutsProvider>
+          {/* Main Content */}
+          <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            {children}
+          </main>
+        </div>
+      </KeyboardShortcutsProvider>
+    </OrganizationProvider>
   )
 }

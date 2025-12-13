@@ -1194,6 +1194,7 @@ export type SubscriptionStatus =
   | 'past_due'
   | 'cancelled'
   | 'paused'
+  | 'suspended'
 
 export type SubscriptionTier =
   | 'starter'

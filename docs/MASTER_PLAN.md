@@ -284,9 +284,12 @@ To enable full test suite:
 
 | Document                | Location                   | Purpose                                 |
 | ----------------------- | -------------------------- | --------------------------------------- |
-| **MASTER_PLAN.md**      | `docs/MASTER_PLAN.md`      | This file - single source of truth      |
+| **MASTER_PLAN.md**      | `docs/MASTER_PLAN.md`      | This file - CRM product features        |
+| **SAAS_PLAN.md**        | `docs/SAAS_PLAN.md`        | SaaS platform infrastructure roadmap    |
 | **CLAUDE.md**           | Root                       | Development context and quick reference |
 | **CRM-ARCHITECTURE.md** | `docs/CRM-ARCHITECTURE.md` | CRM feature technical documentation     |
+
+> **Note**: MASTER_PLAN.md and SAAS_PLAN.md are complementary and can be worked on in parallel. MASTER_PLAN covers CRM product features (what tenants USE). SAAS_PLAN covers platform infrastructure (how YOU run the business). See [SAAS_PLAN.md](SAAS_PLAN.md) for details on multi-tenancy, billing, and super-admin features.
 
 ### Archived Plans (Superseded by MASTER_PLAN.md)
 

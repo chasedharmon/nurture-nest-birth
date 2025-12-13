@@ -232,44 +232,10 @@ export function useOrganization() {
 }
 
 // =====================================================
-// Server Action Helper
+// Server Action Helper - MOVED
 // =====================================================
-
-/**
- * Get the current organization ID for server actions
- * This is used in server components and actions that need org context
- */
-export async function getCurrentOrganizationId(): Promise<string | null> {
-  const supabase = await import('@/lib/supabase/server').then(m =>
-    m.createClient()
-  )
-
-  const {
-    data: { user },
-  } = await (await supabase).auth.getUser()
-
-  if (!user) return null
-
-  // Get from organization_memberships first
-  const { data: membership } = await (await supabase)
-    .from('organization_memberships')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .eq('is_active', true)
-    .order('created_at', { ascending: true })
-    .limit(1)
-    .single()
-
-  if (membership?.organization_id) {
-    return membership.organization_id
-  }
-
-  // Fallback to users table
-  const { data: userData } = await (await supabase)
-    .from('users')
-    .select('organization_id')
-    .eq('id', user.id)
-    .single()
-
-  return userData?.organization_id || null
-}
+// NOTE: getCurrentOrganizationId() has been moved to:
+// src/lib/platform/tenant-context.ts
+//
+// For server actions and server components, use:
+// import { getCurrentOrganizationId } from '@/lib/platform/tenant-context'

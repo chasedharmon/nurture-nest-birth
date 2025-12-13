@@ -25,6 +25,8 @@ import {
 } from 'lucide-react'
 import { DataExportButton } from '@/components/admin/data-export-button'
 import { DeleteOrganizationModal } from '@/components/admin/delete-organization-modal'
+import { BrandingSettings } from '@/components/admin/setup/branding-settings'
+import { getTenantBranding } from '@/app/actions/tenant-branding'
 
 async function getOrganizationData(
   supabase: Awaited<ReturnType<typeof createClient>>
@@ -107,6 +109,9 @@ export default async function OrganizationPage() {
 
   const { organization, role } = data
   const isAdmin = role === 'owner' || role === 'admin'
+
+  // Fetch tenant branding
+  const { data: branding } = await getTenantBranding()
 
   // Generate a masked API key for display
   const maskedApiKey = 'nnb_live_••••••••••••••••••••••••'
@@ -206,40 +211,6 @@ export default async function OrganizationPage() {
                 </div>
               </div>
 
-              {/* Branding Colors */}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="primary-color">Primary Color</Label>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="h-10 w-10 rounded-md border"
-                      style={{ backgroundColor: organization.primary_color }}
-                    />
-                    <Input
-                      id="primary-color"
-                      defaultValue={organization.primary_color}
-                      disabled={!isAdmin}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="secondary-color">Secondary Color</Label>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="h-10 w-10 rounded-md border"
-                      style={{ backgroundColor: organization.secondary_color }}
-                    />
-                    <Input
-                      id="secondary-color"
-                      defaultValue={organization.secondary_color}
-                      disabled={!isAdmin}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-              </div>
-
               {isAdmin && (
                 <div className="flex justify-end">
                   <Button>Save Changes</Button>
@@ -247,6 +218,15 @@ export default async function OrganizationPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Branding Settings */}
+          <BrandingSettings
+            branding={branding}
+            organizationName={organization.name}
+            organizationLogoUrl={organization.logo_url}
+            isAdmin={isAdmin}
+            subscriptionTier={organization.subscription_tier || 'starter'}
+          />
 
           {/* API Keys */}
           <Card>
