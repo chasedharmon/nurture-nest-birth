@@ -12,17 +12,20 @@
 
 ## Project Status
 
-**Current Phase**: Phase 12 In Progress - Custom Objects & CRM Enhancement
-**Last Updated**: December 13, 2025
+**Current Phase**: Phase 12 Complete - Custom Objects & Navigation Management
+**Last Updated**: December 24, 2025
 
-### Phase 12: CRM Enhancement & Custom Objects (Current)
+### Phase 12: CRM Enhancement & Custom Objects (Complete)
 
-| Task                        | Status      | Notes                                                  |
-| --------------------------- | ----------- | ------------------------------------------------------ |
-| CRM-1: Enhanced List Views  | ✅ COMPLETE | Column customization, filters, saved views, export     |
-| CRM-2: Custom Object Wizard | ✅ COMPLETE | 5-step wizard: name, fields, layout, relationships, UI |
-| CRM-3: E2E Test Fixes       | ✅ COMPLETE | 43 list view tests passing (Radix UI locators fixed)   |
-| CRM-4: Navigation Fallback  | ✅ COMPLETE | Build nav from object_definitions when RPC unavailable |
+| Task                            | Status      | Notes                                                  |
+| ------------------------------- | ----------- | ------------------------------------------------------ |
+| CRM-1: Enhanced List Views      | ✅ COMPLETE | Column customization, filters, saved views, export     |
+| CRM-2: Custom Object Wizard     | ✅ COMPLETE | 5-step wizard: name, fields, layout, relationships, UI |
+| CRM-3: E2E Test Fixes           | ✅ COMPLETE | 43 list view tests passing (Radix UI locators fixed)   |
+| CRM-4: Navigation Fallback      | ✅ COMPLETE | Build nav from object_definitions when RPC unavailable |
+| NAV-1: Navigation Manager       | ✅ COMPLETE | Salesforce-style admin UI for nav customization        |
+| NAV-2: Role-Based Visibility    | ✅ COMPLETE | 3-state visibility (visible/available/hidden) per role |
+| NAV-3: User Nav Personalization | ✅ COMPLETE | Users can add/remove/reorder nav items                 |
 
 **Phase 12 Files Created:**
 
@@ -46,8 +49,14 @@ Custom Objects:
 
 Navigation:
 
-- `src/lib/admin-navigation.ts` - Added FALLBACK_NAV_DATA, getObjectHref, extended icon mapping
-- `src/app/actions/navigation.ts` - Added getCustomObjectNavItems fallback builder
+- `src/lib/admin-navigation.ts` - Added FALLBACK_NAV_DATA, getObjectHref, extended icon mapping, VisibilityState type
+- `src/app/actions/navigation.ts` - Added getCustomObjectNavItems fallback builder, updated to use new RPC
+- `src/app/actions/navigation-admin.ts` - Admin management (role visibility, display settings, reordering)
+- `src/app/actions/navigation-user.ts` - User personalization (add/remove/reorder items)
+- `src/app/admin/setup/navigation/page.tsx` - Navigation settings page
+- `src/components/admin/setup/navigation/` - Navigation manager components (5 files)
+- `src/components/admin/navigation/add-nav-items-popover.tsx` - User nav personalization popover
+- `supabase/migrations/20251224000000_navigation_role_visibility.sql` - Role visibility & user preferences schema
 
 **Phase 12 E2E Tests:**
 
@@ -426,15 +435,18 @@ Removed per-page headers from 30+ admin pages:
 - **Fallback Config**: `FALLBACK_NAV_DATA` in `src/lib/admin-navigation.ts` provides hardcoded navigation when database function not available (useful for development without applying navigation_config migration)
 - **Database Function**: `get_navigation_config` RPC function (in migration) returns per-org nav config; falls back gracefully if not applied
 
-#### Phase 12: Custom Objects & CRM Enhancement 🚧 IN PROGRESS
+#### Phase 12: Custom Objects & CRM Enhancement ✅ COMPLETE
 
-| Task                       | Status      | Notes                                                               |
-| -------------------------- | ----------- | ------------------------------------------------------------------- |
-| CO-1: Custom Object Wizard | ✅ COMPLETE | 5-step wizard: Basic Info → Features → Appearance → Fields → Review |
-| CO-2: Custom Object Detail | ✅ COMPLETE | Object detail page with Fields, Settings, Page Layouts tabs         |
-| CO-3: Object Manager UI    | ✅ COMPLETE | Standard/Custom objects list with accordion view                    |
-| CO-4: CRM List Views       | ✅ COMPLETE | Column customization, saved views, filtering                        |
-| CO-5: Custom Objects E2E   | ✅ COMPLETE | 58 tests passing, 1 skipped (mobile nav)                            |
+| Task                        | Status      | Notes                                                               |
+| --------------------------- | ----------- | ------------------------------------------------------------------- |
+| CO-1: Custom Object Wizard  | ✅ COMPLETE | 5-step wizard: Basic Info → Features → Appearance → Fields → Review |
+| CO-2: Custom Object Detail  | ✅ COMPLETE | Object detail page with Fields, Settings, Page Layouts tabs         |
+| CO-3: Object Manager UI     | ✅ COMPLETE | Standard/Custom objects list with accordion view                    |
+| CO-4: CRM List Views        | ✅ COMPLETE | Column customization, saved views, filtering                        |
+| CO-5: Custom Objects E2E    | ✅ COMPLETE | 58 tests passing, 1 skipped (mobile nav)                            |
+| NAV-1: Navigation Manager   | ✅ COMPLETE | Salesforce-style admin UI for nav customization                     |
+| NAV-2: Role Visibility      | ✅ COMPLETE | 3-state visibility (visible/available/hidden) per role              |
+| NAV-3: User Personalization | ✅ COMPLETE | Users can add/remove/reorder nav items                              |
 
 **Phase 12 Files Created:**
 
@@ -444,6 +456,19 @@ Custom Objects UI:
 - `src/app/admin/setup/objects/objects-page-client.tsx` - Client component for objects list
 - `src/app/actions/custom-objects.ts` - Server actions for custom object CRUD
 
+Navigation Management System:
+
+- `supabase/migrations/20251224000000_navigation_role_visibility.sql` - Role visibility and user preferences tables
+- `src/app/actions/navigation-admin.ts` - Admin actions for visibility, display settings, reordering
+- `src/app/actions/navigation-user.ts` - User personalization actions (add/remove/reorder items)
+- `src/app/admin/setup/navigation/page.tsx` - Navigation settings page
+- `src/components/admin/setup/navigation/navigation-manager.tsx` - Main navigation manager with tabs
+- `src/components/admin/setup/navigation/nav-items-list.tsx` - Drag-drop reorderable list using @dnd-kit
+- `src/components/admin/setup/navigation/role-visibility-matrix.tsx` - Grid with 3-state toggles per role
+- `src/components/admin/setup/navigation/nav-item-editor.tsx` - Dialog for display name, icon, required flags
+- `src/components/admin/setup/navigation/icon-picker.tsx` - Visual icon selector with 27 Lucide icons
+- `src/components/admin/navigation/add-nav-items-popover.tsx` - "+" button to add available items to nav
+
 CRM List Views:
 
 - `tests/e2e/crm/crm-list-views.spec.ts` - List view E2E tests
@@ -452,10 +477,14 @@ CRM List Views:
 **Phase 12 Files Modified:**
 
 - `src/app/admin/setup/objects/page.tsx` - Updated to use client component
-- `src/app/actions/navigation.ts` - Enhanced with custom object navigation support
-- `src/lib/admin-navigation.ts` - Added getIconComponent helper for icon lookup
+- `src/app/actions/navigation.ts` - Enhanced with custom object navigation support, updated to use new RPC
+- `src/lib/admin-navigation.ts` - Added getIconComponent helper, VisibilityState type, iconMap export
+- `src/components/admin/navigation/nav-tabs.tsx` - Added context menu for item removal, AddNavItemsPopover integration
+- `src/app/admin/setup/page.tsx` - Added Navigation card under Administration section
 
 **Phase 12 Key Features:**
+
+Custom Objects:
 
 - Create custom objects with full wizard flow (similar to Salesforce Object Manager)
 - Auto-generate API name from label (snake_case with \_\_c suffix)
@@ -464,6 +493,17 @@ CRM List Views:
 - Add text and picklist fields during object creation
 - Objects automatically appear in admin navigation after creation
 - Full E2E test coverage with mobile viewport support
+
+Navigation Management (Salesforce-style):
+
+- **Role-based 3-state visibility**: visible (Default On), available (Default Off), hidden per role
+- **User personalization**: Users can add "available" items to their nav, reorder, and remove (if allowed)
+- **Admin UI**: Navigation manager at `/admin/setup/navigation` with Items & Order and Role Visibility tabs
+- **Drag-drop reordering**: Using @dnd-kit for smooth list reordering
+- **Per-item settings**: Display name, icon, isRequired flag, canBeRemoved flag
+- **Reset to defaults**: One-click restore of default navigation configuration
+- **Database schema**: `navigation_role_visibility` table with 3-state per role, `user_navigation_preferences` for personalization
+- **RPC functions**: `get_user_navigation()` merges role visibility + user preferences, `get_navigation_items_for_admin()` for admin UI
 
 **Phase 12 E2E Test Fixes:**
 
