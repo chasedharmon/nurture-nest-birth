@@ -215,7 +215,14 @@ export function NavItemsList({
           // Refetch all items to get fresh IDs (reorder may create new org-specific records)
           const refetchResult = await getNavigationItemsForAdmin()
           if (refetchResult.success && refetchResult.data) {
+            // Update parent state
             onItemsChange(refetchResult.data)
+            // Also update local items directly with the filtered items for this nav type
+            // This ensures we don't rely on React's render timing for the sync
+            const freshItemsForThisType = refetchResult.data.filter(
+              item => item.navType === navType
+            )
+            setLocalItems(freshItemsForThisType)
             toast.success('Order saved')
           } else {
             // Fallback: update sort order locally if refetch fails

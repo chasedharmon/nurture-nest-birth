@@ -30,6 +30,9 @@ test.describe('Navigation Management System', () => {
     }) => {
       await page.goto('/admin/setup/navigation')
 
+      // Wait for the page to load (navigation settings content appears)
+      await expect(page.getByText('Navigation Settings')).toBeVisible()
+
       // Should have tab buttons
       const itemsTab = page.getByRole('tab', { name: /items.*order/i })
       const visibilityTab = page.getByRole('tab', { name: /role.*visibility/i })
@@ -80,6 +83,9 @@ test.describe('Navigation Management System', () => {
       page,
     }) => {
       await page.goto('/admin/setup/navigation')
+
+      // Wait for the page to fully load
+      await expect(page.getByText('Navigation Settings')).toBeVisible()
 
       // Should show section headers
       await expect(page.getByText(/primary navigation/i)).toBeVisible()

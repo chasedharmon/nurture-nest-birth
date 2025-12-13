@@ -431,24 +431,62 @@ export async function reorderAdminNavItems(
       return { success: false, error: error || 'Not authorized' }
     }
 
-    // For each item, either update existing org override or create one
+    // Fetch all items at once to minimize queries
+    const { data: allItems } = await supabase
+      .from('navigation_config')
+      .select('*')
+      .in('id', itemIds)
+
+    if (!allItems || allItems.length === 0) {
+      return { success: false, error: 'No items found' }
+    }
+
+    // Build a map for quick lookup
+    const itemMap = new Map(allItems.map(item => [item.id, item]))
+
+    // Process all items - create org-specific overrides for global items
+    // and update sort_order for all items in the new order
     for (let i = 0; i < itemIds.length; i++) {
       const itemId = itemIds[i]
+      const existingItem = itemMap.get(itemId)
       const newSortOrder = (i + 1) * 10
-
-      // Get the existing item
-      const { data: existingItem } = await supabase
-        .from('navigation_config')
-        .select('*')
-        .eq('id', itemId)
-        .single()
 
       if (!existingItem) continue
 
       if (existingItem.organization_id === null) {
-        // Create org-specific override with new sort order
-        await supabase.from('navigation_config').upsert(
-          {
+        // This is a global item - need to create/update org-specific override
+        // First, check if an org-specific override already exists
+        let existingOverride = null
+
+        if (existingItem.object_definition_id) {
+          const { data } = await supabase
+            .from('navigation_config')
+            .select('id')
+            .eq('organization_id', orgId)
+            .eq('app_id', 'default')
+            .eq('object_definition_id', existingItem.object_definition_id)
+            .maybeSingle()
+          existingOverride = data
+        } else if (existingItem.item_key) {
+          const { data } = await supabase
+            .from('navigation_config')
+            .select('id')
+            .eq('organization_id', orgId)
+            .eq('app_id', 'default')
+            .eq('item_key', existingItem.item_key)
+            .maybeSingle()
+          existingOverride = data
+        }
+
+        if (existingOverride) {
+          // Update existing org-specific override
+          await supabase
+            .from('navigation_config')
+            .update({ sort_order: newSortOrder })
+            .eq('id', existingOverride.id)
+        } else {
+          // Insert new org-specific override
+          await supabase.from('navigation_config').insert({
             organization_id: orgId,
             object_definition_id: existingItem.object_definition_id,
             item_type: existingItem.item_type,
@@ -460,13 +498,8 @@ export async function reorderAdminNavItems(
             app_id: 'default',
             is_visible: true,
             sort_order: newSortOrder,
-          },
-          {
-            onConflict: existingItem.object_definition_id
-              ? 'organization_id,app_id,object_definition_id'
-              : 'organization_id,app_id,item_key',
-          }
-        )
+          })
+        }
       } else {
         // Update existing org-specific item
         await supabase
