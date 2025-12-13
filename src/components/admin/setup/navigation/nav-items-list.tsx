@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, createElement } from 'react'
-import { GripVertical, Pencil, Lock, Sparkles } from 'lucide-react'
+import { GripVertical, Pencil, Lock, Sparkles, Plus } from 'lucide-react'
 import {
   DndContext,
   closestCenter,
@@ -27,14 +27,18 @@ import { getIconComponent } from '@/lib/admin-navigation'
 import {
   reorderAdminNavItems,
   type AdminNavItem,
+  type NavType,
 } from '@/app/actions/navigation-admin'
 import { NavItemEditor } from './nav-item-editor'
+import { AddNavItemDialog } from './add-nav-item-dialog'
 
 interface NavItemsListProps {
   items: AdminNavItem[]
-  navType: 'primary_tab' | 'tools_menu' | 'admin_menu'
+  navType: NavType
   onItemsChange: (items: AdminNavItem[]) => void
   allItems: AdminNavItem[]
+  onItemAdded?: (newItem: AdminNavItem) => void
+  onItemMoved?: (itemId: string, newNavType: NavType) => void
 }
 
 interface SortableItemProps {
@@ -141,10 +145,13 @@ export function NavItemsList({
   navType,
   onItemsChange,
   allItems,
+  onItemAdded,
+  onItemMoved,
 }: NavItemsListProps) {
   const [isPending, startTransition] = useTransition()
   const [editingItem, setEditingItem] = useState<AdminNavItem | null>(null)
   const [localItems, setLocalItems] = useState(items)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   // Sync local items when props change
   if (items !== localItems && !isPending) {
@@ -202,13 +209,41 @@ export function NavItemsList({
     setEditingItem(null)
   }
 
+  const handleItemAdded = (newItem: AdminNavItem) => {
+    onItemAdded?.(newItem)
+  }
+
+  const handleItemMoved = (itemId: string, newNavType: NavType) => {
+    onItemMoved?.(itemId, newNavType)
+  }
+
   if (localItems.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed p-8 text-center">
-        <p className="text-sm text-muted-foreground">
-          No items in this section
-        </p>
-      </div>
+      <>
+        <div className="rounded-lg border border-dashed p-8 text-center">
+          <p className="text-sm text-muted-foreground mb-4">
+            No items in this section
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsAddDialogOpen(true)}
+            aria-label={`Add item to ${navType.replace('_', ' ')}`}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Item
+          </Button>
+        </div>
+
+        <AddNavItemDialog
+          open={isAddDialogOpen}
+          onOpenChange={setIsAddDialogOpen}
+          targetNavType={navType}
+          existingItems={allItems}
+          onItemAdded={handleItemAdded}
+          onItemMoved={handleItemMoved}
+        />
+      </>
     )
   }
 
@@ -231,6 +266,18 @@ export function NavItemsList({
         </SortableContext>
       </DndContext>
 
+      {/* Add Item Button */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="mt-3 w-full border-dashed"
+        onClick={() => setIsAddDialogOpen(true)}
+        aria-label={`Add item to ${navType.replace('_', ' ')}`}
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Add Item
+      </Button>
+
       {editingItem && (
         <NavItemEditor
           item={editingItem}
@@ -239,6 +286,15 @@ export function NavItemsList({
           onSave={handleEditComplete}
         />
       )}
+
+      <AddNavItemDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        targetNavType={navType}
+        existingItems={allItems}
+        onItemAdded={handleItemAdded}
+        onItemMoved={handleItemMoved}
+      />
     </>
   )
 }

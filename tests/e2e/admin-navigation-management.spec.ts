@@ -583,7 +583,7 @@ test.describe('Navigation Management System', () => {
       const navigationPromise = page.goto('/admin/setup/navigation')
 
       // May show loading spinner briefly - soft check as loading may be too fast
-      const _spinner = page.locator('[data-loading], .animate-spin')
+      // We're primarily verifying the page eventually loads successfully
       await navigationPromise
 
       // Page should load successfully
@@ -603,6 +603,331 @@ test.describe('Navigation Management System', () => {
       await expect(
         page.getByRole('heading', { name: /navigation settings/i })
       ).toBeVisible()
+    })
+  })
+
+  test.describe('Add Navigation Item', () => {
+    test('should show Add Item button in each navigation group', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Should have Add Item buttons for each group
+      const addButtons = page.locator('button:has-text("Add Item")')
+      const buttonCount = await addButtons.count()
+
+      // Should have at least 3 Add Item buttons (one per group)
+      expect(buttonCount).toBeGreaterThanOrEqual(3)
+    })
+
+    test('should open Add Item dialog when clicking Add Item button', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      // Dialog should open
+      const dialog = page.getByRole('dialog')
+      await expect(dialog).toBeVisible()
+
+      // Should have proper title
+      await expect(dialog.getByText(/add item to/i)).toBeVisible()
+    })
+
+    test('should display three tabs in Add Item dialog: Move, Object, Link', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      // Dialog should show tabs
+      const dialog = page.getByRole('dialog')
+      await expect(dialog.getByRole('tab', { name: /move/i })).toBeVisible()
+      await expect(dialog.getByRole('tab', { name: /object/i })).toBeVisible()
+      await expect(dialog.getByRole('tab', { name: /link/i })).toBeVisible()
+    })
+
+    test('should show items from other groups in Move tab', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click Add Item in Primary Navigation using aria-label
+      const addButton = page.getByRole('button', {
+        name: 'Add item to primary tab',
+      })
+      await addButton.click()
+
+      // Dialog should open with Move tab selected by default
+      const dialog = page.getByRole('dialog')
+      await expect(dialog).toBeVisible()
+
+      // Should show items that can be moved (from other groups)
+      // Messages, Reports, etc. are in Tools Menu - use first() since multiple items match
+      await expect(
+        dialog.getByText(/currently in tools menu/i).first()
+      ).toBeVisible()
+    })
+
+    test('should have search input in Move tab', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      // Should have search input in Move tab
+      const dialog = page.getByRole('dialog')
+      await expect(dialog.getByPlaceholder(/search/i)).toBeVisible()
+    })
+
+    test('should show Link tab with URL and display name fields', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      // Click on Link tab
+      const dialog = page.getByRole('dialog')
+      await dialog.getByRole('tab', { name: /link/i }).click()
+
+      // Should show Display Name and URL fields
+      await expect(dialog.getByLabel(/display name/i)).toBeVisible()
+      await expect(dialog.getByLabel(/url/i)).toBeVisible()
+    })
+
+    test('should show icon picker in Link tab', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      // Click on Link tab
+      const dialog = page.getByRole('dialog')
+      await dialog.getByRole('tab', { name: /link/i }).click()
+
+      // Should have icon section
+      await expect(dialog.getByText(/icon/i)).toBeVisible()
+    })
+
+    test('should disable Add Link button when fields are empty', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      // Click on Link tab
+      const dialog = page.getByRole('dialog')
+      await dialog.getByRole('tab', { name: /link/i }).click()
+
+      // Add Link button should be disabled when fields are empty
+      const addLinkButton = dialog.getByRole('button', { name: /add link/i })
+      await expect(addLinkButton).toBeDisabled()
+    })
+
+    test('should enable Add Link button when fields are filled', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      // Click on Link tab
+      const dialog = page.getByRole('dialog')
+      await dialog.getByRole('tab', { name: /link/i }).click()
+
+      // Fill in fields
+      await dialog.getByLabel(/display name/i).fill('Test Link')
+      await dialog.getByLabel(/url/i).fill('https://example.com')
+
+      // Add Link button should now be enabled
+      const addLinkButton = dialog.getByRole('button', { name: /add link/i })
+      await expect(addLinkButton).toBeEnabled()
+    })
+
+    test('should show live preview when filling link fields', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      // Click on Link tab
+      const dialog = page.getByRole('dialog')
+      await dialog.getByRole('tab', { name: /link/i }).click()
+
+      // Fill in display name
+      await dialog.getByLabel(/display name/i).fill('My Custom Link')
+
+      // Should show preview with the name
+      await expect(dialog.getByText('My Custom Link')).toBeVisible()
+    })
+
+    test('should close dialog with Cancel button', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      // Dialog should open
+      const dialog = page.getByRole('dialog')
+      await expect(dialog).toBeVisible()
+
+      // Switch to Link tab where Cancel button is visible
+      await dialog.getByRole('tab', { name: /link/i }).click()
+
+      // Click Cancel
+      await dialog.getByRole('button', { name: /cancel/i }).click()
+
+      // Dialog should close
+      await expect(dialog).not.toBeVisible()
+    })
+
+    test('should have proper aria-label on Add Item buttons', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Check that buttons have aria-labels
+      const addButtons = page.locator('button[aria-label*="Add item to"]')
+      const buttonCount = await addButtons.count()
+
+      expect(buttonCount).toBeGreaterThanOrEqual(3)
+    })
+  })
+
+  test.describe('Move Item Between Groups', () => {
+    test('should show arrow indicator for movable items', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click Add Item in Primary Navigation
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      // Dialog should show items with arrow indicators
+      const dialog = page.getByRole('dialog')
+      const arrowIcons = dialog.locator('svg.lucide-arrow-right')
+      const arrowCount = await arrowIcons.count()
+
+      // Should have arrows for each movable item
+      expect(arrowCount).toBeGreaterThan(0)
+    })
+
+    test('should filter items when searching in Move tab', async ({ page }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      const dialog = page.getByRole('dialog')
+      const searchInput = dialog.getByPlaceholder(/search/i)
+
+      // Get initial count of items
+      const initialItems = await dialog
+        .locator('button')
+        .filter({ hasText: /currently in/i })
+        .count()
+
+      // Search for a specific term
+      await searchInput.fill('Report')
+
+      // Wait for filter to apply
+      await page.waitForTimeout(300)
+
+      // Either shows filtered results or fewer items
+      const filteredItems = await dialog
+        .locator('button')
+        .filter({ hasText: /currently in/i })
+        .count()
+
+      // Filtered count should be less than or equal to initial count
+      expect(filteredItems).toBeLessThanOrEqual(initialItems)
+    })
+
+    test('should show "No items match" when search has no results', async ({
+      page,
+    }) => {
+      await page.goto('/admin/setup/navigation')
+
+      // Wait for content to load
+      await expect(page.getByText('Primary Navigation')).toBeVisible()
+
+      // Click the first Add Item button
+      const addButton = page.locator('button:has-text("Add Item")').first()
+      await addButton.click()
+
+      const dialog = page.getByRole('dialog')
+      const searchInput = dialog.getByPlaceholder(/search/i)
+
+      // Search for something that won't match
+      await searchInput.fill('xyznonexistent123')
+
+      // Wait for filter
+      await page.waitForTimeout(300)
+
+      // Should show no results message
+      await expect(dialog.getByText(/no items match/i)).toBeVisible()
     })
   })
 

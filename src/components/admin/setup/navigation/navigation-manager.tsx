@@ -23,6 +23,7 @@ import {
   getConfigurableRoles,
   resetNavigationToDefaults,
   type AdminNavItem,
+  type NavType,
 } from '@/app/actions/navigation-admin'
 import { NavItemsList } from './nav-items-list'
 import { RoleVisibilityMatrix } from './role-visibility-matrix'
@@ -86,6 +87,20 @@ export function NavigationManager() {
 
   const handleItemsChange = (updatedItems: AdminNavItem[]) => {
     setNavItems(updatedItems)
+    setHasChanges(true)
+  }
+
+  const handleItemAdded = (newItem: AdminNavItem) => {
+    setNavItems(prev => [...prev, newItem])
+    setHasChanges(true)
+  }
+
+  const handleItemMoved = (itemId: string, newNavType: NavType) => {
+    setNavItems(prev =>
+      prev.map(item =>
+        item.id === itemId ? { ...item, navType: newNavType } : item
+      )
+    )
     setHasChanges(true)
   }
 
@@ -171,6 +186,8 @@ export function NavigationManager() {
               navType="primary_tab"
               onItemsChange={handleItemsChange}
               allItems={navItems}
+              onItemAdded={handleItemAdded}
+              onItemMoved={handleItemMoved}
             />
           </div>
 
@@ -187,6 +204,8 @@ export function NavigationManager() {
               navType="tools_menu"
               onItemsChange={handleItemsChange}
               allItems={navItems}
+              onItemAdded={handleItemAdded}
+              onItemMoved={handleItemMoved}
             />
           </div>
 
@@ -203,6 +222,8 @@ export function NavigationManager() {
               navType="admin_menu"
               onItemsChange={handleItemsChange}
               allItems={navItems}
+              onItemAdded={handleItemAdded}
+              onItemMoved={handleItemMoved}
             />
           </div>
         </TabsContent>
