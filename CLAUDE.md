@@ -13,7 +13,7 @@
 ## Project Status
 
 **Current Phase**: Phase 9 Complete - Data Management
-**Last Updated**: December 12, 2024
+**Last Updated**: December 13, 2024
 
 ### Active Development Plan (6-Week Roadmap)
 
@@ -659,14 +659,22 @@ rm -rf ~/Library/Caches/ms-playwright/mcp-chrome-*
 
 ---
 
-## E2E Testing Status (Last Updated: Dec 12, 2024)
+## E2E Testing Status (Last Updated: Dec 13, 2024)
 
-### Recent Test Run Results (Post-Phase 8):
+### Recent Test Run Results (Post-Phase 9):
 
-- **~875 passed** ✅ (including 19 new Phase 8 client portal tests)
+- **~895 passed** ✅ (including 20 new Phase 9 data management tests)
 - **15 flaky** (pass on retry with `--retries=2`)
 - **~8 failed** (mobile viewport timing issues)
-- **~160 skipped** (across all test projects)
+- **~140 skipped** (across all test projects - reduced with import_jobs migration)
+
+### Phase 9 E2E Tests Added:
+
+- `tests/e2e/data-management-phase9.spec.ts` - Data management features (20 tests)
+  - Import wizard UI (landing page, leads/clients import, wizard steps, file dropzone, column mapping)
+  - Export buttons (CSV/Excel dropdown on list views)
+  - Bulk actions (selection bar, team assignment, delete option)
+  - Import history and navigation tests
 
 ### Phase 8 E2E Tests Added:
 
