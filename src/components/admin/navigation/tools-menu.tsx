@@ -44,12 +44,13 @@ export function ToolsMenu({ items }: ToolsMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
+          aria-label="Tools menu"
           className={cn(
             'flex items-center gap-2',
             hasActiveItem && 'bg-primary/10 text-primary'
           )}
         >
-          <Wrench className="h-4 w-4" />
+          <Wrench className="h-4 w-4" aria-hidden="true" />
           <span className="hidden sm:inline">Tools</span>
           {totalBadge > 0 && (
             <Badge variant="destructive" className="ml-1 h-5 min-w-5 px-1.5">

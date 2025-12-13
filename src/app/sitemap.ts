@@ -20,14 +20,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/services/postpartum-doula',
     '/services/infant-feeding',
     '/services/photography',
+    '/services/sibling-prep',
+    '/services/car-seat-safety',
+    '/services/infant-massage',
     '/pricing',
     '/blog',
     '/blog/what-does-a-doula-do',
     '/blog/doula-cost-worth-it',
     '/blog/birth-plan-tips',
+    '/blog/car-seat-safety-guide',
+    '/blog/evidence-doula-support',
     '/testimonials',
     '/faq',
     '/contact',
+    '/gallery',
+    '/resources',
   ]
 
   return routes.map(route => ({
@@ -77,6 +84,11 @@ function getPriority(route: string): number {
   // About, FAQ, testimonials are important
   if (route === '/about' || route === '/faq' || route === '/testimonials') {
     return 0.7
+  }
+
+  // Gallery and resources are moderately important
+  if (route === '/gallery' || route === '/resources') {
+    return 0.6
   }
 
   // Blog index is moderately important

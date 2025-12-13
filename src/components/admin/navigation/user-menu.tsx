@@ -53,12 +53,13 @@ export function UserMenu({ adminItems, brandName, userRole }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
+          aria-label="Account menu"
           className={cn(
             'flex items-center gap-2',
             hasActiveItem && 'bg-primary/10 text-primary'
           )}
         >
-          <User className="h-4 w-4" />
+          <User className="h-4 w-4" aria-hidden="true" />
           <span className="hidden sm:inline">Account</span>
           <ChevronDown className="h-3 w-3 opacity-50" />
         </Button>

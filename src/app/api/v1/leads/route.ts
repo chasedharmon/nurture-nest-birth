@@ -50,9 +50,14 @@ export async function GET(request: NextRequest) {
       }
 
       if (search) {
-        query = query.or(
-          `name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`
-        )
+        // Sanitize search to prevent PostgREST filter injection
+        // Remove characters that could modify filter syntax: comma, parentheses, periods, special operators
+        const sanitizedSearch = search.replace(/[,().%*\\]/g, '').trim()
+        if (sanitizedSearch) {
+          query = query.or(
+            `name.ilike.%${sanitizedSearch}%,email.ilike.%${sanitizedSearch}%,phone.ilike.%${sanitizedSearch}%`
+          )
+        }
       }
 
       const { data, count, error } = await query

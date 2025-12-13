@@ -79,9 +79,13 @@ export async function getAuditLogs(options: GetAuditLogsOptions = {}): Promise<{
 
     // Apply filters
     if (filters.search) {
-      query = query.or(
-        `action.ilike.%${filters.search}%,entity_type.ilike.%${filters.search}%`
-      )
+      // Sanitize search to prevent PostgREST filter injection
+      const sanitizedSearch = filters.search.replace(/[,().%*\\]/g, '').trim()
+      if (sanitizedSearch) {
+        query = query.or(
+          `action.ilike.%${sanitizedSearch}%,entity_type.ilike.%${sanitizedSearch}%`
+        )
+      }
     }
 
     if (filters.action) {

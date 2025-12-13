@@ -65,11 +65,33 @@ pnpm dev
 ### Environment Variables
 
 ```env
+# Required - Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Required - Email
 RESEND_API_KEY=your_resend_key
+RESEND_FROM_EMAIL=onboarding@resend.dev
+CONTACT_EMAIL=hello@nurturenestbirth.com
+
+# Required for Production - Security
+CRON_SECRET=generate_random_32_char_string
+STRIPE_WEBHOOK_SECRET=whsec_xxx  # When Stripe enabled
+
+# Optional - Rate Limiting (Upstash Redis)
+UPSTASH_REDIS_REST_URL=https://your-database.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_token
+
+# Optional - Error Tracking (Sentry)
+NEXT_PUBLIC_SENTRY_DSN=https://xxx.ingest.sentry.io/xxx
+SENTRY_AUTH_TOKEN=your_token
+
+# Optional - Scheduling
+NEXT_PUBLIC_CALENDLY_URL=https://calendly.com/your-username
 ```
+
+See `.env.example` for full documentation of each variable.
 
 ## Scripts
 
@@ -180,6 +202,54 @@ Business information is centralized in `src/config/site.ts`:
 - Credentials
 - Social media links
 - Pricing
+
+## Security
+
+See [docs/SECURITY_AUDIT.md](docs/SECURITY_AUDIT.md) for the full security audit report.
+
+### Key Security Features
+
+- **Authentication**: Supabase Auth with row-level security (RLS)
+- **Rate Limiting**: Upstash Redis with per-endpoint limits
+- **API Keys**: SHA-256 hashed, permission-scoped, with rate limits
+- **CSRF Protection**: Built-in via Next.js Server Actions
+- **Input Validation**: Zod schemas and sanitized search queries
+- **Audit Logging**: All CRUD operations tracked with actor and changes
+
+### Pre-Launch Checklist
+
+- [ ] Set `CRON_SECRET` environment variable
+- [ ] Configure Upstash Redis for rate limiting
+- [ ] Enable Stripe webhook verification (when ready)
+- [ ] Test RLS policies for cross-tenant isolation
+- [ ] Verify all admin routes require authentication
+
+## API
+
+### External API (`/api/v1/`)
+
+The API uses API key authentication. Generate keys in Admin > Setup > API Keys.
+
+```bash
+# List leads
+curl -H "Authorization: Bearer sk_live_xxx" \
+  "https://your-domain.com/api/v1/leads?limit=50"
+
+# Create lead
+curl -X POST -H "Authorization: Bearer sk_live_xxx" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Jane Doe", "email": "jane@example.com"}' \
+  "https://your-domain.com/api/v1/leads"
+```
+
+### Webhooks
+
+Configure webhooks in Admin > Setup > Webhooks. Events are signed with HMAC-SHA256.
+
+```bash
+# Verify webhook signature
+X-Webhook-Signature: sha256=<hmac_of_payload>
+```
 
 ## Business Information
 

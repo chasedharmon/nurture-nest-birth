@@ -59,6 +59,9 @@ export function Header() {
             type="button"
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             <span className="sr-only">
               {mobileMenuOpen ? 'Close menu' : 'Open menu'}
@@ -118,7 +121,7 @@ export function Header() {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden">
+        <div id="mobile-menu" className="lg:hidden">
           <div className="space-y-1 px-6 pb-6 pt-2">
             {navigation.map(item => (
               <Link

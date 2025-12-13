@@ -84,7 +84,7 @@ export async function validateApiKey(
   const { data: keyData, error: keyError } = await supabase
     .from('api_keys')
     .select(
-      'id, organization_id, name, permissions, rate_limit_requests_per_minute, is_revoked, expires_at'
+      'id, organization_id, name, permissions, rate_limit_per_minute, revoked_at, expires_at'
     )
     .eq('key_prefix', prefix)
     .eq('key_hash', keyHash)
@@ -97,8 +97,8 @@ export async function validateApiKey(
     }
   }
 
-  // Check if revoked
-  if (keyData.is_revoked) {
+  // Check if revoked (revoked_at is a timestamp, null means not revoked)
+  if (keyData.revoked_at) {
     return {
       success: false,
       error: 'API key has been revoked',
@@ -118,7 +118,7 @@ export async function validateApiKey(
     organizationId: keyData.organization_id,
     name: keyData.name,
     permissions: keyData.permissions || {},
-    rateLimitRequestsPerMinute: keyData.rate_limit_requests_per_minute || 60,
+    rateLimitRequestsPerMinute: keyData.rate_limit_per_minute || 60,
   }
 
   // Check rate limit

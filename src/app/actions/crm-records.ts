@@ -141,11 +141,16 @@ export async function getRecords<T = CrmRecord>(
 
     // Apply search across multiple fields
     if (search && search.trim() && searchFields.length > 0) {
-      const searchTerm = search.trim()
-      const searchConditions = searchFields
-        .map(field => `${field}.ilike.%${searchTerm}%`)
-        .join(',')
-      query = query.or(searchConditions)
+      // Sanitize search term to prevent PostgREST filter injection
+      const searchTerm = search.trim().replace(/[,().%*\\]/g, '')
+      // Validate field names - only allow alphanumeric and underscores
+      const validFields = searchFields.filter(f => /^[a-z][a-z0-9_]*$/i.test(f))
+      if (searchTerm && validFields.length > 0) {
+        const searchConditions = validFields
+          .map(field => `${field}.ilike.%${searchTerm}%`)
+          .join(',')
+        query = query.or(searchConditions)
+      }
     }
 
     // Apply filters
@@ -493,8 +498,21 @@ export async function bulkUpdateRecords(
 // INLINE EDITING
 // =====================================================
 
+// Protected system fields that should never be updated via inline editing
+const PROTECTED_SYSTEM_FIELDS = new Set([
+  'id',
+  'created_at',
+  'updated_at',
+  'created_by',
+  'owner_id',
+  'organization_id',
+  'deleted_at',
+  'is_deleted',
+])
+
 /**
  * Update a single field on a record (for inline editing)
+ * Includes field validation to prevent updating protected system fields
  */
 export async function inlineUpdateRecord(
   objectApiName: string,
@@ -503,6 +521,22 @@ export async function inlineUpdateRecord(
   value: unknown
 ): Promise<{ success: boolean; error: string | null }> {
   try {
+    // Validate field name - block protected system fields
+    if (PROTECTED_SYSTEM_FIELDS.has(field)) {
+      console.warn(
+        `[Security] Attempted to update protected field: ${field} on ${objectApiName}`
+      )
+      return { success: false, error: 'Cannot update protected system field' }
+    }
+
+    // Validate field name format - only allow alphanumeric and underscores
+    if (!/^[a-z][a-z0-9_]*$/i.test(field)) {
+      console.warn(
+        `[Security] Invalid field name format attempted: ${field} on ${objectApiName}`
+      )
+      return { success: false, error: 'Invalid field name format' }
+    }
+
     const supabase = await createClient()
 
     const tableName = await getTableName(objectApiName)
