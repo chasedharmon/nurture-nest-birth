@@ -4,16 +4,17 @@
  * AdminNavHeader
  *
  * Desktop navigation header with logo, object tabs, tools menu, and user menu.
+ * Receives SerializableNavigationConfig - icons are resolved in child components.
  */
 
 import Link from 'next/link'
 import { NavTabs } from './nav-tabs'
 import { ToolsMenu } from './tools-menu'
 import { UserMenu } from './user-menu'
-import type { NavigationConfig } from '@/lib/admin-navigation'
+import type { SerializableNavigationConfig } from '@/lib/admin-navigation'
 
 interface AdminNavHeaderProps {
-  config: NavigationConfig
+  config: SerializableNavigationConfig
   userRole: string | null
 }
 

@@ -5,25 +5,29 @@
  *
  * These actions fetch navigation configuration from the database
  * and combine it with organization settings.
+ *
+ * IMPORTANT: Returns SerializableNavigationConfig (no React components)
+ * because React components cannot be serialized and passed from server to client.
+ * Client components should use getIconComponent() to get icon components.
  */
 
 import { createClient } from '@/lib/supabase/server'
 import {
   type DbNavItem,
-  type NavigationConfig,
+  type SerializableNavigationConfig,
+  type SerializableNavItem,
   transformNavItems,
   filterByRole,
-  FALLBACK_NAV_CONFIG,
-  getIconComponent,
 } from '@/lib/admin-navigation'
 import { getUnreadCount } from './messaging'
 
 /**
  * Get the complete navigation configuration for the current user
+ * Returns SerializableNavigationConfig (without iconComponent - cannot serialize React components)
  */
 export async function getNavigationConfig(): Promise<{
   success: boolean
-  data: NavigationConfig | null
+  data: SerializableNavigationConfig | null
   error: string | null
 }> {
   try {
@@ -38,7 +42,7 @@ export async function getNavigationConfig(): Promise<{
       return { success: false, data: null, error: 'Not authenticated' }
     }
 
-    // Get user profile with organization
+    // Get user profile with organization (optional - may not exist for new users)
     const { data: profile, error: profileError } = await supabase
       .from('users')
       .select('id, organization_id')
@@ -47,11 +51,7 @@ export async function getNavigationConfig(): Promise<{
 
     if (profileError) {
       console.error('Error fetching user profile:', profileError)
-      return {
-        success: false,
-        data: null,
-        error: 'Failed to fetch user profile',
-      }
+      // Continue with fallback - profile is optional for navigation
     }
 
     // Get user's role from team_members
@@ -74,37 +74,27 @@ export async function getNavigationConfig(): Promise<{
 
     if (navError) {
       console.error('Error fetching navigation config:', navError)
-      // Return fallback config on error
+      // Return null so layout uses its own serializable fallback
       return {
         success: true,
-        data: {
-          ...FALLBACK_NAV_CONFIG,
-          toolsMenu: filterByRole(FALLBACK_NAV_CONFIG.toolsMenu, userRole),
-        },
-        error: null,
+        data: null,
+        error: 'Database function unavailable (using fallback)',
       }
     }
 
-    // Transform database items
+    // Transform database items (returns SerializableNavItem without iconComponent)
     const { primaryTabs, toolsMenu, adminMenu } = transformNavItems(
       (navItems as DbNavItem[]) || []
     )
 
-    // Add icon components to items
-    const addIcons = (items: typeof primaryTabs) =>
-      items.map(item => ({
-        ...item,
-        iconComponent: getIconComponent(item.icon),
-      }))
-
-    // Filter by role
-    const filteredToolsMenu = filterByRole(addIcons(toolsMenu), userRole)
+    // Filter by role (works with SerializableNavItem)
+    const filteredToolsMenu = filterByRole(toolsMenu, userRole)
 
     // Get organization name for branding
     let brandName = 'Admin Portal'
     let brandLogoUrl: string | null = null
 
-    if (profile.organization_id) {
+    if (profile?.organization_id) {
       const { data: org } = await supabase
         .from('organizations')
         .select('name, logo_url')
@@ -122,19 +112,21 @@ export async function getNavigationConfig(): Promise<{
     const unreadMessages = unreadResult.count || 0
 
     // Add badge to messages item
-    const toolsWithBadges = filteredToolsMenu.map(item => {
-      if (item.key === 'messages' && unreadMessages > 0) {
-        return { ...item, badge: unreadMessages }
+    const toolsWithBadges: SerializableNavItem[] = filteredToolsMenu.map(
+      item => {
+        if (item.key === 'messages' && unreadMessages > 0) {
+          return { ...item, badge: unreadMessages }
+        }
+        return item
       }
-      return item
-    })
+    )
 
     return {
       success: true,
       data: {
-        primaryTabs: addIcons(primaryTabs),
+        primaryTabs,
         toolsMenu: toolsWithBadges,
-        adminMenu: addIcons(adminMenu),
+        adminMenu,
         brandName,
         brandLogoUrl,
         unreadMessages,
@@ -143,10 +135,11 @@ export async function getNavigationConfig(): Promise<{
     }
   } catch (error) {
     console.error('Error in getNavigationConfig:', error)
+    // Return null so layout uses its own serializable fallback
     return {
-      success: false,
-      data: FALLBACK_NAV_CONFIG,
-      error: 'Failed to fetch navigation config',
+      success: true,
+      data: null,
+      error: 'Failed to fetch navigation config (using fallback)',
     }
   }
 }
@@ -156,7 +149,7 @@ export async function getNavigationConfig(): Promise<{
  */
 export async function getNavigationConfigForApp(appId: string): Promise<{
   success: boolean
-  data: NavigationConfig | null
+  data: SerializableNavigationConfig | null
   error: string | null
 }> {
   // For now, just use the default app

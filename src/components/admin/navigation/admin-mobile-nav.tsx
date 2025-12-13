@@ -5,6 +5,7 @@
  *
  * Mobile navigation using Sheet drawer.
  * Shows all navigation items organized by section.
+ * Icons are looked up client-side using getIconComponent().
  */
 
 import { useState } from 'react'
@@ -23,10 +24,14 @@ import {
 } from '@/components/ui/sheet'
 import { createClient } from '@/lib/supabase/client'
 import { buildUrlWithPreservedParams } from '@/lib/navigation-utils'
-import type { NavigationConfig, NavItem } from '@/lib/admin-navigation'
+import {
+  type SerializableNavigationConfig,
+  type SerializableNavItem,
+  getIconComponent,
+} from '@/lib/admin-navigation'
 
 interface AdminMobileNavProps {
-  config: NavigationConfig
+  config: SerializableNavigationConfig
 }
 
 function NavSection({
@@ -36,7 +41,7 @@ function NavSection({
   onClose,
 }: {
   title: string
-  items: NavItem[]
+  items: SerializableNavItem[]
   pathname: string
   onClose: () => void
 }) {
@@ -49,7 +54,7 @@ function NavSection({
       </h3>
       <ul className="space-y-1">
         {items.map(item => {
-          const Icon = item.iconComponent
+          const Icon = getIconComponent(item.icon)
           const isActive =
             pathname === item.href || pathname.startsWith(`${item.href}/`)
           const href = buildUrlWithPreservedParams(item.href)

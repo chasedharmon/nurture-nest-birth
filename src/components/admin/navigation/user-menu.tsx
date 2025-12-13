@@ -4,6 +4,7 @@
  * UserMenu
  *
  * Dropdown menu for user actions (Team, Setup, Sign Out).
+ * Icons are looked up client-side using getIconComponent().
  */
 
 import { useRouter } from 'next/navigation'
@@ -20,10 +21,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
-import type { NavItem } from '@/lib/admin-navigation'
+import {
+  type SerializableNavItem,
+  getIconComponent,
+} from '@/lib/admin-navigation'
 
 interface UserMenuProps {
-  adminItems: NavItem[]
+  adminItems: SerializableNavItem[]
   brandName: string
   userRole: string | null
 }
@@ -72,7 +76,7 @@ export function UserMenu({ adminItems, brandName, userRole }: UserMenuProps) {
 
         {/* Admin Items */}
         {adminItems.map(item => {
-          const Icon = item.iconComponent
+          const Icon = getIconComponent(item.icon)
           const isActive =
             pathname === item.href || pathname.startsWith(`${item.href}/`)
 

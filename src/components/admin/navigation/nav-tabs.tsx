@@ -4,16 +4,20 @@
  * NavTabs
  *
  * Horizontal tabs for CRM object navigation (Accounts, Contacts, etc.)
+ * Icons are looked up client-side using getIconComponent().
  */
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { buildUrlWithPreservedParams } from '@/lib/navigation-utils'
-import type { NavItem } from '@/lib/admin-navigation'
+import {
+  type SerializableNavItem,
+  getIconComponent,
+} from '@/lib/admin-navigation'
 
 interface NavTabsProps {
-  items: NavItem[]
+  items: SerializableNavItem[]
 }
 
 export function NavTabs({ items }: NavTabsProps) {
@@ -22,7 +26,7 @@ export function NavTabs({ items }: NavTabsProps) {
   return (
     <nav className="flex items-center gap-1" aria-label="Main navigation">
       {items.map(item => {
-        const Icon = item.iconComponent
+        const Icon = getIconComponent(item.icon)
         const isActive =
           pathname === item.href || pathname.startsWith(`${item.href}/`)
 

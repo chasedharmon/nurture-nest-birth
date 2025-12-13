@@ -4,6 +4,7 @@
  * ToolsMenu
  *
  * Dropdown menu for tools (Reports, Dashboards, Messages, Workflows).
+ * Icons are looked up client-side using getIconComponent().
  */
 
 import Link from 'next/link'
@@ -18,10 +19,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import type { NavItem } from '@/lib/admin-navigation'
+import {
+  type SerializableNavItem,
+  getIconComponent,
+} from '@/lib/admin-navigation'
 
 interface ToolsMenuProps {
-  items: NavItem[]
+  items: SerializableNavItem[]
 }
 
 export function ToolsMenu({ items }: ToolsMenuProps) {
@@ -57,7 +61,7 @@ export function ToolsMenu({ items }: ToolsMenuProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         {items.map(item => {
-          const Icon = item.iconComponent
+          const Icon = getIconComponent(item.icon)
           const isActive =
             pathname === item.href || pathname.startsWith(`${item.href}/`)
 

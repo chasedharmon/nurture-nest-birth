@@ -3,7 +3,10 @@ import { createClient } from '@/lib/supabase/server'
 import { AdminNavigation } from '@/components/admin/navigation'
 import { getNavigationConfig } from '@/app/actions/navigation'
 import { KeyboardShortcutsProvider } from '@/components/admin/keyboard-shortcuts-provider'
-import { FALLBACK_NAV_CONFIG } from '@/lib/admin-navigation'
+import {
+  FALLBACK_NAV_DATA,
+  type SerializableNavigationConfig,
+} from '@/lib/admin-navigation'
 
 /**
  * Admin Portal Layout
@@ -13,6 +16,10 @@ import { FALLBACK_NAV_CONFIG } from '@/lib/admin-navigation'
  * - Navigation configuration from database
  * - Consistent header/nav across all admin pages
  * - Keyboard shortcuts support
+ *
+ * IMPORTANT: Only passes SerializableNavigationConfig to client components.
+ * React components (like LucideIcon) cannot be serialized server → client.
+ * Client components use getIconComponent() to look up icons by name.
  */
 export default async function AdminLayout({
   children,
@@ -39,7 +46,7 @@ export default async function AdminLayout({
 
   const userRole = teamMember?.role || null
 
-  // Fetch navigation configuration
+  // Fetch navigation configuration (returns SerializableNavigationConfig)
   const navResult = await getNavigationConfig()
 
   if (!navResult.success) {
@@ -47,8 +54,18 @@ export default async function AdminLayout({
     console.error('Failed to load navigation config:', navResult.error)
   }
 
+  // Fallback config (serializable - no React components)
+  const fallbackConfig: SerializableNavigationConfig = {
+    primaryTabs: FALLBACK_NAV_DATA.primaryTabs,
+    toolsMenu: FALLBACK_NAV_DATA.toolsMenu,
+    adminMenu: FALLBACK_NAV_DATA.adminMenu,
+    brandName: FALLBACK_NAV_DATA.brandName,
+    brandLogoUrl: FALLBACK_NAV_DATA.brandLogoUrl,
+    unreadMessages: FALLBACK_NAV_DATA.unreadMessages,
+  }
+
   // Use fallback config if data is null
-  const navConfig = navResult.data ?? FALLBACK_NAV_CONFIG
+  const navConfig = navResult.data ?? fallbackConfig
 
   return (
     <KeyboardShortcutsProvider>

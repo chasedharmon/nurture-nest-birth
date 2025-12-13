@@ -56,24 +56,44 @@ export interface DbNavItem {
 }
 
 /**
- * Processed navigation item for UI
+ * Serializable navigation item (safe to pass server → client)
+ * Does NOT include iconComponent as React components can't be serialized
  */
-export interface NavItem {
+export interface SerializableNavItem {
   id: string
   type: NavItemType
   key: string // object api_name or item_key
   label: string
   pluralLabel: string
   href: string
-  icon: string
-  iconComponent?: LucideIcon
+  icon: string // Icon name - use getIconComponent() on client to get component
   badge?: number
   isCustomObject: boolean
   visibleToRoles: string[] | null
 }
 
 /**
- * Complete navigation configuration
+ * Processed navigation item for UI (client-side use only)
+ * Includes iconComponent which is looked up client-side
+ */
+export interface NavItem extends SerializableNavItem {
+  iconComponent?: LucideIcon
+}
+
+/**
+ * Serializable navigation configuration (safe to pass server → client)
+ */
+export interface SerializableNavigationConfig {
+  primaryTabs: SerializableNavItem[]
+  toolsMenu: SerializableNavItem[]
+  adminMenu: SerializableNavItem[]
+  brandName: string
+  brandLogoUrl: string | null
+  unreadMessages: number
+}
+
+/**
+ * Complete navigation configuration (client-side use only)
  */
 export interface NavigationConfig {
   primaryTabs: NavItem[]
@@ -194,9 +214,10 @@ export function getObjectFromPath(pathname: string): string | null {
 // =====================================================
 
 /**
- * Transform database nav item to UI nav item
+ * Transform database nav item to serializable nav item
+ * Does NOT include iconComponent - client components should use getIconComponent()
  */
-export function transformNavItem(dbItem: DbNavItem): NavItem {
+export function transformNavItem(dbItem: DbNavItem): SerializableNavItem {
   const key = dbItem.object_api_name || dbItem.item_key || dbItem.id
   const label = dbItem.display_name || dbItem.object_label || key
   const pluralLabel = dbItem.object_plural_label || label
@@ -221,7 +242,6 @@ export function transformNavItem(dbItem: DbNavItem): NavItem {
     pluralLabel,
     href,
     icon: dbItem.icon_name,
-    iconComponent: getIconComponent(dbItem.icon_name),
     isCustomObject: dbItem.is_custom_object,
     visibleToRoles: dbItem.visible_to_roles,
   }
@@ -229,15 +249,16 @@ export function transformNavItem(dbItem: DbNavItem): NavItem {
 
 /**
  * Transform array of database items to categorized navigation config
+ * Returns SerializableNavItem arrays (safe for server → client)
  */
 export function transformNavItems(dbItems: DbNavItem[]): {
-  primaryTabs: NavItem[]
-  toolsMenu: NavItem[]
-  adminMenu: NavItem[]
+  primaryTabs: SerializableNavItem[]
+  toolsMenu: SerializableNavItem[]
+  adminMenu: SerializableNavItem[]
 } {
-  const primaryTabs: NavItem[] = []
-  const toolsMenu: NavItem[] = []
-  const adminMenu: NavItem[] = []
+  const primaryTabs: SerializableNavItem[] = []
+  const toolsMenu: SerializableNavItem[] = []
+  const adminMenu: SerializableNavItem[] = []
 
   for (const item of dbItems) {
     const navItem = transformNavItem(item)
@@ -307,8 +328,12 @@ export const ROLE_RESTRICTED_ITEMS: Record<string, string[]> = {
 
 /**
  * Check if user can see a nav item based on role
+ * Works with both SerializableNavItem and NavItem
  */
-export function canSeeNavItem(item: NavItem, userRole: string | null): boolean {
+export function canSeeNavItem(
+  item: SerializableNavItem,
+  userRole: string | null
+): boolean {
   // If no role restrictions, everyone can see
   if (!item.visibleToRoles || item.visibleToRoles.length === 0) {
     // Check hardcoded restrictions for known items
@@ -325,11 +350,12 @@ export function canSeeNavItem(item: NavItem, userRole: string | null): boolean {
 
 /**
  * Filter nav items by user role
+ * Generic to work with both SerializableNavItem and NavItem
  */
-export function filterByRole(
-  items: NavItem[],
+export function filterByRole<T extends SerializableNavItem>(
+  items: T[],
   userRole: string | null
-): NavItem[] {
+): T[] {
   return items.filter(item => canSeeNavItem(item, userRole))
 }
 
@@ -338,68 +364,64 @@ export function filterByRole(
 // =====================================================
 
 /**
- * Fallback navigation config if database query fails
- * This ensures the app remains usable even without DB connection
+ * Serializable fallback navigation config data (without React components)
+ * Used for server-side fallback when database is unavailable
+ * Icon components are added client-side using getIconComponent()
  */
-export const FALLBACK_NAV_CONFIG: NavigationConfig = {
+export const FALLBACK_NAV_DATA = {
   primaryTabs: [
     {
       id: 'accounts',
-      type: 'object',
+      type: 'object' as const,
       key: 'Account',
       label: 'Accounts',
       pluralLabel: 'Accounts',
       href: '/admin/accounts',
       icon: 'building-2',
-      iconComponent: Building2,
       isCustomObject: false,
       visibleToRoles: null,
     },
     {
       id: 'contacts',
-      type: 'object',
+      type: 'object' as const,
       key: 'Contact',
       label: 'Contacts',
       pluralLabel: 'Contacts',
       href: '/admin/contacts',
       icon: 'users',
-      iconComponent: Users,
       isCustomObject: false,
       visibleToRoles: null,
     },
     {
       id: 'leads',
-      type: 'object',
+      type: 'object' as const,
       key: 'Lead',
       label: 'Leads',
       pluralLabel: 'Leads',
       href: '/admin/crm-leads',
       icon: 'user-plus',
-      iconComponent: UserPlus,
       isCustomObject: false,
       visibleToRoles: null,
     },
     {
       id: 'opportunities',
-      type: 'object',
+      type: 'object' as const,
       key: 'Opportunity',
       label: 'Opportunities',
       pluralLabel: 'Opportunities',
       href: '/admin/opportunities',
       icon: 'target',
-      iconComponent: Target,
       isCustomObject: false,
       visibleToRoles: null,
     },
     {
       id: 'activities',
-      type: 'object',
+      type: 'object' as const,
       key: 'Activity',
       label: 'Activities',
       pluralLabel: 'Activities',
       href: '/admin/activities',
       icon: 'activity',
-      iconComponent: Activity,
       isCustomObject: false,
       visibleToRoles: null,
     },
@@ -407,75 +429,69 @@ export const FALLBACK_NAV_CONFIG: NavigationConfig = {
   toolsMenu: [
     {
       id: 'messages',
-      type: 'tool',
+      type: 'tool' as const,
       key: 'messages',
       label: 'Messages',
       pluralLabel: 'Messages',
       href: '/admin/messages',
       icon: 'message-square',
-      iconComponent: MessageSquare,
       isCustomObject: false,
       visibleToRoles: null,
     },
     {
       id: 'reports',
-      type: 'tool',
+      type: 'tool' as const,
       key: 'reports',
       label: 'Reports',
       pluralLabel: 'Reports',
       href: '/admin/reports',
       icon: 'bar-chart-3',
-      iconComponent: BarChart3,
       isCustomObject: false,
       visibleToRoles: null,
     },
     {
       id: 'dashboards',
-      type: 'tool',
+      type: 'tool' as const,
       key: 'dashboards',
       label: 'Dashboards',
       pluralLabel: 'Dashboards',
       href: '/admin/dashboards',
       icon: 'layout-dashboard',
-      iconComponent: LayoutDashboard,
       isCustomObject: false,
       visibleToRoles: null,
     },
     {
       id: 'workflows',
-      type: 'tool',
+      type: 'tool' as const,
       key: 'workflows',
       label: 'Workflows',
       pluralLabel: 'Workflows',
       href: '/admin/workflows',
       icon: 'workflow',
-      iconComponent: Workflow,
       isCustomObject: false,
-      visibleToRoles: ['owner', 'admin'],
+      visibleToRoles: ['owner', 'admin'] as string[],
     },
   ],
   adminMenu: [
     {
       id: 'team',
-      type: 'tool',
+      type: 'tool' as const,
       key: 'team',
       label: 'Team',
       pluralLabel: 'Team',
       href: '/admin/team',
       icon: 'users-2',
-      iconComponent: Users2,
       isCustomObject: false,
       visibleToRoles: null,
     },
     {
       id: 'setup',
-      type: 'tool',
+      type: 'tool' as const,
       key: 'setup',
       label: 'Setup',
       pluralLabel: 'Setup',
       href: '/admin/setup',
       icon: 'settings',
-      iconComponent: Settings,
       isCustomObject: false,
       visibleToRoles: null,
     },
@@ -483,4 +499,30 @@ export const FALLBACK_NAV_CONFIG: NavigationConfig = {
   brandName: 'Admin Portal',
   brandLogoUrl: null,
   unreadMessages: 0,
+}
+
+/**
+ * Helper to add icon components to serializable nav data
+ * Call this on the client side after receiving data from server
+ */
+export function addIconComponents(
+  items: Array<Omit<NavItem, 'iconComponent'>>
+): NavItem[] {
+  return items.map(item => ({
+    ...item,
+    iconComponent: getIconComponent(item.icon),
+  }))
+}
+
+/**
+ * Complete fallback config with icon components (for client-side use only)
+ * DO NOT pass this through server actions - it contains non-serializable React components
+ */
+export const FALLBACK_NAV_CONFIG: NavigationConfig = {
+  primaryTabs: addIconComponents(FALLBACK_NAV_DATA.primaryTabs),
+  toolsMenu: addIconComponents(FALLBACK_NAV_DATA.toolsMenu),
+  adminMenu: addIconComponents(FALLBACK_NAV_DATA.adminMenu),
+  brandName: FALLBACK_NAV_DATA.brandName,
+  brandLogoUrl: FALLBACK_NAV_DATA.brandLogoUrl,
+  unreadMessages: FALLBACK_NAV_DATA.unreadMessages,
 }

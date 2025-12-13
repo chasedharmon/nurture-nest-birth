@@ -5,15 +5,18 @@
  *
  * Main navigation wrapper component for the admin portal.
  * Renders the desktop header, mobile nav, and breadcrumbs.
+ *
+ * IMPORTANT: Receives SerializableNavigationConfig (no React components).
+ * Child components use getIconComponent() to look up icons by name.
  */
 
 import { AdminNavHeader } from './admin-nav-header'
 import { AdminMobileNav } from './admin-mobile-nav'
 import { Breadcrumbs } from './breadcrumbs'
-import type { NavigationConfig } from '@/lib/admin-navigation'
+import type { SerializableNavigationConfig } from '@/lib/admin-navigation'
 
 interface AdminNavigationProps {
-  config: NavigationConfig
+  config: SerializableNavigationConfig
   userRole: string | null
 }
 
