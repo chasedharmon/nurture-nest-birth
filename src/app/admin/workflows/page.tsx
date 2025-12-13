@@ -9,6 +9,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui/empty-state'
 import {
   ChevronLeft,
   Workflow,
@@ -256,81 +257,25 @@ export default async function WorkflowsPage() {
 
         {/* Workflows List */}
         {workflows.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <div className="rounded-full bg-muted p-4 mb-4">
-                <Workflow className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold">No workflows yet</h3>
-              <p className="text-muted-foreground text-center mt-1 max-w-sm">
-                Create your first workflow to automate tasks like sending
-                emails, creating action items, and more.
-              </p>
-              <div className="flex gap-2 mt-4">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">
-                      <Zap className="mr-2 h-4 w-4" />
-                      From Template
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Create from Template</DialogTitle>
-                      <DialogDescription>
-                        Choose a pre-built workflow template
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-3 py-4">
-                      {templates.map(template => {
-                        const Icon =
-                          categoryIcons[template.category] || FileText
-                        return (
-                          <form
-                            key={template.id}
-                            action={async () => {
-                              'use server'
-                              const result = await createWorkflowFromTemplate(
-                                template.id
-                              )
-                              if (result.data) {
-                                redirect(`/admin/workflows/${result.data.id}`)
-                              }
-                            }}
-                          >
-                            <button
-                              type="submit"
-                              className="w-full text-left p-4 rounded-lg border hover:border-primary hover:bg-accent transition-colors"
-                            >
-                              <div className="flex items-start gap-3">
-                                <div className="rounded-md bg-muted p-2">
-                                  <Icon className="h-4 w-4 text-muted-foreground" />
-                                </div>
-                                <div>
-                                  <div className="font-medium">
-                                    {template.name}
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    {template.description}
-                                  </p>
-                                </div>
-                              </div>
-                            </button>
-                          </form>
-                        )
-                      })}
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <Link href="/admin/workflows/new">
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Workflow
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <EmptyState
+            variant="card"
+            icon={<Workflow />}
+            title="No workflows yet"
+            description="Automate your follow-ups and communications. Create a workflow to save time and never miss a touchpoint with your clients."
+            actions={[
+              {
+                label: 'Create Workflow',
+                href: '/admin/workflows/new',
+                icon: <Plus className="h-4 w-4" />,
+              },
+              {
+                label: 'Browse Templates',
+                href: '/admin/workflows/templates',
+                variant: 'outline',
+                icon: <LayoutTemplate className="h-4 w-4" />,
+              },
+            ]}
+          />
         ) : (
           <div className="space-y-3">
             {workflows.map(workflow => (

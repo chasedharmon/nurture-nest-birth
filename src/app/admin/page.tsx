@@ -14,6 +14,11 @@ import {
 import { DoulaDashboard } from '@/components/admin/dashboards'
 import { QuickMessagesSheet } from '@/components/admin/quick-messages-sheet'
 import { AdminMessageNotifications } from '@/components/admin/message-notifications'
+import { KeyboardShortcutsProvider } from '@/components/admin/keyboard-shortcuts-provider'
+import {
+  SetupChecklist,
+  getDefaultOnboardingSteps,
+} from '@/components/admin/onboarding'
 import {
   getDashboardKPIs,
   getLeadFunnelData,
@@ -24,6 +29,7 @@ import {
   getLeadSourceDistribution,
 } from '@/app/actions/reports'
 import { getUnreadCount } from '@/app/actions/messaging'
+import { getOnboardingStatus } from '@/app/actions/onboarding'
 
 export const metadata = {
   title: 'Admin Dashboard | Nurture Nest Birth',
@@ -65,6 +71,7 @@ export default async function AdminPage() {
     overdueInvoicesResult,
     leadSourcesResult,
     unreadMessagesResult,
+    onboardingResult,
   ] = await Promise.all([
     getDashboardKPIs(),
     getLeadFunnelData(),
@@ -74,6 +81,7 @@ export default async function AdminPage() {
     getOverdueInvoices(5),
     getLeadSourceDistribution(),
     getUnreadCount(),
+    getOnboardingStatus(),
   ])
 
   const unreadMessages = unreadMessagesResult.count || 0
@@ -102,90 +110,107 @@ export default async function AdminPage() {
   const overdueInvoices = overdueInvoicesResult.data || []
   const leadSources = leadSourcesResult.data || []
 
+  // Onboarding setup
+  const onboardingStatus = onboardingResult.status
+  const showOnboarding =
+    onboardingStatus && !onboardingStatus.isDismissed && canAccessWorkflows
+  const onboardingSteps = onboardingStatus
+    ? getDefaultOnboardingSteps(onboardingStatus)
+    : []
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="font-serif text-2xl font-bold text-foreground">
-                Nurture Nest Birth CRM
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Welcome back, {profile?.full_name || user.email}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link href="/admin/leads">
-                <Button variant="outline" size="sm">
-                  <List className="mr-2 h-4 w-4" />
-                  Leads
-                </Button>
-              </Link>
-              <QuickMessagesSheet
-                userId={user.id}
-                userName={profile?.full_name || user.email || 'Team Member'}
-                initialUnreadCount={unreadMessages}
-              />
-              <Link href="/admin/team">
-                <Button variant="outline" size="sm">
-                  <Users className="mr-2 h-4 w-4" />
-                  Team
-                </Button>
-              </Link>
-              <Link href="/admin/reports">
-                <Button variant="outline" size="sm">
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  Reports
-                </Button>
-              </Link>
-              <Link href="/admin/dashboards">
-                <Button variant="outline" size="sm">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboards
-                </Button>
-              </Link>
-              {canAccessWorkflows && (
-                <Link href="/admin/workflows">
+    <KeyboardShortcutsProvider>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <header className="border-b border-border bg-card">
+          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="font-serif text-2xl font-bold text-foreground">
+                  Nurture Nest Birth CRM
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Welcome back, {profile?.full_name || user.email}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href="/admin/leads">
                   <Button variant="outline" size="sm">
-                    <Workflow className="mr-2 h-4 w-4" />
-                    Workflows
+                    <List className="mr-2 h-4 w-4" />
+                    Leads
                   </Button>
                 </Link>
-              )}
-              <Link href="/admin/setup">
-                <Button variant="outline" size="sm">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Setup
-                </Button>
-              </Link>
-              <form action="/auth/signout" method="POST">
-                <Button variant="outline" size="sm" type="submit">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </Button>
-              </form>
+                <QuickMessagesSheet
+                  userId={user.id}
+                  userName={profile?.full_name || user.email || 'Team Member'}
+                  initialUnreadCount={unreadMessages}
+                />
+                <Link href="/admin/team">
+                  <Button variant="outline" size="sm">
+                    <Users className="mr-2 h-4 w-4" />
+                    Team
+                  </Button>
+                </Link>
+                <Link href="/admin/reports">
+                  <Button variant="outline" size="sm">
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    Reports
+                  </Button>
+                </Link>
+                <Link href="/admin/dashboards">
+                  <Button variant="outline" size="sm">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboards
+                  </Button>
+                </Link>
+                {canAccessWorkflows && (
+                  <Link href="/admin/workflows">
+                    <Button variant="outline" size="sm">
+                      <Workflow className="mr-2 h-4 w-4" />
+                      Workflows
+                    </Button>
+                  </Link>
+                )}
+                <Link href="/admin/setup">
+                  <Button variant="outline" size="sm">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Setup
+                  </Button>
+                </Link>
+                <form action="/auth/signout" method="POST">
+                  <Button variant="outline" size="sm" type="submit">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <DoulaDashboard
-          kpis={kpis}
-          funnelData={funnelData}
-          revenueTrend={revenueTrend}
-          recentLeads={recentLeads}
-          upcomingBirths={upcomingBirths}
-          overdueInvoices={overdueInvoices}
-          leadSources={leadSources}
-        />
-      </main>
+        {/* Main Content */}
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {/* Onboarding Checklist */}
+          {showOnboarding && (
+            <div className="mb-8">
+              <SetupChecklist steps={onboardingSteps} />
+            </div>
+          )}
 
-      {/* Message Notifications */}
-      <AdminMessageNotifications userId={user.id} />
-    </div>
+          <DoulaDashboard
+            kpis={kpis}
+            funnelData={funnelData}
+            revenueTrend={revenueTrend}
+            recentLeads={recentLeads}
+            upcomingBirths={upcomingBirths}
+            overdueInvoices={overdueInvoices}
+            leadSources={leadSources}
+          />
+        </main>
+
+        {/* Message Notifications */}
+        <AdminMessageNotifications userId={user.id} />
+      </div>
+    </KeyboardShortcutsProvider>
   )
 }

@@ -6,6 +6,7 @@ import { MobileNav } from '@/components/client/mobile-nav'
 import { ClientNavMessageBadge } from '@/components/client/nav-message-badge'
 import { ClientMessageNotifications } from '@/components/client/message-notifications'
 import { ChatWidget } from '@/components/client/chat-widget'
+import { OnboardingTour } from '@/components/client/onboarding-tour'
 import { getClientUnreadCount } from '@/app/actions/messaging'
 
 export default async function ClientPortalLayout({
@@ -137,6 +138,9 @@ export default async function ClientPortalLayout({
         clientName={session.name}
         initialUnreadCount={unreadCount}
       />
+
+      {/* Onboarding Tour for new clients */}
+      <OnboardingTour />
     </div>
   )
 }
