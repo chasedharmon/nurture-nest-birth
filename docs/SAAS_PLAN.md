@@ -213,6 +213,7 @@ CREATE TABLE tenant_branding (
 | Billing page redirect handling | `src/app/admin/setup/billing/page.tsx`    | ✅     |
 | Login page signup link         | `src/components/auth/login-form.tsx`      | ✅     |
 | Feature flag enabled           | `src/config/platform.ts`                  | ✅     |
+| E2E tests (63 tests)           | `tests/e2e/self-service-signup.spec.ts`   | ✅     |
 
 #### 1.1 Public Signup Page
 
