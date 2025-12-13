@@ -2,7 +2,40 @@
 
 All notable changes to Nurture Nest Birth are documented in this file.
 
-## [Unreleased] - 2025-12-12
+## [Unreleased] - 2025-12-13
+
+### Added - Navigation Item Management
+
+**Add Navigation Items** (`/admin/setup/navigation`)
+
+- **Add Item Button** - Each navigation group (Primary, Tools, Admin) now has an "Add Item" button
+- **AddNavItemDialog** - Tabbed dialog with three options:
+  - **Move Item** - Move existing items between navigation groups with search filtering
+  - **Object** - Add custom objects not yet in navigation
+  - **Link** - Create external link items with custom icon selection
+
+**Server Actions** (`src/app/actions/navigation-admin.ts`)
+
+- `addNavigationItem()` - Create new navigation items (object, tool, or external_link)
+- `moveNavigationItem()` - Move items between navigation groups
+- `deleteNavigationItem()` - Delete navigation items (with protected item checks)
+- `getAvailableObjectsForNav()` - Fetch custom objects not yet in navigation
+
+**Components** (`src/components/admin/setup/navigation/`)
+
+- `AddNavItemDialog` - New component for the add item dialog
+- `NavItemsList` - Enhanced with Add Item button and dialog integration
+- `NavigationManager` - Added handlers for add/move operations
+
+**E2E Tests** (`tests/e2e/admin-navigation-management.spec.ts`)
+
+- 18 new tests for Add Navigation Item functionality
+- Tests cover: button visibility, dialog tabs, Link tab validation, search filtering, cancel behavior
+- Total navigation management tests: 56
+
+---
+
+## [Previous] - 2025-12-12
 
 ### Added - Enhanced List Views for CRM Objects
 
