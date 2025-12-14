@@ -9,7 +9,7 @@
  * - {{portal_url}}: Client portal link
  */
 
-import { calculateSegments } from './client'
+import { calculateSegments } from './utils'
 
 // =====================================================
 // Types

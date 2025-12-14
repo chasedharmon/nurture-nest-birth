@@ -1,7 +1,7 @@
 # SaaS Platform Plan - Multi-Tenant CRM Infrastructure
 
 > **Created**: December 13, 2025
-> **Status**: Phase 2 Complete - Stripe Billing Integration
+> **Status**: Phase 3 Complete - SMS Communication Activation
 > **Goal**: Transform single-tenant CRM into multi-tenant SaaS platform
 > **Relationship**: This plan covers PLATFORM infrastructure. See [MASTER_PLAN.md](MASTER_PLAN.md) for CRM PRODUCT features.
 
@@ -361,19 +361,90 @@ const { data } = await adminClient
 ### Phase 3: Communication Activation
 
 **Goal**: Enable SMS in workflows
-**Status**: Not Started
+**Status**: ✅ Complete
 
 **Note:** Overlaps with MASTER_PLAN Phase 14 IA-2. Coordinate implementation.
 
+#### Phase 3 Progress
+
+| Task                            | File                                                   | Status |
+| ------------------------------- | ------------------------------------------------------ | ------ |
+| SMS usage/credentials migration | `supabase/migrations/20251227000000_sms_usage_*.sql`   | ✅     |
+| Twilio client (hybrid creds)    | `src/lib/sms/twilio.ts`                                | ✅     |
+| SMS client with tracking        | `src/lib/sms/client.ts`                                | ✅     |
+| SMS utility functions           | `src/lib/sms/utils.ts`                                 | ✅     |
+| SMS usage tracking service      | `src/lib/sms/tracking.ts`                              | ✅     |
+| Twilio webhook handler          | `src/app/api/webhooks/twilio/route.ts`                 | ✅     |
+| Workflow engine SMS integration | `src/lib/workflows/engine.ts`                          | ✅     |
+| SMS settings page (BYOT)        | `src/app/admin/setup/sms-settings/page.tsx`            | ✅     |
+| SMS settings server actions     | `src/app/actions/sms-settings.ts`                      | ✅     |
+| Billing page SMS usage meter    | `src/app/admin/setup/billing/page.tsx`                 | ✅     |
+| SMS templates migration         | `supabase/migrations/20251216000000_sms_templates.sql` | ✅     |
+| E2E tests - SMS settings (32)   | `tests/e2e/admin-sms-settings.spec.ts`                 | ✅     |
+| E2E tests - SMS billing (21)    | `tests/e2e/admin-sms-billing.spec.ts`                  | ✅     |
+| E2E tests - SMS templates (25)  | `tests/e2e/admin-sms-templates.spec.ts`                | ✅     |
+
 #### 3.1 Twilio Integration
 
-- `src/lib/sms/twilio.ts` - Implement actual send
-- Store credentials per-org or platform-level
+**Hybrid Credential Support:**
+
+- Platform mode: Use shared Twilio credentials (env vars)
+- BYOT mode: Organizations can bring their own Twilio account
+- Automatic fallback to platform if BYOT not configured
+- Stub mode for development when no credentials available
+
+**Files:**
+
+- `src/lib/sms/twilio.ts` - Core Twilio client with credential resolution
+- `src/lib/sms/client.ts` - High-level SMS API with opt-in/out checks
+- `src/lib/sms/utils.ts` - Pure functions (segment calculation, phone formatting)
+
+**Environment Variables:**
+
+- `TWILIO_ACCOUNT_SID` - Platform Twilio account
+- `TWILIO_AUTH_TOKEN` - Platform Twilio auth
+- `TWILIO_PHONE_NUMBER` - Platform sending number (E.164)
+- `TWILIO_STATUS_CALLBACK_URL` - Webhook URL for delivery status
 
 #### 3.2 SMS Usage Tracking
 
-- Track SMS sent per billing period
-- Cost attribution per tenant
+**Database Tables:**
+
+- `sms_credentials` - BYOT Twilio credentials per organization
+- `sms_config` - SMS settings (provider mode, compliance options)
+- `sms_usage` - Usage tracking per billing period
+
+**Soft Limits with Overage:**
+
+- Starter tier: SMS not available
+- Professional tier: 500 segments/month included
+- Enterprise tier: Unlimited
+- Overage: $0.01 per segment (configurable)
+- Warning at 80% usage, allow overage with notification
+
+**Database Functions:**
+
+- `get_or_create_sms_usage(p_organization_id)` - Get/create usage record
+- `increment_sms_usage(p_organization_id, p_segments, p_delivered, p_failed)` - Atomic increment
+- `check_sms_limit(p_organization_id)` - Check against tier limits
+- `get_sms_config(p_organization_id)` - Get SMS configuration
+
+#### 3.3 Webhook Handler
+
+- Delivery status updates (queued, sent, delivered, failed)
+- Opt-out keyword handling (STOP, UNSUBSCRIBE, etc.)
+- Opt-in keyword handling (START, YES, etc.)
+- Signature verification in production
+
+#### 3.4 To Configure for Production
+
+1. Create Twilio account at https://twilio.com
+2. Get a phone number for SMS
+3. Set environment variables (see above)
+4. Configure webhook URL in Twilio Console:
+   - Status Callback: `https://your-domain.com/api/webhooks/twilio`
+   - Incoming Message: `https://your-domain.com/api/webhooks/twilio`
+5. Apply database migration for SMS tables
 
 ---
 
@@ -616,4 +687,4 @@ E2E tests use Playwright's `storageState` to persist auth between tests. The aut
 
 ---
 
-_Last updated: December 14, 2025 (Phase 2 E2E Tests Complete)_
+_Last updated: December 13, 2025 (Phase 3 Complete - SMS Communication Activation)_

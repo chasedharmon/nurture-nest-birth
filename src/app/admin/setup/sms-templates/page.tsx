@@ -16,7 +16,7 @@ import {
 import { SmsTemplateDialog } from '@/components/admin/setup/sms-template-dialog'
 import { SmsTemplateActions } from '@/components/admin/setup/sms-template-actions'
 import { SMS_CATEGORY_LABELS, SMS_CATEGORY_COLORS } from '@/lib/sms/templates'
-import { calculateSegments } from '@/lib/sms/client'
+import { calculateSegments } from '@/lib/sms/utils'
 
 export default async function SmsTemplatesPage() {
   const supabase = await createClient()

@@ -21,6 +21,8 @@ interface ExecutionContext {
   triggered_at: string
   record_data: Record<string, unknown>
   step_results?: Record<string, unknown>
+  organization_id?: string // Added for multi-tenant tracking
+  workflow_execution_id?: string // For linking SMS messages to executions
 }
 
 interface StepResult {
@@ -61,6 +63,18 @@ export class WorkflowEngine {
       return
     }
 
+    // Get workflow with organization_id for multi-tenant tracking
+    const { data: workflow, error: workflowError } = await this.supabase
+      .from('workflows')
+      .select('id, organization_id')
+      .eq('id', execution.workflow_id)
+      .single()
+
+    if (workflowError || !workflow) {
+      await this.failExecution(executionId, 'Workflow not found')
+      return
+    }
+
     // Get workflow steps
     const { data: steps, error: stepsError } = await this.supabase
       .from('workflow_steps')
@@ -75,7 +89,11 @@ export class WorkflowEngine {
 
     // Find starting step (trigger) or current step
     let currentStepKey = execution.current_step_key || 'trigger'
-    const context: ExecutionContext = execution.context as ExecutionContext
+    const context: ExecutionContext = {
+      ...(execution.context as ExecutionContext),
+      organization_id: workflow.organization_id,
+      workflow_execution_id: executionId,
+    }
 
     // Process steps until we hit an end, wait, or error
     while (currentStepKey) {
@@ -381,9 +399,10 @@ export class WorkflowEngine {
     }
 
     const formattedPhone = formatPhoneNumber(toPhone)
+    const organizationId = context.organization_id
 
-    // Check opt-in status (respects SMS consent)
-    const optInStatus = await checkOptInStatus(formattedPhone)
+    // Check opt-in status (respects SMS consent) - pass organization_id for tenant isolation
+    const optInStatus = await checkOptInStatus(formattedPhone, organizationId)
     if (!optInStatus.optedIn) {
       console.log(
         '[WorkflowEngine] SMS skipped - not opted in:',
@@ -443,6 +462,7 @@ export class WorkflowEngine {
       contentLength: interpolatedContent.length,
       clientId,
       template: config.template_name,
+      organizationId,
     })
 
     try {
@@ -451,6 +471,8 @@ export class WorkflowEngine {
         body: interpolatedContent,
         clientId,
         templateId: config.template_name,
+        organizationId, // For usage tracking and soft limits
+        workflowExecutionId: context.workflow_execution_id, // For audit trail
       })
 
       if (!result.success) {
@@ -463,14 +485,22 @@ export class WorkflowEngine {
 
       console.log('[WorkflowEngine] SMS sent successfully:', result.messageId)
 
+      // Include limit warning in output if approaching limit
+      const output: Record<string, unknown> = {
+        sms_sent_to: formattedPhone,
+        message_id: result.messageId,
+        segment_count: result.segmentCount,
+        template: config.template_name,
+        provider: result.provider,
+      }
+
+      if (result.limitWarning) {
+        output.limit_warning = result.limitWarning
+      }
+
       return {
         success: true,
-        output: {
-          sms_sent_to: formattedPhone,
-          message_id: result.messageId,
-          segment_count: result.segmentCount,
-          template: config.template_name,
-        },
+        output,
         nextStepKey,
       }
     } catch (error) {

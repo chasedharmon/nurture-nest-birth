@@ -1,30 +1,44 @@
 /**
- * SMS Client Library (Rails Only)
+ * SMS Client Library
  *
- * This is a stubbed implementation for SMS messaging infrastructure.
- * When ready to go live, add your Twilio credentials to environment variables
- * and uncomment the Twilio SDK integration.
+ * Provides SMS sending capabilities with:
+ * - Hybrid credential support (Platform Twilio or BYOT)
+ * - Usage tracking and soft limit enforcement
+ * - Automatic message logging to database
+ * - Opt-in/opt-out consent management
  *
- * Environment Variables Required for Live:
- * - TWILIO_ACCOUNT_SID: Your Twilio account SID
- * - TWILIO_AUTH_TOKEN: Your Twilio auth token
- * - TWILIO_PHONE_NUMBER: Your Twilio phone number (for sending)
+ * Environment Variables (for Platform Mode):
+ * - TWILIO_ACCOUNT_SID: Platform Twilio account SID
+ * - TWILIO_AUTH_TOKEN: Platform Twilio auth token
+ * - TWILIO_PHONE_NUMBER: Platform sending phone number (E.164)
  */
 
-// import twilio from 'twilio'
+import { createAdminClient } from '@/lib/supabase/server'
+import {
+  sendViaTwilio,
+  isPlatformTwilioConfigured,
+  TwilioSendResult,
+} from './twilio'
+import { checkSmsLimit, incrementUsage, SmsLimitCheck } from './tracking'
+import {
+  calculateSegments,
+  formatPhoneNumber,
+  isValidPhoneNumber,
+  interpolateVariables,
+  SMS_CHAR_LIMIT,
+  SMS_EXTENDED_LIMIT,
+} from './utils'
 
-// Uncomment when ready to integrate:
-// const client = twilio(
-//   process.env.TWILIO_ACCOUNT_SID!,
-//   process.env.TWILIO_AUTH_TOKEN!
-// )
-
-// =====================================================
-// Constants
-// =====================================================
-
-export const SMS_CHAR_LIMIT = 160
-export const SMS_EXTENDED_LIMIT = 1600 // Max for concatenated SMS
+// Re-export utility functions for server-side convenience
+// NOTE: Client components should import directly from '@/lib/sms/utils'
+export {
+  calculateSegments,
+  formatPhoneNumber,
+  isValidPhoneNumber,
+  interpolateVariables,
+  SMS_CHAR_LIMIT,
+  SMS_EXTENDED_LIMIT,
+}
 
 // =====================================================
 // Types
@@ -33,16 +47,23 @@ export const SMS_EXTENDED_LIMIT = 1600 // Max for concatenated SMS
 export interface SendSmsParams {
   to: string
   body: string
-  from?: string // Defaults to TWILIO_PHONE_NUMBER
-  clientId?: string // For tracking/logging
-  templateId?: string // Reference to template used
+  from?: string
+  organizationId?: string
+  clientId?: string
+  templateId?: string
+  workflowExecutionId?: string
+  skipOptInCheck?: boolean // For transactional messages
+  skipUsageTracking?: boolean // For BYOT mode
 }
 
 export interface SendSmsResult {
   success: boolean
   messageId?: string
   error?: string
-  segmentCount?: number // Number of SMS segments used
+  segmentCount?: number
+  provider?: 'platform' | 'byot' | 'stub'
+  limitWarning?: string
+  dbMessageId?: string
 }
 
 export interface SmsOptInStatus {
@@ -62,115 +83,36 @@ export interface SmsDeliveryStatus {
 }
 
 // =====================================================
-// Utility Functions
+// Main Send Function
 // =====================================================
 
 /**
- * Calculate the number of SMS segments a message will use
- * Standard SMS is 160 chars (or 70 for Unicode)
- */
-export function calculateSegments(text: string): {
-  segments: number
-  charCount: number
-  remaining: number
-  isUnicode: boolean
-} {
-  // Check if message contains Unicode characters
-  const isUnicode = /[^\x00-\x7F]/.test(text)
-  const charLimit = isUnicode ? 70 : 160
-  const multipartLimit = isUnicode ? 67 : 153 // Headers reduce available chars
-
-  const charCount = text.length
-
-  let segments: number
-  if (charCount <= charLimit) {
-    segments = 1
-  } else {
-    segments = Math.ceil(charCount / multipartLimit)
-  }
-
-  const remaining =
-    segments === 1
-      ? charLimit - charCount
-      : multipartLimit - (charCount % multipartLimit)
-
-  return {
-    segments,
-    charCount,
-    remaining: Math.max(0, remaining),
-    isUnicode,
-  }
-}
-
-/**
- * Format a phone number to E.164 format (required by Twilio)
- * Assumes US numbers if no country code provided
- */
-export function formatPhoneNumber(phone: string): string {
-  // Remove all non-numeric characters
-  const digits = phone.replace(/\D/g, '')
-
-  // If already has country code (11+ digits starting with 1)
-  if (digits.length === 11 && digits.startsWith('1')) {
-    return `+${digits}`
-  }
-
-  // If 10 digits, assume US
-  if (digits.length === 10) {
-    return `+1${digits}`
-  }
-
-  // If already has full international format
-  if (digits.length > 10) {
-    return `+${digits}`
-  }
-
-  // Return as-is if we can't parse
-  return phone
-}
-
-/**
- * Validate a phone number
- */
-export function isValidPhoneNumber(phone: string): boolean {
-  const formatted = formatPhoneNumber(phone)
-  // Basic E.164 validation: + followed by 10-15 digits
-  return /^\+[1-9]\d{9,14}$/.test(formatted)
-}
-
-/**
- * Interpolate template variables in a message
- * Supports {{variable_name}} syntax
- */
-export function interpolateVariables(
-  template: string,
-  data: Record<string, unknown>
-): string {
-  if (!template) return template
-
-  return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-    const value = data[key]
-    if (value === undefined || value === null) {
-      return match // Keep the placeholder if no value
-    }
-    return String(value)
-  })
-}
-
-// =====================================================
-// Stubbed Client Functions
-// =====================================================
-
-/**
- * Send an SMS message
- * STUBBED: Logs action, returns mock success
+ * Send an SMS message with full tracking and limit checking
+ *
+ * This is the main entry point for sending SMS. It:
+ * 1. Validates the phone number
+ * 2. Checks opt-in status (unless skipped)
+ * 3. Checks usage limits (soft limit with overage warning)
+ * 4. Sends via Twilio (platform or BYOT)
+ * 5. Logs message to database
+ * 6. Updates usage tracking
  */
 export async function sendSms(params: SendSmsParams): Promise<SendSmsResult> {
-  const { to, body, clientId, templateId } = params
+  const {
+    to,
+    body,
+    from,
+    organizationId,
+    clientId,
+    templateId,
+    workflowExecutionId,
+    skipOptInCheck = false,
+    skipUsageTracking = false,
+  } = params
 
   // Validate phone number
   if (!isValidPhoneNumber(to)) {
-    console.log('[SMS Stub] Invalid phone number:', to)
+    console.log('[SMS] Invalid phone number:', to)
     return {
       success: false,
       error: 'Invalid phone number format',
@@ -180,140 +122,281 @@ export async function sendSms(params: SendSmsParams): Promise<SendSmsResult> {
   const formattedPhone = formatPhoneNumber(to)
   const { segments } = calculateSegments(body)
 
-  console.log('[SMS Stub] Sending SMS:', {
-    to: formattedPhone,
-    bodyLength: body.length,
-    segments,
-    clientId,
-    templateId,
-  })
-
-  // Stubbed: Return mock success
-  const mockMessageId = `SM_stub_${Date.now()}_${Math.random().toString(36).substring(7)}`
-
-  return {
-    success: true,
-    messageId: mockMessageId,
-    segmentCount: segments,
+  // Check opt-in status (unless skipped for transactional messages)
+  if (!skipOptInCheck && organizationId) {
+    const optInStatus = await checkOptInStatus(formattedPhone, organizationId)
+    if (!optInStatus.optedIn) {
+      console.log('[SMS] Recipient not opted in:', formattedPhone)
+      return {
+        success: false,
+        error: 'Recipient has not opted in to receive SMS',
+      }
+    }
   }
 
-  // Real implementation:
-  // try {
-  //   const message = await client.messages.create({
-  //     to: formattedPhone,
-  //     from: params.from || process.env.TWILIO_PHONE_NUMBER!,
-  //     body,
-  //   })
-  //   return {
-  //     success: true,
-  //     messageId: message.sid,
-  //     segmentCount: message.numSegments,
-  //   }
-  // } catch (error) {
-  //   return {
-  //     success: false,
-  //     error: error instanceof Error ? error.message : 'Unknown error',
-  //   }
-  // }
+  // Check usage limits (soft limit)
+  let limitCheck: SmsLimitCheck | null = null
+  if (organizationId && !skipUsageTracking) {
+    limitCheck = await checkSmsLimit(organizationId, segments)
+
+    if (!limitCheck.canSend) {
+      return {
+        success: false,
+        error: limitCheck.warningMessage || 'SMS limit reached',
+      }
+    }
+  }
+
+  // Send via Twilio
+  const twilioResult: TwilioSendResult = await sendViaTwilio({
+    to: formattedPhone,
+    body,
+    from,
+    organizationId,
+  })
+
+  // Log message to database
+  let dbMessageId: string | undefined
+
+  if (organizationId) {
+    dbMessageId = await logSmsMessage({
+      organizationId,
+      toPhone: formattedPhone,
+      body,
+      templateId,
+      clientId,
+      workflowExecutionId,
+      externalId: twilioResult.messageId,
+      segmentCount: twilioResult.segmentCount || segments,
+      status: twilioResult.success ? 'sent' : 'failed',
+      errorCode: twilioResult.errorCode,
+      errorMessage: twilioResult.error,
+    })
+  }
+
+  // Update usage tracking
+  if (organizationId && !skipUsageTracking && twilioResult.success) {
+    await incrementUsage(organizationId, twilioResult.segmentCount || segments)
+  }
+
+  return {
+    success: twilioResult.success,
+    messageId: twilioResult.messageId,
+    error: twilioResult.error,
+    segmentCount: twilioResult.segmentCount || segments,
+    provider: twilioResult.provider,
+    limitWarning: limitCheck?.warningMessage || undefined,
+    dbMessageId,
+  }
 }
 
+// =====================================================
+// Message Logging
+// =====================================================
+
+interface LogSmsMessageParams {
+  organizationId: string
+  toPhone: string
+  body: string
+  templateId?: string
+  clientId?: string
+  workflowExecutionId?: string
+  externalId?: string
+  segmentCount: number
+  status: string
+  errorCode?: string
+  errorMessage?: string
+}
+
+async function logSmsMessage(
+  params: LogSmsMessageParams
+): Promise<string | undefined> {
+  const supabase = createAdminClient()
+
+  const { data, error } = await supabase
+    .from('sms_messages')
+    .insert({
+      org_id: params.organizationId,
+      to_phone: params.toPhone,
+      body: params.body,
+      template_id: params.templateId || null,
+      client_id: params.clientId || null,
+      workflow_execution_id: params.workflowExecutionId || null,
+      external_id: params.externalId || null,
+      segment_count: params.segmentCount,
+      status: params.status,
+      error_code: params.errorCode || null,
+      error_message: params.errorMessage || null,
+      sent_at: new Date().toISOString(),
+    })
+    .select('id')
+    .single()
+
+  if (error) {
+    console.error('[SMS] Failed to log message:', error)
+    return undefined
+  }
+
+  return data?.id
+}
+
+// =====================================================
+// Delivery Status
+// =====================================================
+
 /**
- * Get delivery status for a message
- * STUBBED: Returns mock delivered status
+ * Get delivery status for a message from database
  */
 export async function getMessageStatus(
   messageId: string
 ): Promise<SmsDeliveryStatus> {
-  console.log('[SMS Stub] Getting message status:', messageId)
+  const supabase = createAdminClient()
 
-  // Stubbed: Return mock delivered status
-  return {
-    messageId,
-    status: 'delivered',
-    deliveredAt: new Date().toISOString(),
+  const { data, error } = await supabase
+    .from('sms_messages')
+    .select('external_id, status, error_code, error_message, delivered_at')
+    .eq('id', messageId)
+    .single()
+
+  if (error || !data) {
+    return {
+      messageId,
+      status: 'queued',
+    }
   }
 
-  // Real implementation:
-  // const message = await client.messages(messageId).fetch()
-  // return {
-  //   messageId: message.sid,
-  //   status: message.status,
-  //   errorCode: message.errorCode?.toString(),
-  //   errorMessage: message.errorMessage,
-  // }
+  return {
+    messageId: data.external_id || messageId,
+    status: data.status as SmsDeliveryStatus['status'],
+    errorCode: data.error_code || undefined,
+    errorMessage: data.error_message || undefined,
+    deliveredAt: data.delivered_at || undefined,
+  }
 }
+
+// =====================================================
+// Opt-In/Opt-Out Management
+// =====================================================
 
 /**
  * Check if a phone number is opted in for SMS
- * STUBBED: Returns true for development
  */
 export async function checkOptInStatus(
-  phoneNumber: string
+  phoneNumber: string,
+  organizationId?: string
 ): Promise<SmsOptInStatus> {
-  console.log('[SMS Stub] Checking opt-in status:', phoneNumber)
+  const formattedPhone = formatPhoneNumber(phoneNumber)
+  const supabase = createAdminClient()
 
-  // Stubbed: Return opted in for dev
-  return {
-    phoneNumber: formatPhoneNumber(phoneNumber),
-    optedIn: true,
-    optInDate: new Date().toISOString(),
-    source: 'web_form',
+  let query = supabase
+    .from('sms_consent')
+    .select('*')
+    .eq('phone_number', formattedPhone)
+
+  if (organizationId) {
+    query = query.eq('org_id', organizationId)
   }
 
-  // Real implementation would query the database
+  const { data, error } = await query.single()
+
+  if (error || !data) {
+    // No consent record - default behavior
+    // In strict mode, this would be opted out
+    // For now, we allow sending if no record exists (implicit opt-in)
+    return {
+      phoneNumber: formattedPhone,
+      optedIn: true, // Default to true for backward compatibility
+      source: 'web_form',
+    }
+  }
+
+  return {
+    phoneNumber: formattedPhone,
+    optedIn: data.opted_in,
+    optInDate: data.opt_in_date,
+    optOutDate: data.opt_out_date,
+    source: data.source,
+  }
 }
 
 /**
  * Record an opt-in for a phone number
- * STUBBED: Logs action
  */
 export async function recordOptIn(
   phoneNumber: string,
-  source: SmsOptInStatus['source'] = 'web_form'
-): Promise<{ success: boolean }> {
-  console.log('[SMS Stub] Recording opt-in:', {
-    phoneNumber: formatPhoneNumber(phoneNumber),
-    source,
+  organizationId: string,
+  source: SmsOptInStatus['source'] = 'web_form',
+  clientId?: string
+): Promise<{ success: boolean; error?: string }> {
+  const formattedPhone = formatPhoneNumber(phoneNumber)
+  const supabase = createAdminClient()
+
+  const { error } = await supabase.rpc('record_sms_consent', {
+    p_phone_number: formattedPhone,
+    p_opted_in: true,
+    p_source: source,
+    p_org_id: organizationId,
+    p_client_id: clientId || null,
   })
 
-  // Stubbed
-  return { success: true }
+  if (error) {
+    console.error('[SMS] Failed to record opt-in:', error)
+    return { success: false, error: error.message }
+  }
 
-  // Real implementation would insert into database
+  return { success: true }
 }
 
 /**
  * Record an opt-out for a phone number
- * STUBBED: Logs action
  */
 export async function recordOptOut(
   phoneNumber: string,
+  organizationId: string,
   source: SmsOptInStatus['source'] = 'sms_reply'
-): Promise<{ success: boolean }> {
-  console.log('[SMS Stub] Recording opt-out:', {
-    phoneNumber: formatPhoneNumber(phoneNumber),
-    source,
+): Promise<{ success: boolean; error?: string }> {
+  const formattedPhone = formatPhoneNumber(phoneNumber)
+  const supabase = createAdminClient()
+
+  const { error } = await supabase.rpc('record_sms_consent', {
+    p_phone_number: formattedPhone,
+    p_opted_in: false,
+    p_source: source,
+    p_org_id: organizationId,
+    p_client_id: null,
   })
 
-  // Stubbed
-  return { success: true }
+  if (error) {
+    console.error('[SMS] Failed to record opt-out:', error)
+    return { success: false, error: error.message }
+  }
 
-  // Real implementation would update database
+  return { success: true }
 }
+
+// =====================================================
+// Bulk SMS
+// =====================================================
 
 /**
  * Send a bulk SMS to multiple recipients
- * STUBBED: Logs action, returns mock results
  */
 export async function sendBulkSms(
-  recipients: Array<{ to: string; body: string; clientId?: string }>
+  recipients: Array<{
+    to: string
+    body: string
+    clientId?: string
+    templateId?: string
+  }>,
+  organizationId: string
 ): Promise<{
   results: SendSmsResult[]
   successCount: number
   failCount: number
 }> {
-  console.log('[SMS Stub] Sending bulk SMS:', {
+  console.log('[SMS] Sending bulk SMS:', {
     recipientCount: recipients.length,
+    organizationId,
   })
 
   const results: SendSmsResult[] = []
@@ -321,7 +404,10 @@ export async function sendBulkSms(
   let failCount = 0
 
   for (const recipient of recipients) {
-    const result = await sendSms(recipient)
+    const result = await sendSms({
+      ...recipient,
+      organizationId,
+    })
     results.push(result)
     if (result.success) {
       successCount++
@@ -334,7 +420,18 @@ export async function sendBulkSms(
 }
 
 // =====================================================
-// Webhook Handling (for Twilio callbacks)
+// Configuration Helpers
+// =====================================================
+
+/**
+ * Check if SMS is configured and ready to send
+ */
+export function isSmsConfigured(): boolean {
+  return isPlatformTwilioConfigured()
+}
+
+// =====================================================
+// Webhook Types (for backward compatibility)
 // =====================================================
 
 export interface TwilioWebhookPayload {
@@ -358,26 +455,6 @@ export interface TwilioStatusCallbackPayload {
     | 'undelivered'
   ErrorCode?: string
   ErrorMessage?: string
-}
-
-/**
- * Verify Twilio webhook signature
- * STUBBED: Always returns true in development
- */
-export function verifyWebhookSignature(
-  _authToken: string,
-  _signature: string,
-  _url: string,
-  _params: Record<string, string>
-): boolean {
-  console.log('[SMS Stub] Verifying webhook signature')
-
-  // Stubbed: Always valid in dev
-  return true
-
-  // Real implementation:
-  // const twilio = require('twilio')
-  // return twilio.validateRequest(authToken, signature, url, params)
 }
 
 /**

@@ -32,11 +32,13 @@ import {
   Clock,
   Plus,
   Trash2,
+  MessageSquare,
 } from 'lucide-react'
 import {
   getOrganizationUsage,
   getOrganizationFeatures,
 } from '@/lib/features/flags'
+import { getUsageSummary } from '@/lib/sms/tracking'
 import { listInvoices, type StripeInvoice } from '@/lib/stripe/client'
 import {
   UpgradeButton,
@@ -166,6 +168,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
 
   const usage = await getOrganizationUsage(organization.id)
   const features = await getOrganizationFeatures(organization.id)
+  const smsUsage = await getUsageSummary(organization.id)
 
   const currentPlan =
     plans.find(p => p.id === organization.subscription_tier) || plans[0]
@@ -198,6 +201,21 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
       unit: 'MB',
     },
   ]
+
+  // Add SMS usage if SMS is enabled for this tier
+  const smsUsageItem = smsUsage.smsEnabled
+    ? {
+        label: 'SMS Messages',
+        current: smsUsage.currentPeriod?.segmentsSent || 0,
+        limit: features.max_sms_per_month,
+        icon: MessageSquare,
+        unit: 'segments',
+        isOverage: (smsUsage.currentPeriod?.segmentsOverage || 0) > 0,
+        overageCost: smsUsage.currentPeriod?.overageCostCents
+          ? `$${(smsUsage.currentPeriod.overageCostCents / 100).toFixed(2)} overage`
+          : undefined,
+      }
+    : null
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'N/A'
@@ -467,6 +485,76 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                         </div>
                       )
                     })}
+
+                    {/* SMS Usage - shown separately with overage info */}
+                    {smsUsageItem && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                            <span>{smsUsageItem.label}</span>
+                            {smsUsageItem.isOverage && (
+                              <Badge
+                                variant="outline"
+                                className="text-xs text-amber-600 border-amber-200"
+                              >
+                                Overage
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-muted-foreground">
+                            {smsUsageItem.current} /{' '}
+                            {smsUsageItem.limit === -1
+                              ? '∞'
+                              : smsUsageItem.limit}{' '}
+                            segments
+                          </span>
+                        </div>
+                        <Progress
+                          value={
+                            smsUsageItem.limit === -1
+                              ? 0
+                              : Math.min(
+                                  (smsUsageItem.current / smsUsageItem.limit) *
+                                    100,
+                                  100
+                                )
+                          }
+                          className={
+                            smsUsageItem.isOverage
+                              ? '[&>div]:bg-amber-500'
+                              : smsUsageItem.current / smsUsageItem.limit >= 0.8
+                                ? '[&>div]:bg-amber-500'
+                                : ''
+                          }
+                        />
+                        {smsUsageItem.overageCost && (
+                          <p className="text-xs text-amber-600">
+                            {smsUsageItem.overageCost} this billing period
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* SMS not available message for Starter tier */}
+                    {!smsUsage.smsEnabled &&
+                      organization.subscription_tier === 'starter' && (
+                        <div className="space-y-2 opacity-60">
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center gap-2">
+                              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                              <span>SMS Messages</span>
+                              <Badge variant="secondary" className="text-xs">
+                                Professional+
+                              </Badge>
+                            </div>
+                          </div>
+                          <Progress value={0} />
+                          <p className="text-xs text-muted-foreground">
+                            Upgrade to Professional to enable SMS messaging
+                          </p>
+                        </div>
+                      )}
                   </div>
                 </div>
 

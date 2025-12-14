@@ -41,7 +41,7 @@ import {
   updateSmsTemplate,
   type SmsTemplate,
 } from '@/app/actions/setup'
-import { calculateSegments } from '@/lib/sms/client'
+import { calculateSegments } from '@/lib/sms/utils'
 import {
   SMS_CATEGORY_OPTIONS,
   SMS_AVAILABLE_VARIABLES,

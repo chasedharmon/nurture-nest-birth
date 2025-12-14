@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { deleteSmsTemplate, type SmsTemplate } from '@/app/actions/setup'
 import { previewTemplate } from '@/lib/sms/templates'
-import { calculateSegments } from '@/lib/sms/client'
+import { calculateSegments } from '@/lib/sms/utils'
 import { SmsTemplateDialog } from './sms-template-dialog'
 import { Eye, Pencil, Trash2, Loader2 } from 'lucide-react'
 
