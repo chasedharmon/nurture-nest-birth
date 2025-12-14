@@ -1,7 +1,7 @@
 # SaaS Platform Plan - Multi-Tenant CRM Infrastructure
 
 > **Created**: December 13, 2025
-> **Status**: Phase 3 Complete - SMS Communication Activation
+> **Status**: Phase 4 Complete - Platform Operations
 > **Goal**: Transform single-tenant CRM into multi-tenant SaaS platform
 > **Relationship**: This plan covers PLATFORM infrastructure. See [MASTER_PLAN.md](MASTER_PLAN.md) for CRM PRODUCT features.
 
@@ -61,6 +61,11 @@
 | Self-service signup                      | ✅ Complete | 1     |
 | Trial management                         | ✅ Complete | 1     |
 | Live Stripe billing (subscriptions)      | ✅ Complete | 2     |
+| SMS communication activation             | ✅ Complete | 3     |
+| Platform metrics & MRR/ARR               | ✅ Complete | 4     |
+| Tenant health monitoring                 | ✅ Complete | 4     |
+| GDPR compliance (export/deletion)        | ✅ Complete | 4     |
+| Platform audit logging                   | ✅ Complete | 4     |
 | Platform marketing site                  | Not started | 0     |
 
 ---
@@ -451,25 +456,132 @@ const { data } = await adminClient
 ### Phase 4: Platform Operations
 
 **Goal**: Tooling for running multi-tenant SaaS
-**Status**: Not Started
+**Status**: ✅ Complete
+
+#### Phase 4 Progress
+
+| Task                              | File                                                  | Status |
+| --------------------------------- | ----------------------------------------------------- | ------ |
+| Platform metrics migration        | `supabase/migrations/20251228000000_platform_ops.sql` | ✅     |
+| Platform metrics table            | `platform_metrics` (daily snapshots)                  | ✅     |
+| Tenant health scores table        | `tenant_health_scores` (engagement/usage/payment)     | ✅     |
+| Platform audit log table          | `platform_audit_log` (admin actions)                  | ✅     |
+| Data export requests table        | `data_export_requests` (GDPR Article 20)              | ✅     |
+| Account deletion queue table      | `account_deletion_queue` (GDPR Article 17)            | ✅     |
+| MRR calculation function          | `calculate_platform_mrr()`                            | ✅     |
+| Health score calculation function | `calculate_tenant_health()`                           | ✅     |
+| Metrics snapshot function         | `snapshot_platform_metrics()`                         | ✅     |
+| Platform metrics server actions   | `src/app/actions/platform-metrics.ts`                 | ✅     |
+| GDPR server actions               | `src/app/actions/gdpr.ts`                             | ✅     |
+| Enhanced dashboard                | `src/app/super-admin/page.tsx`                        | ✅     |
+| Tenant health page                | `src/app/super-admin/health/page.tsx`                 | ✅     |
+| GDPR management page              | `src/app/super-admin/gdpr/page.tsx`                   | ✅     |
+| Audit log page                    | `src/app/super-admin/audit/page.tsx`                  | ✅     |
+| Data export button component      | `src/components/admin/data-export-button.tsx`         | ✅     |
+| E2E tests                         | `tests/e2e/platform-operations.spec.ts`               | ✅     |
 
 #### 4.1 Super-Admin Dashboard Metrics
 
-- Total tenants by status
-- MRR / ARR calculations
-- New signups this week/month
+**Enhanced Dashboard (`/super-admin`):**
+
+- Total tenants by status (active, trialing, suspended, cancelled)
+- MRR / ARR calculations with growth percentage
+- New signups this week/month graphs
+- Tier distribution breakdown
+- Churn risk alerts (high/critical tenants)
+- Upsell opportunity cards with usage bars
+- GDPR requests pending notification
+- Quick actions to all admin pages
+
+**Database:**
+
+- `platform_metrics` table - Daily snapshots of platform KPIs
+- `calculate_platform_mrr()` - Aggregates active subscriptions by tier
+- `snapshot_platform_metrics()` - Creates daily metric snapshots
 
 #### 4.2 Tenant Health Monitoring
 
-- Churn risk (no login in 30+ days)
-- Upsell opportunities (>80% of limits)
-- Error rates per tenant
+**Health Dashboard (`/super-admin/health`):**
+
+- Overall health score (0-100) per tenant
+- Engagement score (login frequency, activity)
+- Usage score (feature utilization)
+- Payment score (on-time payments, no failures)
+- Churn risk levels: low, medium, high, critical
+- Upsell opportunity detection (>80% of any limit)
+- Filter by risk level
+- Refresh data button
+
+**Database:**
+
+- `tenant_health_scores` table - Calculated health metrics
+- `calculate_tenant_health(org_id)` - Computes composite score
+- `refresh_all_tenant_health_scores()` - Batch update function
+- Trigger updates `organizations.last_login_at` on login
+
+**Churn Indicators:**
+
+- No login in 30+ days → high risk
+- No login in 60+ days → critical risk
+- Payment failures → increases risk
+- Low usage score → medium risk
+
+**Upsell Detection:**
+
+- At 80%+ of team member limit
+- At 80%+ of client limit
+- At 80%+ of workflow limit
+- At 80%+ of storage limit
 
 #### 4.3 Data Export / GDPR
 
-- Full org data export (JSON/CSV)
-- Account deletion queue
-- Audit log of data access
+**GDPR Dashboard (`/super-admin/gdpr`):**
+
+- Article 17 - Right to Erasure compliance
+- Article 20 - Data Portability compliance
+- 30-day grace period for account deletions
+- Export request processing workflow
+- Deletion approval/cancellation by platform admin
+- Compliance information banner
+
+**Database Tables:**
+
+- `data_export_requests` - Tracks GDPR data export requests
+- `account_deletion_queue` - Manages deletion requests with grace period
+- `platform_audit_log` - Records all platform admin actions
+
+**Export Flow:**
+
+1. Organization owner requests export via settings page
+2. Request appears in super-admin GDPR dashboard
+3. Platform admin processes export (generates JSON/CSV)
+4. Download link provided, expires after 7 days
+
+**Deletion Flow:**
+
+1. Organization owner requests deletion
+2. 30-day grace period begins (scheduled deletion date set)
+3. Platform admin can approve or cancel with reason
+4. After grace period, background job deletes all org data
+5. Audit log records deletion completion
+
+#### 4.4 Audit Log
+
+**Audit Dashboard (`/super-admin/audit`):**
+
+- All platform admin actions logged
+- Filter by date range (24h, 7d, 30d, 90d)
+- Filter by action type
+- Search by admin, tenant, or details
+- Export functionality
+
+**Logged Actions:**
+
+- Tenant create/update/suspend/reactivate
+- Data export requests and processing
+- Account deletion approvals/cancellations
+- Tier changes and billing actions
+- Metrics refresh operations
 
 ---
 

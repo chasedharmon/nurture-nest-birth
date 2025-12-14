@@ -5,7 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Download, Loader2, CheckCircle } from 'lucide-react'
 import { requestDataExport } from '@/app/actions/gdpr'
 
-export function DataExportButton() {
+interface DataExportButtonProps {
+  organizationId: string
+}
+
+export function DataExportButton({ organizationId }: DataExportButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -16,7 +20,7 @@ export function DataExportButton() {
     setSuccess(false)
 
     try {
-      const result = await requestDataExport()
+      const result = await requestDataExport(organizationId)
 
       if (result.success) {
         setSuccess(true)

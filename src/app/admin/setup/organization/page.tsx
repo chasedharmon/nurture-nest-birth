@@ -304,7 +304,7 @@ export default async function OrganizationPage() {
                     CSV)
                   </p>
                 </div>
-                <DataExportButton />
+                <DataExportButton organizationId={organization.id} />
               </div>
 
               {/* Danger Zone */}
