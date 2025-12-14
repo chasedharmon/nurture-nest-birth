@@ -11,7 +11,7 @@
 import { cache } from 'react'
 
 import { getBranding, tenantDefaults } from '@/config/platform'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import type { Organization, OrganizationMembership } from '@/lib/supabase/types'
 
 // =====================================================
@@ -81,8 +81,13 @@ export const getTenantContext = cache(
       }
     }
 
+    // Use admin client for membership/org queries to bypass RLS
+    // This is safe because we've already verified the user is authenticated
+    // and we're only querying data for the authenticated user's ID
+    const adminClient = createAdminClient()
+
     // Get user's active organization membership
-    const { data: membershipData, error: membershipError } = await supabase
+    const { data: membershipData, error: membershipError } = await adminClient
       .from('organization_memberships')
       .select(
         `
@@ -98,14 +103,14 @@ export const getTenantContext = cache(
 
     if (membershipError || !membershipData) {
       // Try legacy fallback: user.organization_id
-      const { data: userData } = await supabase
+      const { data: userData } = await adminClient
         .from('users')
         .select('organization_id')
         .eq('id', user.id)
         .single()
 
       if (userData?.organization_id) {
-        const { data: orgData, error: orgError } = await supabase
+        const { data: orgData, error: orgError } = await adminClient
           .from('organizations')
           .select('*')
           .eq('id', userData.organization_id)

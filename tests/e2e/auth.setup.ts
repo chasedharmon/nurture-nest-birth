@@ -1,7 +1,7 @@
 import { test as setup, expect } from '@playwright/test'
 
 const ADMIN_EMAIL = 'chase.d.harmon@gmail.com'
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'your-password-here'
+const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'password123'
 const AUTH_FILE = 'tests/e2e/.auth/admin.json'
 
 // Client credentials - uses dev fallback password (password123)

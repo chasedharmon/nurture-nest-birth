@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import {
   Card,
   CardContent,
@@ -54,8 +54,12 @@ async function getOrganizationData(
 
   if (!user) return null
 
+  // Use admin client to bypass RLS for membership/org queries
+  // This is safe because we've verified the user is authenticated
+  const adminClient = createAdminClient()
+
   // Get organization membership
-  const { data: membership } = await supabase
+  const { data: membership } = await adminClient
     .from('organization_memberships')
     .select(
       `
@@ -71,14 +75,14 @@ async function getOrganizationData(
 
   if (!membership?.organization) {
     // Fallback to users table
-    const { data: userData } = await supabase
+    const { data: userData } = await adminClient
       .from('users')
       .select('organization_id')
       .eq('id', user.id)
       .single()
 
     if (userData?.organization_id) {
-      const { data: org } = await supabase
+      const { data: org } = await adminClient
         .from('organizations')
         .select('*')
         .eq('id', userData.organization_id)

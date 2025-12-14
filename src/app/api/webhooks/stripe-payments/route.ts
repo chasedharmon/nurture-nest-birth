@@ -24,7 +24,10 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('stripe-signature') || ''
 
     // Verify webhook signature (stubbed in development)
-    const { valid, event } = verifyPaymentWebhookSignature(body, signature)
+    const { valid, event } = await verifyPaymentWebhookSignature(
+      body,
+      signature
+    )
 
     if (!valid) {
       console.error('[Payment Webhook] Invalid signature')
