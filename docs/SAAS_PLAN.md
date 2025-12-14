@@ -1,7 +1,7 @@
 # SaaS Platform Plan - Multi-Tenant CRM Infrastructure
 
 > **Created**: December 13, 2025
-> **Status**: Phase 1 Complete - Self-Service Signup
+> **Status**: Phase 2 Complete - Stripe Billing Integration
 > **Goal**: Transform single-tenant CRM into multi-tenant SaaS platform
 > **Relationship**: This plan covers PLATFORM infrastructure. See [MASTER_PLAN.md](MASTER_PLAN.md) for CRM PRODUCT features.
 
@@ -60,7 +60,7 @@
 | Tenant impersonation                     | Not started | 0     |
 | Self-service signup                      | ✅ Complete | 1     |
 | Trial management                         | ✅ Complete | 1     |
-| Live Stripe billing (subscriptions)      | Stubbed     | 2     |
+| Live Stripe billing (subscriptions)      | ✅ Complete | 2     |
 | Platform marketing site                  | Not started | 0     |
 
 ---
@@ -250,32 +250,73 @@ CREATE TABLE tenant_branding (
 ### Phase 2: Stripe Billing Integration
 
 **Goal**: Collect payments from tenants (YOUR revenue)
-**Status**: Not Started
+**Status**: ✅ Complete
 
 **Note:** This is DIFFERENT from MASTER_PLAN Phase 14 IA-1 which is about client invoice payments.
+
+#### Phase 2 Progress
+
+| Task                          | File                                                     | Status |
+| ----------------------------- | -------------------------------------------------------- | ------ |
+| Pricing configuration         | `src/config/pricing.ts`                                  | ✅     |
+| Billing type definitions      | `src/types/billing.ts`                                   | ✅     |
+| Stripe client (SDK v20)       | `src/lib/stripe/client.ts`                               | ✅     |
+| Billing server actions        | `src/app/actions/billing.ts`                             | ✅     |
+| Webhook handler               | `src/app/api/webhooks/stripe/route.ts`                   | ✅     |
+| Billing action components     | `src/app/admin/setup/billing/billing-actions.tsx`        | ✅     |
+| Billing page UI updates       | `src/app/admin/setup/billing/page.tsx`                   | ✅     |
+| Database migration            | `supabase/migrations/20251226000000_stripe_price_id.sql` | ✅     |
+| Environment variable template | `.env.example`                                           | ✅     |
+| E2E tests                     | `tests/e2e/stripe-billing.spec.ts`                       | ✅     |
 
 #### 2.1 Stripe Webhook Handler
 
 - `src/app/api/webhooks/stripe/route.ts`
 
-**Events:**
+**Events Handled:**
 
-- `checkout.session.completed` -> Activate subscription
-- `customer.subscription.updated` -> Sync tier/status
-- `customer.subscription.deleted` -> Mark cancelled
-- `invoice.payment_failed` -> Trigger dunning
+- `checkout.session.completed` -> Activate subscription, set tier limits
+- `customer.subscription.created` -> Initialize subscription data
+- `customer.subscription.updated` -> Sync tier/status, handle plan changes
+- `customer.subscription.deleted` -> Downgrade to starter tier
+- `invoice.paid` -> Restore active status after recovery
+- `invoice.payment_failed` -> Mark as past_due
+- `invoice.payment_succeeded` -> Recovery tracking
 
 #### 2.2 Subscription Management
 
-- `src/app/admin/billing/page.tsx` - Billing dashboard
-- `src/app/admin/billing/upgrade/page.tsx` - Plan selection
-- Stripe Customer Portal integration
+- `src/app/admin/setup/billing/page.tsx` - Billing dashboard with usage meters
+- `UpgradeButton` component - Creates Stripe checkout session
+- `ManageSubscriptionButton` - Opens Stripe Customer Portal
+- `PlanUpgradeButton` - Plan comparison upgrade/downgrade
+- `StripeConfigStatus` - Shows setup status in dev mode
 
-#### 2.3 Usage Enforcement
+#### 2.3 Graceful Degradation
 
-- Enforce `max_team_members`, `max_clients`, `max_workflows`, `max_storage_mb`
-- Block operations when at limit
-- Upgrade prompts
+- App builds and runs without Stripe keys configured
+- Mock data fallback for invoices and payment methods
+- "Stripe Not Configured" dialog explains setup steps
+- Designed for go-live: just add keys and price IDs
+
+#### 2.4 Pricing Tiers
+
+| Tier         | Monthly | Yearly | Team | Clients | Workflows | Storage |
+| ------------ | ------- | ------ | ---- | ------- | --------- | ------- |
+| Starter      | $29     | $290   | 1    | 50      | 5         | 1GB     |
+| Professional | $79     | $790   | 5    | 250     | 25        | 10GB    |
+| Enterprise   | $199    | $1,990 | ∞    | ∞       | ∞         | 100GB   |
+
+#### 2.5 To Configure for Production
+
+1. Create products in Stripe Dashboard (Starter, Professional, Enterprise)
+2. Create monthly and yearly prices for each product
+3. Copy price IDs to `src/config/pricing.ts`
+4. Set environment variables:
+   - `STRIPE_SECRET_KEY`
+   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+   - `STRIPE_WEBHOOK_SECRET`
+5. Configure webhook endpoint: `https://your-domain.com/api/webhooks/stripe`
+6. Apply database migration for `stripe_price_id` column
 
 ---
 
@@ -506,4 +547,4 @@ Supabase (Single Project)
 
 ---
 
-_Last updated: December 13, 2025_
+_Last updated: December 13, 2025 (Phase 2 Complete)_
