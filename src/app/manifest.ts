@@ -88,22 +88,16 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
     ],
-    screenshots: [
-      {
-        src: '/screenshots/desktop-dashboard.png',
-        sizes: '1920x1080',
-        type: 'image/png',
-        form_factor: 'wide',
-        label: 'Dashboard - Desktop View',
-      },
-      {
-        src: '/screenshots/mobile-clients.png',
-        sizes: '390x844',
-        type: 'image/png',
-        form_factor: 'narrow',
-        label: 'Clients - Mobile View',
-      },
-    ],
+    // Screenshots removed - add actual screenshots when available
+    // screenshots: [
+    //   {
+    //     src: '/screenshots/desktop-dashboard.png',
+    //     sizes: '1920x1080',
+    //     type: 'image/png',
+    //     form_factor: 'wide',
+    //     label: 'Dashboard - Desktop View',
+    //   },
+    // ],
     shortcuts: [
       {
         name: 'Dashboard',

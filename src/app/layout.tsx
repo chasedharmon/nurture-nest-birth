@@ -115,7 +115,7 @@ export const metadata: Metadata = {
     title: 'NNB CRM',
   },
   applicationName: 'Nurture Nest Birth CRM',
-  manifest: '/manifest.webmanifest',
+  // manifest is auto-generated from src/app/manifest.ts
   other: {
     'mobile-web-app-capable': 'yes',
   },
