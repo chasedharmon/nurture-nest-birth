@@ -12,6 +12,7 @@ import {
   getOrganizationSchema,
   getLocalBusinessSchema,
 } from '@/lib/schema'
+import { PWAProvider } from '@/components/pwa'
 import './globals.css'
 
 const inter = Inter({
@@ -36,6 +37,10 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: 'cover', // Support for notched devices
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#8B4513' },
+    { media: '(prefers-color-scheme: dark)', color: '#5D2E0C' },
+  ],
 }
 
 export const metadata: Metadata = {
@@ -105,6 +110,16 @@ export const metadata: Metadata = {
     // Add Google Search Console verification when ready
     // google: 'verification-code-here',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'NNB CRM',
+  },
+  applicationName: 'Nurture Nest Birth CRM',
+  manifest: '/manifest.webmanifest',
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
 }
 
 export default function RootLayout({
@@ -117,16 +132,38 @@ export default function RootLayout({
       <head>
         <JSONLDScript data={getOrganizationSchema()} />
         <JSONLDScript data={getLocalBusinessSchema()} />
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/icons/apple-touch-icon.png"
+        />
+        {/* Favicon variants */}
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/icons/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="/icons/icon-192x192.png"
+        />
       </head>
       <body className={`${inter.variable} ${lora.variable} antialiased`}>
-        <PersonalizationProvider>
-          <SkipToContent />
-          <ConditionalHeader />
-          <main id="main-content" className="min-h-screen">
-            {children}
-          </main>
-          <ConditionalFooter />
-        </PersonalizationProvider>
+        <PWAProvider showInstallPrompt={true} showUpdateBanner={true}>
+          <PersonalizationProvider>
+            <SkipToContent />
+            <ConditionalHeader />
+            <main id="main-content" className="min-h-screen">
+              {children}
+            </main>
+            <ConditionalFooter />
+          </PersonalizationProvider>
+        </PWAProvider>
         <Analytics />
       </body>
     </html>

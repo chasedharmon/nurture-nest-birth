@@ -1,7 +1,7 @@
 # SaaS Platform Plan - Multi-Tenant CRM Infrastructure
 
 > **Created**: December 13, 2025
-> **Status**: Phase 4 Complete - Platform Operations
+> **Status**: Phase 5A Complete - Progressive Web App
 > **Goal**: Transform single-tenant CRM into multi-tenant SaaS platform
 > **Relationship**: This plan covers PLATFORM infrastructure. See [MASTER_PLAN.md](MASTER_PLAN.md) for CRM PRODUCT features.
 
@@ -66,6 +66,7 @@
 | Tenant health monitoring                 | ✅ Complete | 4     |
 | GDPR compliance (export/deletion)        | ✅ Complete | 4     |
 | Platform audit logging                   | ✅ Complete | 4     |
+| Progressive Web App (PWA)                | ✅ Complete | 5A    |
 | Platform marketing site                  | Not started | 0     |
 
 ---
@@ -588,21 +589,57 @@ const { data } = await adminClient
 ### Phase 5: Mobile App
 
 **Goal**: App Store presence
-**Status**: Not Started
+**Status**: Phase 5A Complete
 
 **Note:** Overlaps with MASTER_PLAN Phase 16 MS-1/MS-2. Coordinate implementation.
 
-#### 5A: Progressive Web App (PWA)
+#### Phase 5A Progress (✅ Complete)
 
-- `public/manifest.json`
-- Service worker for offline/caching
-- Push notifications
+| Task                     | File                                    | Status |
+| ------------------------ | --------------------------------------- | ------ |
+| Web app manifest         | `src/app/manifest.ts`                   | ✅     |
+| Service worker           | `public/sw.js`                          | ✅     |
+| Offline page             | `src/app/offline/page.tsx`              | ✅     |
+| PWA icons (all sizes)    | `public/icons/`                         | ✅     |
+| Icon generation script   | `scripts/generate-pwa-icons.ts`         | ✅     |
+| PWA utilities            | `src/lib/pwa/`                          | ✅     |
+| Install prompt component | `src/components/pwa/install-prompt.tsx` | ✅     |
+| Update banner component  | `src/components/pwa/update-banner.tsx`  | ✅     |
+| PWA provider             | `src/components/pwa/pwa-provider.tsx`   | ✅     |
+| Root layout integration  | `src/app/layout.tsx`                    | ✅     |
+| Next.js config headers   | `next.config.ts`                        | ✅     |
+| E2E tests (24 tests)     | `tests/e2e/pwa.spec.ts`                 | ✅     |
 
-#### 5B: React Native / Expo App
+**PWA Features Implemented:**
+
+- **Web App Manifest**: Defines app metadata, icons, shortcuts, display mode
+- **Service Worker**: Cache-first for static assets, network-first for dynamic content
+- **Offline Support**: Graceful degradation with offline page
+- **Install Prompt**: Cross-platform (iOS instructions, native prompt on Android/desktop)
+- **Update Banner**: Notifies users when new version available
+- **Push Notification Ready**: Service worker handles push events (backend integration pending)
+- **Icon Sizes**: 72, 96, 128, 144, 152, 192, 384, 512px + Apple touch icons
+
+**Caching Strategies:**
+
+- Static assets (JS, CSS, fonts): Cache-first with version-based invalidation
+- Dynamic content (pages, API): Network-first with offline fallback
+- Images: Cache-first with long TTL
+- Service worker itself: No-cache to ensure updates
+
+**To Customize:**
+
+1. Replace placeholder icons: Place 1024x1024 PNG at `public/icons/icon-source.png`
+2. Run `npx ts-node scripts/generate-pwa-icons.ts` to generate all sizes
+3. Add VAPID keys for push notifications when ready
+4. Update manifest shortcuts for most-used features
+
+#### 5B: Native App Wrapper (Optional)
 
 - Separate repository
-- Shared API backend
-- iOS and Android apps
+- Capacitor or Expo wrapper for App Store submission
+- Push notification integration with native APIs
+- Status: Not Started
 
 ---
 
@@ -799,4 +836,4 @@ E2E tests use Playwright's `storageState` to persist auth between tests. The aut
 
 ---
 
-_Last updated: December 13, 2025 (Phase 3 Complete - SMS Communication Activation)_
+_Last updated: December 13, 2025 (Phase 5A Complete - Progressive Web App)_

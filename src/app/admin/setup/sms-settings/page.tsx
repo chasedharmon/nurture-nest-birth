@@ -78,27 +78,28 @@ export default function SmsSettingsPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
-  useEffect(() => {
-    async function loadConfig() {
-      if (!organization?.id) return
+  async function loadConfig() {
+    if (!organization?.id) return
 
-      setLoading(true)
-      try {
-        const result = await getSmsConfig(organization.id)
-        if (result.success && result.data) {
-          setConfig(result.data.config)
-          setCredentials(result.data.credentials)
-        }
-      } catch {
-        setError('Failed to load SMS settings')
-      } finally {
-        setLoading(false)
+    setLoading(true)
+    try {
+      const result = await getSmsConfig(organization.id)
+      if (result.success && result.data) {
+        setConfig(result.data.config)
+        setCredentials(result.data.credentials)
       }
+    } catch {
+      setError('Failed to load SMS settings')
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     if (organization?.id) {
       loadConfig()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organization?.id])
 
   async function handleSaveConfig() {
