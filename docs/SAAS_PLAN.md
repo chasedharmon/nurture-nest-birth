@@ -256,18 +256,56 @@ CREATE TABLE tenant_branding (
 
 #### Phase 2 Progress
 
-| Task                          | File                                                     | Status |
-| ----------------------------- | -------------------------------------------------------- | ------ |
-| Pricing configuration         | `src/config/pricing.ts`                                  | ✅     |
-| Billing type definitions      | `src/types/billing.ts`                                   | ✅     |
-| Stripe client (SDK v20)       | `src/lib/stripe/client.ts`                               | ✅     |
-| Billing server actions        | `src/app/actions/billing.ts`                             | ✅     |
-| Webhook handler               | `src/app/api/webhooks/stripe/route.ts`                   | ✅     |
-| Billing action components     | `src/app/admin/setup/billing/billing-actions.tsx`        | ✅     |
-| Billing page UI updates       | `src/app/admin/setup/billing/page.tsx`                   | ✅     |
-| Database migration            | `supabase/migrations/20251226000000_stripe_price_id.sql` | ✅     |
-| Environment variable template | `.env.example`                                           | ✅     |
-| E2E tests                     | `tests/e2e/stripe-billing.spec.ts`                       | ✅     |
+| Task                           | File                                                     | Status |
+| ------------------------------ | -------------------------------------------------------- | ------ |
+| Pricing configuration          | `src/config/pricing.ts`                                  | ✅     |
+| Billing type definitions       | `src/types/billing.ts`                                   | ✅     |
+| Stripe client (SDK v20)        | `src/lib/stripe/client.ts`                               | ✅     |
+| Billing server actions         | `src/app/actions/billing.ts`                             | ✅     |
+| Webhook handler                | `src/app/api/webhooks/stripe/route.ts`                   | ✅     |
+| Billing action components      | `src/app/admin/setup/billing/billing-actions.tsx`        | ✅     |
+| Billing page UI updates        | `src/app/admin/setup/billing/page.tsx`                   | ✅     |
+| Database migration             | `supabase/migrations/20251226000000_stripe_price_id.sql` | ✅     |
+| Environment variable template  | `.env.example`                                           | ✅     |
+| E2E tests                      | `tests/e2e/stripe-billing.spec.ts`                       | ✅     |
+| RLS policies for memberships   | `supabase/migrations/20251214003244_*.sql`               | ✅     |
+| RLS policies for organizations | `supabase/migrations/20251214003310_*.sql`               | ✅     |
+
+#### 2.6 Critical RLS Fix Applied
+
+**Issue Discovered**: RLS was enabled on `organization_memberships` and `organizations` tables but **no policies existed**, causing authenticated users to be unable to read their own organization data. This resulted in redirect loops to `/onboarding`.
+
+**Solution Applied**:
+
+1. Added RLS policies for `organization_memberships` (SELECT/INSERT/UPDATE/DELETE)
+2. Added RLS policies for `organizations` (SELECT/UPDATE)
+3. Modified `getTenantContext()` in `tenant-context.ts` to use `createAdminClient()` (service role) for membership/org queries
+
+**Why Admin Client is Safe Here**: After authenticating the user via `supabase.auth.getUser()`, we switch to the admin client only for membership/org queries. This bypasses RLS circular dependencies (policies referencing the table they protect) while still ensuring security since:
+
+- User must be authenticated first
+- Queries are scoped to `user_id = user.id`
+- No untrusted input is used
+
+**Pattern for Future Multi-Tenant Queries**:
+
+```typescript
+// 1. Authenticate with regular client
+const supabase = await createClient()
+const {
+  data: { user },
+} = await supabase.auth.getUser()
+if (!user) {
+  /* redirect to login */
+}
+
+// 2. Use admin client for trusted queries
+const adminClient = createAdminClient()
+const { data } = await adminClient
+  .from('organization_memberships')
+  .select('*, organization:organizations(*)')
+  .eq('user_id', user.id) // Safe: using verified user.id
+```
 
 #### 2.1 Stripe Webhook Handler
 
@@ -547,4 +585,35 @@ Supabase (Single Project)
 
 ---
 
-_Last updated: December 13, 2025 (Phase 2 Complete)_
+---
+
+## Troubleshooting Notes
+
+### RLS Circular Dependency Pattern
+
+When querying multi-tenant tables that have RLS policies referencing memberships, you may encounter issues with nested selects (e.g., `organization:organizations(*)`). The RLS policy evaluation creates a circular dependency.
+
+**Symptoms**:
+
+- User authenticated but queries return empty/null
+- Redirects to `/onboarding` despite valid membership
+- Works with service role key but fails with anon key
+
+**Solution**: Use the admin client pattern documented in Section 2.6 above.
+
+### E2E Test Authentication
+
+E2E tests use Playwright's `storageState` to persist auth between tests. The auth state is created by `auth.setup.ts` and stored in `.auth/admin.json`.
+
+**Test Credentials**: `chase.d.harmon@gmail.com` / `password123` (or set `TEST_ADMIN_PASSWORD` env var)
+
+**If tests fail with auth issues**:
+
+1. Delete `.auth/` directory
+2. Ensure test user exists in Supabase Auth
+3. Ensure user has active organization membership
+4. Run tests with `--project=setup` first
+
+---
+
+_Last updated: December 14, 2025 (Phase 2 E2E Tests Complete)_
