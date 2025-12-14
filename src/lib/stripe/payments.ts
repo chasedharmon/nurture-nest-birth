@@ -1,21 +1,14 @@
 /**
- * Stripe Client Invoice Payments (Rails Only)
+ * Stripe Client Invoice Payments
  *
- * This handles payment links for client invoices.
- * When ready to go live, add your Stripe credentials to environment variables.
+ * Handles Stripe Checkout for client invoices (one-time payments).
+ * This is separate from subscription billing - it's for doulas to collect
+ * payments from their clients for services.
  *
- * Environment Variables Required for Live:
- * - STRIPE_SECRET_KEY: Your Stripe secret key
- * - STRIPE_WEBHOOK_SECRET: Webhook signing secret
- * - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: For client-side
+ * Uses the same Stripe SDK and configuration as the subscription billing.
  */
 
-// import Stripe from 'stripe'
-
-// Uncomment when ready to integrate:
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-//   apiVersion: '2023-10-16',
-// })
+import { getStripeClient } from './client'
 
 // =====================================================
 // Types
@@ -42,6 +35,7 @@ export interface InvoiceCheckoutResult {
   checkoutUrl?: string
   expiresAt?: string
   error?: string
+  stripeNotConfigured?: boolean
 }
 
 export interface PaymentIntentDetails {
@@ -54,12 +48,12 @@ export interface PaymentIntentDetails {
 }
 
 // =====================================================
-// Stubbed Client Functions
+// Invoice Checkout Functions
 // =====================================================
 
 /**
- * Create a Stripe Checkout session for an invoice
- * STUBBED: Returns mock checkout URL
+ * Create a Stripe Checkout session for a client invoice
+ * This creates a one-time payment link for clients to pay their invoice
  */
 export async function createInvoiceCheckout(
   params: CreateInvoiceCheckoutParams
@@ -67,87 +61,78 @@ export async function createInvoiceCheckout(
   const {
     invoiceId,
     clientEmail,
-    clientName: _clientName,
+    clientName,
     invoiceNumber,
     lineItems,
     successUrl,
-    cancelUrl: _cancelUrl,
-    metadata: _metadata,
+    cancelUrl,
+    metadata,
   } = params
 
-  console.log('[Stripe Stub] Creating invoice checkout:', {
-    invoiceId,
-    invoiceNumber,
-    clientEmail,
-    itemCount: lineItems.length,
-    totalCents: lineItems.reduce(
-      (sum, item) => sum + item.amount * (item.quantity || 1),
-      0
-    ),
-  })
-
-  // Calculate expiration (24 hours from now)
-  const expiresAt = new Date()
-  expiresAt.setHours(expiresAt.getHours() + 24)
-
-  // Stubbed: Return mock session
-  const mockSessionId = `cs_stub_${Date.now()}_${invoiceId.slice(0, 8)}`
-
-  return {
-    success: true,
-    sessionId: mockSessionId,
-    checkoutUrl: `${successUrl}?session_id=${mockSessionId}&demo=true`,
-    expiresAt: expiresAt.toISOString(),
+  const stripe = getStripeClient()
+  if (!stripe) {
+    console.log('[Stripe] createInvoiceCheckout - Stripe not configured')
+    // Return mock checkout for development
+    const mockSessionId = `cs_mock_${Date.now()}_${invoiceId.slice(0, 8)}`
+    return {
+      success: true,
+      sessionId: mockSessionId,
+      checkoutUrl: `${successUrl}?session_id=${mockSessionId}&demo=true`,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      stripeNotConfigured: true,
+    }
   }
 
-  // Real implementation:
-  // try {
-  //   const session = await stripe.checkout.sessions.create({
-  //     mode: 'payment',
-  //     customer_email: clientEmail,
-  //     line_items: lineItems.map(item => ({
-  //       price_data: {
-  //         currency: 'usd',
-  //         product_data: {
-  //           name: item.description,
-  //         },
-  //         unit_amount: item.amount,
-  //       },
-  //       quantity: item.quantity || 1,
-  //     })),
-  //     success_url: successUrl,
-  //     cancel_url: cancelUrl,
-  //     metadata: {
-  //       invoice_id: invoiceId,
-  //       invoice_number: invoiceNumber,
-  //       client_name: clientName,
-  //       ...metadata,
-  //     },
-  //     payment_intent_data: {
-  //       metadata: {
-  //         invoice_id: invoiceId,
-  //         invoice_number: invoiceNumber,
-  //       },
-  //     },
-  //   })
-  //
-  //   return {
-  //     success: true,
-  //     sessionId: session.id,
-  //     checkoutUrl: session.url!,
-  //     expiresAt: new Date(session.expires_at * 1000).toISOString(),
-  //   }
-  // } catch (error) {
-  //   return {
-  //     success: false,
-  //     error: error instanceof Error ? error.message : 'Unknown error',
-  //   }
-  // }
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      customer_email: clientEmail,
+      line_items: lineItems.map(item => ({
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: item.description,
+          },
+          unit_amount: item.amount,
+        },
+        quantity: item.quantity || 1,
+      })),
+      success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl,
+      metadata: {
+        invoice_id: invoiceId,
+        invoice_number: invoiceNumber,
+        client_name: clientName,
+        type: 'client_invoice',
+        ...metadata,
+      },
+      payment_intent_data: {
+        metadata: {
+          invoice_id: invoiceId,
+          invoice_number: invoiceNumber,
+          client_name: clientName,
+        },
+      },
+    })
+
+    return {
+      success: true,
+      sessionId: session.id,
+      checkoutUrl: session.url || undefined,
+      expiresAt: new Date(session.expires_at * 1000).toISOString(),
+    }
+  } catch (error) {
+    console.error('[Stripe] Error creating invoice checkout:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to create checkout',
+    }
+  }
 }
 
 /**
  * Retrieve a checkout session by ID
- * STUBBED: Returns mock session data
  */
 export async function getCheckoutSession(sessionId: string): Promise<{
   success: boolean
@@ -158,118 +143,132 @@ export async function getCheckoutSession(sessionId: string): Promise<{
     paymentIntentId?: string
     customerEmail?: string
     amountTotal: number
+    metadata?: Record<string, string>
   }
   error?: string
 }> {
-  console.log('[Stripe Stub] Getting checkout session:', sessionId)
-
-  // Stubbed: Return mock session
-  return {
-    success: true,
-    session: {
-      id: sessionId,
-      status: 'complete',
-      paymentStatus: 'paid',
-      paymentIntentId: `pi_stub_${Date.now()}`,
-      amountTotal: 50000, // $500.00
-    },
+  const stripe = getStripeClient()
+  if (!stripe) {
+    // Return mock session for development
+    return {
+      success: true,
+      session: {
+        id: sessionId,
+        status: 'complete',
+        paymentStatus: 'paid',
+        paymentIntentId: `pi_mock_${Date.now()}`,
+        amountTotal: 50000,
+      },
+    }
   }
 
-  // Real implementation:
-  // try {
-  //   const session = await stripe.checkout.sessions.retrieve(sessionId)
-  //   return {
-  //     success: true,
-  //     session: {
-  //       id: session.id,
-  //       status: session.status,
-  //       paymentStatus: session.payment_status,
-  //       paymentIntentId: session.payment_intent as string,
-  //       customerEmail: session.customer_email,
-  //       amountTotal: session.amount_total,
-  //     },
-  //   }
-  // } catch (error) {
-  //   return {
-  //     success: false,
-  //     error: error instanceof Error ? error.message : 'Unknown error',
-  //   }
-  // }
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    return {
+      success: true,
+      session: {
+        id: session.id,
+        status: session.status as 'open' | 'complete' | 'expired',
+        paymentStatus: session.payment_status as
+          | 'unpaid'
+          | 'paid'
+          | 'no_payment_required',
+        paymentIntentId:
+          typeof session.payment_intent === 'string'
+            ? session.payment_intent
+            : session.payment_intent?.id,
+        customerEmail: session.customer_email || undefined,
+        amountTotal: session.amount_total || 0,
+        metadata: session.metadata as Record<string, string>,
+      },
+    }
+  } catch (error) {
+    console.error('[Stripe] Error retrieving checkout session:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to retrieve session',
+    }
+  }
 }
 
 /**
  * Get payment intent details
- * STUBBED: Returns mock payment data
  */
 export async function getPaymentIntent(paymentIntentId: string): Promise<{
   success: boolean
   paymentIntent?: PaymentIntentDetails
   error?: string
 }> {
-  console.log('[Stripe Stub] Getting payment intent:', paymentIntentId)
-
-  // Stubbed: Return mock payment
-  return {
-    success: true,
-    paymentIntent: {
-      id: paymentIntentId,
-      amount: 50000,
-      currency: 'usd',
-      status: 'succeeded',
-      paymentMethodType: 'card',
-      receiptUrl: `https://pay.stripe.com/receipts/stub_${Date.now()}`,
-    },
+  const stripe = getStripeClient()
+  if (!stripe) {
+    // Return mock payment for development
+    return {
+      success: true,
+      paymentIntent: {
+        id: paymentIntentId,
+        amount: 50000,
+        currency: 'usd',
+        status: 'succeeded',
+        paymentMethodType: 'card',
+        receiptUrl: `https://pay.stripe.com/receipts/mock_${Date.now()}`,
+      },
+    }
   }
 
-  // Real implementation:
-  // try {
-  //   const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
-  //   return {
-  //     success: true,
-  //     paymentIntent: {
-  //       id: paymentIntent.id,
-  //       amount: paymentIntent.amount,
-  //       currency: paymentIntent.currency,
-  //       status: paymentIntent.status,
-  //       paymentMethodType: paymentIntent.payment_method_types?.[0],
-  //       receiptUrl: paymentIntent.charges?.data[0]?.receipt_url,
-  //     },
-  //   }
-  // } catch (error) {
-  //   return {
-  //     success: false,
-  //     error: error instanceof Error ? error.message : 'Unknown error',
-  //   }
-  // }
+  try {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+    return {
+      success: true,
+      paymentIntent: {
+        id: paymentIntent.id,
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency,
+        status: paymentIntent.status as PaymentIntentDetails['status'],
+        paymentMethodType: paymentIntent.payment_method_types?.[0],
+        receiptUrl:
+          paymentIntent.latest_charge &&
+          typeof paymentIntent.latest_charge !== 'string'
+            ? paymentIntent.latest_charge.receipt_url || undefined
+            : undefined,
+      },
+    }
+  } catch (error) {
+    console.error('[Stripe] Error retrieving payment intent:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to retrieve payment',
+    }
+  }
 }
 
 /**
  * Expire/cancel a checkout session
- * STUBBED: Logs action
  */
 export async function expireCheckoutSession(
   sessionId: string
 ): Promise<{ success: boolean; error?: string }> {
-  console.log('[Stripe Stub] Expiring checkout session:', sessionId)
+  const stripe = getStripeClient()
+  if (!stripe) {
+    return { success: true }
+  }
 
-  // Stubbed
-  return { success: true }
-
-  // Real implementation:
-  // try {
-  //   await stripe.checkout.sessions.expire(sessionId)
-  //   return { success: true }
-  // } catch (error) {
-  //   return {
-  //     success: false,
-  //     error: error instanceof Error ? error.message : 'Unknown error',
-  //   }
-  // }
+  try {
+    await stripe.checkout.sessions.expire(sessionId)
+    return { success: true }
+  } catch (error) {
+    console.error('[Stripe] Error expiring checkout session:', error)
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to expire session',
+    }
+  }
 }
 
 /**
  * Issue a refund for a payment
- * STUBBED: Logs action
  */
 export async function createRefund(
   paymentIntentId: string,
@@ -280,36 +279,32 @@ export async function createRefund(
   refundId?: string
   error?: string
 }> {
-  console.log('[Stripe Stub] Creating refund:', {
-    paymentIntentId,
-    amount,
-    reason,
-  })
-
-  // Stubbed
-  return {
-    success: true,
-    refundId: `re_stub_${Date.now()}`,
+  const stripe = getStripeClient()
+  if (!stripe) {
+    return {
+      success: true,
+      refundId: `re_mock_${Date.now()}`,
+    }
   }
 
-  // Real implementation:
-  // try {
-  //   const refund = await stripe.refunds.create({
-  //     payment_intent: paymentIntentId,
-  //     amount,
-  //     reason,
-  //   })
-  //   return { success: true, refundId: refund.id }
-  // } catch (error) {
-  //   return {
-  //     success: false,
-  //     error: error instanceof Error ? error.message : 'Unknown error',
-  //   }
-  // }
+  try {
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentIntentId,
+      amount,
+      reason,
+    })
+    return { success: true, refundId: refund.id }
+  } catch (error) {
+    console.error('[Stripe] Error creating refund:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create refund',
+    }
+  }
 }
 
 // =====================================================
-// Webhook Event Types
+// Webhook Event Types (for client invoice payments)
 // =====================================================
 
 export type PaymentWebhookEventType =
@@ -332,27 +327,39 @@ export interface PaymentWebhookEvent {
 }
 
 /**
- * Verify Stripe webhook signature
- * STUBBED: Always returns true in development
+ * Check if a checkout session is for a client invoice (vs subscription)
  */
-export function verifyPaymentWebhookSignature(
-  _payload: string,
-  _signature: string
-): { valid: boolean; event?: PaymentWebhookEvent } {
-  console.log('[Stripe Stub] Verifying payment webhook signature')
+export function isClientInvoiceCheckout(
+  metadata: Record<string, string> | undefined
+): boolean {
+  return metadata?.type === 'client_invoice' || !!metadata?.invoice_id
+}
 
-  // Stubbed: Always valid in dev
-  return { valid: true }
+/**
+ * Verify Stripe webhook signature for payment events
+ * Uses the shared verifyWebhookSignature from client.ts
+ */
+export async function verifyPaymentWebhookSignature(
+  payload: string,
+  signature: string
+): Promise<{ valid: boolean; event?: PaymentWebhookEvent }> {
+  // Dynamic import to avoid circular dependency
+  const { verifyWebhookSignature } = await import('./client')
 
-  // Real implementation:
-  // try {
-  //   const event = stripe.webhooks.constructEvent(
-  //     payload,
-  //     signature,
-  //     process.env.STRIPE_WEBHOOK_SECRET!
-  //   ) as PaymentWebhookEvent
-  //   return { valid: true, event }
-  // } catch (err) {
-  //   return { valid: false }
-  // }
+  const event = verifyWebhookSignature(payload, signature)
+
+  if (!event) {
+    // In development without webhook secret, parse JSON directly
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        const parsed = JSON.parse(payload)
+        return { valid: true, event: parsed as PaymentWebhookEvent }
+      } catch {
+        return { valid: false }
+      }
+    }
+    return { valid: false }
+  }
+
+  return { valid: true, event: event as unknown as PaymentWebhookEvent }
 }

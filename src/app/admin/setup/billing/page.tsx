@@ -37,7 +37,13 @@ import {
   getOrganizationUsage,
   getOrganizationFeatures,
 } from '@/lib/features/flags'
-import { listInvoices, StripeInvoice } from '@/lib/stripe/client'
+import { listInvoices, type StripeInvoice } from '@/lib/stripe/client'
+import {
+  UpgradeButton,
+  ManageSubscriptionButton,
+  PlanUpgradeButton,
+  StripeConfigStatus,
+} from './billing-actions'
 
 async function getOrganizationData(
   supabase: Awaited<ReturnType<typeof createClient>>
@@ -311,6 +317,9 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
           </Alert>
         )}
 
+        {/* Stripe Configuration Status (dev/setup mode) */}
+        <StripeConfigStatus className="mb-6" />
+
         {/* Status Alerts */}
         {isTrialing && !isExpiredRedirect && !isGraceRedirect && (
           <div className="mb-6 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
@@ -322,7 +331,9 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                 Upgrade to keep all your data and features.
               </p>
             </div>
-            <Button size="sm">Upgrade Now</Button>
+            <UpgradeButton tier="professional" className="shrink-0">
+              Upgrade Now
+            </UpgradeButton>
           </div>
         )}
 
@@ -336,9 +347,13 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                 features.
               </p>
             </div>
-            <Button size="sm" variant="destructive">
+            <ManageSubscriptionButton
+              variant="default"
+              size="sm"
+              className="shrink-0 bg-red-600 hover:bg-red-700"
+            >
               Update Payment
-            </Button>
+            </ManageSubscriptionButton>
           </div>
         )}
 
@@ -455,14 +470,22 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-3">
-                  <Button>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Change Plan
-                  </Button>
-                  <Button variant="outline">
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Update Payment Method
-                  </Button>
+                  <ManageSubscriptionButton>
+                    Manage Subscription
+                  </ManageSubscriptionButton>
+                  {organization.subscription_tier !== 'enterprise' && (
+                    <UpgradeButton
+                      tier={
+                        organization.subscription_tier === 'starter'
+                          ? 'professional'
+                          : 'enterprise'
+                      }
+                      variant="outline"
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Upgrade Plan
+                    </UpgradeButton>
+                  )}
                   <Button variant="outline">
                     <Download className="mr-2 h-4 w-4" />
                     Download Invoices
@@ -529,12 +552,19 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                       </>
                     )}
                   </ul>
-                  <Button className="w-full">
+                  <UpgradeButton
+                    tier={
+                      organization.subscription_tier === 'starter'
+                        ? 'professional'
+                        : 'enterprise'
+                    }
+                    className="w-full"
+                  >
                     Upgrade to{' '}
                     {organization.subscription_tier === 'starter'
                       ? 'Professional'
                       : 'Enterprise'}
-                  </Button>
+                  </UpgradeButton>
                 </CardContent>
               </Card>
             )}
@@ -695,20 +725,20 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                       )}
                     </ul>
 
-                    {isCurrentPlan ? (
-                      <Button variant="outline" className="w-full" disabled>
-                        Current Plan
-                      </Button>
-                    ) : (
-                      <Button
-                        variant={plan.is_featured ? 'default' : 'outline'}
-                        className="w-full"
-                      >
-                        {plan.price_monthly > (currentPlan?.price_monthly || 0)
-                          ? 'Upgrade'
-                          : 'Downgrade'}
-                      </Button>
-                    )}
+                    <PlanUpgradeButton
+                      currentTier={
+                        organization.subscription_tier as
+                          | 'starter'
+                          | 'professional'
+                          | 'enterprise'
+                      }
+                      targetTier={
+                        plan.id as 'starter' | 'professional' | 'enterprise'
+                      }
+                      priceMonthly={plan.price_monthly}
+                      isFeatured={plan.is_featured}
+                      className="w-full"
+                    />
                   </div>
                 )
               })}
@@ -771,7 +801,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                         <div className="text-right">
                           <p className="font-medium">
                             {formatCurrency(
-                              invoice.amount_paid || invoice.amount_due,
+                              invoice.amountPaid || invoice.amountDue,
                               invoice.currency
                             )}
                           </p>
@@ -809,10 +839,10 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                   </CardTitle>
                   <CardDescription>Manage your payment methods</CardDescription>
                 </div>
-                <Button variant="outline" size="sm">
+                <ManageSubscriptionButton variant="outline" size="sm">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Card
-                </Button>
+                </ManageSubscriptionButton>
               </div>
             </CardHeader>
             <CardContent>
