@@ -1,4 +1,5 @@
 import { Inter } from 'next/font/google'
+import { PWAProvider } from '@/components/pwa'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -12,5 +13,9 @@ export default function ClientLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <div className={inter.className}>{children}</div>
+  return (
+    <PWAProvider showInstallPrompt={true} showUpdateBanner={true}>
+      <div className={inter.className}>{children}</div>
+    </PWAProvider>
+  )
 }

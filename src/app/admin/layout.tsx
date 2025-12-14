@@ -7,6 +7,7 @@ import { OrganizationProvider } from '@/lib/hooks/use-organization'
 import { getTenantContext } from '@/lib/platform/tenant-context'
 import { TrialBanner } from '@/components/billing/trial-banner'
 import { getTrialStatus } from '@/lib/trial/utils'
+import { PWAProvider } from '@/components/pwa'
 import {
   FALLBACK_NAV_DATA,
   type SerializableNavigationConfig,
@@ -95,28 +96,30 @@ export default async function AdminLayout({
   const trialStatus = getTrialStatus(organization)
 
   return (
-    <OrganizationProvider
-      initialOrganization={organization}
-      initialMembership={membership}
-    >
-      <KeyboardShortcutsProvider>
-        <div className="min-h-screen bg-background">
-          {/* Navigation Header */}
-          <AdminNavigation config={navConfig} userRole={userRole} />
+    <PWAProvider showInstallPrompt={true} showUpdateBanner={true}>
+      <OrganizationProvider
+        initialOrganization={organization}
+        initialMembership={membership}
+      >
+        <KeyboardShortcutsProvider>
+          <div className="min-h-screen bg-background">
+            {/* Navigation Header */}
+            <AdminNavigation config={navConfig} userRole={userRole} />
 
-          {/* Trial Banner - shows for trialing organizations */}
-          {trialStatus.isTrialing && (
-            <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
-              <TrialBanner trialStatus={trialStatus} />
-            </div>
-          )}
+            {/* Trial Banner - shows for trialing organizations */}
+            {trialStatus.isTrialing && (
+              <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+                <TrialBanner trialStatus={trialStatus} />
+              </div>
+            )}
 
-          {/* Main Content */}
-          <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            {children}
-          </main>
-        </div>
-      </KeyboardShortcutsProvider>
-    </OrganizationProvider>
+            {/* Main Content */}
+            <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+              {children}
+            </main>
+          </div>
+        </KeyboardShortcutsProvider>
+      </OrganizationProvider>
+    </PWAProvider>
   )
 }

@@ -12,7 +12,6 @@ import {
   getOrganizationSchema,
   getLocalBusinessSchema,
 } from '@/lib/schema'
-import { PWAProvider } from '@/components/pwa'
 import './globals.css'
 
 const inter = Inter({
@@ -154,16 +153,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${lora.variable} antialiased`}>
-        <PWAProvider showInstallPrompt={true} showUpdateBanner={true}>
-          <PersonalizationProvider>
-            <SkipToContent />
-            <ConditionalHeader />
-            <main id="main-content" className="min-h-screen">
-              {children}
-            </main>
-            <ConditionalFooter />
-          </PersonalizationProvider>
-        </PWAProvider>
+        <PersonalizationProvider>
+          <SkipToContent />
+          <ConditionalHeader />
+          <main id="main-content" className="min-h-screen">
+            {children}
+          </main>
+          <ConditionalFooter />
+        </PersonalizationProvider>
         <Analytics />
       </body>
     </html>

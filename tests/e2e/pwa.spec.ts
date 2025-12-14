@@ -160,6 +160,7 @@ test.describe('PWA - Progressive Web App', () => {
 
   test.describe('HTML Meta Tags', () => {
     test('should have PWA meta tags in head', async ({ page }) => {
+      // PWA is only enabled on CRM routes, but manifest link is in root layout
       await page.goto('/')
 
       // Check for manifest link
@@ -197,18 +198,25 @@ test.describe('PWA - Progressive Web App', () => {
   })
 
   test.describe('PWA Install Prompt', () => {
-    test('should not show install prompt on first visit', async ({ page }) => {
-      // Clear any stored state
+    // Note: PWA install prompt only works on CRM routes (/admin, /client)
+    // These tests verify the install prompt behavior when on those routes
+    // Since /admin requires auth, we test the localStorage behavior on public routes
+    // but the actual prompt would only show on authenticated CRM routes
+
+    test('should not show install prompt on marketing pages', async ({
+      page,
+    }) => {
+      // PWAProvider is not loaded on marketing pages, so no install prompt
       await page.goto('/')
       await page.evaluate(() => {
         localStorage.removeItem('pwa-install-dismissed')
       })
       await page.reload()
 
-      // Give time for prompt delay (normally 30s, but it won't show without beforeinstallprompt)
+      // Give time for any potential prompt
       await page.waitForTimeout(1000)
 
-      // Without the beforeinstallprompt event, prompt shouldn't show
+      // Install prompt should not appear on marketing site
       const installPrompt = page.locator('text=Install App')
       expect(await installPrompt.count()).toBe(0)
     })
